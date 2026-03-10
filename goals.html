@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎯 Goals — Annomuss</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#0d0d1a;color:#fff;min-height:100vh;padding-bottom:80px}
+
+    .topbar{background:#1a1a2e;padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2a2a40;position:sticky;top:0;z-index:100}
+    .topbar a{color:#8a7cff;text-decoration:none;font-size:.9rem;cursor:pointer}
+    .topbar h2{flex:1;font-size:1rem;font-weight:700}
+    .add-btn{background:linear-gradient(135deg,#8a7cff,#ff6ec7);color:#fff;border:none;border-radius:20px;padding:7px 18px;font-size:.85rem;font-weight:700;cursor:pointer}
+
+    .tabs{display:flex;background:#1a1a2e;border-bottom:1px solid #2a2a40}
+    .tab-btn{flex:1;padding:12px;border:none;background:none;color:#666;font-size:.85rem;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+    .tab-btn.active{color:#8a7cff;border-bottom-color:#8a7cff}
+
+    .content{max-width:600px;margin:0 auto;padding:16px}
+
+    /* Goal Card */
+    .goal-card{background:#1a1a2e;border-radius:16px;padding:18px;border:1px solid #2a2a40;margin-bottom:14px;transition:border-color .2s}
+    .goal-card:hover{border-color:#8a7cff44}
+    .goal-card.completed{border-color:#48c78e44;background:rgba(72,199,142,.04)}
+    .goal-card.celebrated{border-color:#FFD700;background:rgba(255,215,0,.04);animation:glow 2s ease-in-out infinite}
+    @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(255,215,0,.2)}50%{box-shadow:0 0 24px rgba(255,215,0,.5)}}
+
+    .goal-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+    .goal-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+    .goal-title{font-weight:700;font-size:1rem;margin-bottom:4px;line-height:1.3}
+    .goal-desc{font-size:.82rem;color:#888;line-height:1.5}
+    .goal-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600}
+    .badge-category{background:rgba(138,124,255,.15);color:#8a7cff;border:1px solid rgba(138,124,255,.3)}
+    .badge-public{background:rgba(72,199,142,.1);color:#48c78e;border:1px solid rgba(72,199,142,.3)}
+    .badge-private{background:rgba(100,100,100,.15);color:#888;border:1px solid #333}
+    .badge-due{background:rgba(255,150,50,.1);color:#ff9632;border:1px solid rgba(255,150,50,.3)}
+    .badge-overdue{background:rgba(255,68,68,.1);color:#ff4444;border:1px solid rgba(255,68,68,.3)}
+    .badge-completed{background:rgba(72,199,142,.1);color:#48c78e;border:1px solid rgba(72,199,142,.3)}
+
+    /* Progress bar */
+    .progress-wrap{margin-bottom:14px}
+    .progress-label{display:flex;justify-content:space-between;font-size:.78rem;color:#888;margin-bottom:6px}
+    .progress-track{height:8px;background:#2a2a40;border-radius:10px;overflow:hidden}
+    .progress-fill{height:100%;border-radius:10px;transition:width .6s ease;background:linear-gradient(90deg,#8a7cff,#ff6ec7)}
+    .progress-fill.done{background:linear-gradient(90deg,#48c78e,#00d4aa)}
+
+    /* Goal actions */
+    .goal-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn-sm{padding:7px 14px;border:none;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s}
+    .btn-update{background:#8a7cff;color:#fff}
+    .btn-update:hover{background:#7a6cf0}
+    .btn-celebrate{background:linear-gradient(135deg,#FFD700,#FF8C00);color:#000;font-weight:700}
+    .btn-cheer{background:#1a1a2e;border:1px solid #2a2a40;color:#fff}
+    .btn-cheer:hover{border-color:#8a7cff;color:#8a7cff}
+    .btn-delete{background:transparent;border:1px solid #ff444444;color:#ff4444;margin-left:auto}
+    .btn-delete:hover{background:rgba(255,68,68,.1)}
+
+    /* Progress history */
+    .progress-history{margin-top:12px;border-top:1px solid #2a2a40;padding-top:12px;display:none}
+    .progress-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #1a1a2e}
+    .progress-item:last-child{border-bottom:none}
+    .progress-dot{width:8px;height:8px;border-radius:50%;background:#8a7cff;flex-shrink:0;margin-top:5px}
+    .progress-note{font-size:.82rem;color:#ccc;flex:1}
+    .progress-pct{font-size:.78rem;color:#8a7cff;font-weight:700;flex-shrink:0}
+
+    /* Celebration card */
+    .celebrate-card{background:linear-gradient(135deg,#1a1a2e,#2a1a0e);border:1px solid #FFD700;border-radius:16px;padding:18px;margin-bottom:14px;text-align:center}
+    .celebrate-emoji{font-size:2.5rem;margin-bottom:8px}
+    .celebrate-name{color:#FFD700;font-weight:700;font-size:1rem;margin-bottom:4px}
+    .celebrate-title{color:#ddd;font-size:.9rem;margin-bottom:12px}
+    .cheer-count{color:#888;font-size:.82rem}
+
+    /* Create modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:flex-end;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#1a1a2e;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+    .modal h3{font-size:1.1rem;font-weight:700;margin-bottom:18px}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;font-size:.82rem;color:#888;margin-bottom:6px}
+    .form-group input,.form-group textarea,.form-group select{width:100%;background:#0d0d1a;border:1.5px solid #2a2a40;border-radius:10px;color:#fff;padding:10px 14px;font-size:.9rem;outline:none;font-family:inherit}
+    .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:#8a7cff}
+    .form-group textarea{resize:vertical;min-height:80px}
+    .form-group select option{background:#1a1a2e}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid #2a2a40}
+    .toggle-label{font-size:.9rem}
+    .toggle-sub{font-size:.78rem;color:#666;margin-top:2px}
+    .toggle{width:44px;height:24px;background:#2a2a40;border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:none}
+    .toggle.on{background:#8a7cff}
+    .toggle::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s}
+    .toggle.on::after{left:23px}
+    .btn-full{width:100%;padding:13px;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:8px}
+    .btn-create{background:linear-gradient(135deg,#8a7cff,#ff6ec7);color:#fff}
+    .btn-cancel-modal{background:#2a2a40;color:#aaa;margin-top:8px}
+
+    /* Progress update modal */
+    .progress-modal{background:#1a1a2e;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:560px}
+    .slider-wrap{padding:10px 0}
+    .slider{width:100%;-webkit-appearance:none;height:6px;background:#2a2a40;border-radius:3px;outline:none}
+    .slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#8a7cff;cursor:pointer}
+    .slider-value{text-align:center;font-size:1.5rem;font-weight:700;color:#8a7cff;margin:8px 0}
+
+    /* Category icons */
+    .cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+    .cat-btn{padding:10px 4px;border:1.5px solid #2a2a40;border-radius:10px;background:none;color:#888;font-size:.75rem;cursor:pointer;text-align:center;transition:all .2s}
+    .cat-btn.selected{border-color:#8a7cff;color:#8a7cff;background:rgba(138,124,255,.1)}
+    .cat-btn .cat-icon{font-size:1.3rem;display:block;margin-bottom:4px}
+
+    .spinner{text-align:center;padding:40px;color:#555}
+    .empty{text-align:center;padding:40px 20px;color:#555}
+    .empty-icon{font-size:3rem;margin-bottom:12px}
+    .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1a2e;border:1px solid #8a7cff;color:#fff;padding:10px 20px;border-radius:20px;font-size:.88rem;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+    .toast.show{opacity:1}
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a onclick="goBack()">← Back</a>
+  <h2>🎯 Goals & Growth</h2>
+  <button class="add-btn" onclick="openCreateModal()">+ New Goal</button>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('my')">My Goals</button>
+  <button class="tab-btn" onclick="switchTab('public')">Community</button>
+  <button class="tab-btn" onclick="switchTab('celebrate')">🎉 Wins</button>
+</div>
+
+<div class="content" id="mainContent">
+  <div class="spinner">⏳ Loading goals...</div>
+</div>
+
+<!-- Create Goal Modal -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <h3>🎯 Set a New Goal</h3>
+
+    <div class="form-group">
+      <label>What's your goal?</label>
+      <input type="text" id="goalTitle" placeholder="e.g. Read 10 books, Lose 5kg, Learn guitar..." maxlength="100"/>
+    </div>
+
+    <div class="form-group">
+      <label>Category</label>
+      <div class="cat-grid">
+        <button class="cat-btn selected" onclick="selectCat(this,'health')"><span class="cat-icon">💪</span>Health</button>
+        <button class="cat-btn" onclick="selectCat(this,'learning')"><span class="cat-icon">📚</span>Learning</button>
+        <button class="cat-btn" onclick="selectCat(this,'career')"><span class="cat-icon">💼</span>Career</button>
+        <button class="cat-btn" onclick="selectCat(this,'relationship')"><span class="cat-icon">💞</span>Social</button>
+        <button class="cat-btn" onclick="selectCat(this,'creative')"><span class="cat-icon">🎨</span>Creative</button>
+        <button class="cat-btn" onclick="selectCat(this,'financial')"><span class="cat-icon">💰</span>Finance</button>
+        <button class="cat-btn" onclick="selectCat(this,'other')"><span class="cat-icon">✨</span>Other</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Description (optional)</label>
+      <textarea id="goalDesc" placeholder="Describe your goal in detail..." maxlength="500"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Due Date</label>
+      <input type="date" id="goalDue"/>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">🌍 Share publicly</div>
+        <div class="toggle-sub">Others can cheer you on</div>
+      </div>
+      <button class="toggle" id="publicToggle" onclick="togglePublic()"></button>
+    </div>
+
+    <button class="btn-full btn-create" id="createBtn" onclick="createGoal()">Set Goal 🎯</button>
+    <button class="btn-full btn-cancel-modal" onclick="closeCreateModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- Progress Update Modal -->
+<div class="modal-overlay" id="progressModal">
+  <div class="progress-modal">
+    <h3>📈 Update Progress</h3>
+    <input type="hidden" id="progressGoalId"/>
+    <div class="slider-wrap">
+      <div class="slider-value" id="sliderValue">0%</div>
+      <input type="range" class="slider" id="progressSlider" min="0" max="100" value="0"
+             oninput="document.getElementById('sliderValue').textContent=this.value+'%'"/>
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label>How's it going? (optional)</label>
+      <textarea id="progressNote" placeholder="Share your progress update..." maxlength="500" style="min-height:70px"></textarea>
+    </div>
+    <button class="btn-full btn-create" onclick="submitProgress()">Update Progress 💪</button>
+    <button class="btn-full btn-cancel-modal" style="margin-top:8px" onclick="closeProgressModal()">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API   = "https://annomuss-backend-icgp.onrender.com";
+const token = localStorage.getItem("token");
+let user    = null;
+try { user = JSON.parse(localStorage.getItem("user") || "null"); } catch(e) {}
+if (!token || !user) window.location.href = "index.html";
+
+let selectedCategory = "health";
+let isPublic         = false;
+let currentTab       = "my";
+
+const CAT_ICONS = { health:"💪", learning:"📚", career:"💼", relationship:"💞", creative:"🎨", financial:"💰", other:"✨" };
+const CAT_COLORS = { health:"#48c78e", learning:"#8a7cff", career:"#ff9632", relationship:"#ff6ec7", creative:"#FFD700", financial:"#48C78E", other:"#aaa" };
+
+function goBack()    { window.location.href = "dashboard.html"; }
+function esc(s)      { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function apiFetch(path, opts = {}) {
+  return fetch(API + path, {
+    ...opts,
+    headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}`, ...(opts.headers||{}) }
+  });
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll(".tab-btn").forEach((b,i) => {
+    b.classList.toggle("active", ["my","public","celebrate"][i] === tab);
+  });
+  if (tab === "my")        loadMyGoals();
+  else if (tab === "public") loadPublicGoals();
+  else loadCelebrations();
+}
+
+// ── Create Modal ──────────────────────────────────────────────────────────────
+function openCreateModal() {
+  // Set default due date to 30 days from now
+  const d = new Date(); d.setDate(d.getDate() + 30);
+  document.getElementById("goalDue").value = d.toISOString().split("T")[0];
+  document.getElementById("goalDue").min   = new Date().toISOString().split("T")[0];
+  document.getElementById("createModal").classList.add("open");
+}
+function closeCreateModal() { document.getElementById("createModal").classList.remove("open"); }
+
+function selectCat(btn, cat) {
+  document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  selectedCategory = cat;
+}
+
+function togglePublic() {
+  isPublic = !isPublic;
+  document.getElementById("publicToggle").classList.toggle("on", isPublic);
+}
+
+async function createGoal() {
+  const title = document.getElementById("goalTitle").value.trim();
+  const desc  = document.getElementById("goalDesc").value.trim();
+  const due   = document.getElementById("goalDue").value;
+  const btn   = document.getElementById("createBtn");
+
+  if (!title) return showToast("Please enter a goal title!");
+  if (!due)   return showToast("Please pick a due date!");
+
+  btn.disabled = true; btn.textContent = "Creating...";
+  try {
+    const res  = await apiFetch("/api/goals", {
+      method: "POST",
+      body: JSON.stringify({ title, description: desc, category: selectedCategory, dueDate: due, isPublic })
+    });
+    const data = await res.json();
+    showToast(data.message || "Goal created! 🎯");
+    closeCreateModal();
+    document.getElementById("goalTitle").value = "";
+    document.getElementById("goalDesc").value  = "";
+    loadMyGoals();
+  } catch(e) { showToast("Failed to create goal ❌"); }
+  finally { btn.disabled = false; btn.textContent = "Set Goal 🎯"; }
+}
+
+// ── Progress Modal ────────────────────────────────────────────────────────────
+function openProgressModal(goalId, currentPct) {
+  document.getElementById("progressGoalId").value    = goalId;
+  document.getElementById("progressSlider").value    = currentPct;
+  document.getElementById("sliderValue").textContent = currentPct + "%";
+  document.getElementById("progressNote").value      = "";
+  document.getElementById("progressModal").classList.add("open");
+}
+function closeProgressModal() { document.getElementById("progressModal").classList.remove("open"); }
+
+async function submitProgress() {
+  const goalId  = document.getElementById("progressGoalId").value;
+  const percent = parseInt(document.getElementById("progressSlider").value);
+  const note    = document.getElementById("progressNote").value.trim();
+
+  try {
+    const res  = await apiFetch(`/api/goals/${goalId}/progress`, {
+      method: "POST",
+      body: JSON.stringify({ percent, note })
+    });
+    const data = await res.json();
+
+    if (percent === 100) {
+      showToast("🎉 Goal completed! Amazing!");
+      closeProgressModal();
+      // Show celebration prompt
+      setTimeout(() => {
+        if (confirm("🎉 You completed your goal! Share this win with the community?")) {
+          celebrateGoal(goalId);
+        }
+      }, 500);
+    } else {
+      showToast(data.message || "Progress updated! 💪");
+      closeProgressModal();
+    }
+    loadMyGoals();
+  } catch(e) { showToast("Failed ❌"); }
+}
+
+async function celebrateGoal(goalId) {
+  try {
+    const res  = await apiFetch(`/api/goals/${goalId}/celebrate`, { method: "POST" });
+    const data = await res.json();
+    showToast(data.message || "🎉 Shared!");
+    loadMyGoals();
+  } catch(e) {}
+}
+
+async function cheerGoal(goalId, btn) {
+  try {
+    const res  = await apiFetch(`/api/goals/${goalId}/cheer`, { method: "POST" });
+    const data = await res.json();
+    btn.textContent = `${data.cheered ? "🔥" : "🤍"} ${data.count}`;
+    btn.style.color = data.cheered ? "#ff9632" : "";
+  } catch(e) {}
+}
+
+async function deleteGoal(goalId) {
+  if (!confirm("Delete this goal?")) return;
+  try {
+    await apiFetch(`/api/goals/${goalId}`, { method: "DELETE" });
+    showToast("Goal deleted");
+    loadMyGoals();
+  } catch(e) {}
+}
+
+function toggleHistory(id) {
+  const el = document.getElementById(`history-${id}`);
+  el.style.display = el.style.display === "block" ? "none" : "block";
+}
+
+// ── Render helpers ────────────────────────────────────────────────────────────
+function daysLeft(dueDate) {
+  const diff = new Date(dueDate) - new Date();
+  const days = Math.ceil(diff / 86400000);
+  if (days < 0)  return { label: `${Math.abs(days)}d overdue`, overdue: true };
+  if (days === 0) return { label: "Due today!", overdue: false };
+  return { label: `${days}d left`, overdue: false };
+}
+
+function renderGoalCard(g, showActions = true) {
+  const icon   = CAT_ICONS[g.category]  || "✨";
+  const color  = CAT_COLORS[g.category] || "#8a7cff";
+  const due    = daysLeft(g.dueDate);
+  const isMine = g.anonymousName === user.anonymousName;
+
+  const historyHtml = g.progress?.length ? `
+    <div class="progress-history" id="history-${g._id}">
+      ${g.progress.slice().reverse().map(p => `
+        <div class="progress-item">
+          <div class="progress-dot"></div>
+          <div class="progress-note">${esc(p.note || "Progress updated")}</div>
+          <div class="progress-pct">${p.percent}%</div>
+        </div>`).join("")}
+    </div>` : "";
+
+  const cheerCount = g.cheers?.length || 0;
+
+  return `
+    <div class="goal-card ${g.isCompleted ? "completed" : ""} ${g.celebrated ? "celebrated" : ""}">
+      ${g.celebrated ? '<div style="text-align:center;font-size:.78rem;color:#FFD700;margin-bottom:8px">🏆 GOAL ACHIEVED — Celebrating!</div>' : ""}
+      <div class="goal-header">
+        <div class="goal-icon" style="background:${color}22;border:1.5px solid ${color}">${icon}</div>
+        <div style="flex:1">
+          <div class="goal-title">${esc(g.title)}</div>
+          ${g.description ? `<div class="goal-desc">${esc(g.description)}</div>` : ""}
+        </div>
+      </div>
+
+      <div class="goal-meta">
+        <span class="badge badge-category">${icon} ${g.category}</span>
+        <span class="badge ${g.isPublic ? "badge-public" : "badge-private"}">${g.isPublic ? "🌍 Public" : "🔒 Private"}</span>
+        ${g.isCompleted
+          ? '<span class="badge badge-completed">✅ Completed</span>'
+          : `<span class="badge ${due.overdue ? "badge-overdue" : "badge-due"}">⏰ ${due.label}</span>`}
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Progress</span>
+          <span>${g.currentPercent}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill ${g.isCompleted ? "done" : ""}" style="width:${g.currentPercent}%"></div>
+        </div>
+      </div>
+
+      ${showActions ? `<div class="goal-actions">
+        ${!g.isCompleted && isMine ? `<button class="btn-sm btn-update" onclick="openProgressModal('${g._id}',${g.currentPercent})">📈 Update</button>` : ""}
+        ${g.isCompleted && !g.celebrated && isMine ? `<button class="btn-sm btn-celebrate" onclick="celebrateGoal('${g._id}')">🎉 Celebrate!</button>` : ""}
+        ${g.progress?.length ? `<button class="btn-sm btn-cheer" onclick="toggleHistory('${g._id}')">📋 History</button>` : ""}
+        ${!isMine ? `<button class="btn-sm btn-cheer" id="cheer-${g._id}" onclick="cheerGoal('${g._id}',this)">🔥 ${cheerCount}</button>` : ""}
+        ${isMine ? `<button class="btn-sm btn-delete" onclick="deleteGoal('${g._id}')">🗑️</button>` : ""}
+      </div>` : ""}
+
+      ${historyHtml}
+    </div>`;
+}
+
+// ── Load functions ────────────────────────────────────────────────────────────
+async function loadMyGoals() {
+  document.getElementById("mainContent").innerHTML = '<div class="spinner">⏳ Loading...</div>';
+  try {
+    const res   = await apiFetch("/api/goals/me");
+    const goals = await res.json();
+
+    if (!goals.length) {
+      document.getElementById("mainContent").innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">🎯</div>
+          <p style="margin-bottom:16px">No goals yet!<br/>Set your first goal and start growing.</p>
+          <button class="btn-sm btn-update" onclick="openCreateModal()">+ Set First Goal</button>
+        </div>`;
+      return;
+    }
+
+    // Separate active and completed
+    const active    = goals.filter(g => !g.isCompleted);
+    const completed = goals.filter(g => g.isCompleted);
+
+    let html = "";
+    if (active.length) {
+      html += `<div style="font-size:.82rem;color:#666;margin-bottom:10px">ACTIVE GOALS (${active.length})</div>`;
+      html += active.map(g => renderGoalCard(g)).join("");
+    }
+    if (completed.length) {
+      html += `<div style="font-size:.82rem;color:#48c78e;margin:16px 0 10px">COMPLETED ✅ (${completed.length})</div>`;
+      html += completed.map(g => renderGoalCard(g)).join("");
+    }
+
+    document.getElementById("mainContent").innerHTML = html;
+  } catch(e) {
+    document.getElementById("mainContent").innerHTML = '<div class="empty">Failed to load goals ❌</div>';
+  }
+}
+
+async function loadPublicGoals() {
+  document.getElementById("mainContent").innerHTML = '<div class="spinner">⏳ Loading community goals...</div>';
+  try {
+    const res   = await apiFetch("/api/goals/public");
+    const goals = await res.json();
+
+    if (!goals.length) {
+      document.getElementById("mainContent").innerHTML = `
+        <div class="empty"><div class="empty-icon">🌍</div>
+        <p>No public goals yet.<br/>Share yours and inspire others!</p></div>`;
+      return;
+    }
+
+    document.getElementById("mainContent").innerHTML =
+      `<div style="font-size:.82rem;color:#666;margin-bottom:10px">COMMUNITY GOALS 🌍</div>` +
+      goals.map(g => renderGoalCard(g)).join("");
+  } catch(e) {
+    document.getElementById("mainContent").innerHTML = '<div class="empty">Failed to load ❌</div>';
+  }
+}
+
+async function loadCelebrations() {
+  document.getElementById("mainContent").innerHTML = '<div class="spinner">🎉 Loading wins...</div>';
+  try {
+    const res   = await apiFetch("/api/goals/celebrations");
+    const goals = await res.json();
+
+    if (!goals.length) {
+      document.getElementById("mainContent").innerHTML = `
+        <div class="empty"><div class="empty-icon">🏆</div>
+        <p>No wins shared this week yet.<br/>Complete a goal and celebrate! 🎉</p></div>`;
+      return;
+    }
+
+    let html = `<div style="font-size:.82rem;color:#FFD700;margin-bottom:10px">🏆 THIS WEEK'S WINS</div>`;
+    goals.forEach(g => {
+      const cheerCount = g.cheers?.length || 0;
+      html += `
+        <div class="celebrate-card">
+          <div class="celebrate-emoji">${CAT_ICONS[g.category] || "🏆"}</div>
+          <div class="celebrate-name">${esc(g.anonymousName)}</div>
+          <div class="celebrate-title">"${esc(g.title)}"</div>
+          <div style="color:#48c78e;font-size:.82rem;margin-bottom:12px">
+            ✅ Completed ${g.completedAt ? new Date(g.completedAt).toLocaleDateString() : ""}
+          </div>
+          <button class="btn-sm btn-cheer" id="cheer-${g._id}" onclick="cheerGoal('${g._id}',this)">
+            🔥 ${cheerCount} Cheers
+          </button>
+        </div>`;
+    });
+
+    document.getElementById("mainContent").innerHTML = html;
+  } catch(e) {
+    document.getElementById("mainContent").innerHTML = '<div class="empty">Failed to load ❌</div>';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadMyGoals();
+</script>
+
+<!-- ── BOTTOM NAV ── -->
+<style>
+.app-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(6,6,15,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid #1c1c34;display:flex;z-index:100;padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}
+.app-nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;color:#4a4770;text-decoration:none;font-size:1.2rem;transition:color .18s;cursor:pointer}
+.app-nav a:hover,.app-nav a.on{color:#9d7eff}
+.app-nav a span{font-size:.52rem;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:.3px}
+</style>
+<div class="app-nav">
+  <a href="dashboard.html"><span style="font-size:1.1rem">🏠</span><span>Feed</span></a>
+  <a href="dashboard.html#mood"><span style="font-size:1.1rem">💭</span><span>Mood</span></a>
+  <a href="randomchat.html"><span style="font-size:1.1rem">🎲</span><span>Chat</span></a>
+  <a href="messages.html"><span style="font-size:1.1rem">💬</span><span>DMs</span></a>
+  <a href="dashboard.html#profile"><span style="font-size:1.1rem">🎭</span><span>Me</span></a>
+</div></body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📍 Nearby — Annomuss</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#0d0d1a;color:#fff;min-height:100vh}
+    .topbar{background:#1a1a2e;padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2a2a40;position:sticky;top:0;z-index:100}
+    .topbar a{color:#8a7cff;text-decoration:none;font-size:.9rem;cursor:pointer}
+    .topbar h2{flex:1;font-size:1rem;font-weight:700}
+    .city-badge{background:rgba(138,124,255,.15);border:1px solid #8a7cff;color:#8a7cff;border-radius:20px;padding:4px 14px;font-size:.82rem}
+
+    .tabs{display:flex;background:#1a1a2e;border-bottom:1px solid #2a2a40}
+    .tab-btn{flex:1;padding:13px;border:none;background:none;color:#666;font-size:.88rem;cursor:pointer;transition:all .2s;border-bottom:2px solid transparent}
+    .tab-btn.active{color:#8a7cff;border-bottom-color:#8a7cff;background:rgba(138,124,255,.05)}
+
+    .tab-content{display:none;padding:16px;max-width:600px;margin:0 auto}
+    .tab-content.active{display:block}
+
+    /* City prompt */
+    .city-prompt{text-align:center;padding:40px 20px}
+    .city-prompt h3{font-size:1.3rem;margin-bottom:10px}
+    .city-prompt p{color:#888;font-size:.9rem;margin-bottom:24px}
+    .btn{padding:12px 24px;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s}
+    .btn-primary{background:linear-gradient(135deg,#8a7cff,#ff6ec7);color:#fff;width:100%}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(138,124,255,.4)}
+    .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+    /* Mood Map */
+    .mood-map-container{border-radius:16px;overflow:hidden;border:1px solid #2a2a40;margin-bottom:16px}
+    #moodMapEl{width:100%;height:340px;background:#0d0d1a}
+    .city-card{background:#1a1a2e;border-radius:14px;padding:16px;border:1px solid #2a2a40;margin-bottom:12px}
+    .city-card h4{font-size:.95rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+    .city-card .mood-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .mood-pill{padding:3px 12px;border-radius:20px;font-size:.78rem;background:rgba(138,124,255,.15);border:1px solid #8a7cff;color:#8a7cff}
+    .people-count{background:rgba(72,199,142,.1);color:#48c78e;border:1px solid rgba(72,199,142,.3);border-radius:20px;padding:2px 10px;font-size:.78rem}
+
+    /* Local Feed */
+    .post-card{background:#1a1a2e;border-radius:14px;padding:16px;border:1px solid #2a2a40;margin-bottom:12px}
+    .post-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .post-avatar{width:36px;height:36px;border-radius:50%;background:#8a7cff;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+    .post-name{font-weight:700;font-size:.9rem;color:#8a7cff}
+    .post-time{font-size:.75rem;color:#555;margin-left:auto}
+    .emotion-tag{display:inline-block;background:rgba(138,124,255,.15);border:1px solid #8a7cff;color:#8a7cff;border-radius:20px;padding:2px 10px;font-size:.78rem;margin-bottom:8px}
+    .post-text{font-size:.9rem;line-height:1.6;color:#ddd}
+    .post-img{width:100%;border-radius:10px;margin-top:10px;max-height:300px;object-fit:cover}
+    .local-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,150,50,.1);color:#ff9632;border:1px solid rgba(255,150,50,.3);border-radius:20px;padding:2px 10px;font-size:.75rem;margin-bottom:12px}
+
+    /* Nearby Chat */
+    .nearby-header{background:#1a1a2e;border-radius:14px;padding:20px;border:1px solid #2a2a40;margin-bottom:16px;text-align:center}
+    .nearby-count{font-size:2.5rem;font-weight:700;color:#8a7cff}
+    .nearby-label{color:#888;font-size:.88rem;margin-top:4px}
+    .pulse-ring{width:80px;height:80px;border-radius:50%;background:rgba(138,124,255,.1);border:2px solid #8a7cff;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 16px;animation:pulse 2s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08);box-shadow:0 0 20px rgba(138,124,255,.4)}}
+    .nearby-users{display:flex;flex-direction:column;gap:10px}
+    .nearby-user{background:#1a1a2e;border-radius:12px;padding:14px 16px;border:1px solid #2a2a40;display:flex;align-items:center;gap:12px}
+    .online-dot{width:8px;height:8px;border-radius:50%;background:#48c78e;flex-shrink:0}
+    .nearby-user-name{flex:1;font-size:.9rem;font-weight:600}
+    .nearby-mood{font-size:.8rem;color:#888}
+    .chat-btn{background:#8a7cff;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:.82rem;cursor:pointer;font-weight:600}
+    .chat-btn:hover{background:#7a6cf0}
+
+    .spinner{text-align:center;padding:30px;color:#555;font-size:.9rem}
+    .empty{text-align:center;padding:40px 20px;color:#555}
+    .empty-icon{font-size:3rem;margin-bottom:12px}
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a onclick="goBack()">← Back</a>
+  <h2>📍 Nearby</h2>
+  <span class="city-badge" id="cityBadge">Locating...</span>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('map')">🗺️ Mood Map</button>
+  <button class="tab-btn" onclick="switchTab('feed')">📰 Local Feed</button>
+  <button class="tab-btn" onclick="switchTab('nearby')">👥 Nearby</button>
+</div>
+
+<!-- MOOD MAP TAB -->
+<div class="tab-content active" id="tab-map">
+  <div id="mapContent">
+    <div class="spinner">📍 Getting your location...</div>
+  </div>
+</div>
+
+<!-- LOCAL FEED TAB -->
+<div class="tab-content" id="tab-feed">
+  <div id="feedContent">
+    <div class="spinner">⏳ Loading local posts...</div>
+  </div>
+</div>
+
+<!-- NEARBY CHAT TAB -->
+<div class="tab-content" id="tab-nearby">
+  <div id="nearbyContent">
+    <div class="spinner">👥 Finding people nearby...</div>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+const API   = "https://annomuss-backend-icgp.onrender.com";
+const token = localStorage.getItem("token");
+let user    = null;
+try { user = JSON.parse(localStorage.getItem("user") || "null"); } catch(e) {}
+if (!token || !user) window.location.href = "index.html";
+
+const socket = io(API, { auth: { token }, transports: ["websocket","polling"] });
+
+let myCity    = localStorage.getItem("userCity") || null;
+let myCityLat = null;
+let myCityLng = null;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function goBack() { window.location.href = "dashboard.html"; }
+function esc(s)   { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function apiFetch(path, opts = {}) {
+  return fetch(API + path, {
+    ...opts,
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...(opts.headers||{}) }
+  });
+}
+
+function switchTab(name) {
+  document.querySelectorAll(".tab-btn").forEach((b,i) => {
+    b.classList.toggle("active", ["map","feed","nearby"][i] === name);
+  });
+  document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+  document.getElementById(`tab-${name}`).classList.add("active");
+}
+
+// ── Mood emoji map ────────────────────────────────────────────────────────────
+const MOOD_EMOJI = {
+  happy:"😊", sad:"😢", anxious:"😰", angry:"😠", lonely:"🌑",
+  excited:"🤩", numb:"😶", grateful:"🙏", overwhelmed:"🌊", hopeful:"🌱", unknown:"🎭"
+};
+const MOOD_COLOR = {
+  happy:"#FFD700", sad:"#6495ED", anxious:"#FF8C00", angry:"#FF4444",
+  lonely:"#9370DB", excited:"#FF69B4", numb:"#808080", grateful:"#48C78E",
+  overwhelmed:"#00CED1", hopeful:"#98FB98", unknown:"#8A7CFF"
+};
+
+// ── Get location ──────────────────────────────────────────────────────────────
+async function getLocation() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      ()  => resolve(null),
+      { timeout: 8000 }
+    );
+  });
+}
+
+async function getCityFromCoords(lat, lng) {
+  try {
+    const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+    const data = await res.json();
+    return data.address?.city || data.address?.town || data.address?.state_district || data.address?.state || "Unknown";
+  } catch(e) { return "Unknown"; }
+}
+
+async function initLocation() {
+  if (myCity) {
+    document.getElementById("cityBadge").textContent = `📍 ${myCity}`;
+    socket.emit("update-city", { city: myCity });
+    loadAll();
+    return;
+  }
+
+  const coords = await getLocation();
+  if (coords) {
+    myCityLat = coords.lat;
+    myCityLng = coords.lng;
+    const city = await getCityFromCoords(coords.lat, coords.lng);
+    myCity = city;
+    localStorage.setItem("userCity", city);
+    document.getElementById("cityBadge").textContent = `📍 ${city}`;
+
+    // Save to backend
+    await apiFetch("/api/location/update", {
+      method: "POST",
+      body: JSON.stringify({ city, lat: coords.lat, lng: coords.lng })
+    });
+
+    socket.emit("update-city", { city });
+    loadAll();
+  } else {
+    showManualCityInput();
+  }
+}
+
+function showManualCityInput() {
+  const html = `
+    <div class="city-prompt">
+      <div style="font-size:3rem;margin-bottom:16px">📍</div>
+      <h3>Where are you?</h3>
+      <p>Enter your city to see local mood, posts and people near you</p>
+      <input type="text" id="cityInput" placeholder="e.g. Mumbai, Delhi, Pune..." 
+             style="width:100%;background:#1a1a2e;border:1.5px solid #2a2a40;border-radius:12px;color:#fff;padding:12px 16px;font-size:.95rem;margin-bottom:12px;outline:none"/>
+      <button class="btn btn-primary" onclick="setManualCity()">Set My City 📍</button>
+    </div>`;
+  document.getElementById("mapContent").innerHTML  = html;
+  document.getElementById("feedContent").innerHTML = html;
+  document.getElementById("nearbyContent").innerHTML = html;
+}
+
+async function setManualCity() {
+  const city = document.getElementById("cityInput")?.value.trim();
+  if (!city) return;
+  myCity = city;
+  localStorage.setItem("userCity", city);
+  document.getElementById("cityBadge").textContent = `📍 ${city}`;
+
+  await apiFetch("/api/location/update", {
+    method: "POST",
+    body: JSON.stringify({ city })
+  });
+
+  socket.emit("update-city", { city });
+  loadAll();
+}
+
+function loadAll() {
+  loadMoodMap();
+  loadLocalFeed();
+  loadNearby();
+}
+
+// ── MOOD MAP ──────────────────────────────────────────────────────────────────
+async function loadMoodMap() {
+  const el = document.getElementById("mapContent");
+  el.innerHTML = `<div style="text-align:center;padding:30px;color:#666"><div style="width:20px;height:20px;border:2px solid #2a2a40;border-top-color:#8a7cff;border-radius:50%;animation:sp .65s linear infinite;margin:0 auto 10px"></div>Loading mood map…</div>`;
+
+  try {
+    const res  = await apiFetch("/api/location/mood-map");
+    const data = await res.json();
+
+    if (!Array.isArray(data) || !data.length) {
+      // ── SHOW ACTIONABLE EMPTY STATE ───────────────────────────────────────
+      el.innerHTML = `
+        <div style="background:#1a1a2e;border-radius:16px;padding:24px 20px;border:1px solid #2a2a40;text-align:center;margin-bottom:12px">
+          <div style="font-size:2.5rem;margin-bottom:12px">🗺️</div>
+          <div style="font-weight:700;font-size:1rem;margin-bottom:8px">No mood data near you yet</div>
+          <div style="color:#888;font-size:.85rem;margin-bottom:20px;line-height:1.6">
+            Be the first! Log your mood and your city will show on the map for everyone nearby.
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;max-width:280px;margin:0 auto">
+            <button onclick="quickLogMood()" style="background:linear-gradient(135deg,#8a7cff,#ff6ec7);color:#fff;border:none;border-radius:12px;padding:12px 20px;font-size:.9rem;font-weight:700;cursor:pointer">
+              😊 Log My Mood Now
+            </button>
+            <div style="color:#555;font-size:.75rem">
+              📍 Your city: <strong style="color:#8a7cff">${myCity || "not set yet"}</strong>
+              ${!myCity ? `<br/><button onclick="resetLocation()" style="background:none;border:none;color:#8a7cff;cursor:pointer;text-decoration:underline;font-size:.75rem;margin-top:4px">Set my city</button>` : ""}
+            </div>
+          </div>
+        </div>
+        <div style="background:#1a1a2e;border-radius:14px;padding:16px;border:1px solid #2a2a40">
+          <div style="font-size:.8rem;font-weight:700;color:#8a7cff;margin-bottom:10px">🌍 How the Mood Map works</div>
+          <div style="color:#666;font-size:.78rem;line-height:1.8">
+            1. Allow location or enter your city<br/>
+            2. Log your mood once a day<br/>
+            3. See your city light up with emotions<br/>
+            4. Discover what mood dominates your area
+          </div>
+        </div>`;
+      return;
+    }
+
+    let html = `<div style="margin-bottom:12px;color:#666;font-size:.82rem">📍 Mood data from the last 24 hours · ${data.reduce((a,c)=>a+c.count,0)} people logged</div>`;
+    const sorted = data.sort((a,b) => (b.city === myCity ? 1 : 0) - (a.city === myCity ? 1 : 0));
+
+    sorted.forEach(c => {
+      const emoji = MOOD_EMOJI[c.dominantMood] || "🎭";
+      const color = MOOD_COLOR[c.dominantMood] || "#8A7CFF";
+      const isMe  = c.city === myCity;
+      html += `
+        <div class="city-card" style="${isMe ? "border-color:#8a7cff;background:rgba(138,124,255,.05)" : ""}">
+          <h4>
+            ${isMe ? "📍 " : "🌍 "}${esc(c.city)}
+            ${isMe ? '<span style="background:#8a7cff;color:#fff;border-radius:20px;padding:2px 8px;font-size:.72rem;margin-left:4px">You are here</span>' : ""}
+            <span class="people-count">${c.count} ${c.count === 1 ? "person" : "people"}</span>
+          </h4>
+          <div style="display:flex;align-items:center;gap:10px;margin:10px 0">
+            <div style="width:48px;height:48px;border-radius:50%;background:${color}22;border:2px solid ${color};display:flex;align-items:center;justify-content:center;font-size:1.5rem">${emoji}</div>
+            <div>
+              <div style="font-weight:700;color:${color};font-size:1rem;text-transform:capitalize">${c.dominantMood}</div>
+              <div style="font-size:.78rem;color:#666">Dominant mood today</div>
+            </div>
+          </div>
+          <div class="mood-pills">
+            ${Object.entries(c.moods).map(([mood, cnt]) =>
+              `<span class="mood-pill" style="border-color:${MOOD_COLOR[mood]||"#8a7cff"};color:${MOOD_COLOR[mood]||"#8a7cff"};background:${MOOD_COLOR[mood]||"#8a7cff"}22">
+                ${MOOD_EMOJI[mood]||"🎭"} ${mood} (${cnt})
+              </span>`).join("")}
+          </div>
+        </div>`;
+    });
+
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><p>Failed to load mood map.<br/><button onclick="loadMoodMap()" style="background:none;border:none;color:#8a7cff;cursor:pointer;text-decoration:underline">Retry</button></p></div>`;
+  }
+}
+
+// Quick mood log from the mood map empty state
+const EMOTIONS = ["happy","sad","anxious","angry","lonely","excited","numb","grateful","overwhelmed","hopeful"];
+async function quickLogMood() {
+  const emoji_map = {happy:"😊",sad:"😢",anxious:"😰",angry:"😠",lonely:"🌑",excited:"🤩",numb:"😶",grateful:"🙏",overwhelmed:"🌊",hopeful:"🌱"};
+  const buttons = EMOTIONS.map(e => `<button onclick="doQuickLog('${e}',this)" style="background:#1a1a2e;border:1.5px solid #2a2a40;border-radius:12px;padding:12px;cursor:pointer;transition:all .15s;color:#fff;font-size:1.4rem" title="${e}">${emoji_map[e]}</button>`).join("");
+  document.getElementById("mapContent").innerHTML = `
+    <div style="background:#1a1a2e;border-radius:16px;padding:20px;border:1px solid #2a2a40">
+      <div style="font-weight:700;margin-bottom:6px">How are you feeling right now?</div>
+      <div style="color:#888;font-size:.8rem;margin-bottom:16px">Your mood will show on the map for your city 🗺️</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px">${buttons}</div>
+      <button onclick="loadMoodMap()" style="background:none;border:none;color:#666;cursor:pointer;font-size:.8rem;width:100%;text-align:center">← Cancel</button>
+    </div>`;
+}
+
+async function doQuickLog(emotion, btn) {
+  btn.style.borderColor = "#8a7cff";
+  btn.style.background = "rgba(138,124,255,.2)";
+  try {
+    const r = await apiFetch("/api/moods", { method:"POST", body: JSON.stringify({ mood: emotion, emotion }) });
+    if (!r.ok) throw new Error();
+    // Small success message then reload map
+    document.getElementById("mapContent").innerHTML = `<div style="text-align:center;padding:30px;color:#48c78e;font-weight:700">✅ Mood logged! Refreshing map…</div>`;
+    setTimeout(loadMoodMap, 1200);
+  } catch(e) {
+    loadMoodMap();
+  }
+}
+
+function resetLocation() {
+  localStorage.removeItem("userCity");
+  myCity = null;
+  showManualCityInput();
+}
+
+// ── LOCAL FEED ────────────────────────────────────────────────────────────────
+async function loadLocalFeed() {
+  try {
+    const res  = await apiFetch("/api/location/local-feed");
+    const data = await res.json();
+
+    if (!data.posts?.length) {
+      document.getElementById("feedContent").innerHTML = `
+        <div class="empty"><div class="empty-icon">📰</div>
+        <p>No local posts yet in ${esc(myCity)}.<br/>Be the first to post!</p></div>`;
+      return;
+    }
+
+    let html = `<div class="local-badge">📍 ${esc(data.city)} — ${data.count} people here</div>`;
+
+    data.posts.forEach(p => {
+      const time = new Date(p.createdAt).toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+      html += `
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar">🎭</div>
+            <div>
+              <div class="post-name">${esc(p.anonymousName)}</div>
+              ${p.emotion ? `<div class="emotion-tag">${MOOD_EMOJI[p.emotion]||""} ${p.emotion}</div>` : ""}
+            </div>
+            <div class="post-time">${time}</div>
+          </div>
+          ${p.caption ? `<div class="post-text">${esc(p.caption)}</div>` : ""}
+          ${p.mediaUrl && p.mediaType === "image" ? `<img class="post-img" src="${p.mediaUrl}" loading="lazy"/>` : ""}
+          ${p.mediaUrl && p.mediaType === "video" ? `<video class="post-img" src="${p.mediaUrl}" controls></video>` : ""}
+        </div>`;
+    });
+
+    document.getElementById("feedContent").innerHTML = html;
+  } catch(e) {
+    document.getElementById("feedContent").innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><p>Failed to load local feed</p></div>`;
+  }
+}
+
+// ── NEARBY PEOPLE ─────────────────────────────────────────────────────────────
+async function loadNearby() {
+  try {
+    const res  = await apiFetch("/api/location/nearby-count");
+    const data = await res.json();
+
+    let html = `
+      <div class="nearby-header">
+        <div class="pulse-ring">📍</div>
+        <div class="nearby-count">${data.count}</div>
+        <div class="nearby-label">people active in ${esc(data.city || myCity)} right now</div>
+      </div>
+      <button class="btn btn-primary" style="margin-bottom:16px" onclick="startNearbyChat()">
+        🎲 Chat with Someone Nearby
+      </button>`;
+
+    document.getElementById("nearbyContent").innerHTML = html;
+  } catch(e) {
+    document.getElementById("nearbyContent").innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><p>Failed to load nearby people</p></div>`;
+  }
+}
+
+function startNearbyChat() {
+  // Store city preference and go to random chat with city filter
+  localStorage.setItem("randomChatCity", myCity);
+  window.location.href = "randomchat.html?mode=nearby";
+}
+
+// Socket — listen for local posts in real time
+socket.on("local-post", (data) => {
+  // Prepend new post to local feed
+  const feedEl = document.getElementById("feedContent");
+  if (feedEl && !feedEl.querySelector(".spinner")) {
+    loadLocalFeed(); // Refresh
+  }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+initLocation();
+</script>
+</body>
+</html>

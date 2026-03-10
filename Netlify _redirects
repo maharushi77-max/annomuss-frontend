@@ -1,0 +1,15 @@
+# Netlify _redirects — Annomuss SPA routing
+# This file must be in the root of your frontend folder
+
+# Redirect all routes to index for SPA support
+/dashboard    /dashboard.html   200
+/goals        /goals.html       200
+/messages     /messages.html    200
+/security     /security.html    200
+/randomchat   /randomchat.html  200
+/admin        /admin.html       200
+/privacy      /privacy.html     200
+/terms        /terms.html       200
+
+# Block direct access to sensitive paths
+/api/*        https://annomuss-backend-icgp.onrender.com/api/:splat  200

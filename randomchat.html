@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Random Chat 🎲</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#0d0d1a;color:#fff;height:100vh;display:flex;flex-direction:column}
+    .topbar{background:#1a1a2e;padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2a2a40;flex-shrink:0}
+    .topbar a{color:#8a7cff;text-decoration:none;font-size:.9rem;cursor:pointer}
+    .topbar h2{flex:1;font-size:1rem}
+    .online-badge{background:rgba(72,199,142,.12);color:#48c78e;border:1px solid rgba(72,199,142,.3);border-radius:20px;padding:3px 12px;font-size:.8rem}
+
+    /* Lobby */
+    #lobby{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px}
+    .lobby-card{background:#1a1a2e;border-radius:20px;padding:32px;width:100%;max-width:420px;border:1px solid #2a2a40;text-align:center}
+    .lobby-card h2{font-size:1.4rem;margin-bottom:8px}
+    .lobby-card p{color:#888;font-size:.9rem;margin-bottom:24px;line-height:1.6}
+    .gender-info{background:#0d0d1a;border-radius:12px;padding:14px;margin-bottom:20px;font-size:.85rem;color:#aaa;line-height:1.7}
+    .gender-info strong{color:#8a7cff}
+    .btn{padding:13px 28px;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;width:100%}
+    .btn-start{background:linear-gradient(135deg,#8a7cff,#ff6ec7);color:#fff}
+    .btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(138,124,255,.4)}
+    .btn-start:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn-cancel{background:#2a2a40;color:#aaa;margin-top:10px}
+    .btn-cancel:hover{background:#333;color:#fff}
+
+    /* Waiting */
+    #waiting{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;text-align:center}
+    .pulse{width:80px;height:80px;border-radius:50%;background:rgba(138,124,255,.2);border:3px solid #8a7cff;display:flex;align-items:center;justify-content:center;font-size:2rem;animation:pulse 1.5s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.7}}
+    #waitStatus{color:#8a7cff;font-size:1rem;font-weight:600}
+    #waitSub{color:#666;font-size:.85rem;margin-top:4px}
+
+    /* Chat */
+    #chatArea{flex:1;display:none;flex-direction:column}
+    .chat-header{background:#1a1a2e;padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2a2a40;flex-shrink:0}
+    .stranger-dot{width:10px;height:10px;border-radius:50%;background:#48c78e;flex-shrink:0}
+    .chat-header h3{flex:1;font-size:.95rem}
+    .timer-badge{background:#ff9632;color:#fff;border-radius:20px;padding:3px 12px;font-size:.82rem;font-weight:600}
+    .report-btn{background:none;border:none;color:#ff6363;cursor:pointer;font-size:.82rem}
+    .leave-btn{background:none;border:none;color:#ff6363;cursor:pointer;font-size:.82rem;margin-left:8px}
+    .msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+    .bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:.9rem;line-height:1.45;word-break:break-word}
+    .bubble.me{background:#8a7cff;align-self:flex-end;border-bottom-right-radius:4px}
+    .bubble.them{background:#1a1a2e;border:1px solid #2a2a40;align-self:flex-start;border-bottom-left-radius:4px}
+    .bubble .btime{font-size:.7rem;opacity:.6;margin-top:3px}
+    .system-msg{text-align:center;color:#555;font-size:.8rem;padding:4px 0}
+    .typing-ind{color:#888;font-size:.8rem;padding:0 16px 6px;min-height:22px;flex-shrink:0}
+    .chat-input{background:#1a1a2e;padding:12px 16px;display:flex;gap:10px;align-items:center;border-top:1px solid #2a2a40;flex-shrink:0}
+    .chat-input input{flex:1;background:#0d0d1a;border:1.5px solid #2a2a40;border-radius:20px;color:#fff;padding:10px 16px;font-size:.9rem;outline:none}
+    .chat-input input:focus{border-color:#8a7cff}
+    .send-btn{background:#8a7cff;color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.1rem;cursor:pointer;flex-shrink:0}
+    .send-btn:hover{background:#7a6cf0}
+
+    /* Ended */
+    #endedScreen{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
+    #endedScreen h2{font-size:1.4rem}
+    #endedScreen p{color:#888}
+    .btn-again{background:#8a7cff;color:#fff;border:none;border-radius:12px;padding:13px 28px;font-size:1rem;font-weight:700;cursor:pointer;width:100%;max-width:300px}
+    .btn-again:hover{background:#7a6cf0}
+
+    /* Report modal */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:flex-end;justify-content:center}
+    .overlay.open{display:flex}
+    .sheet{background:#1a1a2e;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px}
+    .sheet h3{margin-bottom:14px}
+    .sheet select,.sheet textarea{width:100%;background:#0d0d1a;border:1.5px solid #2a2a40;border-radius:10px;color:#fff;padding:10px 14px;font-size:.9rem;outline:none;margin-bottom:12px;font-family:inherit}
+    .sheet textarea{resize:vertical;min-height:80px}
+    .btn-report{background:#ff4444;color:#fff;border:none;border-radius:10px;padding:11px;width:100%;font-size:.95rem;font-weight:600;cursor:pointer}
+    .btn-cancel-report{background:none;border:none;color:#888;cursor:pointer;width:100%;margin-top:10px;font-size:.9rem}
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a onclick="goBack()">← Back</a>
+  <h2>🎲 Random Chat</h2>
+  <span class="online-badge">● Online</span>
+</div>
+
+<!-- Lobby -->
+<div id="lobby">
+  <div class="lobby-card">
+    <h2>Talk to a Stranger</h2>
+    <p>Connect anonymously. No judgement, just real conversations.</p>
+    <div class="gender-info">
+      <strong>How matching works:</strong><br/>
+      ♂️ Males → matched with females first<br/>
+      ♀️ Females → matched with males first<br/>
+      🤍 Prefer not → matched with anyone<br/><br/>
+      After <strong>5 seconds</strong>, expands to anyone available.
+    </div>
+    <button class="btn btn-start" id="startBtn" onclick="joinQueue()">🎲 Find Someone</button>
+  </div>
+</div>
+
+<!-- Waiting -->
+<div id="waiting">
+  <div class="pulse">🎲</div>
+  <div>
+    <div id="waitStatus">Looking for someone...</div>
+    <div id="waitSub">Matching by opposite gender first</div>
+  </div>
+  <button class="btn btn-cancel" style="max-width:280px" onclick="cancelQueue()">Cancel</button>
+</div>
+
+<!-- Chat -->
+<div id="chatArea">
+  <div class="chat-header">
+    <div class="stranger-dot"></div>
+    <h3>Stranger 🎭</h3>
+    <span class="timer-badge" id="timerBadge">5:00</span>
+    <button class="report-btn" onclick="openReport()">⚑ Report</button>
+    <button class="leave-btn" onclick="leaveChat()">Leave</button>
+  </div>
+  <div class="msgs" id="msgs"></div>
+  <div class="typing-ind" id="typingEl"></div>
+  <div class="chat-input">
+    <input type="text" id="msgIn" placeholder="Type a message..."
+           onkeydown="if(event.key==='Enter') sendMsg()"
+           oninput="emitTyping()"/>
+    <button class="send-btn" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<!-- Ended -->
+<div id="endedScreen">
+  <div style="font-size:3rem">👋</div>
+  <h2>Chat Ended</h2>
+  <p id="endReason">The stranger left the chat.</p>
+  <button class="btn-again" onclick="resetAndFind()">Find Another Stranger</button>
+  <a onclick="goBack()" style="color:#8a7cff;cursor:pointer;font-size:.9rem;margin-top:8px;display:block">← Back to Dashboard</a>
+</div>
+
+<!-- Report sheet -->
+<div class="overlay" id="reportOverlay">
+  <div class="sheet">
+    <h3>⚑ Report this user</h3>
+    <select id="reportReason">
+      <option value="Harassment">Harassment / bullying</option>
+      <option value="Inappropriate content">Inappropriate content</option>
+      <option value="Hate speech">Hate speech</option>
+      <option value="Spam">Spam</option>
+      <option value="Other">Other</option>
+    </select>
+    <textarea id="reportDetail" placeholder="Additional details (optional)..."></textarea>
+    <button class="btn-report" onclick="submitReport()">Submit Report</button>
+    <button class="btn-cancel-report" onclick="closeReport()">Cancel</button>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CONFIG — must match backend URL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const API = "https://annomuss-backend-icgp.onrender.com";
+
+// ── Auth ──────────────────────────────
+const token = localStorage.getItem("token");
+let user = null;
+try { user = JSON.parse(localStorage.getItem("user") || "null"); } catch(e) {}
+if (!token || !user) { window.location.href = "index.html"; }
+
+// ── Socket ────────────────────────────
+const socket = io(API, {
+  auth: { token },
+  transports: ["websocket", "polling"],
+  reconnectionAttempts: 5,
+});
+
+socket.on("connect", () => console.log("✅ Socket connected:", socket.id));
+socket.on("connect_error", e => console.error("❌ Socket error:", e.message));
+
+// ── State ─────────────────────────────
+let currentRoomId  = null;
+let timerInterval  = null;
+let typingTimeout  = null;
+const myName       = user.anonymousName;
+
+// ── Screen switcher ───────────────────
+function show(id) {
+  ["lobby","waiting","chatArea","endedScreen"].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = (s === id) ? "flex" : "none";
+  });
+}
+
+// ── Message helpers ───────────────────
+function addMsg(text, side, time) {
+  const el  = document.getElementById("msgs");
+  const div = document.createElement("div");
+  div.className = `bubble ${side}`;
+  const t = time
+    ? new Date(time).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })
+    : new Date().toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+  div.innerHTML = `${esc(text)}<div class="btime">${t}</div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function sysMsg(text) {
+  const el  = document.getElementById("msgs");
+  const div = document.createElement("div");
+  div.className   = "system-msg";
+  div.textContent = text;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function startTimer(ms) {
+  clearInterval(timerInterval);
+  let remaining = ms || 300000;
+  const badge   = document.getElementById("timerBadge");
+  badge.style.background = "#ff9632";
+
+  timerInterval = setInterval(() => {
+    remaining -= 1000;
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      badge.textContent = "0:00";
+      return;
+    }
+    const m = Math.floor(remaining / 60000);
+    const s = Math.floor((remaining % 60000) / 1000).toString().padStart(2, "0");
+    badge.textContent = `${m}:${s}`;
+    if (remaining <= 30000) badge.style.background = "#ff4444";
+  }, 1000);
+}
+
+function cleanupChat() {
+  clearInterval(timerInterval);
+  currentRoomId = null;
+  document.getElementById("msgs").innerHTML       = "";
+  document.getElementById("typingEl").textContent = "";
+  document.getElementById("timerBadge").style.background = "#ff9632";
+  document.getElementById("timerBadge").textContent      = "5:00";
+}
+
+function esc(str) {
+  return String(str || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function goBack() { window.location.href = "dashboard.html"; }
+
+// ── Queue actions ─────────────────────
+function joinQueue() {
+  document.getElementById("startBtn").disabled = true;
+  show("waiting");
+  document.getElementById("waitStatus").textContent = "Looking for someone...";
+  document.getElementById("waitSub").textContent    = "Matching by opposite gender first";
+  socket.emit("join-random-chat");
+}
+
+function cancelQueue() {
+  socket.emit("cancel-random-chat");
+  show("lobby");
+  document.getElementById("startBtn").disabled = false;
+}
+
+function leaveChat() {
+  if (currentRoomId) {
+    socket.emit("leave-random-chat", { roomId: currentRoomId });
+  }
+  cleanupChat();
+  show("endedScreen");
+  document.getElementById("endReason").textContent = "You left the chat.";
+}
+
+function resetAndFind() {
+  cleanupChat();
+  document.getElementById("startBtn").disabled = false;
+  show("lobby");
+  // Small delay before re-queuing
+  setTimeout(joinQueue, 300);
+}
+
+// ── Send message ──────────────────────
+function sendMsg() {
+  const input = document.getElementById("msgIn");
+  const msg   = input.value.trim();
+  if (!msg || !currentRoomId) return;
+  socket.emit("random-chat-message", { roomId: currentRoomId, message: msg });
+  addMsg(msg, "me");
+  input.value = "";
+}
+
+function emitTyping() {
+  if (!currentRoomId) return;
+  socket.emit("random-chat-typing", { roomId: currentRoomId });
+}
+
+// ── Report ────────────────────────────
+function openReport()  { document.getElementById("reportOverlay").classList.add("open"); }
+function closeReport() { document.getElementById("reportOverlay").classList.remove("open"); }
+
+function submitReport() {
+  const reason = document.getElementById("reportReason").value;
+  const detail = document.getElementById("reportDetail").value.trim();
+  socket.emit("report-random-chat", {
+    roomId: currentRoomId,
+    reason: `${reason}${detail ? ": " + detail : ""}`
+  });
+  closeReport();
+  sysMsg("✅ Report submitted. Thank you.");
+}
+
+// ── Socket events ─────────────────────
+let waitDots = null;
+socket.on("random-chat-waiting", ({ genderMatching, queueSize, estimatedWait }) => {
+  document.getElementById("waitStatus").textContent = "Finding your match...";
+  const sub = genderMatching
+    ? `Mood-matching first, then gender (${estimatedWait || "soon"})`
+    : `Matching with anyone available`;
+  document.getElementById("waitSub").textContent = sub;
+  // Animate dots
+  let d = 0;
+  clearInterval(waitDots);
+  waitDots = setInterval(() => {
+    d = (d+1) % 4;
+    const el = document.getElementById("waitStatus");
+    if (el) el.textContent = "Finding your match" + ".".repeat(d||1);
+  }, 600);
+});
+
+socket.on("random-chat-still-waiting", ({ queueSize, tip }) => {
+  document.getElementById("waitSub").textContent = tip || "Almost there — low traffic right now.";
+});
+
+socket.on("random-chat-matched", ({ roomId, duration, matchType, matchLabel }) => {
+  clearInterval(waitDots);
+  currentRoomId = roomId;
+  show("chatArea");
+  startTimer(duration || 420000);
+  const label = matchLabel || "Anonymous match 🎭";
+  sysMsg(`✅ ${label} — ${Math.round((duration||420000)/60000)} min chat. Be kind 💜`);
+  document.getElementById("msgIn").focus();
+});
+
+// ✅ FIXED: just show all messages from the other side
+socket.on("random-chat-message", ({ from, message, createdAt }) => {
+  // Only show messages from the stranger (not our own echoes)
+  if (from !== myName) {
+    addMsg(message, "them", createdAt);
+  }
+});
+
+socket.on("random-chat-typing", () => {
+  const el = document.getElementById("typingEl");
+  el.textContent = "Stranger is typing...";
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => { el.textContent = ""; }, 2000);
+});
+
+socket.on("random-chat-ended", ({ reason }) => {
+  cleanupChat();
+  show("endedScreen");
+  const reasons = {
+    time:           "⏰ Time's up! The 5-minute chat has ended.",
+    partner_left:   "👋 The stranger left the chat.",
+    reported:       "⚑ Chat ended due to a report.",
+  };
+  document.getElementById("endReason").textContent = reasons[reason] || "Chat ended.";
+});
+
+socket.on("already-in-chat", () => {
+  show("lobby");
+  document.getElementById("startBtn").disabled = false;
+  alert("You are already in a random chat in another tab.");
+});
+
+socket.on("account-suspended", () => {
+  localStorage.clear();
+  window.location.href = "index.html";
+});
+
+// ── Init ──────────────────────────────
+show("lobby");
+</script>
+
+<!-- ── BOTTOM NAV ── -->
+<style>
+.app-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(6,6,15,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid #1c1c34;display:flex;z-index:100;padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}
+.app-nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;color:#4a4770;text-decoration:none;font-size:1.2rem;transition:color .18s;cursor:pointer}
+.app-nav a:hover,.app-nav a.on{color:#9d7eff}
+.app-nav a span{font-size:.52rem;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:.3px}
+</style>
+<div class="app-nav">
+  <a href="dashboard.html"><span style="font-size:1.1rem">🏠</span><span>Feed</span></a>
+  <a href="dashboard.html#mood"><span style="font-size:1.1rem">💭</span><span>Mood</span></a>
+  <a href="randomchat.html"><span style="font-size:1.1rem">🎲</span><span>Chat</span></a>
+  <a href="messages.html"><span style="font-size:1.1rem">💬</span><span>DMs</span></a>
+  <a href="dashboard.html#profile"><span style="font-size:1.1rem">🎭</span><span>Me</span></a>
+</div></body>
+</html>

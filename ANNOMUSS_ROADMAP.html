@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Annomuss — Complete Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#040407;--s1:#0a0a10;--s2:#101018;--s3:#161620;
+  --b:#1c1c2e;--b2:#242438;
+  --p:#7048d4;--p2:#9b75ff;--p3:#c8adff;
+  --r:#e8385a;--r2:#ff6b85;
+  --g:#1dc97e;--g2:#4eebb8;
+  --o:#f0901a;--o2:#ffc169;
+  --sky:#2fabff;
+  --tx:#eae6ff;--tx2:#8a85b8;--tx3:#3e3a60;
+  --fH:'Syne',sans-serif;--fB:'DM Sans',sans-serif;--fM:'DM Mono',monospace
+}
+html,body{background:var(--bg);color:var(--tx);font-family:var(--fB);font-size:14px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(800px 600px at -150px -150px,rgba(112,72,212,.09),transparent),
+    radial-gradient(600px 500px at calc(100%+100px) 60%,rgba(232,56,90,.06),transparent),
+    radial-gradient(500px 400px at 40% calc(100%+100px),rgba(29,201,126,.05),transparent)}
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:40px 20px 80px}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:20px 0 40px;border-bottom:1px solid var(--b);margin-bottom:36px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:6px;background:rgba(112,72,212,.1);
+  border:1px solid rgba(112,72,212,.22);border-radius:20px;padding:5px 14px;
+  font-family:var(--fM);font-size:.64rem;letter-spacing:1.8px;color:var(--p2);
+  text-transform:uppercase;margin-bottom:18px}
+.hero h1{font-family:var(--fH);font-size:2.4rem;font-weight:800;letter-spacing:-.6px;
+  line-height:1.15;margin-bottom:10px}
+.hero h1 span{background:linear-gradient(135deg,#9b75ff,#e8385a,#f0901a);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{color:var(--tx2);font-size:.9rem;max-width:520px;margin:0 auto}
+
+/* ── FIX NOW BANNER ── */
+.fix-now{background:linear-gradient(135deg,rgba(232,56,90,.08),rgba(240,144,26,.06));
+  border:1px solid rgba(232,56,90,.3);border-radius:18px;padding:22px 24px;margin-bottom:32px;
+  position:relative;overflow:hidden}
+.fix-now::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--r),var(--o))}
+.fix-now-title{font-family:var(--fH);font-size:1rem;font-weight:800;color:var(--r2);
+  display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.fix-step{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.fix-step:last-child{margin-bottom:0}
+.step-n{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--r),var(--o));
+  display:flex;align-items:center;justify-content:center;font-family:var(--fH);
+  font-size:.65rem;font-weight:800;color:#fff;flex-shrink:0;margin-top:1px}
+.step-t{font-size:.82rem;color:var(--tx2);line-height:1.65}
+.step-t strong{color:var(--tx)}
+.code{font-family:var(--fM);background:rgba(0,0,0,.4);border:1px solid var(--b2);
+  border-radius:6px;padding:2px 8px;font-size:.72rem;color:var(--g2)}
+
+/* ── STATUS AUDIT ── */
+.audit-table{width:100%;border-collapse:collapse;margin-bottom:28px;font-size:.8rem}
+.audit-table th{text-align:left;padding:9px 12px;font-family:var(--fH);font-size:.6rem;
+  font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;
+  background:var(--s1);border-bottom:1px solid var(--b)}
+.audit-table td{padding:9px 12px;border-bottom:1px solid rgba(28,28,46,.6);
+  color:var(--tx2);vertical-align:middle}
+.audit-table tr:hover td{background:rgba(112,72,212,.02)}
+.st-ok{color:var(--g);font-weight:700}.st-fix{color:var(--r2);font-weight:700}
+.st-partial{color:var(--o2);font-weight:700}.st-miss{color:var(--tx3);font-style:italic}
+
+/* ── SECTION HEADS ── */
+.sec-head{display:flex;align-items:center;gap:10px;margin:36px 0 16px}
+.sec-head h2{font-family:var(--fH);font-size:1.1rem;font-weight:800}
+.sec-tag{font-family:var(--fM);font-size:.58rem;font-weight:600;padding:3px 10px;
+  border-radius:20px;letter-spacing:.5px;text-transform:uppercase}
+.tag-now{background:rgba(232,56,90,.1);color:var(--r2);border:1px solid rgba(232,56,90,.25)}
+.tag-next{background:rgba(240,144,26,.09);color:var(--o2);border:1px solid rgba(240,144,26,.25)}
+.tag-viral{background:rgba(29,201,126,.08);color:var(--g2);border:1px solid rgba(29,201,126,.22)}
+.tag-tech{background:rgba(112,72,212,.09);color:var(--p2);border:1px solid rgba(112,72,212,.22)}
+
+/* ── FEATURE CARDS ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:580px){.grid2{grid-template-columns:1fr}}
+.fcard{background:var(--s1);border:1px solid var(--b);border-radius:16px;
+  padding:18px 20px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.fcard::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(112,72,212,.04),transparent);
+  opacity:0;transition:opacity .18s}
+.fcard:hover::after{opacity:1}
+.fcard:hover{border-color:var(--b2);transform:translateY(-2px)}
+.fcard.checked{border-color:rgba(29,201,126,.25);background:rgba(29,201,126,.025)}
+.fcard.checked .fc-check{display:flex}
+.fc-check{position:absolute;top:14px;right:14px;width:20px;height:20px;border-radius:50%;
+  background:var(--g);display:none;align-items:center;justify-content:center;
+  font-size:.65rem;color:#fff;font-weight:800;flex-shrink:0}
+.fc-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.fc-ico{font-size:1.25rem}
+.fc-name{font-family:var(--fH);font-size:.88rem;font-weight:800;flex:1}
+.fc-imp{font-family:var(--fM);font-size:.58rem;font-weight:600;padding:2px 8px;
+  border-radius:20px;margin-left:auto}
+.hi{background:rgba(232,56,90,.1);color:var(--r2);border:1px solid rgba(232,56,90,.2)}
+.md{background:rgba(240,144,26,.09);color:var(--o2);border:1px solid rgba(240,144,26,.2)}
+.lo{background:rgba(61,58,96,.12);color:var(--tx3);border:1px solid var(--b)}
+.vr{background:rgba(29,201,126,.08);color:var(--g2);border:1px solid rgba(29,201,126,.2)}
+.fc-desc{font-size:.78rem;color:var(--tx3);line-height:1.65;margin-bottom:8px}
+.fc-how{font-size:.73rem;color:var(--p2);font-style:italic;padding-top:8px;
+  border-top:1px solid var(--b);line-height:1.55}
+
+/* ── VIRAL IDEAS ── */
+.viral-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:700px){.viral-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:440px){.viral-grid{grid-template-columns:1fr}}
+.vcard{background:var(--s1);border:1px solid var(--b);border-radius:16px;padding:18px;
+  cursor:pointer;transition:all .18s;position:relative}
+.vcard:hover{border-color:var(--b2);transform:translateY(-2px)}
+.vcard.checked{border-color:rgba(29,201,126,.25)}
+.vc-ico{font-size:1.8rem;margin-bottom:10px;display:block}
+.vc-name{font-family:var(--fH);font-size:.84rem;font-weight:800;margin-bottom:6px}
+.vc-desc{font-size:.75rem;color:var(--tx3);line-height:1.6}
+.vc-spark{font-size:.68rem;color:var(--g2);margin-top:8px;font-style:italic}
+
+/* ── CALLOUTS ── */
+.callout{border-radius:12px;padding:14px 17px;margin:16px 0;font-size:.82rem;line-height:1.7}
+.co-g{background:rgba(29,201,126,.06);border:1px solid rgba(29,201,126,.18);color:var(--g2)}
+.co-p{background:rgba(112,72,212,.07);border:1px solid rgba(112,72,212,.2);color:var(--p3)}
+.co-o{background:rgba(240,144,26,.07);border:1px solid rgba(240,144,26,.2);color:var(--o2)}
+
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--b),transparent);margin:28px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">🎭 annomuss · complete roadmap</div>
+  <h1>What makes<br/><span>Annomuss great</span></h1>
+  <p class="hero-sub">Full audit of what's working, what's broken, and every feature that will make users stay, share, and feel something.</p>
+</div>
+
+<!-- FIX NOW: CHALLENGE TAB -->
+<div class="fix-now">
+  <div class="fix-now-title">🔴 Fix This Right Now — Challenge Tab is Empty</div>
+  <div class="fix-step">
+    <div class="step-n">1</div>
+    <div class="step-t"><strong>Open challenge-seeder.html</strong> (in your outputs folder) — a tool to bulk-create 30 days of challenges with one click</div>
+  </div>
+  <div class="fix-step">
+    <div class="step-n">2</div>
+    <div class="step-t">Enter your backend URL and admin password <span class="code">annomuss_admin_2026</span> — click <strong>Test Connection</strong></div>
+  </div>
+  <div class="fix-step">
+    <div class="step-n">3</div>
+    <div class="step-t">Click <strong>🚀 Seed All to DB</strong> — 30 emotionally resonant challenges instantly created. Challenge tab fills up immediately.</div>
+  </div>
+  <div class="fix-step">
+    <div class="step-n">4</div>
+    <div class="step-t">Going forward: open <strong>admin.html</strong> every week to create fresh challenges, or use the seeder anytime to top up.</div>
+  </div>
+</div>
+
+<!-- CURRENT STATUS AUDIT -->
+<div class="sec-head"><h2>📋 Current Status Audit</h2><span class="sec-tag tag-now">Live</span></div>
+<table class="audit-table">
+  <thead><tr><th>Feature</th><th>Status</th><th>What's happening</th></tr></thead>
+  <tbody>
+    <tr><td>🔐 Login / OTP</td><td class="st-ok">✅ Works</td><td>Requires EMAIL_USER + EMAIL_PASS env vars in Render</td></tr>
+    <tr><td>🏠 Post feed (For You)</td><td class="st-ok">✅ Works</td><td>—</td></tr>
+    <tr><td>🔥 Trending tab</td><td class="st-ok">✅ Works</td><td>—</td></tr>
+    <tr><td>💬 Challenge tab</td><td class="st-fix">❌ Empty</td><td>No challenges in DB — use challenge-seeder.html to fix NOW</td></tr>
+    <tr><td>🤫 Confess tab</td><td class="st-partial">⚠️ Partial</td><td>Posts save but may not filter by type="confession" correctly</td></tr>
+    <tr><td>😊 Mood check-in + streak</td><td class="st-ok">✅ Works</td><td>—</td></tr>
+    <tr><td>👥 Friends + requests</td><td class="st-ok">✅ Works</td><td>—</td></tr>
+    <tr><td>💬 Direct Messages</td><td class="st-partial">⚠️ Partial</td><td>Works when both online. Offline delivery via DB. Fixed in new messages.html</td></tr>
+    <tr><td>🎲 Random Chat</td><td class="st-ok">✅ Works</td><td>—</td></tr>
+    <tr><td>🗺️ Mood Map</td><td class="st-fix">❌ Always empty</td><td>Needs: user sets location + logs mood same day. Fixed in new location.html</td></tr>
+    <tr><td>🎯 Goals tracker</td><td class="st-ok">✅ Works</td><td>—</td></tr>
+    <tr><td>🔒 Security (PIN, report, block)</td><td class="st-ok">✅ Works</td><td>—</td></tr>
+    <tr><td>⚡ XP / Levels</td><td class="st-partial">⚠️ localStorage only</td><td>Loses XP on new device. New users.js + User.js fixes this</td></tr>
+    <tr><td>🌙 Stories</td><td class="st-partial">⚠️ Buggy</td><td>Story grouping by user broken in some views</td></tr>
+    <tr><td>🔔 Notifications</td><td class="st-miss">❌ Bell goes nowhere</td><td>Bell icon exists but opens nothing. No notification center.</td></tr>
+    <tr><td>🔍 Search</td><td class="st-miss">❌ Missing</td><td>No way to find users or posts</td></tr>
+    <tr><td>👤 Public profiles</td><td class="st-miss">❌ Missing</td><td>Can't tap a name and see their posts/streak/bio</td></tr>
+    <tr><td>📱 Push notifications</td><td class="st-miss">❌ Missing</td><td>App is silent. Users forget about it.</td></tr>
+    <tr><td>🌐 OG share preview</td><td class="st-miss">❌ Missing</td><td>Sharing the link shows blank preview on WhatsApp/Twitter</td></tr>
+  </tbody>
+</table>
+
+<div class="divider"/>
+
+<!-- MUST FIX -->
+<div class="sec-head"><h2>🔴 Must Add First — Users Notice These Immediately</h2><span class="sec-tag tag-now">Do Now</span></div>
+<div class="grid2">
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">🔔</span><span class="fc-name">Notification Center</span><span class="fc-imp hi">CRITICAL</span></div>
+    <div class="fc-desc">Bell icon exists but clicking it does nothing. Users get friend requests, likes, messages — and have no idea. This breaks the core social loop.</div>
+    <div class="fc-how">→ Create notifications.html. Show: new messages, friend requests, post likes, challenge responses. Store in DB with a "read" flag.</div>
+  </div>
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">🔍</span><span class="fc-name">Search Users & Posts</span><span class="fc-imp hi">CRITICAL</span></div>
+    <div class="fc-desc">If someone tells a friend "find me on Annomuss as SilentMoon99", there's no way to find them. No hashtag search. No user lookup. Growth completely blocked.</div>
+    <div class="fc-how">→ Search bar in topbar. GET /api/users/search?q= already exists. Add GET /api/posts/search?q= for post search. Results page with tabs.</div>
+  </div>
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">📱</span><span class="fc-name">Web Push Notifications</span><span class="fc-imp hi">HIGH</span></div>
+    <div class="fc-desc">Users close the app and never come back. Without push notifications, there's zero re-engagement. Someone likes your post at 11pm — you find out the next time you manually open the app.</div>
+    <div class="fc-how">→ Service Worker + Web Push API (free). Ask permission on first login. Send on: new message, friend request, like on your post, challenge response liked.</div>
+  </div>
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">👤</span><span class="fc-name">Public Profile Pages</span><span class="fc-imp hi">HIGH</span></div>
+    <div class="fc-desc">Tap a username → see their public posts, streak badge, XP level, bio. Currently it does nothing. No social identity = no reason to build one.</div>
+    <div class="fc-how">→ Create profile.html?user=anonymousName. GET /api/users/profile/:name. Show public posts, streak, level, bio, common friends.</div>
+  </div>
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">💬</span><span class="fc-name">Pre-fill 30 Days of Challenges</span><span class="fc-imp hi">HIGH</span></div>
+    <div class="fc-desc">Challenge tab is empty every day until you manually create one. If you forget for a day — users see nothing. Pre-fill a month in advance.</div>
+    <div class="fc-how">→ Use challenge-seeder.html (in your outputs). One click fills 30 days with emotionally resonant prompts. Takes 2 minutes.</div>
+  </div>
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">📊</span><span class="fc-name">XP Syncs to Database</span><span class="fc-imp hi">HIGH</span></div>
+    <div class="fc-desc">All XP is in localStorage. Clear browser = lose everything. Log in on phone = 0 XP. Users build up 500 XP then feel robbed when it vanishes. Kills motivation.</div>
+    <div class="fc-how">→ Deploy new users.js + User.js (already in outputs). PATCH /api/users/xp syncs on each gain. GET /api/users/xp loads on login.</div>
+  </div>
+
+</div>
+
+<div class="divider"/>
+
+<!-- SHOULD ADD -->
+<div class="sec-head"><h2>🟡 Should Add — Makes the App Stickier</h2><span class="sec-tag tag-next">Next Sprint</span></div>
+<div class="grid2">
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">🎭</span><span class="fc-name">Onboarding Flow</span><span class="fc-imp md">MEDIUM</span></div>
+    <div class="fc-desc">New users land on a completely empty feed with no idea what to do. Day-1 churn is brutal. A 3-step welcome reduces it by ~35%.</div>
+    <div class="fc-how">→ After first login: Step 1 pick 3 emotions you relate to → Step 2 log first mood → Step 3 write first post. Store "onboarded" in localStorage + DB.</div>
+  </div>
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">🏆</span><span class="fc-name">Challenge Leaderboard</span><span class="fc-imp md">MEDIUM</span></div>
+    <div class="fc-desc">Show top 3 most-liked challenge responses at the top of the challenge feed. "Most felt this week" drives people to check back and compete for hearts.</div>
+    <div class="fc-how">→ Sort responses by likes.length in /api/posts/challenge/today. Pin top 3 with a crown badge in the frontend.</div>
+  </div>
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">📤</span><span class="fc-name">Share Post as Image Card</span><span class="fc-imp md">MEDIUM</span></div>
+    <div class="fc-desc">The most powerful viral growth feature. Let users generate a beautiful branded image card of any post and share to Instagram/WhatsApp stories. Every share = free marketing.</div>
+    <div class="fc-how">→ html2canvas or Canvas API. Add Share 📤 button on each post. Dark card with quote, emoji, annomuss.app watermark.</div>
+  </div>
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">🌐</span><span class="fc-name">OG Meta Tags for Sharing</span><span class="fc-imp md">MEDIUM</span></div>
+    <div class="fc-desc">Sharing annomuss.netlify.app to WhatsApp or Twitter shows a blank grey box with no image or text. Looks abandoned. Rich previews increase click-through by 3×.</div>
+    <div class="fc-how">→ Add to index.html head: og:title, og:description, og:image (branded purple card), twitter:card. One-time 10-minute fix.</div>
+  </div>
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">🌙</span><span class="fc-name">Story Fix + Image Support</span><span class="fc-imp md">MEDIUM</span></div>
+    <div class="fc-desc">Stories exist but grouping is broken. Also they're text-only. Image stories are 10× more engaging and shareable than text ones.</div>
+    <div class="fc-how">→ Fix story grouping bug in frontend. Add Cloudinary image upload to story creation modal. Stories with images get priority in the strip.</div>
+  </div>
+
+  <div class="fcard" onclick="this.classList.toggle('checked')">
+    <div class="fc-check">✓</div>
+    <div class="fc-top"><span class="fc-ico">🎨</span><span class="fc-name">Custom Anonymous Names</span><span class="fc-imp md">MEDIUM</span></div>
+    <div class="fc-desc">Users are stuck with whatever random name they got. Names are part of identity — let users change theirs once every 30 days for 50 XP. Drives XP engagement.</div>
+    <div class="fc-how">→ security.html already has name change. Just add the 30-day cooldown + XP cost logic. Show countdown timer until next change allowed.</div>
+  </div>
+
+</div>
+
+<div class="divider"/>
+
+<!-- VIRAL IDEAS -->
+<div class="sec-head"><h2>🟢 Unique Features — What Makes Annomuss Unforgettable</h2><span class="sec-tag tag-viral">Viral Potential</span></div>
+<div class="viral-grid">
+
+  <div class="vcard" onclick="this.classList.toggle('checked')">
+    <span class="vc-ico">🌊</span>
+    <div class="vc-name">Weekly Emotional Report</div>
+    <div class="vc-desc">Every Sunday: "This week, 847 people felt anxious, 312 felt hopeful, 156 said they missed someone..." A community emotional weather report that people screenshot and share everywhere.</div>
+    <div class="vc-spark">→ Aggregate last 7 days of moods. Auto-post to feed every Sunday.</div>
+  </div>
+
+  <div class="vcard" onclick="this.classList.toggle('checked')">
+    <span class="vc-ico">🕛</span>
+    <div class="vc-name">Midnight Mailbox</div>
+    <div class="vc-desc">Between 11pm–3am, a special feed unlocks where posts auto-delete at dawn. Radical honesty because everything disappears. Scarcity + mystery = massive FOMO. People tell friends about this.</div>
+    <div class="vc-spark">→ Add expiresAt = next 6am when type="night" + time is 23:00–03:00.</div>
+  </div>
+
+  <div class="vcard" onclick="this.classList.toggle('checked')">
+    <span class="vc-ico">💌</span>
+    <div class="vc-name">Time Capsule Letters</div>
+    <div class="vc-desc">Write a letter to yourself in 30/90/365 days. When it unlocks — it gets posted to the feed. The emotional payoff of reading your past self is deeply shareable content.</div>
+    <div class="vc-spark">→ Add releaseAt field to Post. Check + publish on read. Show countdown.</div>
+  </div>
+
+  <div class="vcard" onclick="this.classList.toggle('checked')">
+    <span class="vc-ico">🫂</span>
+    <div class="vc-name">Vibe Match</div>
+    <div class="vc-desc">After logging a mood, show: "3 other people in your city felt anxious in the last hour — just like you." Not a chat, just a moment of "you're not alone." Deeply emotional feature.</div>
+    <div class="vc-spark">→ After mood log, query users with same emotion in last 1h. Show count.</div>
+  </div>
+
+  <div class="vcard" onclick="this.classList.toggle('checked')">
+    <span class="vc-ico">🌱</span>
+    <div class="vc-name">Emotional Growth Tree</div>
+    <div class="vc-desc">A visual tree that grows with the user. Each mood log = leaf, each post = branch, each goal completed = flower. Screenshot-able identity. Makes streak feel alive, not just a number.</div>
+    <div class="vc-spark">→ SVG animation based on user stats. Private art under profile page.</div>
+  </div>
+
+  <div class="vcard" onclick="this.classList.toggle('checked')">
+    <span class="vc-ico">🎭</span>
+    <div class="vc-name">Persona Masks</div>
+    <div class="vc-desc">Once a month, wear a different mask — a new anonymous identity for 24 hours. Complete reset. Write things you couldn't write as yourself. Makes venting safer and more honest.</div>
+    <div class="vc-spark">→ Add maskName + maskExpiry to User. Show masked name during active window.</div>
+  </div>
+
+</div>
+
+<div class="divider"/>
+
+<!-- PRIORITY CALLOUT -->
+<div class="callout co-g">
+  🎯 <strong>Priority order this week:</strong><br/>
+  1. Use challenge-seeder.html → fill 30 days of challenges → challenge tab works immediately<br/>
+  2. Deploy new admin.html → proper challenge management<br/>
+  3. Add OG meta tags to index.html (10 min fix, huge visual improvement when sharing)<br/>
+  4. Create notifications.html → bell icon finally works<br/>
+  5. Add search bar
+</div>
+
+<div class="callout co-p">
+  🚀 <strong>For viral growth:</strong> Weekly Emotional Report + Midnight Mailbox + Share as Image Card are the three features most likely to get people talking and sharing Annomuss organically. Each one creates content that naturally travels outside the app.
+</div>
+
+<div class="callout co-o">
+  💡 <strong>The #1 retention lever:</strong> Push notifications. Right now if someone likes your post at 10pm, you find out tomorrow if you happen to open the app. With push notifications, that dopamine hit arrives instantly. It's the difference between people checking the app once a week vs 5× a day.
+</div>
+
+<div style="text-align:center;margin-top:40px;color:var(--tx3);font-size:.7rem;font-family:var(--fM)">
+  click any card to check it off · 🎭 annomuss roadmap
+</div>
+
+</div>
+</body>
+</html>

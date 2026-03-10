@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="theme-color" content="#040810"/>
+<link rel="manifest" href="/manifest.json"/>
+<title>Grow — Annomuss</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════════════
+   GROW — Youth Ambition Hub
+   Aesthetic: Dark editorial · Newspaper meets silicon valley
+   Font: Clash Display (bold claims) + Cabinet Grotesk (body)
+   Color: Near-black + electric amber + signal green + ice blue
+   Philosophy: Serious about growth. No scroll traps. No likes.
+══════════════════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#040810;--s1:#080f1c;--s2:#0d1626;--s3:#111d30;--s4:#16243a;
+  --rim:#1a2d47;--rim2:#1f3655;
+  --amber:#f59e0b;--amber2:#fbbf24;--amber3:#fde68a;
+  --green:#10b981;--green2:#34d399;--green3:#a7f3d0;
+  --blue:#38bdf8;--blue2:#7dd3fc;
+  --red:#f43f5e;
+  --tx:#e8f4ff;--tx2:#8ba8c4;--tx3:#3d5a7a;--tx4:#1c3350;
+  --fD:'Clash Display',sans-serif;
+  --fB:'Cabinet Grotesk',sans-serif;
+  --fM:'JetBrains Mono',monospace;
+  --r:14px;--safe:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--fB);
+  -webkit-font-smoothing:antialiased;overscroll-behavior:none}
+
+/* Grain texture overlay */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")}
+
+/* Ambient glow */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 55% 35% at 80% 5%,rgba(245,158,11,.06),transparent 55%),
+    radial-gradient(ellipse 45% 30% at 10% 85%,rgba(16,185,129,.05),transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 50%,rgba(56,189,248,.03),transparent 65%)}
+
+/* ── LAYOUT ───────────────────────────────── */
+#app{position:relative;z-index:1;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;
+  background:rgba(4,8,16,.9);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--rim);flex-shrink:0;position:relative;
+}
+.logo-wrap{display:flex;align-items:center;gap:10px}
+.logo-mark{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--amber),var(--green));
+  display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;font-weight:700;color:#000;font-family:var(--fD);
+}
+.logo-txt{font-family:var(--fD);font-size:1rem;font-weight:700;letter-spacing:-.3px;color:var(--tx)}
+.logo-sub{font-size:.6rem;color:var(--tx3);font-family:var(--fM);letter-spacing:1px;text-transform:uppercase;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.xp-badge{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);
+  border-radius:20px;padding:5px 11px;
+  font-family:var(--fM);font-size:.65rem;color:var(--amber2);
+}
+.notif-btn{width:34px;height:34px;border-radius:50%;background:var(--s2);border:1px solid var(--rim);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .2s}
+.notif-btn:hover{border-color:var(--amber);background:rgba(245,158,11,.08)}
+
+/* ── PAGES ────────────────────────────────── */
+#pages{flex:1;overflow-y:auto;overscroll-behavior:contain}
+.page{display:none;padding-bottom:calc(80px + var(--safe));animation:fadeUp .22s ease}
+.page.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+
+/* ── BOTTOM NAV ───────────────────────────── */
+.nav{
+  display:flex;background:rgba(4,8,16,.95);backdrop-filter:blur(24px);
+  border-top:1px solid var(--rim);flex-shrink:0;
+  padding:8px 0 calc(8px + var(--safe));
+}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 4px;border:none;background:none;cursor:pointer;
+  color:var(--tx3);transition:color .18s;position:relative}
+.ni.on{color:var(--amber)}
+.ni.on .ni-dot{opacity:1;transform:scale(1)}
+.ni-ico{font-size:1.2rem;line-height:1;transition:transform .2s}
+.ni.on .ni-ico{transform:scale(1.1)}
+.ni-lbl{font-size:.52rem;font-weight:700;font-family:var(--fD);text-transform:uppercase;letter-spacing:.4px}
+.ni-dot{width:3px;height:3px;border-radius:50%;background:var(--amber);
+  opacity:0;transform:scale(0);transition:all .2s;position:absolute;bottom:3px}
+
+/* ── CARDS ────────────────────────────────── */
+.card{background:var(--s1);border:1px solid var(--rim);border-radius:18px;
+  padding:18px;margin-bottom:12px;transition:border-color .2s}
+.card:hover{border-color:var(--rim2)}
+.card-label{font-family:var(--fM);font-size:.58rem;font-weight:500;
+  text-transform:uppercase;letter-spacing:1.2px;color:var(--tx3);margin-bottom:8px}
+
+/* ── HERO SECTION ─────────────────────────── */
+.hero-section{padding:24px 16px 0}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--fM);font-size:.6rem;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--amber2);margin-bottom:12px;
+}
+.hero-eyebrow::before{content:"";width:18px;height:1px;background:var(--amber);opacity:.5}
+.hero-title{font-family:var(--fD);font-size:1.9rem;font-weight:700;line-height:1.15;
+  letter-spacing:-.5px;margin-bottom:10px}
+.hero-title .hl-green{color:var(--green2)}
+.hero-title .hl-amber{color:var(--amber2)}
+.hero-sub{font-size:.82rem;color:var(--tx2);line-height:1.7;max-width:420px}
+
+/* ── CATEGORY GRID ────────────────────────── */
+.cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+@media(min-width:480px){.cat-grid{grid-template-columns:repeat(3,1fr)}}
+.cat-card{
+  background:var(--s2);border:1.5px solid var(--rim);border-radius:16px;
+  padding:16px 14px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;
+  text-align:left;
+}
+.cat-card::before{content:"";position:absolute;inset:0;opacity:0;transition:opacity .22s;
+  background:radial-gradient(ellipse 80% 80% at 50% 0%,rgba(245,158,11,.07),transparent)}
+.cat-card:hover::before,.cat-card.sel::before{opacity:1}
+.cat-card:hover,.cat-card.sel{border-color:rgba(245,158,11,.4);transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.cat-card.sel{border-color:var(--amber);background:rgba(245,158,11,.05)}
+.cat-ico{font-size:1.6rem;margin-bottom:8px;display:block}
+.cat-name{font-family:var(--fD);font-size:.8rem;font-weight:600;color:var(--tx);margin-bottom:3px}
+.cat-count{font-family:var(--fM);font-size:.6rem;color:var(--tx3)}
+.cat-check{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;
+  background:var(--amber);display:flex;align-items:center;justify-content:center;
+  font-size:.6rem;color:#000;font-weight:900;opacity:0;transform:scale(0);transition:all .2s}
+.cat-card.sel .cat-check{opacity:1;transform:scale(1)}
+
+/* ── PEOPLE CARDS ─────────────────────────── */
+.person-card{
+  display:flex;align-items:flex-start;gap:14px;
+  background:var(--s1);border:1px solid var(--rim);border-radius:18px;
+  padding:16px;margin-bottom:10px;transition:all .2s;cursor:pointer;
+}
+.person-card:hover{border-color:var(--rim2);transform:translateX(3px)}
+.person-av{
+  width:44px;height:44px;border-radius:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+  background:var(--s3);border:1px solid var(--rim);
+}
+.person-info{flex:1;min-width:0}
+.person-name{font-family:var(--fD);font-size:.88rem;font-weight:600;color:var(--tx);margin-bottom:4px}
+.person-bio{font-size:.75rem;color:var(--tx2);line-height:1.55;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.person-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.tag{padding:2px 8px;border-radius:6px;font-size:.58rem;font-weight:700;font-family:var(--fM);
+  background:rgba(245,158,11,.07);color:var(--amber2);border:1px solid rgba(245,158,11,.15)}
+.tag.green{background:rgba(16,185,129,.07);color:var(--green2);border-color:rgba(16,185,129,.15)}
+.tag.blue{background:rgba(56,189,248,.07);color:var(--blue2);border-color:rgba(56,189,248,.15)}
+.person-connect{
+  flex-shrink:0;padding:7px 13px;border-radius:10px;border:1px solid var(--rim2);
+  background:none;color:var(--tx2);font-family:var(--fD);font-size:.68rem;
+  font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.person-connect:hover{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.07)}
+.person-connect.connected{border-color:var(--green);color:var(--green2);background:rgba(16,185,129,.07)}
+
+/* ── LAUNCH PAD ───────────────────────────── */
+.launch-hero{
+  background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(16,185,129,.05));
+  border:1px solid rgba(245,158,11,.2);border-radius:20px;padding:22px;
+  margin-bottom:14px;position:relative;overflow:hidden;
+}
+.launch-hero::after{content:"LAUNCH";position:absolute;right:-10px;top:50%;
+  transform:translateY(-50%);font-family:var(--fD);font-size:4.5rem;font-weight:700;
+  color:rgba(245,158,11,.04);line-height:1;pointer-events:none;letter-spacing:-2px}
+.launch-title{font-family:var(--fD);font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.launch-sub{font-size:.76rem;color:var(--tx2);line-height:1.65;margin-bottom:16px}
+
+.idea-card{
+  background:var(--s1);border:1px solid var(--rim);border-radius:16px;
+  padding:16px;margin-bottom:10px;transition:all .2s;
+}
+.idea-card:hover{border-color:var(--rim2)}
+.idea-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.idea-title{font-family:var(--fD);font-size:.9rem;font-weight:600;color:var(--tx);line-height:1.35}
+.idea-stage{padding:2px 9px;border-radius:6px;font-size:.58rem;font-weight:700;font-family:var(--fM);
+  flex-shrink:0;margin-top:2px}
+.idea-stage.idea{background:rgba(56,189,248,.08);color:var(--blue2);border:1px solid rgba(56,189,248,.18)}
+.idea-stage.building{background:rgba(245,158,11,.08);color:var(--amber2);border:1px solid rgba(245,158,11,.18)}
+.idea-stage.launched{background:rgba(16,185,129,.08);color:var(--green2);border:1px solid rgba(16,185,129,.18)}
+.idea-desc{font-size:.76rem;color:var(--tx2);line-height:1.6;margin-bottom:10px}
+.idea-footer{display:flex;align-items:center;justify-content:space-between}
+.idea-author{display:flex;align-items:center;gap:7px;font-size:.7rem;color:var(--tx3)}
+.idea-actions{display:flex;gap:6px}
+.ico-btn{width:30px;height:30px;border-radius:8px;background:var(--s3);border:1px solid var(--rim);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;font-size:.75rem}
+.ico-btn:hover{border-color:var(--amber);background:rgba(245,158,11,.08)}
+
+/* ── FOCUS TIMER ──────────────────────────── */
+.timer-hero{
+  background:var(--s2);border:1px solid var(--rim);border-radius:20px;
+  padding:28px 20px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;
+}
+.timer-ring-wrap{position:relative;width:160px;height:160px;margin:0 auto 20px}
+.timer-ring{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--rim2);stroke-width:6}
+.ring-prog{fill:none;stroke:var(--amber);stroke-width:6;stroke-linecap:round;
+  stroke-dasharray:440;stroke-dashoffset:440;transition:stroke-dashoffset .5s ease}
+.timer-display{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.timer-num{font-family:var(--fD);font-size:2rem;font-weight:700;color:var(--tx);letter-spacing:-.5px}
+.timer-label{font-family:var(--fM);font-size:.6rem;color:var(--tx3);margin-top:3px;letter-spacing:1px;text-transform:uppercase}
+.timer-title{font-family:var(--fD);font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.timer-sub{font-size:.76rem;color:var(--tx2);margin-bottom:20px;line-height:1.6}
+.timer-modes{display:flex;gap:8px;justify-content:center;margin-bottom:18px}
+.t-mode{padding:7px 16px;border-radius:10px;border:1px solid var(--rim);background:none;
+  color:var(--tx3);font-family:var(--fD);font-size:.7rem;font-weight:600;cursor:pointer;transition:all .18s}
+.t-mode.on{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.08)}
+.timer-btns{display:flex;gap:10px;justify-content:center}
+
+/* ── WINS WALL ────────────────────────────── */
+.win-card{
+  background:var(--s1);border:1px solid var(--rim);border-radius:18px;
+  padding:18px;margin-bottom:10px;
+  border-left:3px solid var(--green);
+}
+.win-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.win-av{width:36px;height:36px;border-radius:10px;background:var(--s3);
+  display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.win-name{font-family:var(--fD);font-size:.8rem;font-weight:600;color:var(--tx)}
+.win-time{font-family:var(--fM);font-size:.6rem;color:var(--tx3);margin-top:1px}
+.win-text{font-size:.83rem;color:var(--tx2);line-height:1.65;margin-bottom:10px}
+.win-reactions{display:flex;gap:6px}
+.rxn-btn{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;
+  background:var(--s3);border:1px solid var(--rim);cursor:pointer;transition:all .18s;
+  font-size:.7rem;color:var(--tx3);font-weight:600;font-family:var(--fM)}
+.rxn-btn:hover,.rxn-btn.fired{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.07)}
+
+/* ── STREAK / STATS ───────────────────────── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat-card{background:var(--s2);border:1px solid var(--rim);border-radius:14px;padding:14px;text-align:center}
+.stat-v{font-family:var(--fD);font-size:1.5rem;font-weight:700;line-height:1}
+.stat-v.amber{color:var(--amber2)}
+.stat-v.green{color:var(--green2)}
+.stat-v.blue{color:var(--blue2)}
+.stat-l{font-family:var(--fM);font-size:.55rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;margin-top:4px}
+
+/* ── INPUTS ───────────────────────────────── */
+textarea,input[type=text],select{
+  width:100%;background:var(--s3);border:1.5px solid var(--rim);
+  border-radius:12px;color:var(--tx);padding:11px 14px;
+  font-size:.85rem;outline:none;transition:border-color .18s;
+  font-family:var(--fB);line-height:1.6;
+}
+textarea{resize:vertical;min-height:80px}
+textarea:focus,input:focus,select:focus{border-color:var(--amber)}
+textarea::placeholder,input::placeholder{color:var(--tx3)}
+.char-hint{text-align:right;font-family:var(--fM);font-size:.62rem;color:var(--tx3);margin-top:4px}
+label.field-label{display:block;font-family:var(--fD);font-size:.72rem;font-weight:600;
+  color:var(--tx3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+
+/* ── BUTTONS ──────────────────────────────── */
+.btn{padding:11px 22px;border:none;border-radius:12px;
+  font-family:var(--fD);font-size:.78rem;font-weight:700;cursor:pointer;
+  transition:all .18s;display:inline-flex;align-items:center;gap:6px;letter-spacing:.2px}
+.btn-amber{background:linear-gradient(135deg,var(--amber),#e07b00);color:#000;
+  box-shadow:0 4px 16px rgba(245,158,11,.25)}
+.btn-amber:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(245,158,11,.38)}
+.btn-amber:active{transform:scale(.97)}
+.btn-amber:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-ghost{background:none;color:var(--tx2);border:1px solid var(--rim)}
+.btn-ghost:hover{border-color:var(--rim2);color:var(--tx)}
+.btn-green{background:rgba(16,185,129,.1);color:var(--green2);border:1px solid rgba(16,185,129,.25)}
+.btn-green:hover{background:rgba(16,185,129,.18)}
+.btn-full{width:100%;justify-content:center}
+.btn-sm{padding:7px 13px;font-size:.7rem;border-radius:9px}
+
+/* ── OVERLAYS ─────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;
+  display:none;align-items:flex-end;justify-content:center;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.overlay.open{display:flex}
+.sheet{background:var(--s1);border-radius:24px 24px 0 0;width:100%;max-width:640px;
+  padding:20px;max-height:90dvh;overflow-y:auto;
+  border-top:1px solid var(--rim);animation:shUp .25s cubic-bezier(.4,0,.2,1)}
+@keyframes shUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sh-handle{width:36px;height:3px;background:var(--rim2);border-radius:2px;margin:0 auto 18px}
+.sh-title{font-family:var(--fD);font-size:1rem;font-weight:700;margin-bottom:16px;
+  display:flex;align-items:center;justify-content:space-between}
+.sh-close{background:var(--s3);border:1px solid var(--rim);border-radius:50%;
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--tx3);font-size:.75rem;transition:all .15s;flex-shrink:0}
+.sh-close:hover{color:var(--tx);border-color:var(--rim2)}
+
+/* ── ALERT / TOAST ────────────────────────── */
+.alert{padding:10px 13px;border-radius:10px;font-size:.78rem;font-weight:600;
+  line-height:1.55;display:none;margin-bottom:10px}
+.alert.ok{background:rgba(16,185,129,.07);color:var(--green2);border:1px solid rgba(16,185,129,.2);display:block}
+.alert.er{background:rgba(244,63,94,.07);color:#fb7185;border:1px solid rgba(244,63,94,.2);display:block}
+#toast{
+  position:fixed;bottom:calc(76px + var(--safe) + 10px);left:50%;
+  transform:translateX(-50%) translateY(8px);
+  background:var(--s3);border:1px solid var(--rim2);color:var(--tx);
+  padding:9px 20px;border-radius:50px;font-size:.78rem;font-weight:600;
+  z-index:9999;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,.6);
+  opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── MISC ─────────────────────────────────── */
+.divider{height:1px;background:var(--rim);margin:16px 0}
+.empty{text-align:center;padding:40px 20px;color:var(--tx3)}
+.empty-ico{font-size:2.5rem;display:block;margin-bottom:10px;opacity:.5}
+.empty-t{font-family:var(--fD);font-size:.9rem;font-weight:600;color:var(--tx2);margin-bottom:5px}
+.empty-s{font-size:.76rem;line-height:1.65}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(245,158,11,.15);
+  border-top-color:var(--amber);border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.section-title{font-family:var(--fD);font-size:.95rem;font-weight:700;color:var(--tx)}
+.see-all{font-family:var(--fM);font-size:.62rem;color:var(--amber2);cursor:pointer;
+  text-decoration:none;font-weight:500;letter-spacing:.3px}
+.progress-bar{height:6px;background:var(--rim);border-radius:3px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--amber),var(--green));
+  transition:width .8s cubic-bezier(.4,0,.2,1)}
+.online-dot{width:6px;height:6px;border-radius:50%;background:var(--green2);display:inline-block;
+  margin-right:4px;box-shadow:0 0 6px rgba(16,185,129,.6)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ── TOP BAR ─────────────────────────────── -->
+<div class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-mark">G</div>
+    <div>
+      <div class="logo-txt">Grow</div>
+      <div class="logo-sub">by Annomuss</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="xp-badge">⚡ <span id="xpCount">0</span> XP</div>
+    <div class="notif-btn">🔔</div>
+  </div>
+</div>
+
+<!-- ── PAGES ───────────────────────────────── -->
+<div id="pages">
+
+<!-- ══ PAGE: DISCOVER ══════════════════════ -->
+<div class="page on" id="pg-discover">
+  <div class="wrap">
+
+    <!-- Hero -->
+    <div style="padding:8px 0 20px">
+      <div class="hero-eyebrow">Your tribe is here</div>
+      <h1 class="hero-title">Find people<br/>building <span class="hl-green">real things</span></h1>
+      <p class="hero-sub">Not followers. Not likes. Actual collaborators, mentors, and co-founders who share your obsessions.</p>
+    </div>
+
+    <!-- Category filter -->
+    <div class="section-head">
+      <div class="section-title">Your Interests</div>
+      <span class="see-all" onclick="saveInterests()">Save →</span>
+    </div>
+    <div class="cat-grid" id="catGrid">
+      <!-- injected by JS -->
+    </div>
+
+    <div class="divider" style="margin:18px 0"></div>
+
+    <!-- Matched people -->
+    <div class="section-head">
+      <div class="section-title"><span class="online-dot"></span>Ambitious People Near You</div>
+      <span class="see-all" onclick="shufflePeople()">Shuffle ↻</span>
+    </div>
+    <div id="peopleList">
+      <div style="text-align:center;padding:20px;color:var(--tx3);font-size:.8rem">
+        Select interests above to find your people ↑
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ PAGE: LAUNCH PAD ════════════════════ -->
+<div class="page" id="pg-launch">
+  <div class="wrap">
+
+    <div class="launch-hero">
+      <div class="card-label">Launch Pad</div>
+      <div class="launch-title">Share what you're building</div>
+      <div class="launch-sub">Post your idea, project, startup, app, art, research — anything you're working on. Find collaborators. Get feedback. Make it real.</div>
+      <button class="btn btn-amber btn-sm" onclick="openLaunchSheet()">+ Post Your Idea</button>
+    </div>
+
+    <!-- Filter tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none">
+      <button class="btn btn-ghost btn-sm on-filter" data-f="all" onclick="filterIdeas('all',this)" style="border-color:var(--amber);color:var(--amber);flex-shrink:0">All</button>
+      <button class="btn btn-ghost btn-sm" data-f="idea" onclick="filterIdeas('idea',this)" style="flex-shrink:0">💡 Ideas</button>
+      <button class="btn btn-ghost btn-sm" data-f="building" onclick="filterIdeas('building',this)" style="flex-shrink:0">🔨 Building</button>
+      <button class="btn btn-ghost btn-sm" data-f="launched" onclick="filterIdeas('launched',this)" style="flex-shrink:0">🚀 Launched</button>
+      <button class="btn btn-ghost btn-sm" data-f="collab" onclick="filterIdeas('collab',this)" style="flex-shrink:0">🤝 Need Collab</button>
+    </div>
+
+    <div id="ideasList"></div>
+
+  </div>
+</div>
+
+<!-- ══ PAGE: FOCUS ══════════════════════════ -->
+<div class="page" id="pg-focus">
+  <div class="wrap">
+
+    <!-- Focus Timer -->
+    <div class="timer-hero">
+      <div class="card-label">Deep Work Timer</div>
+      <div class="timer-title">Enter Flow State</div>
+      <div class="timer-sub">Research shows 25-min focused sessions outperform 3-hour distracted ones. No notifications. Just you and your work.</div>
+
+      <div class="timer-modes">
+        <button class="t-mode on" data-mins="25" onclick="setMode(25,this)">25 min</button>
+        <button class="t-mode" data-mins="50" onclick="setMode(50,this)">50 min</button>
+        <button class="t-mode" data-mins="90" onclick="setMode(90,this)">90 min</button>
+      </div>
+
+      <div class="timer-ring-wrap">
+        <svg class="timer-ring" width="160" height="160" viewBox="0 0 160 160">
+          <circle class="ring-bg" cx="80" cy="80" r="70"/>
+          <circle class="ring-prog" id="ringProg" cx="80" cy="80" r="70"/>
+        </svg>
+        <div class="timer-display">
+          <div class="timer-num" id="timerNum">25:00</div>
+          <div class="timer-label" id="timerLbl">ready</div>
+        </div>
+      </div>
+
+      <div class="timer-btns">
+        <button class="btn btn-ghost btn-sm" onclick="resetTimer()">Reset</button>
+        <button class="btn btn-amber" id="timerStartBtn" onclick="toggleTimer()">▶ Start Focus</button>
+      </div>
+
+      <div style="margin-top:16px;font-family:var(--fM);font-size:.62rem;color:var(--tx3)">
+        Sessions completed today: <span id="sessionCount" style="color:var(--amber2);font-weight:700">0</span>
+      </div>
+    </div>
+
+    <!-- Today's intention -->
+    <div class="card">
+      <div class="card-label">Today's Intention</div>
+      <textarea id="intentionTxt" placeholder="What is the ONE thing you will accomplish today?..." maxlength="200" rows="3" oninput="countC(this,200,'intentLeft')"></textarea>
+      <div class="char-hint" id="intentLeft">200 left</div>
+      <button class="btn btn-amber btn-full" style="margin-top:12px" onclick="saveIntention()">Set Intention ✓</button>
+      <div id="intentAlert" class="alert" style="margin-top:8px"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="focusStats">
+      <div class="stat-card"><div class="stat-v amber" id="st-sessions">0</div><div class="stat-l">Sessions</div></div>
+      <div class="stat-card"><div class="stat-v green" id="st-streak">0</div><div class="stat-l">Day Streak</div></div>
+      <div class="stat-card"><div class="stat-v blue" id="st-mins">0</div><div class="stat-l">Mins Focused</div></div>
+    </div>
+
+    <!-- Focus quote -->
+    <div class="card" style="border-color:rgba(245,158,11,.18);background:rgba(245,158,11,.03)">
+      <div class="card-label">Today's Signal</div>
+      <div id="focusQuote" style="font-family:var(--fD);font-size:.95rem;line-height:1.6;color:var(--tx2)"></div>
+      <div id="focusQuoteBy" style="font-family:var(--fM);font-size:.6rem;color:var(--tx3);margin-top:8px"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ PAGE: WINS WALL ═══════════════════════ -->
+<div class="page" id="pg-wins">
+  <div class="wrap">
+
+    <div style="margin-bottom:18px">
+      <div class="hero-eyebrow">Public accountability</div>
+      <h2 style="font-family:var(--fD);font-size:1.4rem;font-weight:700;letter-spacing:-.3px;margin-bottom:6px">
+        The <span style="color:var(--green2)">Wins Wall</span>
+      </h2>
+      <p style="font-size:.78rem;color:var(--tx2);line-height:1.65">Post every win — big or small. Shipped a feature? Read 10 pages? Sent a cold email? It counts. Progress in public creates accountability.</p>
+    </div>
+
+    <button class="btn btn-green btn-full" style="margin-bottom:16px" onclick="openWinSheet()">
+      🏆 Post a Win
+    </button>
+
+    <div id="winsList"></div>
+
+  </div>
+</div>
+
+</div><!-- /pages -->
+
+<!-- ── BOTTOM NAV ──────────────────────────── -->
+<div class="nav">
+  <button class="ni on" data-pg="discover" onclick="goPage('discover')">
+    <span class="ni-ico">🔭</span><span class="ni-lbl">Discover</span><span class="ni-dot"></span>
+  </button>
+  <button class="ni" data-pg="launch" onclick="goPage('launch')">
+    <span class="ni-ico">🚀</span><span class="ni-lbl">Launch</span><span class="ni-dot"></span>
+  </button>
+  <button class="ni" data-pg="focus" onclick="goPage('focus')">
+    <span class="ni-ico">🎯</span><span class="ni-lbl">Focus</span><span class="ni-dot"></span>
+  </button>
+  <button class="ni" data-pg="wins" onclick="goPage('wins')">
+    <span class="ni-ico">🏆</span><span class="ni-lbl">Wins</span><span class="ni-dot"></span>
+  </button>
+  <button class="ni" onclick="location.href='dashboard.html'">
+    <span class="ni-ico">🎭</span><span class="ni-lbl">Home</span><span class="ni-dot"></span>
+  </button>
+</div>
+
+</div><!-- /app -->
+
+<!-- ── LAUNCH SHEET ─────────────────────────── -->
+<div class="overlay" id="launchOvl">
+  <div class="sheet" style="position:relative">
+    <div class="sh-handle"></div>
+    <div class="sh-title">
+      Post Your Idea
+      <div class="sh-close" onclick="closeLaunch()">✕</div>
+    </div>
+    <label class="field-label">What are you building?</label>
+    <input type="text" id="ideaTitle" placeholder="e.g. An app that helps students revise smarter" maxlength="80" style="margin-bottom:12px"/>
+    <label class="field-label">Tell us more</label>
+    <textarea id="ideaDesc" placeholder="The problem you're solving, where you are, what help you need..." maxlength="400" oninput="countC(this,400,'ideaLeft')" style="margin-bottom:4px"></textarea>
+    <div class="char-hint" id="ideaLeft">400 left</div>
+    <label class="field-label" style="margin-top:12px">Stage</label>
+    <select id="ideaStage" style="margin-bottom:12px">
+      <option value="idea">💡 Just an idea</option>
+      <option value="building">🔨 Actively building</option>
+      <option value="launched">🚀 Already launched</option>
+    </select>
+    <label class="field-label">Looking for (select all that apply)</label>
+    <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px" id="needGrid">
+      <span class="need-tag" data-v="co-founder" onclick="toggleNeed(this)">🤝 Co-founder</span>
+      <span class="need-tag" data-v="developer" onclick="toggleNeed(this)">💻 Developer</span>
+      <span class="need-tag" data-v="designer" onclick="toggleNeed(this)">🎨 Designer</span>
+      <span class="need-tag" data-v="mentor" onclick="toggleNeed(this)">🧠 Mentor</span>
+      <span class="need-tag" data-v="feedback" onclick="toggleNeed(this)">💬 Feedback</span>
+      <span class="need-tag" data-v="investor" onclick="toggleNeed(this)">💰 Investor</span>
+      <span class="need-tag" data-v="marketer" onclick="toggleNeed(this)">📣 Marketer</span>
+      <span class="need-tag" data-v="nothing" onclick="toggleNeed(this)">✋ Just sharing</span>
+    </div>
+    <style>.need-tag{padding:6px 12px;border-radius:9px;background:var(--s3);border:1.5px solid var(--rim);color:var(--tx2);font-size:.72rem;font-weight:600;cursor:pointer;transition:all .18s;user-select:none}
+    .need-tag.on{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.08)}</style>
+    <div class="alert" id="launchAlert"></div>
+    <button class="btn btn-amber btn-full" onclick="submitIdea()" id="launchBtn">🚀 Post It</button>
+  </div>
+</div>
+
+<!-- ── WIN SHEET ────────────────────────────── -->
+<div class="overlay" id="winOvl">
+  <div class="sheet" style="position:relative">
+    <div class="sh-handle"></div>
+    <div class="sh-title">
+      Post a Win 🏆
+      <div class="sh-close" onclick="closeWin()">✕</div>
+    </div>
+    <label class="field-label">What did you accomplish?</label>
+    <textarea id="winTxt" placeholder="e.g. Finished the login page for my app after 3 days of debugging. Small win but it matters." maxlength="300" oninput="countC(this,300,'winLeft')" style="margin-bottom:4px"></textarea>
+    <div class="char-hint" id="winLeft">300 left</div>
+    <label class="field-label" style="margin-top:12px">Category</label>
+    <select id="winCat" style="margin-bottom:14px">
+      <option value="tech">💻 Tech / Code</option>
+      <option value="creative">🎨 Creative / Art</option>
+      <option value="learning">📚 Learning / Study</option>
+      <option value="fitness">💪 Fitness / Health</option>
+      <option value="business">💼 Business / Career</option>
+      <option value="personal">🌱 Personal Growth</option>
+      <option value="social">🤝 Social / Relationships</option>
+    </select>
+    <div class="alert" id="winAlert"></div>
+    <button class="btn btn-green btn-full" onclick="submitWin()" id="winBtn">Post Win 🏆</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+const API = "https://annomuss-backend-icgp.onrender.com";
+const token = localStorage.getItem("token");
+let user = null;
+try { user = JSON.parse(localStorage.getItem("user")||"null"); } catch(e) {}
+
+// ── CATEGORIES ──────────────────────────────
+const CATEGORIES = [
+  { id:"tech",       ico:"💻", name:"Tech & Dev",    count:"2.1k" },
+  { id:"startup",    ico:"🚀", name:"Startups",       count:"890"  },
+  { id:"design",     ico:"🎨", name:"Design & UI",    count:"1.3k" },
+  { id:"science",    ico:"🔬", name:"Science",        count:"760"  },
+  { id:"writing",    ico:"✍️", name:"Writing",        count:"540"  },
+  { id:"music",      ico:"🎵", name:"Music & Audio",  count:"430"  },
+  { id:"finance",    ico:"📈", name:"Finance",        count:"1.1k" },
+  { id:"health",     ico:"💪", name:"Health & Fit",   count:"870"  },
+  { id:"ai",         ico:"🤖", name:"AI & ML",        count:"1.8k" },
+  { id:"social",     ico:"🌍", name:"Social Impact",  count:"650"  },
+  { id:"gaming",     ico:"🎮", name:"Gaming",         count:"980"  },
+  { id:"education",  ico:"📚", name:"Education",      count:"720"  },
+];
+
+// Mock ambitious people data
+const PEOPLE_POOL = [
+  { name:"NightCoder_X",  emoji:"💻", bio:"Building an AI study assistant for IIT aspirants. 3rd year CSE. Looking for a co-founder who can do product.", tags:["AI","EdTech","Python"],  tagColor:["","green",""] },
+  { name:"DesignFreak22", emoji:"🎨", bio:"Self-taught UI designer. Made 4 apps that failed. Working on #5. Obsessed with micro-interactions.", tags:["Design","Mobile","Figma"], tagColor:["blue","",""] },
+  { name:"GreenMindset",  emoji:"🌱", bio:"Dropped engineering to start a sustainable packaging startup. Need tech partner urgently.", tags:["Sustainability","Startup","🔨"], tagColor:["green","",""] },
+  { name:"MusicAlgo",     emoji:"🎵", bio:"Music composer + programmer. Making generative music AI. Currently at 200 GitHub stars.", tags:["Music","AI","OSS"],    tagColor:["","green","blue"] },
+  { name:"BookWorm404",   emoji:"📚", bio:"Reading 52 books this year. Writing summaries + building a note-taking system. Always share what I learn.", tags:["Writing","Learning","PKM"], tagColor:["","blue",""] },
+  { name:"HardwareHero",  emoji:"🔧", bio:"18, building custom mechanical keyboards. Sold 30 units. Trying to scale. Need marketing help.", tags:["Hardware","Business","DIY"], tagColor:["","","blue"] },
+  { name:"DataNerd_99",   emoji:"📊", bio:"Data science student. Built a sports prediction model that's 71% accurate. Looking for feedbacks.", tags:["Data","Sports","ML"],  tagColor:["blue","","green"] },
+  { name:"SleepLess_",    emoji:"🌙", bio:"Night owl developer. Shipped 3 Chrome extensions. One has 4k users. Building in public.", tags:["Extensions","Indie","Build"], tagColor:["","green",""] },
+  { name:"FilmMaker07",   emoji:"🎬", bio:"Making short films on social issues. 10k views on YouTube. Looking for scriptwriters and editors.", tags:["Film","Creative","Social"], tagColor:["blue","","green"] },
+  { name:"ZeroToVC",      emoji:"💰", bio:"Studying how startups get funded. Taking notes, sharing what I learn. Pre-MBA gap year.", tags:["Finance","Startups","Research"], tagColor:["","","blue"] },
+  { name:"FitnessCoder",  emoji:"💪", bio:"Personal trainer who codes. Building a workout app that actually understands progressive overload.", tags:["Health","Tech","App"],  tagColor:["green","",""] },
+  { name:"OpenSource_",   emoji:"🔓", bio:"Contributing to open source full-time while studying. 47 PRs merged this year. Ask me anything.", tags:["OSS","Community","Git"], tagColor:["","blue",""] },
+];
+
+let selectedCats = new Set(JSON.parse(localStorage.getItem("grow_cats")||"[]"));
+let allIdeas = [];
+let allWins  = [];
+
+// ── INIT ─────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  renderCats();
+  renderPeople();
+  renderFocusStats();
+  renderFocusQuote();
+  renderIdeas();
+  renderWins();
+  loadXP();
+});
+
+// ── NAVIGATION ───────────────────────────────
+function goPage(name) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("on"));
+  document.querySelectorAll(".ni").forEach(n => n.classList.remove("on"));
+  document.getElementById(`pg-${name}`)?.classList.add("on");
+  document.querySelector(`[data-pg="${name}"]`)?.classList.add("on");
+  document.getElementById("pages").scrollTo(0, 0);
+  if (name === "launch") renderIdeas();
+  if (name === "wins")   renderWins();
+  if (name === "focus")  renderFocusStats();
+}
+
+// ── CATEGORIES ───────────────────────────────
+function renderCats() {
+  document.getElementById("catGrid").innerHTML = CATEGORIES.map(c => `
+    <div class="cat-card ${selectedCats.has(c.id)?"sel":""}" onclick="toggleCat('${c.id}',this)" data-id="${c.id}">
+      <div class="cat-check">✓</div>
+      <span class="cat-ico">${c.ico}</span>
+      <div class="cat-name">${c.name}</div>
+      <div class="cat-count">${c.count} members</div>
+    </div>`).join("");
+}
+
+function toggleCat(id, el) {
+  if (selectedCats.has(id)) selectedCats.delete(id);
+  else selectedCats.add(id);
+  el.classList.toggle("sel", selectedCats.has(id));
+  el.querySelector(".cat-check").style.opacity = selectedCats.has(id) ? "1" : "0";
+  el.querySelector(".cat-check").style.transform = selectedCats.has(id) ? "scale(1)" : "scale(0)";
+  renderPeople();
+}
+
+function saveInterests() {
+  localStorage.setItem("grow_cats", JSON.stringify([...selectedCats]));
+  toast("Interests saved ✓");
+  gainXP(5);
+}
+
+// ── PEOPLE ───────────────────────────────────
+function renderPeople() {
+  const el = document.getElementById("peopleList");
+  if (selectedCats.size === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--tx3);font-size:.8rem">Select interests above to find your people ↑</div>`;
+    return;
+  }
+
+  // Filter by interests — in real app this hits the API
+  // For now show all people with matching tags highlighted
+  const shown = shuffleArr([...PEOPLE_POOL]).slice(0, 8);
+  el.innerHTML = shown.map(p => `
+    <div class="person-card">
+      <div class="person-av">${p.emoji}</div>
+      <div class="person-info">
+        <div class="person-name">${p.name}</div>
+        <div class="person-bio">${esc(p.bio)}</div>
+        <div class="person-tags">
+          ${p.tags.map((t,i) => `<span class="tag ${p.tagColor[i]||""}">${t}</span>`).join("")}
+        </div>
+      </div>
+      <button class="person-connect" onclick="connectPerson(this,'${p.name}')">Connect</button>
+    </div>`).join("");
+}
+
+function shufflePeople() {
+  renderPeople();
+  toast("Found new people for you 🔭");
+}
+
+function connectPerson(btn, name) {
+  if (btn.classList.contains("connected")) return;
+  btn.classList.add("connected");
+  btn.textContent = "✓ Connected";
+  toast(`Connection request sent to ${name}`);
+  gainXP(10);
+  // In production: apiFetch("/api/users/friends/request", {method:"POST", body:JSON.stringify({anonymousName:name})})
+}
+
+// ── LAUNCH PAD ───────────────────────────────
+// Seed with demo ideas
+const DEMO_IDEAS = [
+  { id:"d1", title:"AI-powered revision planner for JEE/NEET", desc:"Takes your weak topics from mock tests and auto-creates a study schedule. Currently building the ML model.", stage:"building", author:"NightCoder_X", emoji:"💻", needs:["co-founder","feedback"], reactions:{fire:34,collab:12,love:8} },
+  { id:"d2", title:"Hyperlocal job board for college students", desc:"LinkedIn is for professionals. This is for students who want part-time gigs, internships, and campus projects.", stage:"idea", author:"ZeroToVC", emoji:"💰", needs:["developer","designer"], reactions:{fire:67,collab:28,love:15} },
+  { id:"d3", title:"Open source mechanical keyboard firmware", desc:"MIT licensed. 200 GitHub stars. Used by 40+ people globally. Looking for contributors who know embedded C.", stage:"launched", author:"HardwareHero", emoji:"🔧", needs:["nothing"], reactions:{fire:120,collab:5,love:44} },
+  { id:"d4", title:"Sustainable packaging marketplace for D2C brands", desc:"Connecting eco-packaging manufacturers directly to small D2C brands. Eliminates the middleman.", stage:"building", author:"GreenMindset", emoji:"🌱", needs:["developer","investor"], reactions:{fire:89,collab:33,love:21} },
+];
+
+function renderIdeas(filter = "all") {
+  allIdeas = DEMO_IDEAS;
+  const el = document.getElementById("ideasList");
+  let filtered = filter === "all" ? allIdeas :
+                 filter === "collab" ? allIdeas.filter(i => !i.needs.includes("nothing")) :
+                 allIdeas.filter(i => i.stage === filter);
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty"><span class="empty-ico">🚀</span><div class="empty-t">No posts in this category yet</div><div class="empty-s">Be the first to post here</div></div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(idea => `
+    <div class="idea-card" id="idea-${idea.id}">
+      <div class="idea-head">
+        <div class="idea-title">${esc(idea.title)}</div>
+        <span class="idea-stage ${idea.stage}">${{idea:"💡 Idea",building:"🔨 Building",launched:"🚀 Live"}[idea.stage]}</span>
+      </div>
+      <div class="idea-desc">${esc(idea.desc)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
+        ${idea.needs.map(n => n==="nothing"?"": `<span class="tag">${n}</span>`).join("")}
+      </div>
+      <div class="idea-footer">
+        <div class="idea-author">
+          <span style="font-size:.85rem">${idea.emoji}</span>
+          <span style="color:var(--amber2);font-weight:700">${idea.author}</span>
+        </div>
+        <div class="idea-actions">
+          <div class="ico-btn" onclick="reactIdea('${idea.id}','fire',this)" title="🔥 Fire">🔥<span style="font-size:.6rem;margin-left:2px">${idea.reactions.fire}</span></div>
+          <div class="ico-btn" onclick="reactIdea('${idea.id}','collab',this)" title="🤝 Want to Collab">🤝<span style="font-size:.6rem;margin-left:2px">${idea.reactions.collab}</span></div>
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+function filterIdeas(f, btn) {
+  document.querySelectorAll(".on-filter").forEach(b => {
+    b.classList.remove("on-filter");
+    b.style.borderColor = ""; b.style.color = "";
+  });
+  btn.classList.add("on-filter");
+  btn.style.borderColor = "var(--amber)"; btn.style.color = "var(--amber)";
+  renderIdeas(f);
+}
+
+function reactIdea(id, type, btn) {
+  btn.style.borderColor = "var(--amber)";
+  btn.style.color = "var(--amber)";
+  btn.style.background = "rgba(245,158,11,.08)";
+  gainXP(2);
+}
+
+function openLaunchSheet()  { document.getElementById("launchOvl").classList.add("open"); }
+function closeLaunch()      { document.getElementById("launchOvl").classList.remove("open"); }
+
+function toggleNeed(el) { el.classList.toggle("on"); }
+
+function submitIdea() {
+  const title = document.getElementById("ideaTitle").value.trim();
+  const desc  = document.getElementById("ideaDesc").value.trim();
+  if (!title) return al("launchAlert","Give your idea a title ↑","er");
+  if (!desc)  return al("launchAlert","Tell us a bit more about it ↑","er");
+  const needs = [...document.querySelectorAll(".need-tag.on")].map(el => el.dataset.v);
+  const newIdea = {
+    id: "u" + Date.now(),
+    title, desc,
+    stage: document.getElementById("ideaStage").value,
+    author: user?.anonymousName || "Anonymous",
+    emoji: "🎯",
+    needs: needs.length ? needs : ["nothing"],
+    reactions: {fire:0, collab:0, love:0}
+  };
+  DEMO_IDEAS.unshift(newIdea);
+  closeLaunch();
+  renderIdeas();
+  toast("🚀 Your idea is live!");
+  gainXP(25);
+  document.getElementById("ideaTitle").value = "";
+  document.getElementById("ideaDesc").value  = "";
+  document.querySelectorAll(".need-tag.on").forEach(el => el.classList.remove("on"));
+}
+
+// ── FOCUS TIMER ──────────────────────────────
+let timerMins = 25, timerSecs = 0, timerTotal = 25*60;
+let timerRunning = false, timerInterval = null;
+let sessionsDone = parseInt(localStorage.getItem("grow_sessions")||"0");
+let totalMinsFocused = parseInt(localStorage.getItem("grow_mins")||"0");
+
+const QUOTES = [
+  { q:"The secret of getting ahead is getting started.", by:"— Mark Twain" },
+  { q:"You don't have to be great to start, but you have to start to be great.", by:"— Zig Ziglar" },
+  { q:"An hour of focused work beats a day of scattered effort.", by:"— Cal Newport (paraphrased)" },
+  { q:"Comparison is the thief of joy. Build your own thing.", by:"— Theodore Roosevelt (adapted)" },
+  { q:"The people who are crazy enough to think they can change the world, are the ones who do.", by:"— Steve Jobs" },
+  { q:"Your network is your net worth. But only if the network is ambitious.", by:"— Annomuss Grow" },
+  { q:"Social media is a slot machine. Deep work is a forge.", by:"— Annomuss Grow" },
+  { q:"The best time to start was yesterday. The second best time is now.", by:"— Ancient proverb" },
+  { q:"Small consistent actions compound into unreasonable results.", by:"— James Clear (adapted)" },
+  { q:"Every expert was once a beginner who didn't quit.", by:"— Annomuss Grow" },
+];
+
+function renderFocusQuote() {
+  const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  document.getElementById("focusQuote").textContent = `"${q.q}"`;
+  document.getElementById("focusQuoteBy").textContent = q.by;
+}
+
+function setMode(mins, btn) {
+  document.querySelectorAll(".t-mode").forEach(b => b.classList.remove("on"));
+  btn.classList.add("on");
+  timerMins = mins; timerSecs = 0; timerTotal = mins * 60;
+  resetTimer();
+}
+
+function toggleTimer() {
+  if (timerRunning) pauseTimer();
+  else startTimer();
+}
+
+function startTimer() {
+  if (timerMins === 0 && timerSecs === 0) resetTimer();
+  timerRunning = true;
+  document.getElementById("timerStartBtn").textContent = "⏸ Pause";
+  document.getElementById("timerLbl").textContent = "focusing…";
+  timerInterval = setInterval(() => {
+    if (timerSecs === 0) {
+      if (timerMins === 0) { completeSession(); return; }
+      timerMins--; timerSecs = 59;
+    } else { timerSecs--; }
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function pauseTimer() {
+  timerRunning = false;
+  clearInterval(timerInterval);
+  document.getElementById("timerStartBtn").textContent = "▶ Resume";
+  document.getElementById("timerLbl").textContent = "paused";
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  const mode = document.querySelector(".t-mode.on");
+  const m = mode ? parseInt(mode.dataset.mins) : 25;
+  timerMins = m; timerSecs = 0; timerTotal = m * 60;
+  document.getElementById("timerStartBtn").textContent = "▶ Start Focus";
+  document.getElementById("timerLbl").textContent = "ready";
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const mm = String(timerMins).padStart(2,"0");
+  const ss = String(timerSecs).padStart(2,"0");
+  document.getElementById("timerNum").textContent = `${mm}:${ss}`;
+  const elapsed = timerTotal - (timerMins*60 + timerSecs);
+  const pct = elapsed / timerTotal;
+  const circumference = 2 * Math.PI * 70; // r=70
+  const offset = circumference * (1 - pct);
+  document.getElementById("ringProg").style.strokeDashoffset = offset;
+  document.getElementById("ringProg").style.strokeDasharray = circumference;
+}
+
+function completeSession() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  sessionsDone++;
+  const modeEl = document.querySelector(".t-mode.on");
+  const sessionMins = modeEl ? parseInt(modeEl.dataset.mins) : 25;
+  totalMinsFocused += sessionMins;
+  localStorage.setItem("grow_sessions", sessionsDone);
+  localStorage.setItem("grow_mins", totalMinsFocused);
+  document.getElementById("timerNum").textContent = "✓";
+  document.getElementById("timerLbl").textContent = "session done!";
+  document.getElementById("timerStartBtn").textContent = "▶ Start Focus";
+  timerRunning = false;
+  gainXP(15);
+  renderFocusStats();
+  toast(`🎯 Session complete! +15 XP`);
+  if (Notification.permission === "granted") {
+    new Notification("Focus session done! 🎯", { body:"Take a 5 min break, then go again.", icon:"/icons/icon-192.png" });
+  }
+  setTimeout(() => resetTimer(), 2000);
+}
+
+function renderFocusStats() {
+  sessionsDone = parseInt(localStorage.getItem("grow_sessions")||"0");
+  totalMinsFocused = parseInt(localStorage.getItem("grow_mins")||"0");
+  document.getElementById("st-sessions").textContent = sessionsDone;
+  document.getElementById("st-streak").textContent = parseInt(localStorage.getItem("grow_streak")||"0");
+  document.getElementById("st-mins").textContent = totalMinsFocused;
+  document.getElementById("sessionCount").textContent = sessionsDone;
+}
+
+function saveIntention() {
+  const txt = document.getElementById("intentionTxt").value.trim();
+  if (!txt) return al("intentAlert","Write your intention first ↑","er");
+  localStorage.setItem("grow_intention", txt);
+  localStorage.setItem("grow_intention_date", new Date().toDateString());
+  al("intentAlert","Intention set. Now go make it happen. ✓","ok");
+  gainXP(5);
+}
+
+// ── WINS WALL ────────────────────────────────
+const DEMO_WINS = [
+  { id:"w1", author:"NightCoder_X",  emoji:"💻", cat:"tech",     text:"Finally fixed the auth bug that's been haunting me for 2 weeks. The issue was a missing await. 2 weeks for one missing keyword. I love programming.", time:"2h ago",   reactions:{fire:23,hands:14} },
+  { id:"w2", author:"BookWorm404",   emoji:"📚", cat:"learning", text:"Finished book 14 of 52. 'Atomic Habits' by James Clear. The 1% rule has completely changed how I approach building habits. Take notes, people.", time:"5h ago",   reactions:{fire:41,hands:30} },
+  { id:"w3", author:"GreenMindset",  emoji:"🌱", cat:"business", text:"First paying customer for our eco-packaging service. ₹4,000. It's not much but it's REAL. Someone gave us money. We are a business now.", time:"1d ago",   reactions:{fire:89,hands:67} },
+  { id:"w4", author:"FitnessCoder",  emoji:"💪", cat:"fitness",  text:"Hit 100kg deadlift for the first time. 18 months of consistent training. Small human numbers but personal record. Consistency beats motivation.", time:"2d ago",   reactions:{fire:56,hands:42} },
+  { id:"w5", author:"FilmMaker07",   emoji:"🎬", cat:"creative", text:"My short film on water scarcity hit 10k views on YouTube. Made with ₹800 and a borrowed phone. Budget doesn't determine impact.", time:"3d ago",   reactions:{fire:134,hands:98} },
+];
+
+function renderWins() {
+  const el = document.getElementById("winsList");
+  el.innerHTML = DEMO_WINS.map(w => `
+    <div class="win-card">
+      <div class="win-head">
+        <div class="win-av">${w.emoji}</div>
+        <div>
+          <div class="win-name">${w.author}</div>
+          <div class="win-time">${w.time}</div>
+        </div>
+        <span class="tag ${w.cat==="tech"?"blue":w.cat==="learning"?"":"green"}" style="margin-left:auto">${w.cat}</span>
+      </div>
+      <div class="win-text">${esc(w.text)}</div>
+      <div class="win-reactions">
+        <div class="rxn-btn" onclick="this.classList.toggle('fired');gainXP(1)">🔥 <span>${w.reactions.fire}</span></div>
+        <div class="rxn-btn" onclick="this.classList.toggle('fired');gainXP(1)">🙌 <span>${w.reactions.hands}</span></div>
+        <div class="rxn-btn" onclick="this.classList.toggle('fired');gainXP(1)">💜 Felt this</div>
+      </div>
+    </div>`).join("");
+}
+
+function openWinSheet() { document.getElementById("winOvl").classList.add("open"); }
+function closeWin()     { document.getElementById("winOvl").classList.remove("open"); }
+
+function submitWin() {
+  const txt = document.getElementById("winTxt").value.trim();
+  if (!txt) return al("winAlert","What did you accomplish? ↑","er");
+  DEMO_WINS.unshift({
+    id:"u"+Date.now(),
+    author: user?.anonymousName || "Anonymous",
+    emoji:"🏆", cat: document.getElementById("winCat").value,
+    text: txt, time:"just now",
+    reactions:{fire:0,hands:0}
+  });
+  closeWin();
+  renderWins();
+  toast("🏆 Win posted! Keep building!");
+  gainXP(10);
+  document.getElementById("winTxt").value="";
+}
+
+// ── XP ────────────────────────────────────────
+function loadXP() {
+  const xp = parseInt(localStorage.getItem("ann_xp")||"0");
+  document.getElementById("xpCount").textContent = xp;
+}
+function gainXP(n) {
+  let xp = parseInt(localStorage.getItem("ann_xp")||"0") + n;
+  localStorage.setItem("ann_xp", xp);
+  document.getElementById("xpCount").textContent = xp;
+}
+
+// ── HELPERS ───────────────────────────────────
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function al(id,msg,type){const e=document.getElementById(id);e.textContent=msg;e.className="alert "+type;setTimeout(()=>{e.className="alert"},4000);}
+function countC(el,max,id){document.getElementById(id).textContent=(max-el.value.length)+" left";}
+function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+let toastTmr;
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTmr);toastTmr=setTimeout(()=>t.classList.remove("show"),3200);}
+</script>
+
+<!-- PWA -->
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("/sw.js").catch(()=>{});})}
+</script>
+</body>
+</html>

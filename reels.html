@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reels 🎬</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0d0d1a; color: #fff; min-height: 100vh; }
+    nav { background: #1a1a2e; padding: 14px 20px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #2a2a40; }
+    nav a { color: #8a7cff; text-decoration: none; font-size: 0.9rem; }
+    nav h2 { flex: 1; font-size: 1.1rem; }
+    .main { padding: 16px; max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #8a7cff; color: #fff; }
+    .btn-primary:hover { background: #7a6cf0; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .card { background: #1a1a2e; border-radius: 14px; padding: 18px; margin-bottom: 14px; border: 1px solid #2a2a40; }
+    .reel-card { background: #1a1a2e; border-radius: 14px; padding: 16px; margin-bottom: 14px; border: 1px solid #2a2a40; }
+    .reel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .reel-user { color: #8a7cff; font-weight: 600; font-size: 0.9rem; }
+    .reel-emotion { background: rgba(138,124,255,0.1); color: #8a7cff; border-radius: 20px; padding: 2px 10px; font-size: 0.78rem; }
+    .reel-caption { color: #ddd; margin: 8px 0; font-size: 0.9rem; line-height: 1.5; }
+    .reel-media { border-radius: 10px; overflow: hidden; margin: 10px 0; }
+    .reel-media video { width: 100%; max-height: 280px; object-fit: cover; }
+    .reel-media audio { width: 100%; }
+    .reactions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .reaction-btn { background: #0d0d1a; border: 1.5px solid #333; border-radius: 20px; padding: 5px 12px; cursor: pointer; color: #aaa; font-size: 0.82rem; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
+    .reaction-btn:hover, .reaction-btn.reacted { border-color: #8a7cff; background: rgba(138,124,255,0.1); color: #8a7cff; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 16px; }
+    .tab-btn { flex: 1; padding: 10px; background: #1a1a2e; border: 1.5px solid #333; border-radius: 10px; color: #aaa; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+    .tab-btn.active { border-color: #8a7cff; color: #8a7cff; background: rgba(138,124,255,0.08); }
+    .msg { padding: 10px 14px; border-radius: 8px; margin: 10px 0; font-size: 0.88rem; display: none; }
+    .msg.success { background: rgba(72,199,142,0.12); color: #48c78e; border: 1px solid rgba(72,199,142,0.3); }
+    .msg.error { background: rgba(255,99,99,0.12); color: #ff6363; border: 1px solid rgba(255,99,99,0.3); }
+    .spinner { text-align: center; padding: 40px; color: #555; }
+    select, textarea { width: 100%; background: #0d0d1a; border: 1.5px solid #333; border-radius: 10px; color: #fff; padding: 10px 14px; font-size: 0.9rem; outline: none; margin-bottom: 12px; font-family: inherit; }
+    select:focus, textarea:focus { border-color: #8a7cff; }
+    textarea { resize: vertical; min-height: 70px; }
+    .file-label { display: block; background: #0d0d1a; border: 1.5px dashed #444; border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; color: #888; margin-bottom: 12px; }
+    .file-label:hover { border-color: #8a7cff; }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="dashboard.html">← Back</a>
+  <h2>🎬 Reels</h2>
+</nav>
+
+<div class="main">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('feed', this)">Feed</button>
+    <button class="tab-btn" onclick="switchTab('create', this)">+ Create</button>
+    <button class="tab-btn" onclick="switchTab('mine', this)">My Reels</button>
+  </div>
+
+  <!-- Feed -->
+  <div id="tabFeed">
+    <div id="reelsFeed"><div class="spinner">Loading reels...</div></div>
+  </div>
+
+  <!-- Create -->
+  <div id="tabCreate" style="display:none">
+    <div class="card">
+      <h3 style="margin-bottom:14px">Create a Reel</h3>
+      <select id="createType">
+        <option value="avatar">🧑 Avatar Reel</option>
+        <option value="voice">🎙️ Voice Reel</option>
+        <option value="text_to_reel">✍️ Text to Reel</option>
+      </select>
+      <select id="createEmotion">
+        <option value="">Select emotion *</option>
+        <option value="happy">😊 Happy</option>
+        <option value="sad">😢 Sad</option>
+        <option value="anxious">😰 Anxious</option>
+        <option value="angry">😠 Angry</option>
+        <option value="lonely">🌑 Lonely</option>
+        <option value="excited">🤩 Excited</option>
+        <option value="numb">😶 Numb</option>
+        <option value="grateful">🙏 Grateful</option>
+        <option value="overwhelmed">🌊 Overwhelmed</option>
+        <option value="hopeful">🌱 Hopeful</option>
+        <option value="heartbroken">💔 Heartbroken</option>
+        <option value="funny">😂 Funny</option>
+        <option value="calm">🧘 Calm</option>
+      </select>
+      <textarea id="createCaption" placeholder="Your caption... (max 300 chars)" maxlength="300"></textarea>
+      <label class="file-label" for="reelMedia">🎬 Upload video or audio (optional)</label>
+      <input type="file" id="reelMedia" accept="video/*,audio/*" style="display:none"/>
+      <div id="createMsg" class="msg"></div>
+      <button class="btn btn-primary" style="width:100%" id="createReelBtn" onclick="createReel()">Create Reel ✅</button>
+    </div>
+  </div>
+
+  <!-- My Reels -->
+  <div id="tabMine" style="display:none">
+    <div id="myReelsList"><div class="spinner">Loading...</div></div>
+  </div>
+</div>
+
+<script>
+  const API = "https://annomuss-backend-icgp.onrender.com"; // Change to your backend URL
+  const token = localStorage.getItem("token");
+  let user = null;
+
+  try { user = JSON.parse(localStorage.getItem("user") || "null"); } catch (e) { user = null; }
+
+  if (!token || !user) { window.location.href = "index.html"; }
+
+  const REACTIONS = [
+    { key: "felt_this", label: "😮 Felt this" },
+    { key: "not_alone", label: "🤝 Not alone" },
+    { key: "same_here", label: "💙 Same here" },
+    { key: "sending_strength", label: "💪 Sending strength" },
+    { key: "tell_more", label: "💬 Tell more" }
+  ];
+
+  document.addEventListener("DOMContentLoaded", loadFeed);
+
+  function switchTab(name, btn) {
+    document.getElementById("tabFeed").style.display   = name === "feed"   ? "block" : "none";
+    document.getElementById("tabCreate").style.display = name === "create" ? "block" : "none";
+    document.getElementById("tabMine").style.display   = name === "mine"   ? "block" : "none";
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    if (name === "mine") loadMyReels();
+  }
+
+  async function loadFeed() {
+    try {
+      const res = await apiFetch("/api/reels");
+      const reels = await res.json();
+      const el = document.getElementById("reelsFeed");
+      if (!Array.isArray(reels) || !reels.length) {
+        el.innerHTML = '<div class="spinner">No reels yet 🎬</div>'; return;
+      }
+      el.innerHTML = reels.map(renderReel).join("");
+    } catch (e) {
+      document.getElementById("reelsFeed").innerHTML = '<div class="spinner">Failed to load reels ❌</div>';
+    }
+  }
+
+  async function loadMyReels() {
+    try {
+      const res = await apiFetch("/api/reels/my");
+      const reels = await res.json();
+      const el = document.getElementById("myReelsList");
+      if (!Array.isArray(reels) || !reels.length) {
+        el.innerHTML = '<div class="spinner">You have no reels yet 🎬</div>'; return;
+      }
+      el.innerHTML = reels.map(r => renderReel(r, true)).join("");
+    } catch (e) {}
+  }
+
+  function renderReel(r, showDelete = false) {
+    const myName = user?.anonymousName || "";
+    const media = r.mediaUrl
+      ? r.mediaType === "video"
+        ? `<div class="reel-media"><video src="${escHtml(r.mediaUrl)}" controls></video></div>`
+        : `<div class="reel-media"><audio src="${escHtml(r.mediaUrl)}" controls></audio></div>`
+      : "";
+
+    const reactionBtns = REACTIONS.map(rx => {
+      const arr = r[rx.key] || [];
+      const reacted = arr.includes(myName);
+      return `<button class="reaction-btn ${reacted ? "reacted" : ""}"
+        id="rxbtn-${r._id}-${rx.key}"
+        onclick="reactReel('${r._id}', '${rx.key}')">
+        ${rx.label} <span id="rxtotal-${r._id}-${rx.key}">${arr.length}</span>
+      </button>`;
+    }).join("");
+
+    const deleteBtn = showDelete
+      ? `<button style="background:none;border:none;color:#ff6363;cursor:pointer;font-size:0.8rem" onclick="deleteReel('${r._id}')">🗑 Delete</button>`
+      : "";
+
+    return `
+      <div class="reel-card" id="reel-${r._id}">
+        <div class="reel-header">
+          <span class="reel-user">🎭 ${escHtml(r.anonymousName || "")}</span>
+          <span class="reel-emotion">${escHtml(r.emotion || "")}</span>
+        </div>
+        ${r.caption ? `<div class="reel-caption">${escHtml(r.caption)}</div>` : ""}
+        ${media}
+        <div class="reactions">${reactionBtns}</div>
+        <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+          <span style="color:#555;font-size:0.8rem">👁 ${(r.views || []).length}</span>
+          ${deleteBtn}
+        </div>
+      </div>`;
+  }
+
+  async function reactReel(reelId, reaction) {
+    try {
+      const res = await apiFetch(`/api/reels/${reelId}/react`, {
+        method: "POST", body: JSON.stringify({ reaction })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      // Update all reaction totals from response
+      if (data.totals) {
+        for (const [key, count] of Object.entries(data.totals)) {
+          const totalEl = document.getElementById(`rxtotal-${reelId}-${key}`);
+          if (totalEl) totalEl.textContent = count;
+          const btn = document.getElementById(`rxbtn-${reelId}-${key}`);
+          if (btn) btn.classList.toggle("reacted", key === reaction && data.reacted);
+        }
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  async function createReel() {
+    const emotion = document.getElementById("createEmotion").value;
+    const type    = document.getElementById("createType").value;
+    const caption = document.getElementById("createCaption").value.trim();
+    const file    = document.getElementById("reelMedia").files[0];
+    const btn     = document.getElementById("createReelBtn");
+
+    if (!emotion) return showMsg("createMsg", "Please select an emotion ❌", "error");
+
+    btn.disabled = true; btn.textContent = "Creating...";
+    const fd = new FormData();
+    fd.append("emotion", emotion);
+    fd.append("type", type);
+    if (caption) fd.append("caption", caption);
+    if (file) fd.append("media", file);
+
+    try {
+      const res = await fetch(`${API}/api/reels`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      showMsg("createMsg", "Reel created! 🎉", "success");
+      document.getElementById("createCaption").value = "";
+      document.getElementById("reelMedia").value = "";
+    } catch (err) {
+      showMsg("createMsg", err.message, "error");
+    } finally {
+      btn.disabled = false; btn.textContent = "Create Reel ✅";
+    }
+  }
+
+  async function deleteReel(id) {
+    if (!confirm("Delete this reel?")) return;
+    try {
+      const res = await apiFetch(`/api/reels/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      document.getElementById(`reel-${id}`)?.remove();
+    } catch (err) { alert(err.message); }
+  }
+
+  function apiFetch(path, opts = {}) {
+    return fetch(`${API}${path}`, {
+      ...opts,
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+        ...(opts.headers || {})
+      }
+    });
+  }
+
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.className = `msg ${type}`;
+    el.style.display = text ? "block" : "none";
+  }
+
+  function escHtml(str) {
+    return String(str || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+</script>
+</body>
+</html>

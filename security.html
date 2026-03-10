@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔐 Security — Annomuss</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#0d0d1a;color:#fff;min-height:100vh;padding-bottom:40px}
+    .topbar{background:#1a1a2e;padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2a2a40;position:sticky;top:0;z-index:100}
+    .topbar a{color:#8a7cff;text-decoration:none;font-size:.9rem;cursor:pointer}
+    .topbar h2{flex:1;font-size:1rem;font-weight:700}
+
+    .content{max-width:560px;margin:0 auto;padding:16px}
+
+    /* Profile card */
+    .profile-card{background:#1a1a2e;border-radius:20px;padding:28px;border:1px solid #2a2a40;margin-bottom:20px;text-align:center}
+    .avatar-wrap{position:relative;display:inline-block;margin-bottom:14px}
+    .avatar-circle{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#8a7cff,#ff6ec7);display:flex;align-items:center;justify-content:center;font-size:2.8rem;cursor:pointer;border:3px solid #2a2a40;transition:border-color .2s}
+    .avatar-circle:hover{border-color:#8a7cff}
+    .avatar-edit{position:absolute;bottom:0;right:0;background:#8a7cff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer}
+    .profile-name{font-size:1.3rem;font-weight:700;color:#8a7cff;margin-bottom:4px}
+    .profile-email{font-size:.82rem;color:#666;margin-bottom:16px}
+    .profile-stats{display:flex;gap:16px;justify-content:center;margin-bottom:18px}
+    .stat{text-align:center}
+    .stat-val{font-size:1rem;font-weight:700;color:#fff}
+    .stat-label{font-size:.72rem;color:#666}
+    .name-cooldown{font-size:.78rem;color:#ff9632;margin-top:6px}
+
+    /* Section */
+    .section{background:#1a1a2e;border-radius:16px;border:1px solid #2a2a40;margin-bottom:14px;overflow:hidden}
+    .section-header{padding:16px 18px;border-bottom:1px solid #2a2a40;display:flex;align-items:center;gap:10px}
+    .section-icon{font-size:1.1rem}
+    .section-title{font-weight:700;font-size:.95rem;flex:1}
+    .section-badge{background:rgba(138,124,255,.15);color:#8a7cff;border:1px solid rgba(138,124,255,.3);border-radius:20px;padding:2px 10px;font-size:.75rem}
+    .section-badge.green{background:rgba(72,199,142,.1);color:#48c78e;border-color:rgba(72,199,142,.3)}
+    .section-badge.red{background:rgba(255,68,68,.1);color:#ff4444;border-color:rgba(255,68,68,.3)}
+
+    .row{padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #1a1a2e;cursor:pointer;transition:background .15s}
+    .row:last-child{border-bottom:none}
+    .row:hover{background:rgba(138,124,255,.04)}
+    .row-icon{font-size:1.1rem;width:28px;text-align:center}
+    .row-text{flex:1}
+    .row-label{font-size:.9rem;font-weight:600}
+    .row-sub{font-size:.76rem;color:#666;margin-top:2px}
+    .row-arrow{color:#444;font-size:.8rem}
+    .row-toggle{width:44px;height:24px;background:#2a2a40;border-radius:12px;position:relative;cursor:pointer;flex-shrink:0;border:none;transition:background .2s}
+    .row-toggle.on{background:#8a7cff}
+    .row-toggle::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s}
+    .row-toggle.on::after{left:23px}
+
+    /* Danger zone */
+    .danger-section{background:rgba(255,68,68,.04);border-color:rgba(255,68,68,.2)}
+    .danger-row{padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,68,68,.1);cursor:pointer;transition:background .15s}
+    .danger-row:last-child{border-bottom:none}
+    .danger-row:hover{background:rgba(255,68,68,.06)}
+    .danger-label{font-size:.9rem;font-weight:600;color:#ff4444}
+    .danger-sub{font-size:.76rem;color:#994444;margin-top:2px}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:flex-end;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#1a1a2e;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:560px;max-height:85vh;overflow-y:auto}
+    .modal h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+    .modal p{font-size:.85rem;color:#888;margin-bottom:20px}
+
+    /* PIN dots */
+    .pin-dots{display:flex;gap:14px;justify-content:center;margin:20px 0}
+    .pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid #8a7cff;background:transparent;transition:background .2s}
+    .pin-dot.filled{background:#8a7cff}
+    .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:0 auto 16px}
+    .pin-key{height:58px;border:1.5px solid #2a2a40;border-radius:12px;background:#0d0d1a;color:#fff;font-size:1.3rem;font-weight:600;cursor:pointer;transition:all .2s}
+    .pin-key:hover{border-color:#8a7cff;background:rgba(138,124,255,.08)}
+    .pin-key:active{transform:scale(.94)}
+    .pin-key.del{font-size:1rem;color:#888}
+
+    /* Emoji picker */
+    .emoji-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:12px 0}
+    .emoji-opt{height:46px;border:1.5px solid #2a2a40;border-radius:10px;background:none;font-size:1.4rem;cursor:pointer;transition:all .2s}
+    .emoji-opt:hover,.emoji-opt.selected{border-color:#8a7cff;background:rgba(138,124,255,.1)}
+
+    /* Report modal */
+    .report-reasons{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+    .reason-btn{padding:12px 16px;border:1.5px solid #2a2a40;border-radius:10px;background:none;color:#ccc;text-align:left;cursor:pointer;font-size:.88rem;transition:all .2s}
+    .reason-btn:hover,.reason-btn.selected{border-color:#8a7cff;color:#8a7cff;background:rgba(138,124,255,.08)}
+
+    /* Form inputs */
+    .input{width:100%;background:#0d0d1a;border:1.5px solid #2a2a40;border-radius:10px;color:#fff;padding:11px 14px;font-size:.9rem;outline:none;font-family:inherit;margin-bottom:10px}
+    .input:focus{border-color:#8a7cff}
+    textarea.input{resize:vertical;min-height:80px}
+
+    .btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:6px}
+    .btn-primary{background:linear-gradient(135deg,#8a7cff,#ff6ec7);color:#fff}
+    .btn-danger{background:linear-gradient(135deg,#ff4444,#cc2222);color:#fff}
+    .btn-cancel{background:#2a2a40;color:#aaa}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+
+    .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;border:1px solid #8a7cff;color:#fff;padding:10px 20px;border-radius:20px;font-size:.88rem;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+    .toast.show{opacity:1}
+    .toast.error{border-color:#ff4444}
+
+    /* Name change */
+    .name-history{margin-top:12px}
+    .history-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #2a2a40;font-size:.8rem}
+    .history-item:last-child{border-bottom:none}
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a onclick="goBack()">← Back</a>
+  <h2>🔐 Security & Profile</h2>
+</div>
+
+<div class="content">
+
+  <!-- Profile Card -->
+  <div class="profile-card">
+    <div class="avatar-wrap">
+      <div class="avatar-circle" id="avatarCircle" onclick="openModal('avatarModal')">🎭</div>
+      <div class="avatar-edit">✏️</div>
+    </div>
+    <div class="profile-name" id="profileName">Loading...</div>
+    <div class="profile-email" id="profileEmail"></div>
+    <div class="profile-stats">
+      <div class="stat"><div class="stat-val" id="statStreak">0</div><div class="stat-label">streak</div></div>
+      <div class="stat"><div class="stat-val" id="statCheckins">0</div><div class="stat-label">check-ins</div></div>
+      <div class="stat"><div class="stat-val" id="statFriends">0</div><div class="stat-label">friends</div></div>
+      <div class="stat"><div class="stat-val" id="statJoined">—</div><div class="stat-label">joined</div></div>
+    </div>
+    <div class="name-cooldown" id="nameCooldown"></div>
+  </div>
+
+  <!-- Identity -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">👤</span>
+      <span class="section-title">Identity</span>
+    </div>
+    <div class="row" onclick="openModal('nameModal')">
+      <div class="row-icon">🎭</div>
+      <div class="row-text"><div class="row-label">Change Anonymous Name</div><div class="row-sub">Once every 7 days</div></div>
+      <span class="row-arrow">›</span>
+    </div>
+    <div class="row" onclick="openModal('avatarModal')">
+      <div class="row-icon">🌈</div>
+      <div class="row-text"><div class="row-label">Change Avatar Emoji</div><div class="row-sub">Express yourself</div></div>
+      <span class="row-arrow">›</span>
+    </div>
+    <div class="row" onclick="openModal('dobModal')">
+      <div class="row-icon">🎂</div>
+      <div class="row-text"><div class="row-label">Date of Birth</div><div class="row-sub" id="dobDisplay">Not set</div></div>
+      <span class="row-arrow">›</span>
+    </div>
+  </div>
+
+  <!-- PIN Lock -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🔒</span>
+      <span class="section-title">App PIN Lock</span>
+      <span class="section-badge" id="pinBadge">OFF</span>
+    </div>
+    <div class="row" onclick="openModal('pinModal')">
+      <div class="row-icon">🔑</div>
+      <div class="row-text"><div class="row-label" id="pinRowLabel">Set PIN Lock</div><div class="row-sub">4-digit PIN to open app</div></div>
+      <span class="row-arrow">›</span>
+    </div>
+    <div class="row" id="removePinRow" style="display:none" onclick="openModal('removePinModal')">
+      <div class="row-icon">🗑️</div>
+      <div class="row-text"><div class="row-label" style="color:#ff9632">Remove PIN</div><div class="row-sub">Disable PIN lock</div></div>
+      <span class="row-arrow">›</span>
+    </div>
+  </div>
+
+  <!-- Safety -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🛡️</span>
+      <span class="section-title">Safety</span>
+    </div>
+    <div class="row" onclick="openModal('reportModal')">
+      <div class="row-icon">🚨</div>
+      <div class="row-text"><div class="row-label">Report a User</div><div class="row-sub">Report harassment, spam, abuse</div></div>
+      <span class="row-arrow">›</span>
+    </div>
+    <div class="row" onclick="openModal('blockModal')">
+      <div class="row-icon">🚫</div>
+      <div class="row-text"><div class="row-label">Block a User</div><div class="row-sub">They won't see your content</div></div>
+      <span class="row-arrow">›</span>
+    </div>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="section danger-section">
+    <div class="section-header">
+      <span class="section-icon">⚠️</span>
+      <span class="section-title">Danger Zone</span>
+      <span class="section-badge red">Irreversible</span>
+    </div>
+    <div class="danger-row" onclick="openModal('deleteModal')">
+      <div class="row-icon">🗑️</div>
+      <div class="row-text"><div class="danger-label">Delete Account</div><div class="danger-sub">Permanently delete your account and all data</div></div>
+      <span class="row-arrow" style="color:#ff4444">›</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── MODALS ── -->
+
+<!-- Avatar Modal -->
+<div class="modal-overlay" id="avatarModal">
+  <div class="modal">
+    <h3>🌈 Choose Your Avatar</h3>
+    <p>Pick an emoji that represents you anonymously</p>
+    <div class="emoji-grid" id="emojiGrid"></div>
+    <button class="btn btn-primary" onclick="saveAvatar()">Save Avatar ✅</button>
+    <button class="btn btn-cancel" onclick="closeModal('avatarModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- Name Change Modal -->
+<div class="modal-overlay" id="nameModal">
+  <div class="modal">
+    <h3>🎭 Change Your Name</h3>
+    <p>You can change your name once every 7 days. Choose wisely!</p>
+    <input class="input" id="newNameInput" placeholder="New anonymous name..." maxlength="30"/>
+    <div id="nameHistoryWrap" style="margin-bottom:12px"></div>
+    <button class="btn btn-primary" onclick="changeName()">Change Name 🎭</button>
+    <button class="btn btn-cancel" onclick="closeModal('nameModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- DOB Modal -->
+<div class="modal-overlay" id="dobModal">
+  <div class="modal">
+    <h3>🎂 Date of Birth</h3>
+    <p>Stored privately. Never shown to other users.</p>
+    <input class="input" type="date" id="dobInput"/>
+    <button class="btn btn-primary" onclick="saveDob()">Save 🎂</button>
+    <button class="btn btn-cancel" onclick="closeModal('dobModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- PIN Modal -->
+<div class="modal-overlay" id="pinModal">
+  <div class="modal" style="text-align:center">
+    <h3>🔐 Set PIN Lock</h3>
+    <p id="pinModalSub">Enter a 4-digit PIN to lock your app</p>
+    <div class="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-pad">
+      ${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k =>
+        `<button class="pin-key ${k==='⌫'?'del':''}" onclick="pinKey('${k}')">${k}</button>`).join('')}
+    </div>
+    <button class="btn btn-cancel" onclick="closeModal('pinModal');resetPin()">Cancel</button>
+  </div>
+</div>
+
+<!-- Remove PIN Modal -->
+<div class="modal-overlay" id="removePinModal">
+  <div class="modal" style="text-align:center">
+    <h3>🔓 Remove PIN</h3>
+    <p>Enter your current PIN to disable lock</p>
+    <div class="pin-dots">
+      <div class="pin-dot" id="rd0"></div>
+      <div class="pin-dot" id="rd1"></div>
+      <div class="pin-dot" id="rd2"></div>
+      <div class="pin-dot" id="rd3"></div>
+    </div>
+    <div class="pin-pad">
+      ${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k =>
+        `<button class="pin-key ${k==='⌫'?'del':''}" onclick="removePinKey('${k}')">${k}</button>`).join('')}
+    </div>
+    <button class="btn btn-cancel" onclick="closeModal('removePinModal');resetRemovePin()">Cancel</button>
+  </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal">
+    <h3>🚨 Report a User</h3>
+    <p>All reports are permanently recorded and reviewed by our team.</p>
+    <input class="input" id="reportName" placeholder="Anonymous name to report..."/>
+    <div class="report-reasons" id="reportReasons">
+      ${[
+        ['harassment','😤 Harassment or bullying'],
+        ['spam','📢 Spam or fake account'],
+        ['hate_speech','🤬 Hate speech'],
+        ['sexual','🔞 Sexual content'],
+        ['violence','⚔️ Violence or threats'],
+        ['other','❓ Other']
+      ].map(([v,l]) => `<button class="reason-btn" onclick="selectReason(this,'${v}')">${l}</button>`).join('')}
+    </div>
+    <textarea class="input" id="reportDesc" placeholder="Describe what happened (optional)..." rows="3"></textarea>
+    <button class="btn btn-danger" onclick="submitReport()">Submit Report 🚨</button>
+    <button class="btn btn-cancel" onclick="closeModal('reportModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- Block Modal -->
+<div class="modal-overlay" id="blockModal">
+  <div class="modal">
+    <h3>🚫 Block a User</h3>
+    <p>Blocked users cannot see your posts, stories or send you messages.</p>
+    <input class="input" id="blockName" placeholder="Anonymous name to block..."/>
+    <button class="btn btn-danger" onclick="submitBlock()">Block User 🚫</button>
+    <button class="btn btn-cancel" onclick="closeModal('blockModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>⚠️ Delete Account</h3>
+    <p>This will permanently delete your account, posts, and all data. This <strong>cannot be undone</strong>.</p>
+    <div id="deleteStep1">
+      <button class="btn btn-danger" onclick="requestDeletion()">Send Confirmation OTP 📧</button>
+      <button class="btn btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
+    </div>
+    <div id="deleteStep2" style="display:none">
+      <p style="color:#ff9632;margin-bottom:12px">Enter the OTP sent to your email:</p>
+      <input class="input" id="deleteOtp" placeholder="6-digit OTP" maxlength="6" type="number"/>
+      <button class="btn btn-danger" onclick="confirmDeletion()">Permanently Delete Account 🗑️</button>
+      <button class="btn btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API   = "https://annomuss-backend-icgp.onrender.com";
+const token = localStorage.getItem("token");
+let user    = null;
+try { user = JSON.parse(localStorage.getItem("user") || "null"); } catch(e) {}
+if (!token || !user) window.location.href = "index.html";
+
+let selectedAvatar = "🎭";
+let selectedReason = null;
+let pinBuffer      = [];
+let removePinBuffer = [];
+let fullProfile    = null;
+
+const AVATARS = ["🎭","🌊","🔥","⚡","🌙","⭐","🦋","🐉","🌸","💎","🎪","🎨","🎯","🚀","👾","🦊","🐺","🦅","🌈","💫","🎵","🌺","🍀","🎭","👻","🤖","🦁","🐯","🦄","🐉","🌸","💜"];
+
+function goBack()   { window.location.href = "dashboard.html"; }
+function esc(s)     { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;") }
+
+function showToast(msg, err=false) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className   = "toast show" + (err ? " error" : "");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+function openModal(id)  { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+function apiFetch(path, opts={}) {
+  return fetch(API + path, {
+    ...opts,
+    headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}`, ...(opts.headers||{}) }
+  });
+}
+
+// ── Load profile ──────────────────────────────────────────────────────────────
+async function loadProfile() {
+  try {
+    const res  = await apiFetch("/api/security/profile");
+    const data = await res.json();
+    fullProfile = data;
+
+    document.getElementById("avatarCircle").textContent = data.avatar || "🎭";
+    document.getElementById("profileName").textContent  = data.anonymousName;
+    document.getElementById("profileEmail").textContent = data.email;
+    document.getElementById("statStreak").textContent   = data.currentStreak || 0;
+    document.getElementById("statCheckins").textContent = data.totalCheckIns || 0;
+    document.getElementById("statFriends").textContent  = data.friends?.length || 0;
+    document.getElementById("statJoined").textContent   = data.createdAt
+      ? new Date(data.createdAt).toLocaleDateString("en-IN", {month:"short", year:"numeric"})
+      : "—";
+
+    selectedAvatar = data.avatar || "🎭";
+
+    if (data.dateOfBirth) {
+      document.getElementById("dobDisplay").textContent =
+        new Date(data.dateOfBirth).toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"});
+      document.getElementById("dobInput").value = data.dateOfBirth.split("T")[0];
+    }
+
+    // PIN badge
+    if (data.pinEnabled) {
+      document.getElementById("pinBadge").textContent = "ON";
+      document.getElementById("pinBadge").className   = "section-badge green";
+      document.getElementById("pinRowLabel").textContent = "Change PIN";
+      document.getElementById("removePinRow").style.display = "flex";
+    }
+
+    // Name cooldown
+    if (data.lastNameChange) {
+      const daysSince = (Date.now() - new Date(data.lastNameChange)) / 86400000;
+      if (daysSince < 7) {
+        const left = Math.ceil(7 - daysSince);
+        document.getElementById("nameCooldown").textContent = `⏳ Name can be changed in ${left} day${left!==1?"s":""}`;
+      }
+    }
+
+    // Name history
+    if (data.nameHistory?.length) {
+      let html = '<div style="font-size:.78rem;color:#666;margin-bottom:6px">Previous names:</div>';
+      html += data.nameHistory.slice(-3).reverse().map(h =>
+        `<div class="history-item"><span>${esc(h.name)}</span><span style="color:#555">${new Date(h.changedAt).toLocaleDateString()}</span></div>`
+      ).join("");
+      document.getElementById("nameHistoryWrap").innerHTML = html;
+    }
+
+  } catch(e) { showToast("Failed to load profile", true); }
+}
+
+// ── Avatar ────────────────────────────────────────────────────────────────────
+function buildEmojiGrid() {
+  document.getElementById("emojiGrid").innerHTML = AVATARS.map(e =>
+    `<button class="emoji-opt ${e===selectedAvatar?"selected":""}" onclick="pickEmoji(this,'${e}')">${e}</button>`
+  ).join("");
+}
+
+function pickEmoji(btn, emoji) {
+  document.querySelectorAll(".emoji-opt").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  selectedAvatar = emoji;
+}
+
+async function saveAvatar() {
+  try {
+    const res  = await apiFetch("/api/security/profile", {
+      method: "PATCH", body: JSON.stringify({ avatar: selectedAvatar })
+    });
+    const data = await res.json();
+    document.getElementById("avatarCircle").textContent = selectedAvatar;
+    showToast("Avatar updated ✅");
+    closeModal("avatarModal");
+  } catch(e) { showToast("Failed ❌", true); }
+}
+
+// ── Name change ───────────────────────────────────────────────────────────────
+async function changeName() {
+  const newName = document.getElementById("newNameInput").value.trim();
+  if (!newName) return showToast("Enter a name!");
+  try {
+    const res  = await apiFetch("/api/security/change-name", {
+      method: "PATCH", body: JSON.stringify({ newName })
+    });
+    const data = await res.json();
+    if (!res.ok) return showToast(data.message, true);
+
+    // Update stored user + token
+    localStorage.setItem("token", data.token);
+    const u = JSON.parse(localStorage.getItem("user") || "{}");
+    u.anonymousName = data.anonymousName;
+    u.avatar        = data.user.avatar;
+    localStorage.setItem("user", JSON.stringify(u));
+
+    document.getElementById("profileName").textContent = data.anonymousName;
+    showToast(data.message);
+    closeModal("nameModal");
+    loadProfile();
+  } catch(e) { showToast("Failed ❌", true); }
+}
+
+// ── DOB ───────────────────────────────────────────────────────────────────────
+async function saveDob() {
+  const dob = document.getElementById("dobInput").value;
+  if (!dob) return showToast("Pick a date!");
+  try {
+    await apiFetch("/api/security/profile", {
+      method: "PATCH", body: JSON.stringify({ dateOfBirth: dob })
+    });
+    document.getElementById("dobDisplay").textContent =
+      new Date(dob).toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"});
+    showToast("Birthday saved 🎂");
+    closeModal("dobModal");
+  } catch(e) { showToast("Failed ❌", true); }
+}
+
+// ── PIN ───────────────────────────────────────────────────────────────────────
+function updatePinDots(buf, prefix="d") {
+  for (let i=0; i<4; i++) {
+    document.getElementById(`${prefix}${i}`).classList.toggle("filled", i < buf.length);
+  }
+}
+
+function pinKey(k) {
+  if (k === "⌫") { pinBuffer.pop(); }
+  else if (k !== "" && pinBuffer.length < 4) { pinBuffer.push(k); }
+  updatePinDots(pinBuffer);
+  if (pinBuffer.length === 4) setTimeout(() => submitPin(), 200);
+}
+
+async function submitPin() {
+  const pin = pinBuffer.join("");
+  pinBuffer  = [];
+  updatePinDots([]);
+  try {
+    const res  = await apiFetch("/api/security/pin/set", {
+      method: "POST", body: JSON.stringify({ pin })
+    });
+    const data = await res.json();
+    if (!res.ok) return showToast(data.message, true);
+
+    document.getElementById("pinBadge").textContent = "ON";
+    document.getElementById("pinBadge").className   = "section-badge green";
+    document.getElementById("pinRowLabel").textContent = "Change PIN";
+    document.getElementById("removePinRow").style.display = "flex";
+    showToast("PIN set! App is now locked 🔐");
+    closeModal("pinModal");
+  } catch(e) { showToast("Failed ❌", true); }
+}
+
+function resetPin() { pinBuffer = []; updatePinDots([]); }
+
+function removePinKey(k) {
+  if (k === "⌫") { removePinBuffer.pop(); }
+  else if (k !== "" && removePinBuffer.length < 4) { removePinBuffer.push(k); }
+  updatePinDots(removePinBuffer, "rd");
+  if (removePinBuffer.length === 4) setTimeout(() => submitRemovePin(), 200);
+}
+
+async function submitRemovePin() {
+  const pin   = removePinBuffer.join("");
+  removePinBuffer = [];
+  updatePinDots([], "rd");
+  try {
+    const res  = await apiFetch("/api/security/pin", {
+      method: "DELETE", body: JSON.stringify({ pin })
+    });
+    const data = await res.json();
+    if (!res.ok) return showToast(data.message, true);
+
+    document.getElementById("pinBadge").textContent = "OFF";
+    document.getElementById("pinBadge").className   = "section-badge";
+    document.getElementById("pinRowLabel").textContent = "Set PIN Lock";
+    document.getElementById("removePinRow").style.display = "none";
+    showToast("PIN removed ✅");
+    closeModal("removePinModal");
+  } catch(e) { showToast("Failed ❌", true); }
+}
+
+function resetRemovePin() { removePinBuffer = []; updatePinDots([], "rd"); }
+
+// ── Report ────────────────────────────────────────────────────────────────────
+function selectReason(btn, reason) {
+  document.querySelectorAll(".reason-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  selectedReason = reason;
+}
+
+async function submitReport() {
+  const name = document.getElementById("reportName").value.trim();
+  const desc = document.getElementById("reportDesc").value.trim();
+  if (!name)           return showToast("Enter the user's name!", true);
+  if (!selectedReason) return showToast("Select a reason!", true);
+
+  try {
+    const res  = await apiFetch("/api/security/report", {
+      method: "POST",
+      body: JSON.stringify({ reportedName: name, reason: selectedReason, description: desc })
+    });
+    const data = await res.json();
+    showToast(res.ok ? data.message : data.message, !res.ok);
+    if (res.ok) closeModal("reportModal");
+  } catch(e) { showToast("Failed ❌", true); }
+}
+
+// ── Block ─────────────────────────────────────────────────────────────────────
+async function submitBlock() {
+  const name = document.getElementById("blockName").value.trim();
+  if (!name) return showToast("Enter a name!", true);
+  try {
+    const res  = await apiFetch(`/api/security/block/${encodeURIComponent(name)}`, { method: "POST" });
+    const data = await res.json();
+    showToast(data.message, !res.ok);
+    if (res.ok) closeModal("blockModal");
+  } catch(e) { showToast("Failed ❌", true); }
+}
+
+// ── Delete account ────────────────────────────────────────────────────────────
+async function requestDeletion() {
+  try {
+    const res = await apiFetch("/api/security/delete-account/request", { method: "POST" });
+    const d   = await res.json();
+    showToast(d.message, !res.ok);
+    if (res.ok) {
+      document.getElementById("deleteStep1").style.display = "none";
+      document.getElementById("deleteStep2").style.display = "block";
+    }
+  } catch(e) { showToast("Failed ❌", true); }
+}
+
+async function confirmDeletion() {
+  const otp = document.getElementById("deleteOtp").value.trim();
+  if (!otp) return showToast("Enter OTP!", true);
+  try {
+    const res = await apiFetch("/api/security/delete-account/confirm", {
+      method: "POST", body: JSON.stringify({ otp })
+    });
+    const d = await res.json();
+    if (!res.ok) return showToast(d.message, true);
+    showToast("Account deleted. Goodbye 👋");
+    setTimeout(() => {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }, 2000);
+  } catch(e) { showToast("Failed ❌", true); }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildEmojiGrid();
+loadProfile();
+</script>
+</body>
+</html>

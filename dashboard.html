@@ -480,6 +480,79 @@ img{display:block;max-width:100%}
 @keyframes toastIn{from{opacity:0;transform:translateY(-8px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes toastOut{to{opacity:0;transform:translateY(-8px) scale(.92)}}
 
+/* ─── 5-Reaction System ─── */
+.reactions-bar{display:flex;gap:5px;padding:4px 10px 12px;flex-wrap:wrap}
+.react-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:5px 11px;border-radius:100px;
+  background:var(--bg3);border:1.5px solid var(--bd);
+  font-size:.76rem;font-weight:600;color:var(--tx3);
+  cursor:pointer;transition:all .14s;white-space:nowrap;
+}
+.react-btn.active{background:var(--v3);border-color:var(--v);color:var(--v2)}
+.react-btn:active{transform:scale(.9)}
+.react-count{font-variant-numeric:tabular-nums;min-width:10px;text-align:center}
+
+/* ─── Vent Board ─── */
+.vent-card{
+  background:var(--card);border:1px solid var(--bd);
+  border-radius:var(--r2);margin:0 16px 12px;
+  overflow:hidden;transition:border-color .2s;
+}
+.vent-card:active{border-color:var(--bd2)}
+.vent-header{display:flex;align-items:center;gap:10px;padding:14px 14px 8px}
+.vent-body{padding:0 14px 10px;font-size:.925rem;line-height:1.6;color:var(--tx);word-break:break-word}
+.vent-emo-tag{font-size:.7rem;padding:2px 7px;border-radius:100px;background:var(--v3);color:var(--v2);font-weight:500;margin-left:4px}
+.vent-reactions{display:flex;gap:5px;padding:4px 14px 14px;flex-wrap:wrap}
+.vent-react{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 9px;border-radius:100px;
+  background:var(--bg3);border:1.5px solid var(--bd);
+  font-size:.8rem;cursor:pointer;color:var(--tx3);transition:all .14s;
+}
+.vent-react.active{background:var(--v3);border-color:var(--v);color:var(--v2)}
+.vent-react:active{transform:scale(.9)}
+.vent-tab-bar{display:flex;border-bottom:1px solid var(--bd);margin:0 16px 0}
+.vent-tab{
+  flex:1;padding:10px 0;text-align:center;
+  font-size:.82rem;font-weight:600;color:var(--tx3);
+  border-bottom:2.5px solid transparent;transition:all .2s;cursor:pointer;
+}
+.vent-tab.active{color:var(--v2);border-color:var(--v)}
+
+/* ─── Crisis Overlay ─── */
+#crisis-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(5,5,16,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  display:none;flex-direction:column;align-items:center;
+  justify-content:center;padding:28px;text-align:center;
+  animation:fadeIn .3s ease;
+}
+#crisis-overlay.open{display:flex}
+.crisis-helpline{
+  display:flex;align-items:center;gap:10px;width:100%;max-width:340px;
+  padding:12px 14px;border-radius:14px;
+  background:rgba(0,212,168,.08);border:1.5px solid rgba(0,212,168,.25);
+  text-decoration:none;color:var(--tl);
+  font-size:.85rem;font-weight:600;margin-bottom:8px;
+  transition:background .15s;
+}
+.crisis-helpline:active{background:rgba(0,212,168,.14)}
+
+/* ─── Ad Card ─── */
+.ad-card{
+  margin:0 16px 12px;padding:14px;
+  border-radius:var(--r2);background:var(--card);
+  border:1px solid rgba(255,179,71,.2);
+}
+.ad-card-label{font-size:.65rem;color:var(--tx3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.ad-card-title{font-weight:700;font-size:.9rem;margin-bottom:3px;color:var(--tx)}
+.ad-card-body{font-size:.8rem;color:var(--tx2);margin-bottom:10px}
+.ad-card-cta{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;font-weight:700;color:var(--go)}
+
+/* ─── Mood badge ─── */
+.mood-badge-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--v3);border:1px solid var(--v);border-radius:100px;font-size:.78rem;color:var(--v2);cursor:pointer}
+
 /* ─── Context Menu ─── */
 .ctx-menu{
   position:fixed;z-index:600;
@@ -933,7 +1006,7 @@ img{display:block;max-width:100%}
     </div>
 
     <!-- ═══════════ CONNECT PAGE (replaces Mood) ═══════════ -->
-    <div class="page" id="page-connect" style="display:none;flex-direction:column">
+    <div class="page" id="page-connect">
       <div class="topbar">
         <div class="topbar-title syne">Connect</div>
         <div style="display:flex;align-items:center;gap:6px">
@@ -1251,6 +1324,43 @@ img{display:block;max-width:100%}
       </div>
     </div>
 
+
+    <!-- ═══════════ VENT BOARD PAGE ═══════════ -->
+    <div class="page" id="page-vent">
+      <div class="topbar">
+        <span class="topbar-title">💭 Vent Board</span>
+        <span style="font-size:.78rem;color:var(--tx3)">Say it. Let it go.</span>
+      </div>
+      <div class="section" style="padding-bottom:8px">
+        <div class="card" style="padding:14px">
+          <textarea id="vent-text" maxlength="280" placeholder="What is on your mind? (max 280 chars)" oninput="ventCharUpdate(this)"
+            style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:12px;color:var(--tx);font-size:.9rem;min-height:90px;resize:none;display:block;margin-bottom:10px"></textarea>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span id="vent-chars" style="font-size:.75rem;color:var(--tx3);font-family:monospace">0/280</span>
+            <select id="vent-emotion" style="background:var(--bg3);border:1px solid var(--bd);color:var(--tx2);border-radius:8px;padding:4px 8px;font-size:.8rem;flex:1;min-width:110px">
+              <option value="">+ emotion</option>
+              <option value="happy">😊 Happy</option>
+              <option value="sad">😔 Sad</option>
+              <option value="anxious">😰 Anxious</option>
+              <option value="lonely">🌙 Lonely</option>
+              <option value="angry">😤 Angry</option>
+              <option value="grateful">🙏 Grateful</option>
+              <option value="excited">⚡ Excited</option>
+              <option value="inspired">✨ Inspired</option>
+            </select>
+            <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;color:var(--tx3);cursor:pointer;white-space:nowrap">
+              <input type="checkbox" id="vent-disappears" style="accent-color:var(--v)"> 24h
+            </label>
+            <button onclick="submitVent()" class="btn btn-v btn-sm" style="padding:8px 16px;border-radius:10px;margin-left:auto">Let it out</button>
+          </div>
+        </div>
+      </div>
+      <div class="vent-tab-bar">
+        <div class="vent-tab active" id="vtab-latest" onclick="loadVents('latest')">Latest</div>
+        <div class="vent-tab" id="vtab-trending" onclick="loadVents('trending')">🔥 Trending</div>
+      </div>
+      <div id="vent-feed" style="padding-top:12px;padding-bottom:8px"></div>
+    </div>
   </div><!-- /pages -->
 
   <!-- BOTTOM NAV -->
@@ -1266,9 +1376,9 @@ img{display:block;max-width:100%}
     <button class="nav-btn" onclick="openCompose('post')">
       <div class="nav-fab">✏️</div>
     </button>
-    <button class="nav-btn" id="nb-grow" onclick="goPage('grow')">
-      <span class="nav-ico">🌱</span>
-      <span>Grow</span>
+    <button class="nav-btn" id="nb-vent" onclick="goPage('vent')">
+      <span class="nav-ico">💭</span>
+      <span>Vent</span>
     </button>
     <button class="nav-btn" id="nb-profile" onclick="goPage('profile')" style="position:relative">
       <span class="nav-ico">🎭</span>
@@ -1303,6 +1413,315 @@ let composeType = 'post';
 let composeEmo = '';
 let uploadedMediaUrl = null;
 let uploadedMediaType = null;
+
+// ─── NEW v4 STATE ────────────────────────────────────────────────────────────
+let ventPage = 1, ventTab = 'latest', ventLoading = false;
+const REACT_TYPES = [
+  { key:'heard', emoji:'💙', label:'Heard' },
+  { key:'same',  emoji:'🤝', label:'Same'  },
+  { key:'strong',emoji:'🔥', label:'Strong'},
+  { key:'love',  emoji:'🌊', label:'Love'  },
+  { key:'helped',emoji:'✨', label:'Helped'},
+];
+
+// ── Mood Signal Tracker (sends behavioral signals every 5min silently) ────────
+const moodSignals = {
+  sessionStart:      Date.now(),
+  scrollEvents:      [],
+  reactionsUsed:     [],
+  recentPostEmotion: null,
+};
+let _lastScrollY = 0, _lastScrollT = Date.now();
+document.addEventListener('scroll', () => {
+  const now = Date.now(), dy = Math.abs(window.scrollY - _lastScrollY);
+  const dt  = now - _lastScrollT;
+  if (dt > 100) {
+    moodSignals.scrollEvents.push((dy/dt)*1000);
+    if (moodSignals.scrollEvents.length > 30) moodSignals.scrollEvents.shift();
+    _lastScrollY = window.scrollY; _lastScrollT = now;
+  }
+}, {passive:true});
+
+setInterval(async () => {
+  if (!token) return;
+  try {
+    const avg = moodSignals.scrollEvents.length
+      ? moodSignals.scrollEvents.reduce((a,b)=>a+b,0) / moodSignals.scrollEvents.length : 0;
+    const scrollSpeed   = avg > 800 ? 'fast' : avg < 200 ? 'slow' : 'normal';
+    const sessionLength = Math.floor((Date.now() - moodSignals.sessionStart) / 60000);
+    await apiFetch('/api/moods/signals', {
+      method:'POST',
+      body: JSON.stringify({
+        scrollSpeed, sessionLength,
+        reactionsUsed:     [...new Set(moodSignals.reactionsUsed)],
+        recentPostEmotion: moodSignals.recentPostEmotion,
+      })
+    });
+    moodSignals.scrollEvents  = [];
+    moodSignals.reactionsUsed = [];
+  } catch(_) {} // silent — never crash for this
+}, 5 * 60 * 1000);
+
+// ── Firebase + Push ───────────────────────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey:            'YOUR_FIREBASE_API_KEY',
+  authDomain:        'annomuss-app.firebaseapp.com',
+  projectId:         'annomuss-app',
+  messagingSenderId: 'YOUR_SENDER_ID',
+  appId:             'YOUR_APP_ID',
+};
+const VAPID_KEY = 'YOUR_VAPID_KEY';
+
+async function initPushNotifications() {
+  if (!('Notification' in window) || !token) return;
+  try {
+    if (typeof firebase === 'undefined') return;
+    if (!firebase.apps?.length) firebase.initializeApp(FIREBASE_CONFIG);
+    const messaging  = firebase.messaging();
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+    const fcmToken = await messaging.getToken({ vapidKey: VAPID_KEY });
+    if (!fcmToken) return;
+    await apiFetch('/api/users/fcm-token', { method:'POST', body: JSON.stringify({ fcmToken }) });
+    console.log('✅ Push enabled');
+  } catch(e) { console.warn('Push init:', e.message); }
+}
+
+// ── Crisis Overlay ────────────────────────────────────────────────────────────
+function showCrisisOverlay(msg, sub) {
+  const el = document.getElementById('crisis-overlay');
+  if (!el) return;
+  if (msg) { const m = document.getElementById('crisis-msg'); if(m) m.textContent = msg; }
+  if (sub) { const s = document.getElementById('crisis-sub'); if(s) s.textContent = sub; }
+  el.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function crisisDismiss() {
+  const el = document.getElementById('crisis-overlay');
+  if (el) el.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function crisisJoinChat() {
+  crisisDismiss();
+  goPage('connect');
+  setTimeout(() => { if (typeof rchatStart === 'function') rchatStart(); }, 600);
+}
+function handleCrisisResponse(crisis) {
+  if (!crisis || crisis.level === 'none') return;
+  setTimeout(() => showCrisisOverlay(crisis.message, crisis.subtext), 1500);
+}
+
+// ── API helper ────────────────────────────────────────────────────────────────
+function apiFetch(path, opts={}) {
+  return fetch(API + path, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? {'Authorization': 'Bearer ' + token} : {}),
+      ...(opts.headers || {}),
+    }
+  });
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function timeAgo(date) {
+  const s = Math.floor((Date.now() - new Date(date)) / 1000);
+  if (s < 60)    return 'just now';
+  if (s < 3600)  return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+function esc(t) {
+  return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── VENT BOARD ────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+function ventCharUpdate(el) {
+  const n = el.value.length;
+  const c = document.getElementById('vent-chars');
+  if (c) {
+    c.textContent = n + '/280';
+    c.style.color = n > 250 ? 'var(--cr)' : 'var(--tx3)';
+  }
+}
+
+async function submitVent() {
+  const textEl = document.getElementById('vent-text');
+  const text   = textEl?.value?.trim();
+  const emotion    = document.getElementById('vent-emotion')?.value || null;
+  const disappears = document.getElementById('vent-disappears')?.checked || false;
+
+  if (!text)         return showToast('Write something first 💭');
+  if (text.length > 280) return showToast('Max 280 characters');
+
+  try {
+    const r    = await apiFetch('/api/vents', {
+      method: 'POST',
+      body: JSON.stringify({ text, emotion, disappears })
+    });
+    const data = await r.json();
+    if (!r.ok) return showToast(data.message || 'Failed ❌');
+
+    // Clear composer
+    textEl.value = '';
+    document.getElementById('vent-chars').textContent = '0/280';
+    if (document.getElementById('vent-disappears'))
+      document.getElementById('vent-disappears').checked = false;
+
+    showToast('Shared 💭');
+
+    // Crisis check
+    if (data.crisis) handleCrisisResponse(data.crisis);
+
+    // Track mood signal
+    if (emotion) moodSignals.recentPostEmotion = emotion;
+
+    // Refresh feed
+    loadVents('latest');
+  } catch(e) { showToast('Network error ❌'); }
+}
+
+function renderVent(v) {
+  const me  = user?.anonymousName || '';
+  const r   = v.reactions || {};
+  const age = timeAgo(v.createdAt);
+  const dis = v.disappearsAt ? ' · 💨' : '';
+
+  return \`<div class="vent-card" id="vc-\${v._id}">
+    <div class="vent-header">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">\${v.avatar||'🎭'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:.85rem">\${esc(v.anonymousName)}
+          \${v.emotion ? \`<span class="vent-emo-tag">\${v.emotion}</span>\` : ''}
+        </div>
+        <div style="font-size:.72rem;color:var(--tx3)">\${age}\${dis}</div>
+      </div>
+    </div>
+    <div class="vent-body">\${esc(v.text)}</div>
+    <div class="vent-reactions">
+      \${REACT_TYPES.map(t => \`
+        <button class="vent-react \${(r[t.key]||[]).includes(me) ? 'active' : ''}"
+          onclick="reactVent('\${v._id}','\${t.key}',this)">
+          \${t.emoji} <span id="vrc-\${t.key}-\${v._id}">\${(r[t.key]||[]).length}</span>
+        </button>\`).join('')}
+    </div>
+  </div>\`;
+}
+
+async function loadVents(tab='latest', reset=true) {
+  if (ventLoading) return;
+  ventLoading = true;
+  if (reset) {
+    ventPage = 1; ventTab = tab;
+    const feed = document.getElementById('vent-feed');
+    if (feed) feed.innerHTML = '<div style="text-align:center;padding:32px;color:var(--tx3)">Loading...</div>';
+    document.querySelectorAll('.vent-tab').forEach(b => b.classList.remove('active'));
+    const active = document.getElementById('vtab-' + tab);
+    if (active) active.classList.add('active');
+  }
+  try {
+    const r    = await apiFetch('/api/vents?tab=' + ventTab + '&page=' + ventPage);
+    const data = await r.json();
+    const feed = document.getElementById('vent-feed');
+    if (!feed) return;
+    if (reset) feed.innerHTML = '';
+    if (!data.vents?.length && reset) {
+      feed.innerHTML = '<div class="empty"><div class="empty-ico">💭</div><div class="empty-t">No vents yet</div><div class="empty-s">Be the first to share something real.</div></div>';
+      return;
+    }
+    document.getElementById('load-more-vent')?.remove();
+    feed.insertAdjacentHTML('beforeend', data.vents.map(renderVent).join(''));
+    if (data.hasMore) {
+      ventPage++;
+      feed.insertAdjacentHTML('beforeend',
+        \`<div style="text-align:center;padding:16px"><button class="btn btn-g btn-sm" id="load-more-vent" onclick="loadVents('\${ventTab}',false)">Load more 💭</button></div>\`);
+    }
+  } catch(e) { console.warn('loadVents:', e.message); }
+  finally { ventLoading = false; }
+}
+
+async function reactVent(id, type, btn) {
+  try {
+    const r    = await apiFetch('/api/vents/' + id + '/react', {
+      method:'POST', body: JSON.stringify({type})
+    });
+    const data = await r.json();
+    if (!r.ok) return;
+    const cnt  = data.reactions[type]?.length || 0;
+    const span = document.getElementById('vrc-' + type + '-' + id);
+    if (span) span.textContent = cnt;
+    btn.classList.toggle('active');
+    moodSignals.reactionsUsed.push(type);
+  } catch(e) { console.warn('reactVent:', e.message); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── 5-REACTION SYSTEM FOR POSTS ───────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+function renderReactions(p) {
+  const me = user?.anonymousName || '';
+  const r  = p.reactions || {};
+  return '<div class="reactions-bar">' +
+    REACT_TYPES.map(t => {
+      const arr   = r[t.key] || [];
+      const active = arr.includes(me);
+      const count  = arr.length;
+      return \`<button class="react-btn \${active ? 'active' : ''}"
+        onclick="reactPost('\${p._id}','\${t.key}',this)">
+        \${t.emoji} <span class="react-count" id="rc-\${t.key}-\${p._id}">\${count}</span>
+      </button>\`;
+    }).join('') + '</div>';
+}
+
+async function reactPost(id, type, btn) {
+  try {
+    const r    = await apiFetch('/api/posts/' + id + '/react', {
+      method:'POST', body: JSON.stringify({type})
+    });
+    const data = await r.json();
+    if (!r.ok) return;
+    const cnt  = (data.reactions[type] || []).length;
+    const span = document.getElementById('rc-' + type + '-' + id);
+    if (span) span.textContent = cnt;
+    btn.classList.toggle('active');
+    moodSignals.reactionsUsed.push(type);
+  } catch(e) { console.warn('reactPost:', e.message); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── MOOD-CONTEXTUAL ADS ───────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadAndInjectAd(feedEl) {
+  if (!token || user?.isPremium) return;
+  try {
+    const r    = await apiFetch('/api/ads/feed');
+    const data = await r.json();
+    if (!data.ad) return;
+    const ad   = data.ad;
+
+    // Inject ad after 5th post in feed
+    const cards = feedEl.querySelectorAll('.post-card');
+    const insertAfter = cards[4] || null;
+    const adEl = document.createElement('div');
+    adEl.className = 'ad-card';
+    adEl.innerHTML = \`
+      <div class="ad-card-label">Promoted</div>
+      <div class="ad-card-title">\${esc(ad.title)}</div>
+      \${ad.body ? \`<div class="ad-card-body">\${esc(ad.body)}</div>\` : ''}
+      <a href="\${ad.url}" onclick="trackAdClick('\${ad.id}')" class="ad-card-cta" target="_blank">
+        \${esc(ad.cta)} →
+      </a>\`;
+    if (insertAfter) feedEl.insertBefore(adEl, insertAfter.nextSibling);
+    else feedEl.appendChild(adEl);
+  } catch(_) {}
+}
+
+function trackAdClick(adId) {
+  apiFetch('/api/ads/click', { method:'POST', body: JSON.stringify({adId}) }).catch(()=>{});
+}
+
 let uploadController = null;
 let pomodoroInterval = null;
 let pomodoroRunning = false;
@@ -1390,6 +1809,10 @@ function timeAgo(d) {
 
 /* ─── PAGE NAVIGATION ─── */
 function goPage(name) {
+  // Load vent board when switching to it
+  if (name === 'vent' && ventPage === 1 && !ventLoading) {
+    setTimeout(() => loadVents('latest'), 50);
+  }
   if (currentPage === name) return;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -2772,12 +3195,41 @@ async function init() {
   updateMoodBadge();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  // Push notifications: ask 10 seconds after load (not immediately)
+  setTimeout(initPushNotifications, 10000);
+});
 
 // Close menus on background click
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.ctx-menu') && !e.target.closest('.post-menu-btn')) closeCtxMenu();
 });
 </script>
+
+<!-- ═══ CRISIS OVERLAY ═══ -->
+<div id="crisis-overlay">
+  <div style="font-size:3.5rem;margin-bottom:20px">💙</div>
+  <div style="font-family:Syne,sans-serif;font-size:1.5rem;font-weight:900;color:#f0f0ff;margin-bottom:12px" id="crisis-heading">Hey. We hear you.</div>
+  <p id="crisis-msg" style="font-size:.9rem;color:#9090b0;max-width:300px;line-height:1.8;margin:0 0 8px">You are not alone in this. It is okay to reach out.</p>
+  <p id="crisis-sub" style="font-size:.8rem;color:#606078;max-width:280px;line-height:1.7;margin:0 0 24px"></p>
+  <div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:340px">
+    <button onclick="crisisJoinChat()" class="btn btn-v btn-full" style="border-radius:14px;padding:14px">
+      💬 Talk to someone anonymously now
+    </button>
+    <a href="tel:9152987821" class="crisis-helpline">
+      📞 iCall — 9152987821 <span style="opacity:.6;font-size:.75rem">&nbsp;Free · Mon–Sat</span>
+    </a>
+    <a href="tel:18602662345" class="crisis-helpline">
+      📞 Vandrevala — 1860-2662-345 <span style="opacity:.6;font-size:.75rem">&nbsp;24/7 Free</span>
+    </a>
+    <a href="tel:08046110007" class="crisis-helpline">
+      📞 NIMHANS — 080-46110007 <span style="opacity:.6;font-size:.75rem">&nbsp;24/7</span>
+    </a>
+    <button onclick="crisisDismiss()" style="background:none;border:none;color:var(--tx3);font-size:.82rem;cursor:pointer;margin-top:8px;font-family:inherit">
+      I am okay — just needed to express this
+    </button>
+  </div>
+</div>
 </body>
 </html>

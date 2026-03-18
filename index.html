@@ -257,10 +257,10 @@ async function sendOtp() {
       attempt++;
       try {
         r = await fetch(`${API}/api/auth/send-otp`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
-        });
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, anonymousName: name, gender: selGender })  // ← CORRECT
+});
         break; // success — exit retry loop
       } catch(fetchErr) {
         if (attempt < 3) {

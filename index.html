@@ -4,18 +4,17 @@
 <meta charset="UTF-8"/>
 <link rel="manifest" href="/manifest.json"/>
 <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
-
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
 <meta name="description" content="Annomuss — Express yourself anonymously. No judgement. Just you."/>
 <meta property="og:title" content="Annomuss — Express yourself anonymously"/>
 <meta property="og:description" content="Say what you feel. No judgement. No real name. Just you."/>
-<meta property="og:image" content="https://annomuss-backend-icgp.onrender.com/og.png"/>
 <meta property="og:type" content="website"/>
-<meta property="og:url" content="https://graceful-sawine-572c39.netlify.app"/>
+<meta property="og:url" content="https://annomuss-frontend.vercel.app"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="Annomuss 🎭"/>
 <meta name="twitter:description" content="Express yourself anonymously. No judgement."/>
 <meta name="theme-color" content="#06060f"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Annomuss 🎭</title>
@@ -113,9 +112,9 @@ input::placeholder{color:var(--tx3)}
       <div class="field">
         <label>Gender <span style="color:var(--tx3);font-weight:400;text-transform:none;font-size:.7rem">(for random chat matching)</span></label>
         <div class="gender-grid">
-          <div class="gopt" onclick="setGender('male',this)"><span class="gopt-ico">♂️</span>Male</div>
-          <div class="gopt" onclick="setGender('female',this)"><span class="gopt-ico">♀️</span>Female</div>
-          <div class="gopt sel" onclick="setGender('prefer_not_to_say',this)"><span class="gopt-ico">🤍</span>Private</div>
+          <div class="gopt" onclick="setGender('Male',this)"><span class="gopt-ico">♂️</span>Male</div>
+          <div class="gopt" onclick="setGender('Female',this)"><span class="gopt-ico">♀️</span>Female</div>
+          <div class="gopt sel" onclick="setGender('Private',this)"><span class="gopt-ico">🤍</span>Private</div>
         </div>
       </div>
 
@@ -156,9 +155,9 @@ input::placeholder{color:var(--tx3)}
 
 <script>
 const API = "https://annomuss-backend-icgp.onrender.com";
-let selGender = "prefer_not_to_say", resendIv = null;
+let selGender = "Private", resendIv = null;
 
-// If token exists, validate it before redirecting
+// ── Auto-login if token exists ────────────────
 (async function() {
   const tk = localStorage.getItem("token");
   if (!tk) return;
@@ -171,13 +170,11 @@ let selGender = "prefer_not_to_say", resendIv = null;
       localStorage.setItem("user", JSON.stringify(fresh));
       location.href = "dashboard.html";
     } else {
-      // Token invalid — clear and show login
       localStorage.removeItem("token");
       localStorage.removeItem("user");
     }
   } catch(e) {
-    // Network error — redirect anyway (offline case)
-    location.href = "dashboard.html";
+    // Network error — stay on login
   }
 })();
 
@@ -186,63 +183,84 @@ function setGender(g, el) {
   document.querySelectorAll(".gopt").forEach(e => e.classList.remove("sel"));
   el.classList.add("sel");
 }
-function sanitize(s) { return String(s||"").replace(/[<>"'`\\]/g,"").trim(); }
+
+function sanitize(s) { return String(s || "").replace(/[<>"'`\\]/g, "").trim(); }
+
 function showAlert(id, msg, type) {
   const el = document.getElementById(id);
-  el.textContent = msg; el.className = `alert ${type}`;
+  el.textContent = msg;
+  el.className = `alert ${type}`;
 }
-function clearAlert(id) { const el=document.getElementById(id); el.className="alert"; el.textContent=""; }
 
-// ── OTP Boxes ─────────────────────────────────────────────────────────────
+function clearAlert(id) {
+  const el = document.getElementById(id);
+  el.className = "alert";
+  el.textContent = "";
+}
+
+// ── OTP Boxes ─────────────────────────────────
 const boxes = [...document.querySelectorAll(".otp-box")];
 boxes.forEach((box, i) => {
   box.addEventListener("input", () => {
-    box.value = box.value.replace(/\D/g,"").slice(-1);
+    box.value = box.value.replace(/\D/g, "").slice(-1);
     box.classList.toggle("filled", !!box.value);
-    if (box.value && i < 5) boxes[i+1].focus();
-    if (boxes.every(b=>b.value)) verifyOtp();
+    if (box.value && i < 5) boxes[i + 1].focus();
+    if (boxes.every(b => b.value)) verifyOtp();
   });
   box.addEventListener("keydown", e => {
-    if (e.key==="Backspace" && !box.value && i>0) boxes[i-1].focus();
-    if (e.key==="Enter") verifyOtp();
+    if (e.key === "Backspace" && !box.value && i > 0) boxes[i - 1].focus();
+    if (e.key === "Enter") verifyOtp();
   });
   box.addEventListener("paste", e => {
     e.preventDefault();
-    const p = (e.clipboardData||window.clipboardData).getData("text").replace(/\D/g,"").slice(0,6);
-    [...p].forEach((ch,j) => { if(boxes[j]){boxes[j].value=ch;boxes[j].classList.add("filled");}});
-    if(boxes[Math.min(p.length,5)]) boxes[Math.min(p.length,5)].focus();
-    if(p.length===6) verifyOtp();
+    const p = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, 6);
+    [...p].forEach((ch, j) => { if (boxes[j]) { boxes[j].value = ch; boxes[j].classList.add("filled"); } });
+    if (boxes[Math.min(p.length, 5)]) boxes[Math.min(p.length, 5)].focus();
+    if (p.length === 6) verifyOtp();
   });
 });
-function getOtp() { return boxes.map(b=>b.value).join(""); }
-function clearOtp() { boxes.forEach(b=>{b.value="";b.classList.remove("filled");}); boxes[0].focus(); }
 
-// ── Resend timer ──────────────────────────────────────────────────────────
-function startTimer(s=60) {
-  let t=s;
-  document.getElementById("resendBtn").disabled=true;
-  document.getElementById("resendCount").style.display="inline";
+function getOtp() { return boxes.map(b => b.value).join(""); }
+function clearOtp() { boxes.forEach(b => { b.value = ""; b.classList.remove("filled"); }); boxes[0].focus(); }
+
+// ── Resend timer ──────────────────────────────
+function startTimer(s = 60) {
+  let t = s;
+  document.getElementById("resendBtn").disabled = true;
+  document.getElementById("resendCount").style.display = "inline";
   clearInterval(resendIv);
-  resendIv=setInterval(()=>{
-    t--; document.getElementById("resendTimer").textContent=t;
-    if(t<=0){clearInterval(resendIv);document.getElementById("resendBtn").disabled=false;document.getElementById("resendCount").style.display="none";}
-  },1000);
+  resendIv = setInterval(() => {
+    t--;
+    document.getElementById("resendTimer").textContent = t;
+    if (t <= 0) {
+      clearInterval(resendIv);
+      document.getElementById("resendBtn").disabled = false;
+      document.getElementById("resendCount").style.display = "none";
+    }
+  }, 1000);
 }
 
-// ── Send OTP ──────────────────────────────────────────────────────────────
+// ── Send OTP ──────────────────────────────────
+// FIX: sends email + anonymousName + gender together
 async function sendOtp() {
   clearAlert("a1");
+
   const email = sanitize(document.getElementById("emailIn").value);
   const name  = sanitize(document.getElementById("nameIn").value);
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    return showAlert("a1","Please enter a valid email address ❌","err");
-  if (!name || name.length<2) return showAlert("a1","Name must be at least 2 characters ❌","err");
-  if (name.length>30) return showAlert("a1","Name must be 30 characters or less ❌","err");
+  const gender = selGender;
 
-  const btn=document.getElementById("sendBtn");
-  btn.disabled=true;
-  btn.innerHTML='<span class="spin"></span>Sending...';
-  // Show wake-up message after 6s (Render free tier sleeps ~15s)
+  // Client-side validation
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return showAlert("a1", "Please enter a valid email address ❌", "err");
+  if (!name || name.length < 2)
+    return showAlert("a1", "Name must be at least 2 characters ❌", "err");
+  if (name.length > 30)
+    return showAlert("a1", "Name must be 30 characters or less ❌", "err");
+
+  const btn = document.getElementById("sendBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Sending...';
+
   const wakeTimer = setTimeout(() => {
     if (btn.disabled) {
       showAlert("a1", "⏳ Server is waking up — first load takes ~20s. Please wait…", "ok");
@@ -251,32 +269,27 @@ async function sendOtp() {
   }, 6000);
 
   try {
-    // Retry loop — try up to 3 times with 20s gap (handles Render cold start)
-    let r, attempt = 0;
-    while (attempt < 3) {
-      attempt++;
-      try {
-        r = await fetch(`${API}/api/auth/send-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, anonymousName: name, gender: selGender })  // ← CORRECT
-});
-        break; // success — exit retry loop
-      } catch(fetchErr) {
-        if (attempt < 3) {
-          btn.innerHTML = `<span class="spin"></span>Retrying (${attempt}/3)...`;
-          showAlert("a1", `⏳ Server still waking up… retry ${attempt}/3`, "ok");
-          await new Promise(res => setTimeout(res, 8000)); // wait 8s then retry
-        } else {
-          throw fetchErr; // all retries failed
-        }
-      }
-    }
+    // ✅ THE FIX — send all three fields the backend requires
+    const payload = {
+      email:         email,
+      anonymousName: name,
+      gender:        gender
+    };
+
+    console.log("Sending OTP payload:", payload); // debug
+
+    const r = await fetch(`${API}/api/auth/send-otp`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(payload)
+    });
 
     clearTimeout(wakeTimer);
     const d = await r.json();
+
     if (!r.ok) throw new Error(d.message || "Failed to send OTP");
 
+    // Success — move to step 2
     document.getElementById("otpSub").textContent = `Code sent to ${email}`;
     document.getElementById("s1").classList.remove("on");
     document.getElementById("s2").classList.add("on");
@@ -284,121 +297,131 @@ async function sendOtp() {
     startTimer(60);
     clearAlert("a1");
     setTimeout(() => boxes[0].focus(), 100);
-  } catch(e) {
+
+  } catch (e) {
     clearTimeout(wakeTimer);
     let msg = e.message || "";
-    if (!msg || msg.includes("fetch") || msg.includes("network") || msg.includes("Failed") || msg.includes("Load failed")) {
-      msg = "⚠️ Server is still waking up. Wait 15 seconds and tap Send OTP again.";
-    } else if (msg.includes("timeout") || msg.includes("abort") || msg.includes("signal")) {
-      msg = "⚠️ Server took too long. Wait 15 seconds and tap Send OTP again.";
+    if (!msg || msg.includes("fetch") || msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+      msg = "⚠️ Server is waking up. Wait 15 seconds and tap Send OTP again.";
     }
     showAlert("a1", msg, "err");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "Send OTP ✉️";
   }
-  finally { btn.disabled = false; btn.innerHTML = "Send OTP ✉️"; }
 }
 
+// ── Resend OTP ────────────────────────────────
 async function resendOtp() {
   clearAlert("a2");
-  const email=sanitize(document.getElementById("emailIn").value);
+  const email  = sanitize(document.getElementById("emailIn").value);
+  const name   = sanitize(document.getElementById("nameIn").value);
+  const gender = selGender;
+
   try {
-    const r=await fetch(`${API}/api/auth/send-otp`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
-    const d=await r.json();
-    if(!r.ok) throw new Error(d.message);
-    showAlert("a2","New code sent! Check your inbox ✅","ok");
-    clearOtp(); startTimer(60);
-  } catch(e) { showAlert("a2",e.message,"err"); }
+    // ✅ FIX — also send all fields on resend
+    const r = await fetch(`${API}/api/auth/send-otp`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ email, anonymousName: name, gender })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message);
+    showAlert("a2", "New code sent! Check your inbox ✅", "ok");
+    clearOtp();
+    startTimer(60);
+  } catch (e) {
+    showAlert("a2", e.message, "err");
+  }
 }
 
-// ── Verify OTP ────────────────────────────────────────────────────────────
+// ── Verify OTP ────────────────────────────────
 async function verifyOtp() {
   clearAlert("a2");
-  const otp=getOtp();
-  if(otp.length!==6) return showAlert("a2","Enter all 6 digits ❌","err");
-  const btn=document.getElementById("verBtn");
-  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Verifying...';
+  const otp = getOtp();
+  if (otp.length !== 6) return showAlert("a2", "Enter all 6 digits ❌", "err");
+
+  const btn = document.getElementById("verBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Verifying...';
+
   try {
-    const email=sanitize(document.getElementById("emailIn").value);
-    const name=sanitize(document.getElementById("nameIn").value);
-    const r=await fetch(`${API}/api/auth/verify-otp`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,otp,anonymousName:name,gender:selGender})});
-    const d=await r.json();
-    if(!r.ok) throw new Error(d.message||"Verification failed");
-    localStorage.setItem("token",d.token);
-    localStorage.setItem("user",JSON.stringify(d.user));
-    showAlert("a2",`Welcome${d.user?.anonymousName?" "+d.user.anonymousName:""}! 🎭`,"ok");
+    const email  = sanitize(document.getElementById("emailIn").value);
+    const name   = sanitize(document.getElementById("nameIn").value);
+    const gender = selGender;
+
+    const r = await fetch(`${API}/api/auth/verify-otp`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ email, otp, anonymousName: name, gender })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || "Verification failed");
+
+    localStorage.setItem("token", d.token);
+    localStorage.setItem("user", JSON.stringify(d.user));
+    showAlert("a2", `Welcome${d.user?.anonymousName ? " " + d.user.anonymousName : ""}! 🎭`, "ok");
     clearInterval(resendIv);
-    setTimeout(()=>location.href="dashboard.html",700);
-  } catch(e) { showAlert("a2",e.message,"err"); clearOtp(); }
-  finally { btn.disabled=false; btn.innerHTML="Enter Annomuss 🚀"; }
+    setTimeout(() => location.href = "dashboard.html", 700);
+
+  } catch (e) {
+    showAlert("a2", e.message, "err");
+    clearOtp();
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "Enter Annomuss 🚀";
+  }
 }
 
 function goBack() {
   clearInterval(resendIv);
   document.getElementById("s2").classList.remove("on");
   document.getElementById("s1").classList.add("on");
-  document.getElementById("prog").style.width="50%";
-  clearAlert("a1"); clearAlert("a2"); clearOtp();
+  document.getElementById("prog").style.width = "50%";
+  clearAlert("a1");
+  clearAlert("a2");
+  clearOtp();
 }
 
-document.getElementById("emailIn").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("nameIn").focus();});
-document.getElementById("nameIn").addEventListener("keydown",e=>{if(e.key==="Enter")sendOtp();});
+document.getElementById("emailIn").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("nameIn").focus(); });
+document.getElementById("nameIn").addEventListener("keydown", e => { if (e.key === "Enter") sendOtp(); });
 </script>
 
 <script>
-// ── PWA Service Worker Registration ──
+// ── PWA Service Worker ────────────────────────
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js")
       .then(reg => {
         console.log("✅ SW registered:", reg.scope);
-        // Check for updates every 60s
         setInterval(() => reg.update(), 60000);
       })
       .catch(err => console.warn("SW reg failed:", err));
   });
 }
 
-// ── Install Prompt (Add to Home Screen) ──
+// ── PWA Install Banner ────────────────────────
 let deferredPrompt = null;
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   deferredPrompt = e;
-  // Show install banner after 30 seconds if not installed
   setTimeout(showInstallBanner, 30000);
 });
 
 function showInstallBanner() {
-  if (!deferredPrompt) return;
-  if (localStorage.getItem("ann_pwa_dismissed")) return;
-
+  if (!deferredPrompt || localStorage.getItem("ann_pwa_dismissed")) return;
   const banner = document.createElement("div");
   banner.id = "pwa-banner";
-  banner.style.cssText = `
-    position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:12px;right:12px;
-    background:linear-gradient(135deg,#10101f,#161628);
-    border:1px solid rgba(124,92,244,.35);border-radius:18px;
-    padding:14px 16px;z-index:9000;display:flex;align-items:center;gap:12px;
-    box-shadow:0 8px 32px rgba(0,0,0,.6);animation:slideUp .3s ease;
-  `;
-  banner.innerHTML = `
-    <style>@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}</style>
-    <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7c5cf4,#ff5c7a);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">🎭</div>
-    <div style="flex:1;min-width:0">
-      <div style="font-family:'Syne',sans-serif;font-size:.82rem;font-weight:900;color:#edeaff">Install Annomuss</div>
-      <div style="font-size:.72rem;color:#4a4770;margin-top:2px">Add to home screen for quick access</div>
-    </div>
-    <button onclick="installPWA()" style="background:linear-gradient(135deg,#7c5cf4,#ff5c7a);border:none;color:#fff;border-radius:10px;padding:8px 14px;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:900;cursor:pointer;white-space:nowrap">Install</button>
-    <button onclick="dismissBanner()" style="background:none;border:none;color:#4a4770;cursor:pointer;font-size:1rem;padding:4px;flex-shrink:0">✕</button>
-  `;
+  banner.style.cssText = `position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:12px;right:12px;background:linear-gradient(135deg,#10101f,#161628);border:1px solid rgba(124,92,244,.35);border-radius:18px;padding:14px 16px;z-index:9000;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.6);animation:slideUp .3s ease;`;
+  banner.innerHTML = `<style>@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}</style><div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7c5cf4,#ff5c7a);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">🎭</div><div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:900;color:#edeaff">Install Annomuss</div><div style="font-size:.72rem;color:#4a4770;margin-top:2px">Add to home screen for quick access</div></div><button onclick="installPWA()" style="background:linear-gradient(135deg,#7c5cf4,#ff5c7a);border:none;color:#fff;border-radius:10px;padding:8px 14px;font-size:.72rem;font-weight:900;cursor:pointer;white-space:nowrap">Install</button><button onclick="dismissBanner()" style="background:none;border:none;color:#4a4770;cursor:pointer;font-size:1rem;padding:4px;flex-shrink:0">✕</button>`;
   document.body.appendChild(banner);
 }
 
 function installPWA() {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(result => {
-    if (result.outcome === "accepted") {
-      document.getElementById("pwa-banner")?.remove();
-    }
+  deferredPrompt.userChoice.then(r => {
+    if (r.outcome === "accepted") document.getElementById("pwa-banner")?.remove();
     deferredPrompt = null;
   });
 }
@@ -411,9 +434,7 @@ function dismissBanner() {
 window.addEventListener("appinstalled", () => {
   document.getElementById("pwa-banner")?.remove();
   deferredPrompt = null;
-  console.log("✅ Annomuss installed as PWA");
 });
 </script>
-
 </body>
 </html>

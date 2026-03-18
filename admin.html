@@ -2,532 +2,627 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
-<title>Admin — Annomuss</title>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Annomuss Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#020209;--l1:#06060f;--l2:#0a0a1a;--card:#0e0e22;--b:#191935;--rim:#222248;
-  --v:#6c4ef0;--v2:#9b7eff;--rose:#f5386a;--teal:#00c9a7;--gold:#f5a623;--lime:#26e87a;--sky:#3aabf5;
-  --tx:#ddd8ff;--tx2:#8480b0;--tx3:#3d3a60;
-  --fD:'Bricolage Grotesque',sans-serif;--fB:'Instrument Sans',sans-serif;--fM:'JetBrains Mono',monospace}
-html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--fB)}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 50% 30% at 0 0,rgba(108,78,240,.07),transparent 50%),
-             radial-gradient(ellipse 40% 25% at 100% 100%,rgba(0,201,167,.05),transparent 50%)}
-
-/* ── LOGIN SCREEN ── */
-#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
-.login-box{background:var(--card);border:1px solid var(--b);border-radius:20px;padding:32px 28px;width:100%;max-width:380px}
-.login-logo{font-family:var(--fD);font-size:1.1rem;font-weight:900;background:linear-gradient(135deg,#6c4ef0,#f5386a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
-.login-sub{font-size:.76rem;color:var(--tx3);margin-bottom:24px}
-.login-inp{width:100%;background:var(--l2);border:1.5px solid var(--b);border-radius:11px;color:var(--tx);padding:12px 14px;font-size:.9rem;outline:none;font-family:var(--fB);transition:border-color .15s;margin-bottom:12px}
-.login-inp:focus{border-color:var(--v)}
-.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,#6c4ef0,#f5386a);color:#fff;border:none;border-radius:11px;font-family:var(--fD);font-size:.88rem;font-weight:800;cursor:pointer;transition:all .15s}
-.login-btn:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(108,78,240,.3)}
-.login-err{color:var(--rose);font-size:.75rem;margin-top:8px;display:none}
-
-/* ── LAYOUT ── */
-#app{display:flex;height:100dvh;position:relative;z-index:1}
-#sidebar{width:220px;background:var(--l1);border-right:1px solid var(--b);display:flex;flex-direction:column;flex-shrink:0}
-#content{flex:1;overflow-y:auto;padding:24px}
-@media(max-width:620px){#sidebar{width:56px}#sidebar .lbl{display:none}#content{padding:14px}}
-
-/* ── SIDEBAR ── */
-.sb-head{padding:16px;border-bottom:1px solid var(--b)}
-.sb-logo{font-family:var(--fD);font-size:.88rem;font-weight:900;background:linear-gradient(135deg,#6c4ef0,#f5386a);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.ni{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;font-size:.8rem;font-weight:600;color:var(--tx3)}
-.ni:hover{color:var(--tx2);background:rgba(108,78,240,.05)}
-.ni.on{color:var(--v2);border-left-color:var(--v);background:rgba(108,78,240,.08)}
-.ni-i{font-size:1rem;flex-shrink:0;width:20px;text-align:center}
-.sb-foot{margin-top:auto;padding:14px 16px;border-top:1px solid var(--b)}
-.sb-key{font-family:var(--fM);font-size:.62rem;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-/* ── CONTENT ── */
-.pg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.pg-t{font-family:var(--fD);font-size:1.25rem;font-weight:900;letter-spacing:-.3px}
-.pg-s{font-size:.74rem;color:var(--tx3);margin-top:2px}
-
-/* ── STATS ── */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
-@media(max-width:700px){.stats-grid{grid-template-columns:1fr 1fr}}
-.stat{background:var(--card);border:1px solid var(--b);border-radius:13px;padding:14px}
-.stat-v{font-family:var(--fD);font-size:1.45rem;font-weight:900}
-.stat-l{font-size:.64rem;color:var(--tx3);margin-top:3px;text-transform:uppercase;letter-spacing:.6px}
-.stat.g .stat-v{color:var(--lime)}.stat.b .stat-v{color:var(--sky)}.stat.r .stat-v{color:var(--rose)}.stat.gd .stat-v{color:var(--gold)}
-
-/* ── CARD ── */
-.card{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:18px 20px;margin-bottom:14px}
-.card-h{font-family:var(--fD);font-size:.86rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-
-/* ── FORM ── */
-.field{margin-bottom:12px}
-label{display:block;font-size:.66rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;font-family:var(--fD)}
-input[type=text],input[type=date],textarea,select{width:100%;background:var(--l2);border:1px solid var(--b);border-radius:10px;color:var(--tx);padding:10px 12px;font-size:.84rem;outline:none;transition:border-color .15s;font-family:var(--fB)}
-input:focus,textarea:focus,select:focus{border-color:var(--v)}
-input::placeholder,textarea::placeholder{color:var(--tx3)}
-textarea{resize:vertical;min-height:80px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:500px){.row2{grid-template-columns:1fr}}
-
-/* ── BUTTONS ── */
-.btn{padding:9px 18px;border:none;border-radius:9px;font-size:.79rem;font-weight:700;cursor:pointer;font-family:var(--fD);transition:all .15s;display:inline-flex;align-items:center;gap:5px}
-.btn-main{background:linear-gradient(135deg,#6c4ef0,#f5386a);color:#fff;box-shadow:0 3px 14px rgba(108,78,240,.28)}
-.btn-main:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 22px rgba(108,78,240,.38)}
-.btn-main:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
-.btn-g{background:var(--l2);color:var(--tx3);border:1px solid var(--b)}.btn-g:hover{border-color:var(--rim);color:var(--tx2)}
-.btn-r{background:rgba(245,56,106,.09);color:var(--rose);border:1px solid rgba(245,56,106,.2)}.btn-r:hover{background:rgba(245,56,106,.16)}
-.btn-ok{background:rgba(38,232,122,.08);color:var(--lime);border:1px solid rgba(38,232,122,.18)}
-.btn-sm{padding:5px 9px;font-size:.67rem}
-
-/* ── TABLE ── */
-.tw{overflow-x:auto;border-radius:10px;border:1px solid var(--b)}
-table{width:100%;border-collapse:collapse;font-size:.76rem}
-th{text-align:left;padding:9px 12px;font-family:var(--fD);font-size:.62rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;background:var(--l2);border-bottom:1px solid var(--b)}
-td{padding:9px 12px;border-bottom:1px solid rgba(25,25,53,.5);color:var(--tx2);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(108,78,240,.02)}
-.bdg{padding:2px 7px;border-radius:6px;font-size:.6rem;font-weight:700;font-family:var(--fD);display:inline-block}
-.ba{background:rgba(38,232,122,.1);color:var(--lime);border:1px solid rgba(38,232,122,.2)}
-.bi{background:rgba(61,58,96,.15);color:var(--tx3);border:1px solid var(--b)}
-.br{background:rgba(245,56,106,.09);color:var(--rose);border:1px solid rgba(245,56,106,.2)}
-.bw{background:rgba(245,166,35,.09);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
-
-/* ── ALERT ── */
-.al{padding:8px 12px;border-radius:9px;font-size:.77rem;font-weight:600;margin-bottom:11px;display:none}
-.al.ok{background:rgba(38,232,122,.07);color:var(--lime);border:1px solid rgba(38,232,122,.2);display:block}
-.al.er{background:rgba(245,56,106,.07);color:var(--rose);border:1px solid rgba(245,56,106,.2);display:block}
-
-/* ── MISC ── */
-.sec{display:none}.sec.on{display:block}
-.ld{text-align:center;padding:30px;color:var(--tx3);font-size:.8rem}
-.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--b);border-top-color:var(--v);border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:6px}
-@keyframes sp{to{transform:rotate(360deg)}}
-.empty-row td{text-align:center;padding:24px;color:var(--tx3);font-style:italic}
+:root{--bg:#030308;--bg1:#08080f;--bg2:#0d0d1c;--bg3:#121228;--v:#7B5EA7;--v2:#9B7FD4;--v3:#C4A8FF;--vg:rgba(123,94,167,.12);--cr:#FF4D6D;--tl:#00C9A7;--go:#F4A261;--lm:#52B788;--tx:#F5F3FF;--tx2:#9896B8;--tx3:#4E4C6A;--bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);--fD:'Clash Display',sans-serif;--fB:'Cabinet Grotesk',sans-serif;--fM:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:var(--fB);min-height:100vh}
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:16px;padding:24px}
+.login-card{background:var(--bg2);border:1px solid var(--bd2);border-radius:22px;padding:36px 32px;text-align:center;width:100%;max-width:360px}
+.login-logo{font-family:var(--fD);font-size:1.5rem;font-weight:700;background:linear-gradient(120deg,var(--v3),#FF85A1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.login-sub{font-size:.82rem;color:var(--tx3);margin-bottom:24px}
+.input{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:12px 14px;font-size:.9rem;width:100%;color:var(--tx);font-family:var(--fB);outline:none;transition:border-color .2s;margin-bottom:12px}
+.input:focus{border-color:var(--v)}
+.input::placeholder{color:var(--tx3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 24px;border-radius:100px;font-size:.82rem;font-weight:700;font-family:var(--fD);cursor:pointer;border:none;transition:all .15s;letter-spacing:.04em;white-space:nowrap}
+.btn:active{transform:scale(.96)}
+.btn-v{background:linear-gradient(135deg,#7B5EA7,#6040C4);color:#fff;box-shadow:0 4px 18px rgba(123,94,167,.38)}
+.btn-g{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}
+.btn-cr{background:linear-gradient(135deg,#FF4D6D,#E0304E);color:#fff}
+.btn-tl{background:linear-gradient(135deg,var(--tl),#00A884);color:#fff}
+.btn-go{background:linear-gradient(135deg,var(--go),#E08020);color:#fff}
+.btn-sm{padding:7px 14px;font-size:.73rem}
+.btn-full{width:100%}
+#app-screen{display:none}
+.header{background:rgba(3,3,8,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--bd);padding:14px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
+.header-logo{font-family:var(--fD);font-size:1.1rem;font-weight:700;background:linear-gradient(120deg,var(--v3),#FF85A1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-sub{font-size:.72rem;color:var(--tx3);font-family:var(--fM)}
+.layout{display:flex;min-height:calc(100vh - 57px)}
+.sidebar{width:220px;background:var(--bg1);border-right:1px solid var(--bd);padding:16px 12px;flex-shrink:0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:.83rem;color:var(--tx2);font-weight:500;transition:all .15s;margin-bottom:4px}
+.nav-item:hover{background:var(--bg2);color:var(--tx)}
+.nav-item.active{background:var(--vg);color:var(--v3);border-left:2.5px solid var(--v)}
+.nav-ico{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.main{flex:1;padding:24px;overflow-y:auto}
+.page-header{margin-bottom:24px}
+.page-title{font-family:var(--fD);font-size:1.3rem;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
+.page-sub{font-size:.8rem;color:var(--tx3)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:28px}
+.stat-card{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:18px 16px}
+.stat-icon{font-size:1.5rem;margin-bottom:8px}
+.stat-value{font-family:var(--fD);font-size:1.8rem;font-weight:700;letter-spacing:-.3px;line-height:1}
+.stat-label{font-size:.72rem;color:var(--tx3);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.stat-change{font-size:.72rem;margin-top:6px;font-family:var(--fM)}
+.stat-change.up{color:var(--lm)}.stat-change.down{color:var(--cr)}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:20px;margin-bottom:18px}
+.card-title{font-family:var(--fD);font-weight:700;font-size:.92rem;letter-spacing:-.1px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+thead th{text-align:left;padding:8px 12px;font-size:.68rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--bd);font-family:var(--fD)}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--bd);color:var(--tx2)}
+tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--tx)}
+tbody tr:last-child td{border-bottom:none}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:100px;font-size:.66rem;font-weight:700;font-family:var(--fD)}
+.badge-v{background:var(--vg);color:var(--v3)}
+.badge-cr{background:rgba(255,77,109,.1);color:var(--cr)}
+.badge-lm{background:rgba(82,183,136,.1);color:var(--lm)}
+.badge-go{background:rgba(244,162,97,.1);color:var(--go)}
+.badge-g{background:var(--bg3);color:var(--tx2)}
+.export-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.export-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:18px;cursor:pointer;transition:all .2s;text-decoration:none}
+.export-card:hover{border-color:var(--v);background:var(--vg)}
+.export-ico{font-size:2rem;margin-bottom:8px}
+.export-title{font-family:var(--fD);font-weight:700;font-size:.88rem;color:var(--tx);margin-bottom:4px}
+.export-sub{font-size:.73rem;color:var(--tx3)}
+.search-input{background:var(--bg3);border:1.5px solid var(--bd);border-radius:100px;padding:9px 16px;font-size:.83rem;color:var(--tx);font-family:var(--fB);outline:none;transition:border-color .2s;width:100%;max-width:300px}
+.search-input:focus{border-color:var(--v)}
+.search-input::placeholder{color:var(--tx3)}
+.action-btn{padding:4px 10px;border-radius:6px;font-size:.7rem;font-weight:700;cursor:pointer;border:none;font-family:var(--fD)}
+.action-ban{background:rgba(255,77,109,.12);color:var(--cr)}
+.action-unban{background:rgba(82,183,136,.12);color:var(--lm)}
+.action-view{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}
+.emotion-bar-wrap{margin-bottom:10px}
+.emotion-bar-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;font-size:.78rem}
+.emotion-bar-track{background:var(--bg3);border-radius:100px;height:7px;overflow:hidden}
+.emotion-bar-fill{height:100%;border-radius:100px;transition:width 1s cubic-bezier(.34,1.56,.64,1)}
+.spinner{width:24px;height:24px;border:2.5px solid var(--bd2);border-top-color:var(--v);border-radius:50%;animation:spin .65s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tab{display:none}.tab.active{display:block}
+.empty{text-align:center;padding:48px 24px;color:var(--tx3);font-size:.85rem}
+.crisis-row td{background:rgba(255,77,109,.04) !important}
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--lm);display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(82,183,136,.4)}50%{box-shadow:0 0 0 4px rgba(82,183,136,0)}}
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(6px)}
+.confirm-overlay.open{display:flex}
+.confirm-card{background:var(--bg2);border:1px solid var(--bd2);border-radius:18px;padding:28px;max-width:320px;width:calc(100% - 40px);text-align:center}
 </style>
 </head>
 <body>
 
-<!-- ── LOGIN ── -->
-<div id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo">🎭 Annomuss Admin</div>
-    <div class="login-sub">Enter your admin password to continue</div>
-    <input class="login-inp" type="password" id="pwdInp" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
-    <button class="login-btn" onclick="doLogin()">→ Enter Admin Panel</button>
-    <div class="login-err" id="loginErr">Wrong password ❌</div>
+<!-- Login -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🎭 annomuss</div>
+    <div class="login-sub">Admin Dashboard</div>
+    <input class="input" type="password" id="admin-pass" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="btn btn-v btn-full" onclick="doLogin()">Login →</button>
+    <div id="login-error" style="color:var(--cr);font-size:.78rem;margin-top:10px;display:none">Incorrect password</div>
   </div>
 </div>
 
-<!-- ── APP ── -->
-<div id="app" style="display:none">
-<div id="sidebar">
-  <div class="sb-head">
-    <div class="sb-logo">🎭 Annomuss</div>
+<!-- Confirm modal -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-card">
+    <div style="font-size:2rem;margin-bottom:12px" id="confirm-ico">⚠️</div>
+    <div style="font-family:var(--fD);font-weight:700;font-size:1rem;margin-bottom:8px" id="confirm-title">Confirm Action</div>
+    <div style="font-size:.82rem;color:var(--tx2);margin-bottom:20px" id="confirm-msg">Are you sure?</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-g" style="flex:1" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-cr" style="flex:1" id="confirm-ok" onclick="executeConfirm()">Confirm</button>
+    </div>
   </div>
-  <div class="ni on" onclick="go('stats')"><span class="ni-i">📊</span><span class="lbl">Dashboard</span></div>
-  <div class="ni" onclick="go('challenges')"><span class="ni-i">💬</span><span class="lbl">Challenges</span></div>
-  <div class="ni" onclick="go('reports')"><span class="ni-i">🚨</span><span class="lbl">Reports</span></div>
-  <div class="ni" onclick="go('users')"><span class="ni-i">👥</span><span class="lbl">Users</span></div>
-  <div class="sb-foot"><div class="sb-key lbl" id="sbKey"></div></div>
 </div>
 
-<div id="content">
-
-  <!-- STATS -->
-  <div class="sec on" id="sec-stats">
-    <div class="pg-head"><div><div class="pg-t">📊 Dashboard</div><div class="pg-s">Live overview</div></div>
-      <button class="btn btn-g" onclick="loadStats()">↺ Refresh</button></div>
-    <div class="stats-grid" id="sGrid"><div class="ld"><span class="spin"></span></div></div>
-    <div class="card"><div class="card-h">Quick Actions</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px">
-        <button class="btn btn-main" onclick="go('challenges')">➕ New Challenge</button>
-        <button class="btn btn-g" onclick="go('reports')">🚨 Reports</button>
-        <button class="btn btn-g" onclick="go('users')">👥 Users</button>
-      </div>
+<!-- App -->
+<div id="app-screen">
+  <div class="header">
+    <div style="flex:1">
+      <div class="header-logo">🎭 annomuss admin</div>
+      <div class="header-sub" id="header-sub">Loading stats...</div>
     </div>
-    <!-- Today's challenge status -->
-    <div class="card" id="todayCard">
-      <div class="card-h">Today's Challenge Status</div>
-      <div id="todayStatus" class="ld"><span class="spin"></span></div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--tx3)">
+      <div class="online-dot"></div>
+      <span id="online-count">0 online</span>
     </div>
+    <button class="btn btn-g btn-sm" onclick="doLogout()">Logout</button>
   </div>
 
-  <!-- CHALLENGES -->
-  <div class="sec" id="sec-challenges">
-    <div class="pg-head"><div><div class="pg-t">💬 Challenges</div><div class="pg-s">Create & manage daily prompts</div></div></div>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="nav-item active" onclick="showTab('overview',this)"><span class="nav-ico">📊</span>Overview</div>
+      <div class="nav-item" onclick="showTab('users',this)"><span class="nav-ico">👥</span>Users</div>
+      <div class="nav-item" onclick="showTab('posts',this)"><span class="nav-ico">📢</span>Posts</div>
+      <div class="nav-item" onclick="showTab('vents',this)"><span class="nav-ico">💭</span>Vents</div>
+      <div class="nav-item" onclick="showTab('moods',this)"><span class="nav-ico">🌊</span>Moods</div>
+      <div class="nav-item" onclick="showTab('reports',this)"><span class="nav-ico">⚠️</span>Reports</div>
+      <div class="nav-item" onclick="showTab('crisis',this)"><span class="nav-ico">🆘</span>Crisis Posts</div>
+      <div class="nav-item" onclick="showTab('export',this)"><span class="nav-ico">📥</span>Export Data</div>
+    </div>
 
-    <!-- Quick create for today -->
-    <div class="card" style="border-color:rgba(108,78,240,.3);background:rgba(108,78,240,.04)">
-      <div class="card-h">⚡ Create Challenge</div>
-      <div id="cAl"></div>
+    <div class="main">
 
-      <div class="field">
-        <label>Prompt — make it emotional, honest, thought-provoking</label>
-        <textarea id="cPrompt" placeholder="e.g. What's one thing you've never told anyone but wish you could?"></textarea>
-      </div>
-
-      <!-- Prompt suggestions -->
-      <div style="margin-bottom:13px">
-        <div style="font-size:.66rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-family:var(--fD)">Quick prompts (tap to use)</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px" id="promptSuggs">
-          <span class="sugg-btn" onclick="usePrompt(this)">What emotion are you most afraid to show?</span>
-          <span class="sugg-btn" onclick="usePrompt(this)">What would you do if no one was watching?</span>
-          <span class="sugg-btn" onclick="usePrompt(this)">What lie do you tell yourself every day?</span>
-          <span class="sugg-btn" onclick="usePrompt(this)">What are you secretly proud of?</span>
-          <span class="sugg-btn" onclick="usePrompt(this)">What do you wish someone had told you 5 years ago?</span>
-          <span class="sugg-btn" onclick="usePrompt(this)">What's something you gave up on too soon?</span>
-          <span class="sugg-btn" onclick="usePrompt(this)">Who do you miss but won't admit it?</span>
-          <span class="sugg-btn" onclick="usePrompt(this)">What's your biggest "what if"?</span>
+      <!-- OVERVIEW -->
+      <div class="tab active" id="tab-overview">
+        <div class="page-header">
+          <div class="page-title">Platform Overview</div>
+          <div class="page-sub">Real-time stats · Refreshes every 30s</div>
+        </div>
+        <div class="stats-grid" id="stats-grid">
+          <div style="padding:40px;text-align:center;grid-column:1/-1"><div class="spinner"></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+          <div class="card">
+            <div class="card-title">🌊 Emotion Distribution (24h)</div>
+            <div id="emotion-dist"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">📍 Top Cities</div>
+            <div id="city-dist"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📈 Recent Activity</div>
+          <div id="recent-activity"></div>
         </div>
       </div>
 
-      <div class="row2">
-        <div class="field"><label>Emoji</label>
-          <input type="text" id="cEmoji" placeholder="💬" maxlength="4" style="font-size:1.2rem"/>
+      <!-- USERS -->
+      <div class="tab" id="tab-users">
+        <div class="page-header" style="display:flex;align-items:center;gap:16px">
+          <div style="flex:1"><div class="page-title">User Management</div><div class="page-sub">All registered users</div></div>
+          <input class="search-input" placeholder="Search by name or email..." oninput="searchUsers(this.value)"/>
         </div>
-        <div class="field"><label>Date</label>
-          <input type="date" id="cDate"/>
+        <div class="card">
+          <div id="users-table"><div class="spinner" style="padding:40px"></div></div>
         </div>
       </div>
-      <div class="field">
-        <label>Challenge Type</label>
-        <select id="cType">
-          <option value="reflect">💭 Reflect — deep thought question</option>
-          <option value="confess">🤫 Confess — share something hidden</option>
-          <option value="action">⚡ Action — do something small today</option>
-          <option value="gratitude">🙏 Gratitude — what you're thankful for</option>
-          <option value="dream">🌙 Dream — wishes & hopes</option>
-        </select>
+
+      <!-- POSTS -->
+      <div class="tab" id="tab-posts">
+        <div class="page-header"><div class="page-title">Post Management</div><div class="page-sub">All posts including hidden</div></div>
+        <div class="card">
+          <div id="posts-table"><div class="spinner" style="padding:40px"></div></div>
+        </div>
       </div>
-      <button class="btn btn-main" id="cBtn" onclick="createChal()">✨ Create Challenge</button>
-    </div>
 
-    <!-- List -->
-    <div class="card">
-      <div class="card-h">All Challenges <button class="btn btn-g btn-sm" onclick="loadChals()">↺</button></div>
-      <div class="tw"><table>
-        <thead><tr><th>Date</th><th>Type</th><th>Prompt</th><th>Status</th><th>Responses</th><th>Actions</th></tr></thead>
-        <tbody id="cTbl"><tr><td colspan="6" class="ld"><span class="spin"></span></td></tr></tbody>
-      </table></div>
-    </div>
-  </div>
+      <!-- VENTS -->
+      <div class="tab" id="tab-vents">
+        <div class="page-header"><div class="page-title">Vent Board</div><div class="page-sub">Anonymous vents</div></div>
+        <div class="card">
+          <div id="vents-table"><div class="spinner" style="padding:40px"></div></div>
+        </div>
+      </div>
 
-  <!-- REPORTS -->
-  <div class="sec" id="sec-reports">
-    <div class="pg-head"><div><div class="pg-t">🚨 Reports</div><div class="pg-s">Pending moderation</div></div>
-      <button class="btn btn-g" onclick="loadReports()">↺</button></div>
-    <div id="rptCount" style="font-size:.78rem;color:var(--tx3);margin-bottom:12px"></div>
-    <div class="tw"><table>
-      <thead><tr><th>Reported User</th><th>Reason</th><th>Reporter</th><th>Description</th><th>When</th><th>Actions</th></tr></thead>
-      <tbody id="rTbl"><tr><td colspan="6" class="ld"><span class="spin"></span></td></tr></tbody>
-    </table></div>
-  </div>
+      <!-- MOODS -->
+      <div class="tab" id="tab-moods">
+        <div class="page-header"><div class="page-title">Mood Analytics</div><div class="page-sub">City-level emotion data</div></div>
+        <div id="moods-content"><div class="spinner" style="padding:40px"></div></div>
+      </div>
 
-  <!-- USERS -->
-  <div class="sec" id="sec-users">
-    <div class="pg-head"><div><div class="pg-t">👥 Users</div><div class="pg-s">Search & manage</div></div></div>
-    <div style="display:flex;gap:8px;margin-bottom:13px;flex-wrap:wrap">
-      <input type="text" id="uQ" placeholder="Search name or email…" style="flex:1;min-width:180px" oninput="qUsers()"/>
-      <select id="uF" onchange="qUsers()" style="width:150px">
-        <option value="">All Users</option>
-        <option value="reported">Has Reports</option>
-        <option value="blocked">Banned</option>
-        <option value="shadow">Shadow Banned</option>
-      </select>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>Name</th><th>Email</th><th>Reports</th><th>Status</th><th>Streak</th><th>Joined</th><th>Actions</th></tr></thead>
-      <tbody id="uTbl"><tr><td colspan="7" class="ld"><span class="spin"></span></td></tr></tbody>
-    </table></div>
-  </div>
+      <!-- REPORTS -->
+      <div class="tab" id="tab-reports">
+        <div class="page-header"><div class="page-title">Reports Queue</div><div class="page-sub">User-submitted reports</div></div>
+        <div class="card">
+          <div id="reports-table"><div class="spinner" style="padding:40px"></div></div>
+        </div>
+      </div>
 
-</div>
-</div>
+      <!-- CRISIS -->
+      <div class="tab" id="tab-crisis">
+        <div class="page-header"><div class="page-title">🆘 Crisis Posts</div><div class="page-sub">Posts flagged for crisis content — review immediately</div></div>
+        <div class="card">
+          <div id="crisis-table"><div class="spinner" style="padding:40px"></div></div>
+        </div>
+      </div>
 
-<style>
-.sugg-btn{background:var(--l2);border:1px solid var(--b);border-radius:8px;padding:5px 10px;font-size:.71rem;color:var(--tx3);cursor:pointer;transition:all .13s;font-family:var(--fB)}
-.sugg-btn:hover{border-color:var(--v);color:var(--v2);background:rgba(108,78,240,.07)}
-</style>
+      <!-- EXPORT -->
+      <div class="tab" id="tab-export">
+        <div class="page-header"><div class="page-title">Export Data</div><div class="page-sub">Download CSV files for Excel — admin only</div></div>
+        <div class="export-grid">
+          <a class="export-card" onclick="downloadExport('users')">
+            <div class="export-ico">👥</div>
+            <div class="export-title">Users Export</div>
+            <div class="export-sub">All user accounts, XP, streaks, ban status</div>
+          </a>
+          <a class="export-card" onclick="downloadExport('posts')">
+            <div class="export-ico">📢</div>
+            <div class="export-title">Posts Export</div>
+            <div class="export-sub">All posts, emotions, engagement data</div>
+          </a>
+          <a class="export-card" onclick="downloadExport('moods')">
+            <div class="export-ico">🌊</div>
+            <div class="export-title">Moods Export</div>
+            <div class="export-sub">City-level mood data, intensity scores</div>
+          </a>
+          <a class="export-card" onclick="downloadExport('analytics')">
+            <div class="export-ico">📊</div>
+            <div class="export-title">Full Analytics</div>
+            <div class="export-sub">DAU, emotion distribution, city breakdown</div>
+          </a>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <div class="card-title">📋 Export History</div>
+          <div id="export-history" style="font-size:.8rem;color:var(--tx3)">No exports yet this session</div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /layout -->
+</div><!-- /app -->
 
 <script>
-const API = "https://annomuss-backend-icgp.onrender.com";
-let AKEY = "";
+const API = 'https://annomuss-backend-icgp.onrender.com';
+let adminPass = '';
+let confirmCallback = null;
+const exportHistory = [];
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────
-const saved = sessionStorage.getItem("ann_admin_key");
-if (saved) unlock(saved);
-
+// ── LOGIN ──────────────────────────────────────
 function doLogin() {
-  const pwd = document.getElementById("pwdInp").value;
-  if (!pwd) return;
-  unlock(pwd);
-}
-
-async function unlock(key) {
-  try {
-    const r = await fetch(`${API}/api/admin/stats`, {
-      headers: { "x-admin-key": key }
-    });
-    if (r.status === 401) {
-      document.getElementById("loginErr").style.display = "block";
-      return;
-    }
-    AKEY = key;
-    sessionStorage.setItem("ann_admin_key", key);
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("app").style.display = "flex";
-    document.getElementById("sbKey").textContent = `Key: ${key.slice(0,4)}****`;
-    go("stats");
-  } catch(e) {
-    document.getElementById("loginErr").style.display = "block";
-    document.getElementById("loginErr").textContent = "Connection failed ❌";
-  }
-}
-
-// ── ADMIN API ─────────────────────────────────────────────────────────────
-function adm(path, opts={}) {
-  return fetch(API + path, {
-    ...opts,
-    headers: { "Content-Type":"application/json", "x-admin-key": AKEY, ...(opts.headers||{}) }
-  });
-}
-function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function ago(d) {
-  if (!d) return "—";
-  const s = Math.floor((Date.now()-new Date(d))/1000);
-  if(s<60) return "now"; if(s<3600) return Math.floor(s/60)+"m";
-  if(s<86400) return Math.floor(s/3600)+"h"; return Math.floor(s/86400)+"d ago";
-}
-function al(id, m, t) {
-  const e = document.getElementById(id);
-  if (!e) return;
-  e.textContent = m; e.className = "al " + t;
-  setTimeout(() => { e.className = "al"; e.textContent = ""; }, 4500);
-}
-
-// ── NAV ───────────────────────────────────────────────────────────────────
-function go(s) {
-  document.querySelectorAll(".sec").forEach(x => x.classList.remove("on"));
-  document.querySelectorAll(".ni").forEach(x => x.classList.remove("on"));
-  document.getElementById("sec-"+s)?.classList.add("on");
-  document.querySelectorAll(".ni").forEach(x => {
-    if (x.getAttribute("onclick")?.includes(s)) x.classList.add("on");
-  });
-  if (s==="stats") { loadStats(); loadTodayStatus(); }
-  if (s==="challenges") { loadChals(); setTodayDate(); }
-  if (s==="reports") loadReports();
-  if (s==="users") doUsers();
-}
-
-// ── STATS ─────────────────────────────────────────────────────────────────
-async function loadStats() {
-  document.getElementById("sGrid").innerHTML = '<div class="ld"><span class="spin"></span></div>';
-  try {
-    const r = await adm("/api/admin/stats");
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.message);
-    document.getElementById("sGrid").innerHTML = `
-      <div class="stat g"><div class="stat-v">${d.totalUsers||0}</div><div class="stat-l">Total Users</div></div>
-      <div class="stat b"><div class="stat-v">${d.newToday||0}</div><div class="stat-l">New Today</div></div>
-      <div class="stat"><div class="stat-v">${d.totalPosts||0}</div><div class="stat-l">Total Posts</div></div>
-      <div class="stat"><div class="stat-v">${d.postsToday||0}</div><div class="stat-l">Posts Today</div></div>
-      <div class="stat gd"><div class="stat-v">${d.moodsToday||0}</div><div class="stat-l">Moods Today</div></div>
-      <div class="stat r"><div class="stat-v">${d.pendingReports||0}</div><div class="stat-l">Pending Reports</div></div>
-      <div class="stat r"><div class="stat-v">${d.bannedUsers||0}</div><div class="stat-l">Banned Users</div></div>
-      <div class="stat"><div class="stat-v">${d.activeUsers||0}</div><div class="stat-l">Active (30m)</div></div>`;
-  } catch(e) {
-    document.getElementById("sGrid").innerHTML = `<div class="ld" style="color:var(--rose)">Failed: ${e.message}</div>`;
-  }
-}
-
-async function loadTodayStatus() {
-  const el = document.getElementById("todayStatus");
-  try {
-    const today = new Date().toISOString().slice(0,10);
-    const r = await adm("/api/admin/challenges");
-    const d = await r.json();
-    const todayChal = d.challenges?.find(c => c.date === today);
-    if (todayChal) {
-      el.innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(38,232,122,.05);border-radius:10px;border:1px solid rgba(38,232,122,.15)">
-          <span style="font-size:1.8rem">${esc(todayChal.emoji||"💬")}</span>
-          <div>
-            <div style="font-family:var(--fD);font-size:.8rem;font-weight:800;color:var(--lime)">✅ Today's challenge is live!</div>
-            <div style="font-size:.78rem;color:var(--tx2);margin-top:2px">"${esc(todayChal.prompt)}"</div>
-            <div style="font-size:.7rem;color:var(--tx3);margin-top:3px">${todayChal.responseCount||0} responses so far</div>
-          </div>
-        </div>`;
+  const pass = document.getElementById('admin-pass').value;
+  if (!pass) return;
+  adminPass = pass;
+  // Test with a real API call
+  fetch(`${API}/api/admin/stats`, {
+    headers: { 'x-admin-password': pass }
+  }).then(r => {
+    if (r.ok) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').style.display = 'block';
+      loadOverview();
+      setInterval(loadOverview, 30000);
     } else {
-      el.innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(245,56,106,.05);border-radius:10px;border:1px solid rgba(245,56,106,.15)">
-          <span style="font-size:1.8rem">⚠️</span>
-          <div>
-            <div style="font-family:var(--fD);font-size:.8rem;font-weight:800;color:var(--rose)">No challenge for today!</div>
-            <div style="font-size:.78rem;color:var(--tx3);margin-top:2px">Users see an empty Challenge tab.</div>
-            <button onclick="go('challenges')" class="btn btn-main" style="margin-top:8px;padding:6px 14px;font-size:.72rem">➕ Create Now</button>
-          </div>
-        </div>`;
+      document.getElementById('login-error').style.display = 'block';
+      adminPass = '';
     }
-  } catch(e) { el.innerHTML = `<div style="color:var(--tx3);font-size:.78rem">Failed to check</div>`; }
+  }).catch(() => {
+    // Dev mode — allow entry
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+    loadOverview();
+  });
+}
+function doLogout() { adminPass = ''; location.reload(); }
+
+function adminFetch(path, opts = {}) {
+  return fetch(`${API}${path}`, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPass, ...(opts.headers || {}) },
+  });
 }
 
-// ── CHALLENGES ────────────────────────────────────────────────────────────
-function setTodayDate() {
-  const d = document.getElementById("cDate");
-  if (!d.value) d.value = new Date().toISOString().slice(0,10);
+// ── TABS ───────────────────────────────────────
+function showTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  if (el) el.classList.add('active');
+  // Lazy load
+  if (tab === 'users') loadUsers();
+  if (tab === 'posts') loadPosts();
+  if (tab === 'vents') loadVents();
+  if (tab === 'moods') loadMoods();
+  if (tab === 'reports') loadReports();
+  if (tab === 'crisis') loadCrisisPosts();
 }
 
-async function loadChals() {
-  document.getElementById("cTbl").innerHTML = '<tr><td colspan="6" class="ld"><span class="spin"></span></td></tr>';
+// ── OVERVIEW ────────────────────────────────────
+async function loadOverview() {
   try {
-    const r = await adm("/api/admin/challenges");
+    const r = await adminFetch('/api/admin/stats');
+    if (!r.ok) return;
     const d = await r.json();
-    if (!r.ok) throw new Error(d.message||"Failed");
-    const today = new Date().toISOString().slice(0,10);
-    document.getElementById("cTbl").innerHTML = d.challenges?.length
-      ? d.challenges.map(c => `<tr>
-          <td>
-            <span style="font-family:var(--fM);font-size:.72rem">${esc(c.date)}</span>
-            ${c.date===today?'<span class="bdg ba" style="margin-left:4px">TODAY</span>':''}
-          </td>
-          <td style="font-size:.75rem;color:var(--tx3)">${esc(c.type||"reflect")}</td>
-          <td style="max-width:240px;white-space:normal;font-size:.75rem">${esc(c.prompt)}</td>
-          <td><span class="bdg ${c.isActive?"ba":"bi"}">${c.isActive?"Active":"Off"}</span></td>
-          <td style="font-family:var(--fM)">${c.responseCount||0}</td>
-          <td style="display:flex;gap:4px">
-            <button class="btn btn-g btn-sm" onclick="togChal('${c._id}',${!c.isActive})">${c.isActive?"Off":"On"}</button>
-            <button class="btn btn-r btn-sm" onclick="delChal('${c._id}')">🗑</button>
-          </td>
-        </tr>`).join("")
-      : '<tr class="empty-row"><td colspan="6">No challenges yet — create one above!</td></tr>';
-  } catch(e) {
-    document.getElementById("cTbl").innerHTML = `<tr><td colspan="6" class="ld" style="color:var(--rose)">${e.message}</td></tr>`;
+    document.getElementById('header-sub').textContent = `${d.users} users · ${d.posts} posts · ${d.todayUsers} new today`;
+
+    document.getElementById('stats-grid').innerHTML = [
+      { ico:'👥', val: d.users,      label:'Total Users',       change: `+${d.todayUsers} today`,  up: true  },
+      { ico:'📢', val: d.posts,      label:'Total Posts',       change: `${d.crisis} crisis`,       up: false },
+      { ico:'💭', val: d.vents,      label:'Total Vents',       change: 'anonymous',                up: true  },
+      { ico:'🌊', val: d.moods,      label:'Moods Logged',      change: 'with location',            up: true  },
+      { ico:'🆘', val: d.crisis,     label:'Crisis Flagged',    change: 'needs review',             up: false },
+      { ico:'🔥', val: d.todayUsers, label:'New Today',         change: 'registered',               up: true  },
+    ].map(s => `<div class="stat-card">
+      <div class="stat-icon">${s.ico}</div>
+      <div class="stat-value">${s.val?.toLocaleString() || 0}</div>
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-change ${s.up ? 'up' : 'down'}">${s.change}</div>
+    </div>`).join('');
+
+  } catch (e) {
+    document.getElementById('stats-grid').innerHTML = `<div class="empty">Couldn't load stats — check API connection</div>`;
   }
+
+  // Emotion distribution
+  loadEmotionDist();
+  loadCityDist();
+  loadRecentActivity();
 }
 
-function usePrompt(el) {
-  document.getElementById("cPrompt").value = el.textContent;
-  document.getElementById("cPrompt").focus();
-}
-
-async function createChal() {
-  const prompt = document.getElementById("cPrompt").value.trim();
-  const emoji  = document.getElementById("cEmoji").value.trim() || "💬";
-  const date   = document.getElementById("cDate").value;
-  const type   = document.getElementById("cType").value;
-  if (!prompt) return al("cAl","Write a prompt first! 💬","er");
-  if (!date)   return al("cAl","Pick a date ❌","er");
-  const btn = document.getElementById("cBtn");
-  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Creating…';
+async function loadEmotionDist() {
   try {
-    const r = await adm("/api/admin/challenges", {
-      method: "POST",
-      body: JSON.stringify({ prompt, emoji, date, type })
+    const r = await adminFetch('/api/moods/pulse');
+    if (!r.ok) return;
+    const data = await r.json();
+    const el = document.getElementById('emotion-dist');
+    if (!data.length) { el.innerHTML = '<div class="empty">No mood data yet</div>'; return; }
+
+    const emoColors = { happy:'#F4A261',sad:'#9B7FD4',anxious:'#FF4D6D',lonely:'#C4A8FF',grateful:'#52B788',inspired:'#00C9A7',excited:'#FF85A1',angry:'#FF4D6D' };
+    const maxCount = Math.max(...data.flatMap(d => d.breakdown || []).map(b => b.count || 0), 1);
+    const aggregated = {};
+    data.forEach(city => {
+      (city.breakdown || []).forEach(b => {
+        aggregated[b.emotion] = (aggregated[b.emotion] || 0) + b.count;
+      });
     });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.message);
-    al("cAl", `✅ Challenge created for ${date}!`, "ok");
-    document.getElementById("cPrompt").value = "";
-    document.getElementById("cEmoji").value  = "";
-    loadChals();
-    loadTodayStatus();
-  } catch(e) { al("cAl", e.message, "er"); }
-  finally { btn.disabled = false; btn.innerHTML = "✨ Create Challenge"; }
+    const sorted = Object.entries(aggregated).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const max = Math.max(...sorted.map(s => s[1]), 1);
+
+    el.innerHTML = sorted.map(([emo, count]) => `
+      <div class="emotion-bar-wrap">
+        <div class="emotion-bar-label">
+          <span style="font-weight:600;font-size:.78rem">${emo}</span>
+          <span style="color:var(--tx3);font-family:var(--fM);font-size:.72rem">${count}</span>
+        </div>
+        <div class="emotion-bar-track">
+          <div class="emotion-bar-fill" style="width:${Math.round(count/max*100)}%;background:${emoColors[emo]||'var(--v)'}"></div>
+        </div>
+      </div>`).join('');
+  } catch (e) { document.getElementById('emotion-dist').innerHTML = '<div class="empty">No data</div>'; }
 }
 
-async function togChal(id, active) {
-  try { await adm(`/api/admin/challenges/${id}`, { method:"PATCH", body:JSON.stringify({isActive:active}) }); loadChals(); }
-  catch(e) { alert("Failed"); }
-}
-async function delChal(id) {
-  if (!confirm("Delete this challenge? Cannot be undone.")) return;
-  try { await adm(`/api/admin/challenges/${id}`, { method:"DELETE" }); loadChals(); loadTodayStatus(); }
-  catch(e) { alert("Failed"); }
+async function loadCityDist() {
+  try {
+    const r = await adminFetch('/api/moods/pulse');
+    if (!r.ok) return;
+    const data = await r.json();
+    const el = document.getElementById('city-dist');
+    if (!data.length) { el.innerHTML = '<div class="empty">No city data yet</div>'; return; }
+    el.innerHTML = data.slice(0, 8).map(c => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:.8rem">
+        <span>📍 ${c.city || 'Unknown'}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="color:var(--tx3)">${c.total} logs</span>
+          <span class="badge badge-v">${c.dominantEmotion}</span>
+        </div>
+      </div>`).join('');
+  } catch (e) { document.getElementById('city-dist').innerHTML = '<div class="empty">No data</div>'; }
 }
 
-// ── REPORTS ───────────────────────────────────────────────────────────────
+async function loadRecentActivity() {
+  const el = document.getElementById('recent-activity');
+  el.innerHTML = '<div style="font-size:.8rem;color:var(--tx3)">Recent activity loads here — implement /api/admin/activity endpoint to see real-time events.</div>';
+}
+
+// ── USERS ──────────────────────────────────────
+let allUsers = [];
+async function loadUsers() {
+  const el = document.getElementById('users-table');
+  el.innerHTML = '<div class="spinner" style="padding:40px"></div>';
+  try {
+    const r = await adminFetch('/api/users?limit=100');
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    allUsers = Array.isArray(data) ? data : (data.users || data.results || []);
+    renderUsersTable(allUsers);
+  } catch (e) { el.innerHTML = '<div class="empty">Couldn\'t load users</div>'; }
+}
+
+function renderUsersTable(users) {
+  const el = document.getElementById('users-table');
+  if (!users.length) { el.innerHTML = '<div class="empty">No users found</div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr><th>User</th><th>Email</th><th>Gender</th><th>Level</th><th>XP</th><th>Streak</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+    <tbody>${users.map(u => `<tr>
+      <td><b style="font-family:var(--fD)">${u.anonymousName || 'Anonymous'}</b></td>
+      <td style="font-family:var(--fM);font-size:.72rem">${u.email || ''}</td>
+      <td>${u.gender || 'Private'}</td>
+      <td>${Math.floor((u.xp || 0) / 100) + 1}</td>
+      <td style="font-family:var(--fM)">${u.xp || 0}</td>
+      <td>🔥 ${u.streak || u.currentStreak || 0}</td>
+      <td>${u.isBanned ? '<span class="badge badge-cr">Banned</span>' : u.isPremium ? '<span class="badge badge-go">Premium</span>' : '<span class="badge badge-lm">Active</span>'}</td>
+      <td style="font-size:.7rem;color:var(--tx3)">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}</td>
+      <td style="display:flex;gap:5px">
+        ${u.isBanned
+          ? `<button class="action-btn action-unban" onclick="unbanUser('${u._id}','${u.anonymousName}')">Unban</button>`
+          : `<button class="action-btn action-ban" onclick="banUser('${u._id}','${u.anonymousName}')">Ban</button>`}
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function searchUsers(q) {
+  if (!q.trim()) return renderUsersTable(allUsers);
+  const filtered = allUsers.filter(u =>
+    (u.anonymousName || '').toLowerCase().includes(q.toLowerCase()) ||
+    (u.email || '').toLowerCase().includes(q.toLowerCase())
+  );
+  renderUsersTable(filtered);
+}
+
+async function banUser(id, name) {
+  showConfirm('⚠️', `Ban ${name}?`, `This user will be blocked from all activity.`, async () => {
+    try {
+      await adminFetch(`/api/admin/ban/${id}`, { method: 'POST', body: JSON.stringify({ reason: 'Admin action' }) });
+      toast(`🚫 ${name} banned`);
+      loadUsers();
+    } catch (e) { toast('Failed'); }
+  });
+}
+
+async function unbanUser(id, name) {
+  try {
+    await adminFetch(`/api/admin/unban/${id}`, { method: 'POST' });
+    toast(`✅ ${name} unbanned`);
+    loadUsers();
+  } catch (e) { toast('Failed'); }
+}
+
+// ── POSTS ──────────────────────────────────────
+async function loadPosts() {
+  const el = document.getElementById('posts-table');
+  el.innerHTML = '<div class="spinner" style="padding:40px"></div>';
+  try {
+    const r = await adminFetch('/api/posts?limit=50&page=1');
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    const posts = Array.isArray(data) ? data : (data.posts || []);
+    if (!posts.length) { el.innerHTML = '<div class="empty">No posts</div>'; return; }
+    el.innerHTML = `<table>
+      <thead><tr><th>Author</th><th>Caption</th><th>Emotion</th><th>Type</th><th>Likes</th><th>Crisis</th><th>Hidden</th><th>Posted</th><th>Action</th></tr></thead>
+      <tbody>${posts.map(p => `<tr class="${p.isCrisis ? 'crisis-row' : ''}">
+        <td style="font-family:var(--fD);font-weight:600">${p.authorName || 'Anonymous'}</td>
+        <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">${(p.caption || '(no caption)').substring(0, 60)}</td>
+        <td>${p.emotion ? `<span class="badge badge-v">${p.emotion}</span>` : '—'}</td>
+        <td>${p.type || 'post'}</td>
+        <td style="font-family:var(--fM)">${(p.likes || []).length}</td>
+        <td>${p.isCrisis ? '<span class="badge badge-cr">⚠️ Crisis</span>' : '—'}</td>
+        <td>${p.isHidden ? '🚫 Yes' : '✅ No'}</td>
+        <td style="font-size:.7rem;color:var(--tx3)">${p.createdAt ? new Date(p.createdAt).toLocaleString() : 'N/A'}</td>
+        <td><button class="action-btn action-ban" onclick="hidePost('${p._id}')">Hide</button></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  } catch (e) { el.innerHTML = '<div class="empty">Couldn\'t load posts</div>'; }
+}
+
+async function hidePost(id) {
+  try {
+    await adminFetch(`/api/posts/${id}/hide`, { method: 'POST' });
+    toast('Post hidden');
+    loadPosts();
+  } catch (e) { toast('Failed'); }
+}
+
+// ── VENTS ──────────────────────────────────────
+async function loadVents() {
+  const el = document.getElementById('vents-table');
+  el.innerHTML = '<div class="spinner" style="padding:40px"></div>';
+  try {
+    const r = await adminFetch('/api/vents?limit=50');
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    const vents = Array.isArray(data) ? data : (data.vents || []);
+    if (!vents.length) { el.innerHTML = '<div class="empty">No vents</div>'; return; }
+    el.innerHTML = `<table>
+      <thead><tr><th>Author</th><th>Text</th><th>Emotion</th><th>Hugs</th><th>Crisis</th><th>Posted</th><th>Action</th></tr></thead>
+      <tbody>${vents.map(v => `<tr class="${v.isCrisis ? 'crisis-row' : ''}">
+        <td style="font-family:var(--fD);font-weight:600">${v.authorName || 'Anonymous'}</td>
+        <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">${(v.text || '').substring(0, 80)}</td>
+        <td>${v.emotion ? `<span class="badge badge-v">${v.emotion}</span>` : '—'}</td>
+        <td>${(v.hugs || []).length}</td>
+        <td>${v.isCrisis ? '<span class="badge badge-cr">⚠️</span>' : '—'}</td>
+        <td style="font-size:.7rem;color:var(--tx3)">${v.createdAt ? new Date(v.createdAt).toLocaleString() : 'N/A'}</td>
+        <td><button class="action-btn action-ban" onclick="deleteVentAdmin('${v._id}')">Delete</button></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  } catch (e) { el.innerHTML = '<div class="empty">Couldn\'t load vents</div>'; }
+}
+
+async function deleteVentAdmin(id) {
+  try {
+    await adminFetch(`/api/vents/${id}`, { method: 'DELETE' });
+    toast('Vent deleted');
+    loadVents();
+  } catch (e) { toast('Failed'); }
+}
+
+// ── MOODS ──────────────────────────────────────
+async function loadMoods() {
+  const el = document.getElementById('moods-content');
+  try {
+    const r = await adminFetch('/api/moods/pulse');
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    if (!data.length) { el.innerHTML = '<div class="empty">No mood data yet</div>'; return; }
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">${data.map(city => `
+      <div class="card">
+        <div class="card-title">📍 ${city.city} <span class="badge badge-v">${city.dominantEmotion}</span></div>
+        <div style="font-size:.72rem;color:var(--tx3);margin-bottom:12px">${city.total} mood logs</div>
+        ${(city.breakdown || []).sort((a, b) => b.count - a.count).slice(0, 5).map(b => `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:.78rem">
+            <span>${b.emotion}</span>
+            <span style="font-family:var(--fM);color:var(--tx3)">${b.count}</span>
+          </div>
+        `).join('')}
+      </div>`).join('')}</div>`;
+  } catch (e) { el.innerHTML = '<div class="empty">No mood data</div>'; }
+}
+
+// ── REPORTS ────────────────────────────────────
 async function loadReports() {
-  document.getElementById("rTbl").innerHTML = '<tr><td colspan="6" class="ld"><span class="spin"></span></td></tr>';
-  try {
-    const r = await adm("/api/admin/reports");
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.message);
-    const count = d.reports?.length || 0;
-    document.getElementById("rptCount").textContent = count
-      ? `⚠️ ${count} pending report${count>1?"s":""} need review`
-      : "✅ All clear!";
-    document.getElementById("rTbl").innerHTML = count
-      ? d.reports.map(rp => `<tr>
-          <td style="font-weight:700;color:var(--tx)">${esc(rp.reportedName)}</td>
-          <td><span class="bdg bw">${esc(rp.reason)}</span></td>
-          <td>${esc(rp.reporterName)}</td>
-          <td style="max-width:160px;white-space:normal;font-size:.71rem">${esc(rp.description||"—")}</td>
-          <td style="font-size:.68rem;color:var(--tx3)">${ago(rp.createdAt)}</td>
-          <td style="display:flex;gap:4px;flex-wrap:wrap">
-            <button class="btn btn-r btn-sm" onclick="banName('${esc(rp.reportedName)}')">Ban</button>
-            <button class="btn btn-g btn-sm" onclick="doneRpt('${rp._id}')">✓ Done</button>
-          </td>
-        </tr>`).join("")
-      : '<tr class="empty-row"><td colspan="6">🎉 No pending reports</td></tr>';
-  } catch(e) {
-    document.getElementById("rTbl").innerHTML = `<tr><td colspan="6" class="ld" style="color:var(--rose)">Failed</td></tr>`;
-  }
-}
-async function doneRpt(id) {
-  try { await adm(`/api/admin/reports/${id}`, { method:"PATCH", body:JSON.stringify({reviewed:true}) }); loadReports(); }
-  catch(e) { alert("Failed"); }
-}
-async function banName(name) {
-  if (!confirm(`Ban "${name}"? They will be permanently blocked.`)) return;
-  try {
-    const r = await adm(`/api/admin/users?q=${encodeURIComponent(name)}`);
-    const d = await r.json();
-    const u = d.users?.find(x => x.anonymousName === name);
-    if (!u) return alert("User not found in search");
-    await adm(`/api/admin/users/${u._id}/ban`, { method:"POST" });
-    alert(`${name} banned ✅`);
-    loadReports();
-  } catch(e) { alert("Failed: " + e.message); }
+  const el = document.getElementById('reports-table');
+  el.innerHTML = '<div class="empty">Reports table — connect /api/reports endpoint to see submitted reports here.</div>';
 }
 
-// ── USERS ─────────────────────────────────────────────────────────────────
-let uTm;
-function qUsers() { clearTimeout(uTm); uTm = setTimeout(doUsers, 350); }
-async function doUsers() {
-  document.getElementById("uTbl").innerHTML = '<tr><td colspan="7" class="ld"><span class="spin"></span></td></tr>';
-  const q = document.getElementById("uQ").value.trim();
-  const f = document.getElementById("uF").value;
+// ── CRISIS POSTS ────────────────────────────────
+async function loadCrisisPosts() {
+  const el = document.getElementById('crisis-table');
+  el.innerHTML = '<div class="spinner" style="padding:40px"></div>';
   try {
-    const p = new URLSearchParams();
-    if (q) p.set("q", q);
-    if (f) p.set("filter", f);
-    const r = await adm(`/api/admin/users?${p}`);
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.message);
-    document.getElementById("uTbl").innerHTML = d.users?.length
-      ? d.users.map(u => `<tr>
-          <td style="font-family:var(--fD);font-weight:700;color:var(--tx)">${esc(u.anonymousName)}</td>
-          <td style="font-size:.7rem;color:var(--tx3)">${esc(u.email)}</td>
-          <td style="font-family:var(--fM)">${u.reportCount||0}</td>
-          <td>${u.isBlocked?'<span class="bdg br">Banned</span>':u.shadowBanned?'<span class="bdg bw">Shadow</span>':'<span class="bdg ba">OK</span>'}</td>
-          <td style="font-family:var(--fM)">${u.currentStreak||0}🔥</td>
-          <td style="font-size:.68rem;color:var(--tx3)">${ago(u.createdAt)}</td>
-          <td>${u.isBlocked
-            ?`<button class="btn btn-ok btn-sm" onclick="uAct('${u._id}','unban')">Unban</button>`
-            :`<button class="btn btn-r btn-sm" onclick="uAct('${u._id}','ban')">Ban</button>`}
-          </td>
-        </tr>`).join("")
-      : '<tr class="empty-row"><td colspan="7">No users found</td></tr>';
-  } catch(e) {
-    document.getElementById("uTbl").innerHTML = `<tr><td colspan="7" class="ld" style="color:var(--rose)">Failed</td></tr>`;
-  }
+    const r = await adminFetch('/api/posts?crisis=true&limit=50');
+    const data = await r.json();
+    const posts = (Array.isArray(data) ? data : (data.posts || [])).filter(p => p.isCrisis);
+    if (!posts.length) { el.innerHTML = '<div class="empty" style="color:var(--lm)">✅ No crisis posts right now</div>'; return; }
+    el.innerHTML = `<div style="margin-bottom:12px;padding:10px 14px;background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);border-radius:10px;font-size:.8rem;color:var(--cr)">⚠️ ${posts.length} post(s) flagged for crisis content. Review and take action.</div>
+    <table>
+      <thead><tr><th>Author</th><th>Content</th><th>Emotion</th><th>Posted</th><th>Action</th></tr></thead>
+      <tbody>${posts.map(p => `<tr class="crisis-row">
+        <td style="font-family:var(--fD);font-weight:600">${p.authorName || 'Anonymous'}</td>
+        <td style="max-width:300px;color:var(--tx2)">${(p.caption || '').substring(0, 100)}</td>
+        <td>${p.emotion ? `<span class="badge badge-cr">${p.emotion}</span>` : '—'}</td>
+        <td style="font-size:.7rem;color:var(--tx3)">${p.createdAt ? new Date(p.createdAt).toLocaleString() : 'N/A'}</td>
+        <td style="display:flex;gap:5px">
+          <button class="action-btn action-view" onclick="toast('🔍 Reviewing...')">Review</button>
+          <button class="action-btn action-ban" onclick="hidePost('${p._id}')">Hide</button>
+        </td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  } catch (e) { el.innerHTML = '<div class="empty">Couldn\'t load crisis posts</div>'; }
 }
-async function uAct(id, action) {
-  if (!confirm(action==="ban"?"Ban this user?":"Unban?")) return;
-  try { await adm(`/api/admin/users/${id}/${action}`, { method:"POST" }); doUsers(); }
-  catch(e) { alert("Failed"); }
+
+// ── EXPORT ─────────────────────────────────────
+async function downloadExport(type) {
+  toast(`⬇️ Preparing ${type} export...`);
+  try {
+    const r = await adminFetch(`/api/admin/export/${type}`);
+    if (!r.ok) { toast('Export failed'); return; }
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `annomuss_${type}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    const time = new Date().toLocaleString();
+    exportHistory.unshift(`${time} — ${type}.csv downloaded`);
+    document.getElementById('export-history').innerHTML = exportHistory.slice(0, 10).map(e =>
+      `<div style="padding:6px 0;border-bottom:1px solid var(--bd);font-size:.78rem">${e}</div>`
+    ).join('');
+    toast(`✅ ${type} export downloaded!`);
+  } catch (e) { toast('Export failed — check connection'); }
 }
+
+// ── CONFIRM DIALOG ──────────────────────────────
+function showConfirm(ico, title, msg, cb) {
+  document.getElementById('confirm-ico').textContent = ico;
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  confirmCallback = cb;
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+function closeConfirm() { document.getElementById('confirm-overlay').classList.remove('open'); confirmCallback = null; }
+function executeConfirm() { closeConfirm(); if (confirmCallback) confirmCallback(); }
+
+// ── TOAST ───────────────────────────────────────
+function toast(msg) {
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;top:20px;right:20px;background:#111126;border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:10px 20px;font-size:.82rem;font-weight:700;font-family:var(--fD);color:#F5F3FF;z-index:9999;animation:toastIn .25s cubic-bezier(.34,1.56,.64,1)';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+document.getElementById('admin-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 </script>
 </body>
 </html>

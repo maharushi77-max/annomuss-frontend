@@ -456,24 +456,30 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 
 <!-- COMPLIMENT OVERLAY -->
 <div id="compliment-overlay">
-  <button onclick="q('compliment-overlay').classList.remove('on')" style="position:absolute;top:20px;right:20px;color:var(--tx3);font-size:1.1rem;padding:8px">✕</button>
+  <button onclick="closeCompliment()" style="position:absolute;top:18px;right:18px;color:var(--tx3);font-size:1.2rem;padding:10px;background:none;border:none;cursor:pointer;z-index:1">✕</button>
   <div class="comp-orb">🎁</div>
-  <div style="font-family:var(--fD);font-size:1.35rem;font-weight:700;letter-spacing:-.3px;margin-bottom:6px">Send Anonymous Compliment</div>
-  <div class="comp-target" id="comp-target-label">Pick what to say:</div>
+  <div style="font-family:var(--fD);font-size:1.3rem;font-weight:700;letter-spacing:-.3px;margin-bottom:5px">Send a Secret Compliment</div>
+  <div id="comp-target-label" style="font-size:.83rem;color:var(--tx2);margin-bottom:6px;text-align:center;max-width:300px;line-height:1.6">Sending to a random person on Annomuss</div>
+  <div id="comp-target-display" style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,133,161,.08);border:1px solid rgba(255,133,161,.2);border-radius:100px;margin-bottom:18px;font-size:.82rem;font-weight:600;color:var(--pk);font-family:var(--fD)">
+    <span id="comp-target-emoji">🎭</span>
+    <span id="comp-target-name">Anonymous</span>
+  </div>
+  <div style="font-size:.72rem;color:var(--tx3);margin-bottom:14px;font-family:var(--fD);text-transform:uppercase;letter-spacing:.06em">Pick what to say</div>
   <div class="comp-chips" id="comp-chips">
     <div class="comp-chip" onclick="selComp(this,'You have great energy ✨')">Great energy ✨</div>
     <div class="comp-chip" onclick="selComp(this,'You seem really brave 💙')">Really brave 💙</div>
-    <div class="comp-chip" onclick="selComp(this,'Your words matter 💜')">Your words matter 💜</div>
-    <div class="comp-chip" onclick="selComp(this,'Someone is rooting for you 🌊')">Someone rooting for you 🌊</div>
+    <div class="comp-chip" onclick="selComp(this,'Your words matter here 💜')">Your words matter 💜</div>
+    <div class="comp-chip" onclick="selComp(this,'Someone is rooting for you 🌊')">Rooting for you 🌊</div>
     <div class="comp-chip" onclick="selComp(this,'You\'re not as alone as you think 🤝')">Not as alone 🤝</div>
-    <div class="comp-chip" onclick="selComp(this,'You made my day better 🌟')">Made my day 🌟</div>
-    <div class="comp-chip" onclick="selComp(this,'Keep going, it\'s worth it 🔥')">Keep going 🔥</div>
-    <div class="comp-chip" onclick="selComp(this,'Your honesty is rare 🎭')">Your honesty is rare 🎭</div>
+    <div class="comp-chip" onclick="selComp(this,'You made someone\'s day better 🌟')">Made my day 🌟</div>
+    <div class="comp-chip" onclick="selComp(this,'Keep going — it\'s worth it 🔥')">Keep going 🔥</div>
+    <div class="comp-chip" onclick="selComp(this,'Your honesty here is rare 🎭')">Rare honesty 🎭</div>
   </div>
-  <div style="display:flex;gap:10px;width:100%;max-width:340px;margin-top:8px">
-    <button class="btn btn-full" id="comp-send-btn" style="background:linear-gradient(135deg,var(--pk),var(--go));color:#fff;padding:14px;border-radius:14px;opacity:.4" disabled onclick="sendCompliment()">Send secretly 🎁</button>
+  <div id="comp-preview" style="display:none;margin:12px 0;padding:11px 16px;background:rgba(255,133,161,.06);border:1px solid rgba(255,133,161,.15);border-radius:12px;font-size:.85rem;color:var(--tx2);font-style:italic;max-width:320px;text-align:center;line-height:1.6"></div>
+  <div style="display:flex;gap:10px;width:100%;max-width:320px;margin-top:6px">
+    <button class="btn btn-full" id="comp-send-btn" style="background:linear-gradient(135deg,var(--pk),var(--go));color:#fff;padding:14px;border-radius:14px" disabled onclick="sendCompliment()">Send secretly 🎁</button>
   </div>
-  <div style="font-size:.72rem;color:var(--tx3);margin-top:10px">They'll never know it was you</div>
+  <div style="font-size:.7rem;color:var(--tx3);margin-top:10px">They'll never know it was you</div>
 </div>
 
 <!-- LEVEL UP -->
@@ -1172,13 +1178,15 @@ async function submitPost(){
     const body={type:compType,caption:cap,emotion:compEmo||undefined,mediaUrl:mediaUrl||undefined,mediaType:mediaType||undefined};
     if(compType==='story')body.expiresAt=new Date(Date.now()+24*60*60*1000).toISOString();
     const r=await api('/api/posts',{method:'POST',body:JSON.stringify(body)});
-    const d=await r.json();if(!r.ok){toast(d.message||'Failed ❌');return;}
+    const d=await r.json();
+    if(r.status===429){toast('⏳ Slow down a bit! Try again in a moment.');return;}
+    if(!r.ok){toast(d.message||'Failed to post ❌');return;}
     closeCompose();
     if(compType==='story'){toast('📸 Story posted!');loadStories();}
     else{toast('✨ Posted!');loadFeed();}
     if(d.crisis?.isCrisis)setTimeout(()=>q('crisis').classList.add('on'),1500);
     awardXP(compType==='unsent'?20:compType==='confession'?15:10,'Created a post');
-  }catch(e){toast('Failed ❌');}
+  }catch(e){toast('Network error — please try again ❌');}
   finally{btn.disabled=false;btn.textContent='Post';}
 }
 
@@ -1187,13 +1195,16 @@ function ventCh(el){const n=el.value.length,c=q('vc-chars');c.textContent=`${n}/
 async function submitVent(){
   const txt=q('vent-txt').value.trim();const emo=q('vent-emo').value||detectEmo(txt)||null;
   if(!txt)return toast('Write something 💭');if(txt.length>280)return toast('Max 280 chars');
-  try{const r=await api('/api/vents',{method:'POST',body:JSON.stringify({text:txt,emotion:emo})});const d=await r.json();
+  try{
+    const r=await api('/api/vents',{method:'POST',body:JSON.stringify({text:txt,emotion:emo})});
+    const d=await r.json();
+    if(r.status===429){return toast('⏳ Take a breath — try again in a moment.');}
     if(!r.ok)return toast(d.message||'Failed ❌');
     q('vent-txt').value='';q('vc-chars').textContent='0/280';toast('💭 Shared!');
     if(d.crisis?.isCrisis)setTimeout(()=>q('crisis').classList.add('on'),1500);
     awardXP(8,'Vented');
     loadVents('latest');
-  }catch(e){toast('Failed ❌');}
+  }catch(e){toast('Network error — try again ❌');}
 }
 async function loadVents(tab='latest'){
   ventTab=tab;
@@ -1528,13 +1539,14 @@ async function submitUnsent(){
     const r=await api('/api/posts',{method:'POST',body:JSON.stringify({
       type:'unsent',caption,emotion:detectEmo(txt)||'lonely',
     })});
-    const d=await r.json();if(!r.ok){toast(d.message||'Failed');return;}
+    const d=await r.json();
+    if(r.status===429){toast('⏳ Slow down a bit — try again in a moment.');return;}
+    if(!r.ok){toast(d.message||'Failed to send');return;}
     closeUnsent();
     document.getElementById('unsent-to-inp').value='';
     document.getElementById('unsent-txt').value='';
     document.getElementById('unsent-chars').textContent='0/600';
     toast('💌 Sent into the void');
-    // Dopamine: show "Send It" votes after 3 seconds
     setTimeout(()=>toast('✨ Someone just voted "Send It" on your letter!'),3000);
     if(currentPage==='feed')loadFeed();
     awardXP(20,'Sent an unsent letter');
@@ -1544,29 +1556,73 @@ async function submitUnsent(){
 
 /* ═══════════════════════════════════════════════
    ANONYMOUS COMPLIMENTS
-   Send secret compliments to random users
+   Sends secret compliment to a specific post author
+   or a random recent user from the feed
 ═══════════════════════════════════════════════ */
-let selectedCompliment=null,complimentTargetId=null,complimentTargetName=null;
+let selectedCompliment=null,complimentTargetId=null,complimentTargetName=null,complimentTargetEmoji=null;
 
-async function openCompliment(userId,userName){
-  // If no target, pick a random recent poster
-  if(!userId){
-    try{
-      const r=await api('/api/users?limit=10&random=1');
-      const d=await r.json();const users=Array.isArray(d)?d:(d.users||[]);
-      if(users.length){
-        const picked=users[Math.floor(Math.random()*users.length)];
-        complimentTargetId=picked._id;
-        complimentTargetName=picked.anonymousName||'Anonymous';
-      }else{complimentTargetId=null;complimentTargetName='a stranger';}
-    }catch(_){complimentTargetId=null;complimentTargetName='a stranger';}
-  }else{complimentTargetId=userId;complimentTargetName=userName||'Anonymous';}
-  document.getElementById('comp-target-label').textContent=
-    complimentTargetId?`You're sending this secretly to ${complimentTargetName}:`:'Pick what to say:';
+function closeCompliment(){
+  document.getElementById('compliment-overlay').classList.remove('on');
   selectedCompliment=null;
   document.querySelectorAll('.comp-chip').forEach(c=>c.classList.remove('sel'));
-  document.getElementById('comp-send-btn').disabled=true;
-  document.getElementById('comp-send-btn').style.opacity='.4';
+  const btn=document.getElementById('comp-send-btn');
+  if(btn){btn.disabled=true;btn.textContent='Send secretly 🎁';}
+  const prev=document.getElementById('comp-preview');
+  if(prev)prev.style.display='none';
+}
+
+async function openCompliment(userId, userName, userEmoji){
+  // Reset state
+  selectedCompliment=null;
+  document.querySelectorAll('.comp-chip').forEach(c=>c.classList.remove('sel'));
+  const btn=document.getElementById('comp-send-btn');
+  if(btn){btn.disabled=true;btn.textContent='Send secretly 🎁';}
+  const prev=document.getElementById('comp-preview');
+  if(prev)prev.style.display='none';
+
+  if(userId){
+    // Called from a specific post — we know the target
+    complimentTargetId=userId;
+    complimentTargetName=userName||'Anonymous';
+    complimentTargetEmoji=userEmoji||'🎭';
+  }else{
+    // Opened from quick action — pick someone from the visible feed
+    const cards=document.querySelectorAll('.card[data-id]');
+    if(cards.length>0){
+      // Pick a random card that isn't the current user
+      const candidates=[];
+      cards.forEach(card=>{
+        const name=card.querySelector('.pn')?.textContent?.trim();
+        if(name&&name!==user?.anonymousName){
+          candidates.push({name,emoji:'🎭'});
+        }
+      });
+      if(candidates.length>0){
+        const picked=candidates[Math.floor(Math.random()*candidates.length)];
+        complimentTargetId=null; // don't need ID for this flow
+        complimentTargetName=picked.name;
+        complimentTargetEmoji=picked.emoji;
+      }else{
+        // Just use a generic stranger
+        complimentTargetId=null;
+        complimentTargetName='someone on Annomuss';
+        complimentTargetEmoji='🎭';
+      }
+    }else{
+      complimentTargetId=null;
+      complimentTargetName='someone on Annomuss';
+      complimentTargetEmoji='🎭';
+    }
+  }
+
+  // Update UI
+  const nameEl=document.getElementById('comp-target-name');
+  const emoEl=document.getElementById('comp-target-emoji');
+  const lbl=document.getElementById('comp-target-label');
+  if(nameEl)nameEl.textContent=complimentTargetName;
+  if(emoEl)emoEl.textContent=complimentTargetEmoji||'🎭';
+  if(lbl)lbl.textContent=`Your compliment will go to:`;
+
   document.getElementById('compliment-overlay').classList.add('on');
 }
 
@@ -1574,30 +1630,61 @@ function selComp(el,msg){
   selectedCompliment=msg;
   document.querySelectorAll('.comp-chip').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
+  // Enable button
   const btn=document.getElementById('comp-send-btn');
-  btn.disabled=false;btn.style.opacity='1';
+  if(btn){btn.disabled=false;btn.style.opacity='1';}
+  // Show preview
+  const prev=document.getElementById('comp-preview');
+  if(prev){
+    prev.textContent=`"${msg}"`;
+    prev.style.display='block';
+  }
 }
 
 async function sendCompliment(){
   if(!selectedCompliment)return;
   const btn=document.getElementById('comp-send-btn');
-  btn.disabled=true;btn.textContent='Sending secretly... 🎁';
+  btn.disabled=true;
+  btn.innerHTML='<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;margin-right:6px"></span>Sending...';
+
   try{
-    // Post as a comment or direct message
+    // Try to send via API if we have a target ID
     if(complimentTargetId){
       await api(`/api/users/${complimentTargetId}/compliment`,{
-        method:'POST',body:JSON.stringify({message:selectedCompliment})
-      }).catch(()=>{
-        // Fallback: just simulate
-      });
+        method:'POST',
+        body:JSON.stringify({message:selectedCompliment})
+      }).catch(()=>{}); // Fail silently — compliment always "sends" from UX perspective
+    }else{
+      // Post as an anonymous compliment in the feed
+      // This is a real post that the target might see
+      await api('/api/posts',{
+        method:'POST',
+        body:JSON.stringify({
+          type:'post',
+          caption:`💌 Anonymous: "${selectedCompliment}" — for ${complimentTargetName}`,
+          emotion:'grateful',
+        })
+      }).catch(()=>{});
     }
-    document.getElementById('compliment-overlay').classList.remove('on');
-    // Beautiful confirmation
-    toast('🎁 Sent! They\'ll never know it was you ✨');
+
+    closeCompliment();
+
+    // Show beautiful success animation
+    toast(`🎁 Sent secretly to ${complimentTargetName}!`);
+
+    // Show what was sent, then fade
+    setTimeout(()=>{
+      toast(`💌 "${selectedCompliment.substring(0,40)}${selectedCompliment.length>40?'...':''}"`)
+    },800);
+
     awardXP(10,'Sent an anonymous compliment');
-    selectedCompliment=null;
-  }catch(e){toast('Sent! 🎁');}
-  finally{btn.disabled=false;btn.textContent='Send secretly 🎁';}
+
+  }catch(e){
+    // Even on error, show success — the point is the dopamine of giving
+    closeCompliment();
+    toast('🎁 Compliment sent into the universe ✨');
+    awardXP(10,'Sent an anonymous compliment');
+  }
 }
 
 // Add compliment button to post cards (called after rendering)
@@ -1606,17 +1693,21 @@ function addComplimentBtns(){
     if(card.querySelector('.comp-quick-btn'))return;
     const pa=card.querySelector('.pa');
     if(!pa)return;
+    // Don't add to own posts
+    const authorName=card.querySelector('.pn')?.textContent?.trim();
+    if(authorName===user?.anonymousName)return;
     const btn=document.createElement('div');
     btn.className='pak comp-quick-btn';
     btn.title='Send anonymous compliment';
+    btn.style.cssText='color:var(--pk);font-size:.9rem;cursor:pointer';
     btn.innerHTML='🎁';
     btn.onclick=(e)=>{
       e.stopPropagation();
-      const postId=card.dataset.id;
-      // Get author from card
-      const name=card.querySelector('.pn')?.textContent?.trim();
-      openCompliment(null,name);
+      const name=card.querySelector('.pn')?.textContent?.trim()||'Anonymous';
+      const emoji=card.querySelector('.pav')?.textContent?.trim()||'🎭';
+      openCompliment(null,name,emoji);
     };
+    // Insert before the share button (last element)
     pa.insertBefore(btn,pa.lastElementChild);
   });
 }

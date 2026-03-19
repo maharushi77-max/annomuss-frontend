@@ -1,42 +1,43 @@
+const CACHE='annomuss-v1';const ASSETS=['/','index.html','dashboard.html'];
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>{}))));
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).then(r=>{if(r&&r.status===200){const clone=r.clone();caches.open(CACHE).then(c=>c.put(e.request,clone));}return r;}).catch(()=>caches.match(e.request)));});
+
+
+
+
+
+
+
+
+
 /* ═══════════════════════════════════════════
-   ANNOMUSS SERVICE WORKER v2
-   Strategy:
-   - App shell (HTML/CSS) → Cache First
-   - API calls → Network First (never cache)
-   - Images → Stale While Revalidate
-   - Offline fallback page included
+   ANNOMUSS SERVICE WORKER v3
 ═══════════════════════════════════════════ */
 
-const CACHE_NAME    = "annomuss-v2";
-const OFFLINE_URL   = "/offline.html";
+const CACHE_NAME  = "annomuss-v3";
+const OFFLINE_URL = "/offline.html";
 
-// Files to cache immediately on install (app shell)
 const PRECACHE = [
   "/index.html",
   "/dashboard.html",
-  "/randomchat.html",
-  "/messages.html",
-  "/challenge.html",
-  "/confessions.html",
-  "/trending.html",
-  "/goals.html",
-  "/levels.html",
-  "/location.html",
-  "/security.html",
-  "/manifest.json",
-  "/offline.html"
+  "/offline.html",
+  "/manifest.json"
 ];
 
-// ── INSTALL: pre-cache app shell ─────────────
+// ── INSTALL ──────────────────────────────────
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(PRECACHE))
+      .then(cache => {
+        return Promise.allSettled(
+          PRECACHE.map(url => cache.add(url).catch(() => {}))
+        );
+      })
       .then(() => self.skipWaiting())
   );
 });
 
-// ── ACTIVATE: delete old caches ──────────────
+// ── ACTIVATE ─────────────────────────────────
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -49,47 +50,58 @@ self.addEventListener("activate", event => {
   );
 });
 
-// ── FETCH: routing strategy ──────────────────
+// ── FETCH ─────────────────────────────────────
 self.addEventListener("fetch", event => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // 1. Skip non-GET and browser extension requests
   if (request.method !== "GET") return;
   if (!url.protocol.startsWith("http")) return;
 
-  // 2. API calls → Network Only (never serve stale data)
-  if (url.hostname.includes("onrender.com") ||
-      url.hostname.includes("cloudinary.com") ||
-      url.hostname.includes("socket.io")) {
-    return; // let it go to network naturally
-  }
+  // Never cache API calls
+  if (
+    url.hostname.includes("onrender.com") ||
+    url.hostname.includes("cloudinary.com") ||
+    url.hostname.includes("socket.io") ||
+    url.pathname.startsWith("/api/")
+  ) return;
 
-  // 3. Google Fonts → Cache First (they never change)
-  if (url.hostname.includes("fonts.googleapis.com") ||
-      url.hostname.includes("fonts.gstatic.com")) {
+  // Skip Chrome devtools noise
+  if (url.pathname.includes(".well-known")) return;
+
+  // Google Fonts / CDN → Cache First
+  if (
+    url.hostname.includes("fonts.googleapis.com") ||
+    url.hostname.includes("fonts.gstatic.com") ||
+    url.hostname.includes("cdnjs.cloudflare.com")
+  ) {
     event.respondWith(
       caches.match(request).then(cached => {
         if (cached) return cached;
         return fetch(request).then(resp => {
-          const clone = resp.clone();
-          caches.open(CACHE_NAME).then(c => c.put(request, clone));
+          if (resp.ok) {
+            const clone = resp.clone();
+            caches.open(CACHE_NAME).then(c => c.put(request, clone));
+          }
           return resp;
-        });
+        }).catch(() => cached);
       })
     );
     return;
   }
 
-  // 4. HTML pages → Network First, fallback to cache, fallback to offline
-  if (request.destination === "document" ||
-      request.headers.get("accept")?.includes("text/html")) {
+  // HTML → Network First, fallback to cache, fallback to offline
+  if (
+    request.destination === "document" ||
+    request.headers.get("accept")?.includes("text/html")
+  ) {
     event.respondWith(
       fetch(request)
         .then(resp => {
-          // Update cache with fresh version
-          const clone = resp.clone();
-          caches.open(CACHE_NAME).then(c => c.put(request, clone));
+          if (resp.ok) {
+            const clone = resp.clone();
+            caches.open(CACHE_NAME).then(c => c.put(request, clone));
+          }
           return resp;
         })
         .catch(() =>
@@ -100,17 +112,17 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // 5. Everything else (JS, CSS, images) → Stale While Revalidate
+  // Everything else → Cache First, fallback network
   event.respondWith(
     caches.match(request).then(cached => {
-      const networkFetch = fetch(request).then(resp => {
+      if (cached) return cached;
+      return fetch(request).then(resp => {
         if (resp.ok) {
           const clone = resp.clone();
           caches.open(CACHE_NAME).then(c => c.put(request, clone));
         }
         return resp;
-      });
-      return cached || networkFetch;
+      }).catch(() => new Response("Offline", { status: 503 }));
     })
   );
 });
@@ -119,22 +131,19 @@ self.addEventListener("fetch", event => {
 self.addEventListener("push", event => {
   if (!event.data) return;
   let data = {};
-  try { data = event.data.json(); } catch(e) { data = { title: "Annomuss 🎭", body: event.data.text() }; }
-
+  try { data = event.data.json(); } catch(e) {
+    data = { title: "Annomuss 🎭", body: event.data.text() };
+  }
   event.waitUntil(
     self.registration.showNotification(data.title || "Annomuss 🎭", {
-      body:    data.body    || "Something new is waiting for you",
-      icon:    data.icon    || "/icons/icon-192.png",
-      badge:   data.badge   || "/icons/icon-96.png",
-      image:   data.image   || undefined,
-      tag:     data.tag     || "annomuss-notif",
+      body:     data.body || "Something new is waiting for you",
+      icon:     "/icons/icon-192.png",
+      badge:    "/icons/icon-96.png",
+      tag:      data.tag  || "annomuss-notif",
       renotify: true,
-      vibrate: [100, 50, 100],
-      data: {
-        url: data.url || "/dashboard.html",
-        dateOfArrival: Date.now()
-      },
-      actions: [
+      vibrate:  [100, 50, 100],
+      data:     { url: data.url || "/dashboard.html" },
+      actions:  [
         { action: "open",    title: "Open" },
         { action: "dismiss", title: "Dismiss" }
       ]
@@ -146,41 +155,17 @@ self.addEventListener("push", event => {
 self.addEventListener("notificationclick", event => {
   event.notification.close();
   if (event.action === "dismiss") return;
-
   const url = event.notification.data?.url || "/dashboard.html";
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true })
       .then(clientList => {
-        // If app is already open, focus it
         for (const client of clientList) {
           if (client.url.includes(self.location.origin) && "focus" in client) {
             client.navigate(url);
             return client.focus();
           }
         }
-        // Otherwise open new window
         if (clients.openWindow) return clients.openWindow(url);
       })
   );
 });
-
-// ── BACKGROUND SYNC (future: post queue) ────
-self.addEventListener("sync", event => {
-  if (event.tag === "sync-posts") {
-    event.waitUntil(syncQueuedPosts());
-  }
-});
-
-async function syncQueuedPosts() {
-  // Placeholder for offline post queue sync
-  const queue = await getQueuedPosts();
-  for (const post of queue) {
-    try {
-      await fetch("/api/posts", { method: "POST", body: JSON.stringify(post) });
-      await removeFromQueue(post.id);
-    } catch(e) {}
-  }
-}
-
-async function getQueuedPosts()   { return []; } // implement with IndexedDB
-async function removeFromQueue(id) { return; }

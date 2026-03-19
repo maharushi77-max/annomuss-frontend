@@ -2,133 +2,144 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<link rel="manifest" href="/manifest.json"/>
-<link rel="apple-touch-icon" href="/icons/icon-192.png"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
-<meta name="description" content="Annomuss — Express yourself anonymously. No judgement. Just you."/>
-<meta property="og:title" content="Annomuss — Express yourself anonymously"/>
-<meta property="og:description" content="Say what you feel. No judgement. No real name. Just you."/>
-<meta property="og:type" content="website"/>
-<meta property="og:url" content="https://annomuss-frontend.vercel.app"/>
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="Annomuss 🎭"/>
-<meta name="twitter:description" content="Express yourself anonymously. No judgement."/>
-<meta name="theme-color" content="#06060f"/>
-<meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#030308"/>
 <title>Annomuss 🎭</title>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800;900&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg:#03030c;--card:#0e0e26;--border:#1a1a3e;--rim:#26265a;
-  --v:#7c5cf4;--v2:#a58bff;--rose:#ff4f87;--teal:#00d9b4;
-  --tx:#e0dcff;--tx2:#8e8ab5;--tx3:#4a4768;
-  --grad:linear-gradient(135deg,#7c5cf4,#ff4f87);
-  --fD:'Bricolage Grotesque',sans-serif;--fB:'Instrument Sans',sans-serif;
-}
-html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--fB)}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 70% 50% at 50% -10%,rgba(124,92,244,.12),transparent 60%),
-             radial-gradient(ellipse 40% 30% at 100% 100%,rgba(0,217,180,.06),transparent 60%)}
-.page{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative;z-index:1}
-.hero{text-align:center;margin-bottom:26px}
-.logo{font-family:var(--fD);font-size:2.4rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.5px;display:block;margin-bottom:6px}
-.tagline{font-size:.88rem;color:var(--tx3)}
-.dots{display:flex;gap:5px;justify-content:center;margin-top:10px}
-.dot{width:5px;height:5px;border-radius:50%}
-.dot:nth-child(1){background:var(--v)}.dot:nth-child(2){background:var(--rose)}.dot:nth-child(3){background:var(--teal)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:26px 22px;width:100%;max-width:420px;position:relative;overflow:hidden}
-.card::before{content:"";position:absolute;top:-60px;right:-60px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(124,92,244,.07),transparent 65%);pointer-events:none}
-.prog-bar{height:3px;background:var(--border);border-radius:2px;margin-bottom:22px;overflow:hidden}
-.prog-fill{height:100%;border-radius:2px;background:var(--grad);transition:width .4s cubic-bezier(.4,0,.2,1)}
-.step{display:none}.step.on{display:block}
-.step-num{font-family:var(--fD);font-size:.66rem;font-weight:800;color:var(--v2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
-.step-title{font-family:var(--fD);font-size:1.08rem;font-weight:800;color:var(--tx)}
-.step-sub{font-size:.78rem;color:var(--tx3);margin-top:4px;line-height:1.5;margin-bottom:20px}
-.field{margin-bottom:14px}
-label{display:block;font-size:.71rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-family:var(--fD)}
-input[type="email"],input[type="text"]{width:100%;background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:12px;color:var(--tx);padding:12px 14px;font-size:.94rem;outline:none;transition:border-color .18s,box-shadow .18s;font-family:var(--fB)}
-input:focus{border-color:var(--v);box-shadow:0 0 0 3px rgba(124,92,244,.11)}
-input::placeholder{color:var(--tx3)}
-.hint{font-size:.69rem;color:var(--tx3);margin-top:5px;line-height:1.5}
-.gender-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
-.gopt{background:rgba(255,255,255,.03);border:1.5px solid var(--border);border-radius:12px;padding:12px 6px;text-align:center;cursor:pointer;transition:all .17s;font-size:.77rem;color:var(--tx3);font-weight:600;user-select:none}
-.gopt:hover{border-color:var(--rim);color:var(--tx2)}
-.gopt.sel{border-color:var(--v);background:rgba(124,92,244,.1);color:var(--v2)}
-.gopt-ico{font-size:1.25rem;display:block;margin-bottom:4px}
-.otp-wrap{display:flex;gap:8px;justify-content:center;margin:4px 0 18px}
-.otp-box{width:46px;height:52px;background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:12px;color:var(--tx);font-size:1.4rem;font-weight:700;text-align:center;outline:none;transition:border-color .18s,box-shadow .18s;font-family:var(--fD);caret-color:var(--v2)}
-.otp-box:focus{border-color:var(--v);box-shadow:0 0 0 3px rgba(124,92,244,.11)}
-.otp-box.filled{border-color:rgba(124,92,244,.35)}
-.alert{padding:10px 13px;border-radius:10px;font-size:.79rem;margin-bottom:13px;display:none;animation:fadeUp .2s ease;line-height:1.5;font-weight:500}
-@keyframes fadeUp{from{opacity:0;transform:translateY(-4px)}to{opacity:1}}
-.alert.ok{background:rgba(0,217,180,.08);color:var(--teal);border:1px solid rgba(0,217,180,.2);display:block}
-.alert.err{background:rgba(255,79,135,.08);color:var(--rose);border:1px solid rgba(255,79,135,.2);display:block}
-.btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .18s;font-family:var(--fD);letter-spacing:.2px}
-.btn-main{background:var(--grad);color:#fff;box-shadow:0 4px 20px rgba(124,92,244,.28)}
-.btn-main:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 28px rgba(124,92,244,.4)}
-.btn-main:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
-.btn-ghost{background:transparent;color:var(--tx3);border:1px solid var(--border);margin-top:8px}
-.btn-ghost:hover{border-color:var(--rim);color:var(--tx2)}
-.resend-row{text-align:center;margin-top:13px;font-size:.76rem}
-.resend-btn{background:none;border:none;color:var(--v2);cursor:pointer;font-family:var(--fB);font-weight:600;padding:4px 6px;border-radius:6px}
-.resend-btn:disabled{opacity:.4;cursor:not-allowed}
-.resend-count{color:var(--tx3)}
-.footer-links{text-align:center;margin-top:18px;font-size:.72rem}
-.footer-links a{color:var(--tx3);text-decoration:none;margin:0 8px;transition:color .15s}
-.footer-links a:hover{color:var(--v2)}
-.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:5px}
+:root{--bg:#030308;--bg1:#08080f;--bg2:#0d0d1c;--bg3:#121228;--v:#7B5EA7;--v2:#9B7FD4;--v3:#C4A8FF;--vg:rgba(123,94,167,.13);--vb:rgba(123,94,167,.3);--cr:#FF4D6D;--tl:#00C9A7;--lm:#52B788;--pk:#FF85A1;--tx:#F5F3FF;--tx2:#9896B8;--tx3:#4E4C6A;--bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);--bd3:rgba(255,255,255,.2);--fD:'Clash Display',sans-serif;--fB:'Cabinet Grotesk',sans-serif;--fM:'JetBrains Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{min-height:100%}
+body{min-height:100dvh;background:var(--bg);color:var(--tx);font-family:var(--fB);font-size:15px;line-height:1.5;overflow-x:hidden}
+button,input{font-family:inherit;border:none;outline:none;background:none;color:var(--tx)}
+button{cursor:pointer}
+::-webkit-scrollbar{width:0}
+#canvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 100% 60% at 15% 0%,rgba(123,94,167,.09),transparent 55%),radial-gradient(ellipse 70% 50% at 85% 100%,rgba(0,201,167,.06),transparent 55%),radial-gradient(ellipse 50% 40% at 80% 5%,rgba(255,77,109,.04),transparent 50%)}
+.wrap{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px 40px;position:relative;z-index:1}
+.hero{text-align:center;margin-bottom:20px;animation:heroIn .7s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes heroIn{from{opacity:0;transform:translateY(-18px) scale(.92)}to{opacity:1;transform:none}}
+.logo{display:block;font-family:var(--fD);font-size:2.8rem;font-weight:700;letter-spacing:-.5px;background:linear-gradient(125deg,var(--v3) 0%,var(--pk) 45%,var(--v2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:5px}
+.tagline{font-size:.85rem;color:var(--tx3)}
+.live-row{display:flex;align-items:center;gap:7px;justify-content:center;margin-top:10px;font-size:.75rem;color:var(--tx3)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--lm);flex-shrink:0;animation:lp 2.2s ease-in-out infinite}
+@keyframes lp{0%,100%{box-shadow:0 0 0 0 rgba(82,183,136,.5)}55%{box-shadow:0 0 0 6px rgba(82,183,136,0)}}
+.ticker-wrap{width:100%;max-width:440px;overflow:hidden;margin:14px 0 18px;mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent)}
+.ticker-inner{display:flex;gap:10px;width:max-content;animation:tm 22s linear infinite}
+.t-chip{padding:5px 13px;border-radius:100px;font-size:.73rem;font-weight:700;background:var(--bg2);border:1px solid var(--bd);color:var(--tx3);white-space:nowrap;flex-shrink:0}
+@keyframes tm{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.card{background:var(--bg1);border:1px solid var(--bd);border-radius:24px;padding:26px 22px;width:100%;max-width:440px;position:relative;overflow:hidden;animation:cardIn .55s .08s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.card::after{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(123,94,167,.07),transparent 70%);pointer-events:none}
+.prog-bar{height:2.5px;background:var(--bg3);border-radius:2px;margin-bottom:22px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--v),var(--cr),var(--pk));background-size:200%;animation:ps 3s linear infinite;transition:width .4s cubic-bezier(.4,0,.2,1)}
+@keyframes ps{0%{background-position:0%}100%{background-position:200%}}
+.step{display:none}.step.on{display:block;animation:si .28s cubic-bezier(.4,0,.2,1)}
+@keyframes si{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+.step-chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;background:var(--vg);border:1px solid var(--vb);font-size:.65rem;font-weight:700;color:var(--v2);letter-spacing:.07em;text-transform:uppercase;font-family:var(--fD);margin-bottom:7px}
+.step-title{font-family:var(--fD);font-size:1.05rem;font-weight:700;color:var(--tx);letter-spacing:-.2px;margin-bottom:4px}
+.step-sub{font-size:.8rem;color:var(--tx3);margin-bottom:18px;line-height:1.65}
+.fl{margin-bottom:12px}
+.fl-lbl{display:block;font-size:.67rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-family:var(--fD)}
+.field{width:100%;background:rgba(255,255,255,.04);border:1.5px solid var(--bd2);border-radius:12px;color:var(--tx);padding:12px 14px;font-size:.93rem;transition:border-color .18s,box-shadow .18s,background .18s}
+.field:focus{border-color:var(--v);box-shadow:0 0 0 3px rgba(123,94,167,.13);background:rgba(255,255,255,.06)}
+.field::placeholder{color:var(--tx3)}
+.field.err{border-color:var(--cr) !important;box-shadow:0 0 0 3px rgba(255,77,109,.1) !important}
+.f-hint{font-size:.7rem;color:var(--tx3);margin-top:5px;line-height:1.5}
+.return-box{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--vg);border:1.5px solid var(--vb);border-radius:14px;margin-bottom:12px;animation:cardIn .3s ease}
+.return-emo{font-size:1.5rem;flex-shrink:0}
+.return-lbl{font-size:.67rem;color:var(--v2);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-family:var(--fD)}
+.return-nm{font-family:var(--fD);font-weight:700;font-size:.97rem;color:var(--tx);letter-spacing:-.1px}
+.g-row{display:flex;gap:8px;margin-bottom:16px}
+.g-btn{flex:1;padding:11px 6px;border-radius:11px;border:1.5px solid var(--bd2);background:rgba(255,255,255,.03);color:var(--tx3);font-size:.78rem;font-weight:700;cursor:pointer;text-align:center;transition:all .16s;font-family:var(--fD)}
+.g-btn .ico{display:block;font-size:1.2rem;margin-bottom:3px}
+.g-btn.sel{border-color:var(--v);background:var(--vg);color:var(--v2)}
+.otp-row{display:flex;gap:7px;justify-content:center;margin:4px 0 18px}
+.otp-box{width:46px;height:54px;background:rgba(255,255,255,.04);border:1.5px solid var(--bd2);border-radius:11px;color:var(--tx);font-size:1.5rem;font-weight:700;text-align:center;font-family:var(--fM);transition:all .17s;caret-color:var(--v2)}
+.otp-box:focus{border-color:var(--v);box-shadow:0 0 0 3px rgba(123,94,167,.13);background:rgba(255,255,255,.07)}
+.otp-box.filled{border-color:rgba(123,94,167,.45);background:var(--vg)}
+.otp-box.shake{animation:shk .38s ease}
+@keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}60%{transform:translateX(5px)}80%{transform:translateX(-3px)}}
+.alert{padding:10px 13px;border-radius:10px;font-size:.8rem;margin-bottom:12px;display:none;line-height:1.55;font-weight:500;animation:si .2s ease}
+.alert.ok{display:block;background:rgba(0,201,167,.09);color:var(--tl);border:1px solid rgba(0,201,167,.22)}
+.alert.err{display:block;background:rgba(255,77,109,.09);color:#FF8FA3;border:1px solid rgba(255,77,109,.22)}
+.alert.info{display:block;background:var(--vg);color:var(--v3);border:1px solid var(--vb)}
+.btn{width:100%;padding:13px;border-radius:100px;font-size:.9rem;font-weight:700;font-family:var(--fD);letter-spacing:.04em;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,box-shadow .15s;cursor:pointer;border:none}
+.btn:active{transform:scale(.96)}
+.btn-v{background:linear-gradient(135deg,#7B5EA7,#FF4D6D);color:#fff;box-shadow:0 5px 22px rgba(123,94,167,.38)}
+.btn-v:disabled{opacity:.4;cursor:not-allowed;transform:none !important;box-shadow:none}
+.btn-g{background:rgba(255,255,255,.05);color:var(--tx3);border:1px solid var(--bd2);margin-top:8px;padding:11px}
+.spin{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;display:inline-block;flex-shrink:0}
 @keyframes sp{to{transform:rotate(360deg)}}
+.resend-row{text-align:center;margin-top:12px;font-size:.75rem}
+.resend-btn{color:var(--v2);font-weight:700;padding:4px 8px;border-radius:7px;background:none;border:none;cursor:pointer;font-family:var(--fB)}
+.resend-btn:disabled{opacity:.4;cursor:not-allowed}
+.timer-txt{color:var(--tx3)}
+.footer{text-align:center;margin-top:18px;font-size:.72rem;animation:cardIn .5s .3s ease both}
+.footer a{color:var(--tx3);text-decoration:none;margin:0 7px}
+.footer a:hover{color:var(--v2)}
+#success{position:fixed;inset:0;z-index:999;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center}
+#success.on{display:flex;animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.s-orb{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--v),var(--cr));display:flex;align-items:center;justify-content:center;font-size:2.8rem;box-shadow:0 0 64px rgba(123,94,167,.55);margin-bottom:18px;animation:orbPop .65s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes orbPop{from{transform:scale(0) rotate(-180deg)}to{transform:scale(1) rotate(0)}}
+.s-title{font-family:var(--fD);font-size:1.55rem;font-weight:700;letter-spacing:-.3px;margin-bottom:6px;animation:heroIn .4s .28s ease both}
+.s-sub{font-size:.85rem;color:var(--tx2);max-width:260px;line-height:1.7;animation:heroIn .4s .4s ease both}
+.s-streak{display:none;align-items:center;gap:6px;padding:5px 14px;border-radius:100px;background:var(--vg);border:1px solid var(--vb);font-size:.78rem;font-weight:700;color:var(--v2);margin-top:12px;font-family:var(--fD);animation:heroIn .4s .52s ease both}
+#confetti-c{position:fixed;inset:0;pointer-events:none;z-index:1000}
 </style>
 </head>
 <body>
-<div class="page">
+<canvas id="canvas"></canvas>
+<div id="success">
+  <canvas id="confetti-c"></canvas>
+  <div class="s-orb" id="s-orb">🎭</div>
+  <div class="s-title" id="s-title">Welcome!</div>
+  <div class="s-sub" id="s-sub">Opening your sanctuary...</div>
+  <div class="s-streak" id="s-streak">🔥 <span id="s-streak-txt"></span></div>
+</div>
+<div class="wrap">
   <div class="hero">
     <span class="logo">🎭 annomuss</span>
-    <p class="tagline">Express yourself. Anonymously.</p>
-    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <p class="tagline">Express yourself. Completely anonymous.</p>
+    <div class="live-row"><div class="live-dot"></div><span id="live-num">...</span> people online now</div>
   </div>
-
+  <div class="ticker-wrap">
+    <div class="ticker-inner">
+      <span class="t-chip">😊 Happy</span><span class="t-chip">😔 Sad</span><span class="t-chip">😰 Anxious</span><span class="t-chip">✨ Inspired</span><span class="t-chip">🌧️ Lonely</span><span class="t-chip">🙏 Grateful</span><span class="t-chip">😤 Angry</span><span class="t-chip">🤩 Excited</span><span class="t-chip">💌 Unsent</span><span class="t-chip">🌙 Midnight</span>
+      <span class="t-chip">😊 Happy</span><span class="t-chip">😔 Sad</span><span class="t-chip">😰 Anxious</span><span class="t-chip">✨ Inspired</span><span class="t-chip">🌧️ Lonely</span><span class="t-chip">🙏 Grateful</span><span class="t-chip">😤 Angry</span><span class="t-chip">🤩 Excited</span><span class="t-chip">💌 Unsent</span><span class="t-chip">🌙 Midnight</span>
+    </div>
+  </div>
   <div class="card">
     <div class="prog-bar"><div class="prog-fill" id="prog" style="width:50%"></div></div>
-
-    <!-- STEP 1 -->
     <div class="step on" id="s1">
-      <div class="step-num">Step 1 of 2</div>
-      <div class="step-title">Who are you… anonymously?</div>
-      <div class="step-sub">New users pick a name. Returning users are recognised automatically.</div>
-
-      <div class="field">
-        <label>Email Address</label>
-        <input type="email" id="emailIn" placeholder="you@example.com" autocomplete="email" inputmode="email"/>
-      </div>
-      <div class="field">
-        <label>Anonymous Name</label>
-        <input type="text" id="nameIn" placeholder="e.g. SilentStorm99" maxlength="30" autocomplete="off" spellcheck="false"/>
-        <div class="hint">2–30 characters. This is how others see you.</div>
-      </div>
-      <div class="field">
-        <label>Gender <span style="color:var(--tx3);font-weight:400;text-transform:none;font-size:.7rem">(for random chat matching)</span></label>
-        <div class="gender-grid">
-          <div class="gopt" onclick="setGender('Male',this)"><span class="gopt-ico">♂️</span>Male</div>
-          <div class="gopt" onclick="setGender('Female',this)"><span class="gopt-ico">♀️</span>Female</div>
-          <div class="gopt sel" onclick="setGender('Private',this)"><span class="gopt-ico">🤍</span>Private</div>
+      <div class="step-chip">Step 1 of 2</div>
+      <div class="step-title" id="s1t">Who are you tonight?</div>
+      <div class="step-sub" id="s1s">New? Pick a name. Been here? Just use your email — we'll recognise you.</div>
+      <div class="fl"><label class="fl-lbl">Email Address</label><input class="field" type="email" id="emailIn" placeholder="you@example.com" autocomplete="email" inputmode="email"/></div>
+      <div id="new-fields">
+        <div class="fl"><label class="fl-lbl">Your Anonymous Name</label><input class="field" type="text" id="nameIn" placeholder="e.g. NightOwl42" maxlength="30" autocomplete="off" spellcheck="false"/><div class="f-hint" id="name-hint">2–30 characters · how others see you</div></div>
+        <div class="fl"><label class="fl-lbl">Gender <span style="color:var(--tx3);font-weight:400;font-size:.68rem;text-transform:none">(for better chat matching)</span></label>
+          <div class="g-row">
+            <button class="g-btn" onclick="selG('Male',this)"><span class="ico">♂️</span>Male</button>
+            <button class="g-btn" onclick="selG('Female',this)"><span class="ico">♀️</span>Female</button>
+            <button class="g-btn sel" onclick="selG('Private',this)"><span class="ico">🤍</span>Private</button>
+          </div>
         </div>
       </div>
-
+      <div class="return-box" id="ret-box" style="display:none">
+        <div class="return-emo" id="ret-emo">🎭</div>
+        <div><div class="return-lbl">Welcome back</div><div class="return-nm" id="ret-nm">...</div></div>
+      </div>
       <div class="alert" id="a1"></div>
-      <button class="btn btn-main" id="sendBtn" onclick="sendOtp()">Send OTP ✉️</button>
+      <button class="btn btn-v" id="sendBtn" onclick="doSend()">Get OTP ✉️</button>
     </div>
-
-    <!-- STEP 2 -->
     <div class="step" id="s2">
-      <div class="step-num">Step 2 of 2</div>
-      <div class="step-title">Check your inbox</div>
-      <div class="step-sub" id="otpSub">We sent a 6-digit code to your email.</div>
-
-      <div class="otp-wrap" id="otpWrap">
+      <div class="step-chip">Step 2 of 2</div>
+      <div class="step-title">Check your email</div>
+      <div class="step-sub" id="s2s">Enter the 6-digit code we sent you.</div>
+      <div class="otp-row">
         <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-i="0"/>
         <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-i="1"/>
         <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-i="2"/>
@@ -136,305 +147,105 @@ input::placeholder{color:var(--tx3)}
         <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-i="4"/>
         <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-i="5"/>
       </div>
-
       <div class="alert" id="a2"></div>
-      <button class="btn btn-main" id="verBtn" onclick="verifyOtp()">Enter Annomuss 🚀</button>
-      <button class="btn btn-ghost" onclick="goBack()">← Change email</button>
+      <button class="btn btn-v" id="verBtn" onclick="doVerify()">Enter Annomuss 🚀</button>
+      <button class="btn btn-g" onclick="goBack()">← Change email</button>
       <div class="resend-row">
-        <button class="resend-btn" id="resendBtn" onclick="resendOtp()" disabled>Resend OTP</button>
-        <span class="resend-count" id="resendCount"> in <span id="resendTimer">60</span>s</span>
+        <button class="resend-btn" id="resendBtn" onclick="doResend()" disabled>Resend code</button>
+        <span class="timer-txt" id="timerEl"> in <span id="timerNum">60</span>s</span>
       </div>
     </div>
   </div>
-
-  <div class="footer-links">
-    <a href="privacy.html">Privacy</a>
-    <a href="terms.html">Terms</a>
-  </div>
+  <div class="footer"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="help.html">Help</a><a href="admin.html" style="opacity:.25">Admin</a></div>
 </div>
-
 <script>
-const API = "https://annomuss-backend-icgp.onrender.com";
-let selGender = "Private", resendIv = null;
-
-// ── Auto-login if token exists ────────────────
-(async function() {
-  const tk = localStorage.getItem("token");
-  if (!tk) return;
-  try {
-    const r = await fetch(API + "/api/users/me", {
-      headers: { "Authorization": `Bearer ${tk}`, "Content-Type": "application/json" }
-    });
-    if (r.ok) {
-      const fresh = await r.json();
-      localStorage.setItem("user", JSON.stringify(fresh));
-      location.href = "dashboard.html";
-    } else {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-    }
-  } catch(e) {
-    // Network error — stay on login
-  }
-})();
-
-function setGender(g, el) {
-  selGender = g;
-  document.querySelectorAll(".gopt").forEach(e => e.classList.remove("sel"));
-  el.classList.add("sel");
+const API='https://annomuss-backend-icgp.onrender.com';
+let gender='Private',timerIv=null,isRet=false;
+const q=id=>document.getElementById(id);
+const sa=(id,msg,t)=>{const el=q(id);el.textContent=msg;el.className='alert '+t;};
+const ca=id=>{const el=q(id);el.className='alert';el.textContent='';};
+const san=s=>String(s||'').replace(/[<>"'`\\]/g,'').trim();
+/* Particles */
+(()=>{const c=q('canvas'),ctx=c.getContext('2d');const rs=()=>{c.width=innerWidth;c.height=innerHeight};rs();window.addEventListener('resize',rs);const pts=Array.from({length:45},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+.4,dx:(Math.random()-.5)*.22,dy:(Math.random()-.5)*.22,a:Math.random()*.25+.06,col:['rgba(123,94,167,','rgba(0,201,167,','rgba(255,77,109,'][Math.floor(Math.random()*3)]}));const draw=()=>{ctx.clearRect(0,0,c.width,c.height);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.col+p.a+')';ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>c.width)p.dx*=-1;if(p.y<0||p.y>c.height)p.dy*=-1;});requestAnimationFrame(draw);};draw();})();
+/* Auto-login */
+(async()=>{const tk=localStorage.getItem('token');if(tk){try{const r=await fetch(API+'/api/users/me',{headers:{Authorization:'Bearer '+tk}});if(r.ok){const u=await r.json();localStorage.setItem('user',JSON.stringify(u));location.href='dashboard.html';return;}}catch(_){}localStorage.removeItem('token');}setTimeout(()=>{const el=q('live-num');const t=Math.floor(Math.random()*280+60);let c=0;const iv=setInterval(()=>{c=Math.min(c+Math.ceil(t/25),t);el.textContent=c;if(c>=t)clearInterval(iv);},35);},400);})();
+/* OTP boxes */
+const boxes=[...document.querySelectorAll('.otp-box')];
+boxes.forEach((b,i)=>{b.addEventListener('input',()=>{b.value=b.value.replace(/\D/g,'').slice(-1);b.classList.toggle('filled',!!b.value);if(b.value&&i<5)boxes[i+1].focus();if(boxes.every(x=>x.value))setTimeout(doVerify,80);});b.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!b.value&&i>0)boxes[i-1].focus();if(e.key==='Enter')doVerify();});b.addEventListener('paste',e=>{e.preventDefault();const p=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);[...p].forEach((ch,j)=>{if(boxes[j]){boxes[j].value=ch;boxes[j].classList.add('filled');}});if(boxes[Math.min(p.length,5)])boxes[Math.min(p.length,5)].focus();if(p.length===6)setTimeout(doVerify,80);});});
+const getOtp=()=>boxes.map(b=>b.value).join('');
+const clearOtp=()=>{boxes.forEach(b=>{b.value='';b.classList.remove('filled');});boxes[0].focus();};
+const shakeOtp=()=>{boxes.forEach(b=>{b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);});};
+/* Timer */
+function startTimer(s=60){let t=s;q('resendBtn').disabled=true;q('timerEl').style.display='inline';clearInterval(timerIv);timerIv=setInterval(()=>{q('timerNum').textContent=--t;if(t<=0){clearInterval(timerIv);q('resendBtn').disabled=false;q('timerEl').style.display='none';}},1000);}
+/* Gender */
+function selG(g,el){gender=g;document.querySelectorAll('.g-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+/* Set returning user */
+function setRet(name){isRet=!!name;q('new-fields').style.display=name?'none':'block';q('ret-box').style.display=name?'flex':'none';if(name){q('ret-nm').textContent=name;}q('s1t').textContent=name?'Welcome back 🎭':'Who are you tonight?';q('s1s').textContent=name?'We know you. Just verify with the OTP below.':'New? Pick a name. Been here? Just use your email — we\'ll recognise you.';}
+/* Send OTP */
+async function doSend(){
+  ca('a1');
+  const email=san(q('emailIn').value);
+  const name=isRet?'placeholder':san(q('nameIn').value);
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){q('emailIn').classList.add('err');setTimeout(()=>q('emailIn').classList.remove('err'),2000);return sa('a1','Please enter a valid email address','err');}
+  if(!isRet&&name.length<2)return sa('a1','Name must be at least 2 characters','err');
+  if(!isRet&&name.length>30)return sa('a1','Name must be 30 characters or less','err');
+  const btn=q('sendBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span> Sending...';
+  const wu=setTimeout(()=>{if(btn.disabled)sa('a1','⏳ Server waking up (~20s first load) — please wait...','info');},8000);
+  try{
+    const r=await fetch(API+'/api/auth/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,anonymousName:name,gender})});
+    clearTimeout(wu);ca('a1');
+    const d=await r.json();
+    if(!r.ok){if(r.status===409)return sa('a1',d.message||'That name is taken. Try another!','err');throw new Error(d.message||'Failed');}
+    if(d.isReturning&&d.knownName)setRet(d.knownName);
+    q('s2s').textContent='Code sent to '+email+'. Check your inbox!';
+    q('s1').classList.remove('on');q('s2').classList.add('on');q('prog').style.width='100%';
+    startTimer(60);setTimeout(()=>boxes[0].focus(),120);
+  }catch(e){clearTimeout(wu);const m=(!e.message||e.message.includes('fetch'))?'Server waking up — wait 15s and try again':e.message;sa('a1',m,'err');}
+  finally{btn.disabled=false;btn.innerHTML='Get OTP ✉️';}
 }
-
-function sanitize(s) { return String(s || "").replace(/[<>"'`\\]/g, "").trim(); }
-
-function showAlert(id, msg, type) {
-  const el = document.getElementById(id);
-  el.textContent = msg;
-  el.className = `alert ${type}`;
+/* Resend */
+async function doResend(){
+  ca('a2');
+  const email=san(q('emailIn').value);const name=isRet?'placeholder':san(q('nameIn').value);
+  try{const r=await fetch(API+'/api/auth/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,anonymousName:name,gender})});const d=await r.json();if(!r.ok)throw new Error(d.message);sa('a2','New code sent! ✅','ok');clearOtp();startTimer(60);}
+  catch(e){sa('a2',e.message,'err');}
 }
-
-function clearAlert(id) {
-  const el = document.getElementById(id);
-  el.className = "alert";
-  el.textContent = "";
+/* Verify */
+async function doVerify(){
+  ca('a2');const otp=getOtp();
+  if(otp.length!==6){shakeOtp();return sa('a2','Enter all 6 digits','err');}
+  const btn=q('verBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span> Verifying...';
+  try{
+    const email=san(q('emailIn').value);
+    const r=await fetch(API+'/api/auth/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,otp})});
+    const d=await r.json();
+    if(!r.ok){shakeOtp();clearOtp();throw new Error(d.message||'Verification failed');}
+    localStorage.setItem('token',d.token);localStorage.setItem('user',JSON.stringify(d.user));
+    showSuccess(d.user,d.isNew);
+  }catch(e){sa('a2',e.message,'err');}
+  finally{btn.disabled=false;btn.innerHTML='Enter Annomuss 🚀';}
 }
-
-// ── OTP Boxes ─────────────────────────────────
-const boxes = [...document.querySelectorAll(".otp-box")];
-boxes.forEach((box, i) => {
-  box.addEventListener("input", () => {
-    box.value = box.value.replace(/\D/g, "").slice(-1);
-    box.classList.toggle("filled", !!box.value);
-    if (box.value && i < 5) boxes[i + 1].focus();
-    if (boxes.every(b => b.value)) verifyOtp();
-  });
-  box.addEventListener("keydown", e => {
-    if (e.key === "Backspace" && !box.value && i > 0) boxes[i - 1].focus();
-    if (e.key === "Enter") verifyOtp();
-  });
-  box.addEventListener("paste", e => {
-    e.preventDefault();
-    const p = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, 6);
-    [...p].forEach((ch, j) => { if (boxes[j]) { boxes[j].value = ch; boxes[j].classList.add("filled"); } });
-    if (boxes[Math.min(p.length, 5)]) boxes[Math.min(p.length, 5)].focus();
-    if (p.length === 6) verifyOtp();
-  });
-});
-
-function getOtp() { return boxes.map(b => b.value).join(""); }
-function clearOtp() { boxes.forEach(b => { b.value = ""; b.classList.remove("filled"); }); boxes[0].focus(); }
-
-// ── Resend timer ──────────────────────────────
-function startTimer(s = 60) {
-  let t = s;
-  document.getElementById("resendBtn").disabled = true;
-  document.getElementById("resendCount").style.display = "inline";
-  clearInterval(resendIv);
-  resendIv = setInterval(() => {
-    t--;
-    document.getElementById("resendTimer").textContent = t;
-    if (t <= 0) {
-      clearInterval(resendIv);
-      document.getElementById("resendBtn").disabled = false;
-      document.getElementById("resendCount").style.display = "none";
-    }
-  }, 1000);
+/* Success screen */
+function showSuccess(user,isNew){
+  q('s-orb').textContent=user.avatarEmoji||'🎭';
+  q('s-title').textContent=isNew?'You\'re in, '+user.anonymousName+'! 🎉':'Hey '+user.anonymousName+'! 🎭';
+  q('s-sub').textContent=isNew?'Your anonymous sanctuary is ready. Express freely.':'Opening your feed...';
+  if(!isNew&&user.streak>1){const sk=q('s-streak');sk.style.display='inline-flex';q('s-streak-txt').textContent=user.streak+' day streak!';}
+  q('success').classList.add('on');confetti();clearInterval(timerIv);
+  setTimeout(()=>location.href='dashboard.html',isNew?2400:1500);
 }
-
-// ── Send OTP ──────────────────────────────────
-// FIX: sends email + anonymousName + gender together
-async function sendOtp() {
-  clearAlert("a1");
-
-  const email = sanitize(document.getElementById("emailIn").value);
-  const name  = sanitize(document.getElementById("nameIn").value);
-  const gender = selGender;
-
-  // Client-side validation
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    return showAlert("a1", "Please enter a valid email address ❌", "err");
-  if (!name || name.length < 2)
-    return showAlert("a1", "Name must be at least 2 characters ❌", "err");
-  if (name.length > 30)
-    return showAlert("a1", "Name must be 30 characters or less ❌", "err");
-
-  const btn = document.getElementById("sendBtn");
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>Sending...';
-
-  const wakeTimer = setTimeout(() => {
-    if (btn.disabled) {
-      showAlert("a1", "⏳ Server is waking up — first load takes ~20s. Please wait…", "ok");
-      btn.innerHTML = '<span class="spin"></span>Waking up...';
-    }
-  }, 6000);
-
-  try {
-    // ✅ THE FIX — send all three fields the backend requires
-    const payload = {
-      email:         email,
-      anonymousName: name,
-      gender:        gender
-    };
-
-    console.log("Sending OTP payload:", payload); // debug
-
-    const r = await fetch(`${API}/api/auth/send-otp`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(payload)
-    });
-
-    clearTimeout(wakeTimer);
-    const d = await r.json();
-
-    if (!r.ok) throw new Error(d.message || "Failed to send OTP");
-
-    // Success — move to step 2
-    document.getElementById("otpSub").textContent = `Code sent to ${email}`;
-    document.getElementById("s1").classList.remove("on");
-    document.getElementById("s2").classList.add("on");
-    document.getElementById("prog").style.width = "100%";
-    startTimer(60);
-    clearAlert("a1");
-    setTimeout(() => boxes[0].focus(), 100);
-
-  } catch (e) {
-    clearTimeout(wakeTimer);
-    let msg = e.message || "";
-    if (!msg || msg.includes("fetch") || msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
-      msg = "⚠️ Server is waking up. Wait 15 seconds and tap Send OTP again.";
-    }
-    showAlert("a1", msg, "err");
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = "Send OTP ✉️";
-  }
+/* Confetti */
+function confetti(){
+  const c=q('confetti-c'),ctx=c.getContext('2d');
+  c.width=innerWidth;c.height=innerHeight;
+  const cols=['#7B5EA7','#FF4D6D','#00C9A7','#F4A261','#FF85A1','#C4A8FF'];
+  const ps=Array.from({length:90},()=>({x:Math.random()*c.width,y:Math.random()*c.height*.3-40,w:Math.random()*9+4,h:Math.random()*5+3,color:cols[Math.floor(Math.random()*cols.length)],rot:Math.random()*Math.PI*2,dx:(Math.random()-.5)*5,dy:Math.random()*4+1.5,drot:(Math.random()-.5)*.14,opacity:1}));
+  let f=0;(function draw(){ctx.clearRect(0,0,c.width,c.height);ps.forEach(p=>{p.x+=p.dx;p.y+=p.dy;p.rot+=p.drot;p.opacity=Math.max(0,1-f/140);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.globalAlpha=p.opacity;ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});if(++f<145)requestAnimationFrame(draw);})();
 }
-
-// ── Resend OTP ────────────────────────────────
-async function resendOtp() {
-  clearAlert("a2");
-  const email  = sanitize(document.getElementById("emailIn").value);
-  const name   = sanitize(document.getElementById("nameIn").value);
-  const gender = selGender;
-
-  try {
-    // ✅ FIX — also send all fields on resend
-    const r = await fetch(`${API}/api/auth/send-otp`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ email, anonymousName: name, gender })
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.message);
-    showAlert("a2", "New code sent! Check your inbox ✅", "ok");
-    clearOtp();
-    startTimer(60);
-  } catch (e) {
-    showAlert("a2", e.message, "err");
-  }
-}
-
-// ── Verify OTP ────────────────────────────────
-async function verifyOtp() {
-  clearAlert("a2");
-  const otp = getOtp();
-  if (otp.length !== 6) return showAlert("a2", "Enter all 6 digits ❌", "err");
-
-  const btn = document.getElementById("verBtn");
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>Verifying...';
-
-  try {
-    const email  = sanitize(document.getElementById("emailIn").value);
-    const name   = sanitize(document.getElementById("nameIn").value);
-    const gender = selGender;
-
-    const r = await fetch(`${API}/api/auth/verify-otp`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ email, otp, anonymousName: name, gender })
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.message || "Verification failed");
-
-    localStorage.setItem("token", d.token);
-    localStorage.setItem("user", JSON.stringify(d.user));
-    showAlert("a2", `Welcome${d.user?.anonymousName ? " " + d.user.anonymousName : ""}! 🎭`, "ok");
-    clearInterval(resendIv);
-    setTimeout(() => location.href = "dashboard.html", 700);
-
-  } catch (e) {
-    showAlert("a2", e.message, "err");
-    clearOtp();
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = "Enter Annomuss 🚀";
-  }
-}
-
-function goBack() {
-  clearInterval(resendIv);
-  document.getElementById("s2").classList.remove("on");
-  document.getElementById("s1").classList.add("on");
-  document.getElementById("prog").style.width = "50%";
-  clearAlert("a1");
-  clearAlert("a2");
-  clearOtp();
-}
-
-document.getElementById("emailIn").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("nameIn").focus(); });
-document.getElementById("nameIn").addEventListener("keydown", e => { if (e.key === "Enter") sendOtp(); });
-</script>
-
-<script>
-// ── PWA Service Worker ────────────────────────
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js")
-      .then(reg => {
-        console.log("✅ SW registered:", reg.scope);
-        setInterval(() => reg.update(), 60000);
-      })
-      .catch(err => console.warn("SW reg failed:", err));
-  });
-}
-
-// ── PWA Install Banner ────────────────────────
-let deferredPrompt = null;
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  setTimeout(showInstallBanner, 30000);
-});
-
-function showInstallBanner() {
-  if (!deferredPrompt || localStorage.getItem("ann_pwa_dismissed")) return;
-  const banner = document.createElement("div");
-  banner.id = "pwa-banner";
-  banner.style.cssText = `position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:12px;right:12px;background:linear-gradient(135deg,#10101f,#161628);border:1px solid rgba(124,92,244,.35);border-radius:18px;padding:14px 16px;z-index:9000;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.6);animation:slideUp .3s ease;`;
-  banner.innerHTML = `<style>@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}</style><div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7c5cf4,#ff5c7a);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">🎭</div><div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:900;color:#edeaff">Install Annomuss</div><div style="font-size:.72rem;color:#4a4770;margin-top:2px">Add to home screen for quick access</div></div><button onclick="installPWA()" style="background:linear-gradient(135deg,#7c5cf4,#ff5c7a);border:none;color:#fff;border-radius:10px;padding:8px 14px;font-size:.72rem;font-weight:900;cursor:pointer;white-space:nowrap">Install</button><button onclick="dismissBanner()" style="background:none;border:none;color:#4a4770;cursor:pointer;font-size:1rem;padding:4px;flex-shrink:0">✕</button>`;
-  document.body.appendChild(banner);
-}
-
-function installPWA() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(r => {
-    if (r.outcome === "accepted") document.getElementById("pwa-banner")?.remove();
-    deferredPrompt = null;
-  });
-}
-
-function dismissBanner() {
-  document.getElementById("pwa-banner")?.remove();
-  localStorage.setItem("ann_pwa_dismissed", "1");
-}
-
-window.addEventListener("appinstalled", () => {
-  document.getElementById("pwa-banner")?.remove();
-  deferredPrompt = null;
-});
+function goBack(){clearInterval(timerIv);q('s2').classList.remove('on');q('s1').classList.add('on');q('prog').style.width='50%';ca('a1');ca('a2');clearOtp();}
+q('emailIn').addEventListener('keydown',e=>{if(e.key==='Enter')q('nameIn').focus();});
+q('nameIn').addEventListener('keydown',e=>{if(e.key==='Enter')doSend();});
+if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 </body>
 </html>

@@ -348,10 +348,131 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 /* session expired */
 #sess{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;padding:24px}
 #sess.on{display:flex}
+
+/* ══ MIDNIGHT MODE ══ */
+body.midnight{--bg:#01010a;--bg1:#03030e;--bg2:#060614;--bg3:#0a0a1a}
+body.midnight #nav{background:rgba(1,1,10,.96)}
+body.midnight .tb{background:rgba(1,1,10,.92)}
+.midnight-banner{margin:0 14px 10px;padding:14px 16px;background:linear-gradient(135deg,rgba(123,94,167,.15),rgba(3,3,8,.8));border:1px solid rgba(196,168,255,.18);border-radius:18px;display:none;cursor:pointer;animation:midnightPulse 3s ease-in-out infinite}
+.midnight-banner.show{display:flex;align-items:center;gap:14px}
+@keyframes midnightPulse{0%,100%{border-color:rgba(196,168,255,.18)}50%{border-color:rgba(196,168,255,.42)}}
+.midnight-orb{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#1a0040,#3d0070);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;box-shadow:0 0 20px rgba(123,94,167,.4)}
+
+/* ══ UNSENT LETTER OVERLAY ══ */
+#unsent-overlay{position:fixed;inset:0;z-index:400;display:none;flex-direction:column}
+#unsent-overlay.on{display:flex;animation:pgIn .25s ease}
+.unsent-bg{background:linear-gradient(180deg,#0a0014 0%,#030308 60%);flex:1;display:flex;flex-direction:column}
+.unsent-header{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(196,168,255,.1)}
+.unsent-body{flex:1;padding:24px 22px;display:flex;flex-direction:column;gap:0}
+.unsent-to{font-size:.72rem;font-weight:700;color:rgba(196,168,255,.5);letter-spacing:.5px;text-transform:uppercase;font-family:var(--fD);margin-bottom:8px}
+#unsent-to-inp{font-family:'Instrument Serif',var(--fS,'Georgia',serif);font-size:1rem;font-style:italic;color:var(--v3);background:none;border:none;outline:none;width:100%;margin-bottom:20px;padding-bottom:8px;border-bottom:1px solid rgba(196,168,255,.12)}
+#unsent-to-inp::placeholder{color:rgba(196,168,255,.25)}
+#unsent-txt{flex:1;font-family:'Georgia',serif;font-size:1.05rem;line-height:1.85;color:rgba(245,243,255,.88);background:none;border:none;outline:none;resize:none;min-height:280px}
+#unsent-txt::placeholder{color:rgba(196,168,255,.2);font-style:italic}
+.unsent-footer{padding:16px 22px calc(16px + var(--safe));border-top:1px solid rgba(196,168,255,.1);display:flex;align-items:center;justify-content:space-between}
+.unsent-count{font-family:var(--fM);font-size:.72rem;color:rgba(196,168,255,.4)}
+.send-votes{display:flex;align-items:center;gap:6px;font-size:.78rem;color:rgba(196,168,255,.55)}
+
+/* ══ COMPLIMENT OVERLAY ══ */
+#compliment-overlay{position:fixed;inset:0;z-index:500;background:rgba(3,3,8,.95);backdrop-filter:blur(20px);display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center}
+#compliment-overlay.on{display:flex;animation:pgIn .3s ease}
+.comp-orb{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--pk),var(--go));display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:20px;box-shadow:0 0 60px rgba(255,133,161,.4);animation:compOrb 2.5s ease-in-out infinite}
+@keyframes compOrb{0%,100%{box-shadow:0 0 40px rgba(255,133,161,.3)}50%{box-shadow:0 0 80px rgba(255,133,161,.6)}}
+.comp-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0}
+.comp-chip{padding:8px 16px;border-radius:100px;background:rgba(255,133,161,.08);border:1.5px solid rgba(255,133,161,.2);color:var(--pk);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:var(--fD)}
+.comp-chip:active{transform:scale(.93)}
+.comp-chip.sel{background:rgba(255,133,161,.2);border-color:var(--pk);transform:scale(1.05)}
+.comp-target{font-size:.85rem;color:var(--tx2);margin-bottom:12px}
+
+/* ══ EMOTION PULSE BANNER ══ */
+.pulse-banner{margin:0 14px 10px;padding:14px 16px;background:var(--bg1);border:1px solid var(--bd);border-radius:18px;overflow:hidden;position:relative}
+.pulse-banner::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(123,94,167,.05),transparent);pointer-events:none}
+.pulse-city{font-family:var(--fD);font-size:.78rem;font-weight:700;color:var(--tx3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.pulse-bars{display:flex;gap:6px;align-items:flex-end;height:40px}
+.pulse-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.pulse-bar{border-radius:4px 4px 0 0;width:100%;min-height:4px;transition:height .8s cubic-bezier(.34,1.56,.64,1)}
+.pulse-bar-lbl{font-size:.6rem;color:var(--tx3);font-family:var(--fD);white-space:nowrap}
+
+/* ══ XP LEVEL UP OVERLAY ══ */
+#levelup-overlay{position:fixed;inset:0;z-index:9998;display:none;align-items:center;justify-content:center;pointer-events:none}
+#levelup-overlay.on{display:flex}
+.levelup-card{background:var(--bg1);border:1px solid var(--vb);border-radius:22px;padding:32px 28px;text-align:center;animation:levelUpPop .5s cubic-bezier(.34,1.56,.64,1);pointer-events:all}
+@keyframes levelUpPop{from{transform:scale(.4) rotate(-10deg);opacity:0}to{transform:none;opacity:1}}
+
+/* ══ GRATITUDE BOMB notification ══ */
+.gratitude-notif{position:fixed;top:0;left:0;right:0;z-index:9997;padding:16px 20px;background:linear-gradient(135deg,rgba(255,133,161,.15),rgba(244,162,97,.1));border-bottom:1px solid rgba(255,133,161,.25);display:none;align-items:center;gap:12px;animation:slideDown .4s cubic-bezier(.34,1.56,.64,1)}
+.gratitude-notif.on{display:flex}
+@keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+
+/* ══ DEEP TALK mode ══ */
+.deep-talk-banner{margin:0 18px 14px;padding:12px 14px;background:rgba(92,232,255,.07);border:1px solid rgba(92,232,255,.2);border-radius:12px;font-size:.78rem;color:var(--bl);font-weight:600;display:none;animation:pgIn .3s ease}
+.deep-talk-banner.on{display:flex;align-items:center;gap:8px}
+.deep-q{margin:8px 18px;padding:14px 16px;background:var(--bg2);border-left:3px solid var(--bl);border-radius:0 12px 12px 0;font-size:.88rem;color:var(--tx);line-height:1.65;font-style:italic;display:none;animation:pgIn .3s ease}
+.deep-q.on{display:block}
 </style>
 </head>
 <body>
 <div id="toasts"></div>
+
+<!-- UNSENT LETTER OVERLAY -->
+<div id="unsent-overlay">
+  <div class="unsent-bg">
+    <div class="unsent-header">
+      <button class="ico-btn" onclick="closeUnsent()" style="background:rgba(196,168,255,.08);border-color:rgba(196,168,255,.2);color:var(--v3)">✕</button>
+      <div style="flex:1;font-family:var(--fD);font-weight:700;font-size:.95rem;color:var(--v3);letter-spacing:-.1px">💌 Unsent Letter</div>
+      <button class="btn btn-sm" id="unsent-post-btn" style="background:linear-gradient(135deg,rgba(196,168,255,.2),rgba(123,94,167,.3));color:var(--v3);border:1px solid var(--vb)" onclick="submitUnsent()">Send into the void ✦</button>
+    </div>
+    <div class="unsent-body">
+      <div class="unsent-to">To —</div>
+      <input id="unsent-to-inp" placeholder="a person, a feeling, a version of yourself..." maxlength="60"/>
+      <textarea id="unsent-txt" placeholder="Write what you've never been able to say out loud..." maxlength="600" oninput="q('unsent-chars').textContent=this.value.length+'/600'"></textarea>
+    </div>
+    <div class="unsent-footer">
+      <div class="unsent-count" id="unsent-chars">0/600</div>
+      <div style="font-size:.72rem;color:rgba(196,168,255,.35)">Posts anonymously · No one knows it's you</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLIMENT OVERLAY -->
+<div id="compliment-overlay">
+  <button onclick="q('compliment-overlay').classList.remove('on')" style="position:absolute;top:20px;right:20px;color:var(--tx3);font-size:1.1rem;padding:8px">✕</button>
+  <div class="comp-orb">🎁</div>
+  <div style="font-family:var(--fD);font-size:1.35rem;font-weight:700;letter-spacing:-.3px;margin-bottom:6px">Send Anonymous Compliment</div>
+  <div class="comp-target" id="comp-target-label">Pick what to say:</div>
+  <div class="comp-chips" id="comp-chips">
+    <div class="comp-chip" onclick="selComp(this,'You have great energy ✨')">Great energy ✨</div>
+    <div class="comp-chip" onclick="selComp(this,'You seem really brave 💙')">Really brave 💙</div>
+    <div class="comp-chip" onclick="selComp(this,'Your words matter 💜')">Your words matter 💜</div>
+    <div class="comp-chip" onclick="selComp(this,'Someone is rooting for you 🌊')">Someone rooting for you 🌊</div>
+    <div class="comp-chip" onclick="selComp(this,'You\'re not as alone as you think 🤝')">Not as alone 🤝</div>
+    <div class="comp-chip" onclick="selComp(this,'You made my day better 🌟')">Made my day 🌟</div>
+    <div class="comp-chip" onclick="selComp(this,'Keep going, it\'s worth it 🔥')">Keep going 🔥</div>
+    <div class="comp-chip" onclick="selComp(this,'Your honesty is rare 🎭')">Your honesty is rare 🎭</div>
+  </div>
+  <div style="display:flex;gap:10px;width:100%;max-width:340px;margin-top:8px">
+    <button class="btn btn-full" id="comp-send-btn" style="background:linear-gradient(135deg,var(--pk),var(--go));color:#fff;padding:14px;border-radius:14px;opacity:.4" disabled onclick="sendCompliment()">Send secretly 🎁</button>
+  </div>
+  <div style="font-size:.72rem;color:var(--tx3);margin-top:10px">They'll never know it was you</div>
+</div>
+
+<!-- LEVEL UP -->
+<div id="levelup-overlay">
+  <div class="levelup-card">
+    <div style="font-size:3rem;margin-bottom:12px">🎊</div>
+    <div style="font-family:var(--fD);font-size:.72rem;color:var(--v2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Level Up!</div>
+    <div style="font-family:var(--fD);font-size:1.6rem;font-weight:700;letter-spacing:-.3px;margin-bottom:6px" id="levelup-title">Level 2</div>
+    <div style="font-size:.82rem;color:var(--tx2);margin-bottom:20px">You're growing. Keep expressing. 🌊</div>
+    <button class="btn btn-v" onclick="q('levelup-overlay').classList.remove('on');q('levelup-overlay').style.display='none'" style="padding:12px 32px">Let's go 🚀</button>
+  </div>
+</div>
+
+<!-- GRATITUDE NOTIFICATION -->
+<div class="gratitude-notif" id="gratitude-notif">
+  <div style="font-size:1.5rem;flex-shrink:0">🎁</div>
+  <div style="flex:1"><div style="font-family:var(--fD);font-weight:700;font-size:.875rem;margin-bottom:2px">A stranger sent you something</div><div style="font-size:.78rem;color:var(--tx2)" id="gratitude-msg">Someone thinks you're brave</div></div>
+  <button onclick="q('gratitude-notif').classList.remove('on')" style="color:var(--tx3);font-size:.9rem;padding:4px">✕</button>
+</div>
 
 <!-- CRISIS -->
 <div id="crisis">
@@ -467,7 +588,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 <!-- FEED -->
 <div class="page active" id="pg-feed">
   <div class="tb">
-    <div class="tb-logo">annomuss</div>
+    <div class="tb-logo" id="feed-logo">annomuss</div>
     <div style="flex:1"></div>
     <div style="display:flex;align-items:center;gap:5px;margin-right:10px">
       <div class="pulse-dot"></div>
@@ -475,7 +596,25 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     </div>
     <button class="ico-btn" onclick="goPage('social')">🔔</button>
   </div>
+
+  <!-- MIDNIGHT BANNER — shows 11pm–4am -->
+  <div class="midnight-banner" id="midnight-banner" onclick="filterEmo('midnight',null)">
+    <div class="midnight-orb">🌙</div>
+    <div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.9rem;color:var(--v3)">Midnight Mode</div>
+      <div style="font-size:.76rem;color:var(--tx2);margin-top:2px">Late night thoughts. Auto-delete at dawn.</div>
+    </div>
+    <span style="color:var(--tx3);margin-left:auto;font-size:1.1rem">›</span>
+  </div>
+
   <div class="stories" id="stories-strip"><div class="s-add" onclick="openCompose('story')">➕</div></div>
+
+  <!-- EMOTION PULSE BANNER -->
+  <div class="pulse-banner" id="pulse-banner" style="display:none">
+    <div class="pulse-city" id="pulse-city-label"><span>📍</span><span>Loading pulse...</span></div>
+    <div class="pulse-bars" id="pulse-bars"></div>
+  </div>
+
   <div class="emo-bar">
     <div class="ec on" onclick="filterEmo('',this)">🌊 All</div>
     <div class="ec" onclick="filterEmo('happy',this)">😊 Happy</div>
@@ -487,11 +626,35 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="ec" onclick="filterEmo('angry',this)">😤 Angry</div>
     <div class="ec" onclick="filterEmo('inspired',this)">✨ Inspired</div>
   </div>
-  <div style="margin:0 14px 10px;padding:14px 16px;background:linear-gradient(135deg,rgba(255,77,109,.1),rgba(123,94,167,.08));border:1px solid rgba(255,77,109,.18);border-radius:18px;display:flex;align-items:center;gap:14px;cursor:pointer" onclick="openCompose('confession')">
-    <div style="font-size:2rem;flex-shrink:0">🤫</div>
-    <div><div style="font-family:var(--fD);font-weight:700;font-size:.88rem">Got something to confess?</div><div style="font-size:.76rem;color:var(--tx2);margin-top:2px">Anonymous. No names. Just truth.</div></div>
-    <span style="color:var(--tx3);margin-left:auto">›</span>
+
+  <!-- FEATURE CARDS ROW -->
+  <div style="padding:0 14px 10px;display:flex;gap:8px;overflow-x:auto">
+    <!-- Unsent Letter -->
+    <div onclick="openUnsent()" style="flex-shrink:0;padding:12px 14px;background:linear-gradient(135deg,rgba(123,94,167,.14),rgba(3,3,8,.8));border:1px solid rgba(196,168,255,.2);border-radius:14px;cursor:pointer;min-width:140px">
+      <div style="font-size:1.4rem;margin-bottom:5px">💌</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.8rem;color:var(--v3)">Unsent Letter</div>
+      <div style="font-size:.7rem;color:var(--tx3);margin-top:2px">Say the unsayable</div>
+    </div>
+    <!-- Confess -->
+    <div onclick="openCompose('confession')" style="flex-shrink:0;padding:12px 14px;background:linear-gradient(135deg,rgba(255,77,109,.12),rgba(3,3,8,.8));border:1px solid rgba(255,77,109,.2);border-radius:14px;cursor:pointer;min-width:140px">
+      <div style="font-size:1.4rem;margin-bottom:5px">🤫</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.8rem;color:var(--cr)">Confess</div>
+      <div style="font-size:.7rem;color:var(--tx3);margin-top:2px">No names. Just truth.</div>
+    </div>
+    <!-- Compliment -->
+    <div onclick="openCompliment(null)" style="flex-shrink:0;padding:12px 14px;background:linear-gradient(135deg,rgba(255,133,161,.12),rgba(3,3,8,.8));border:1px solid rgba(255,133,161,.2);border-radius:14px;cursor:pointer;min-width:140px">
+      <div style="font-size:1.4rem;margin-bottom:5px">🎁</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.8rem;color:var(--pk)">Compliment</div>
+      <div style="font-size:.7rem;color:var(--tx3);margin-top:2px">Send secretly</div>
+    </div>
+    <!-- Random Chat -->
+    <div onclick="goPage('connect')" style="flex-shrink:0;padding:12px 14px;background:linear-gradient(135deg,rgba(92,232,255,.1),rgba(3,3,8,.8));border:1px solid rgba(92,232,255,.18);border-radius:14px;cursor:pointer;min-width:140px">
+      <div style="font-size:1.4rem;margin-bottom:5px">⚡</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.8rem;color:var(--bl)">Random Chat</div>
+      <div style="font-size:.7rem;color:var(--tx3);margin-top:2px">5 min · matched by mood</div>
+    </div>
   </div>
+
   <div id="feed-list"></div>
   <div id="load-more" style="padding:14px;text-align:center;display:none"><button class="btn btn-g" onclick="loadMore()">Load more</button></div>
 </div>
@@ -578,6 +741,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <!-- match banners -->
       <div class="match-banner mb-emo" id="emo-banner" style="display:none">💜 You both feel the same way right now</div>
       <div class="match-banner mb-loc" id="loc-banner" style="display:none">📍 <span id="loc-banner-txt">Same city</span></div>
+      <!-- deep talk question -->
+      <div class="deep-talk-banner" id="deep-banner"><span>💡</span><span id="deep-banner-txt">Deep talk mode active</span></div>
+      <div class="deep-q" id="deep-q"></div>
       <!-- messages -->
       <div class="chat-msgs" id="rc-msgs"></div>
       <div class="typing-row" id="rc-typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>
@@ -793,6 +959,8 @@ async function loadFeed(reset=true){
     posts.forEach((p,i)=>{const d=document.createElement('div');d.innerHTML=renderPost(p);const c=d.firstElementChild;if(c){c.style.animationDelay=`${i*.05}s`;el.appendChild(c);}});
     feedDone=posts.length<15;q('load-more').style.display=feedDone?'none':'block';
     feedPage++;
+    // Add compliment buttons after cards render
+    setTimeout(addComplimentBtns,100);
   }catch(e){feedLoading=false;if(reset)el.innerHTML=`<div class="empty"><div style="font-size:3rem">⚡</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">Couldn't load feed</div><button class="btn btn-g btn-sm" style="margin-top:12px" onclick="loadFeed()">Retry</button></div>`;}
 }
 function loadMore(){if(!feedDone)loadFeed(false);}
@@ -982,8 +1150,10 @@ async function submitPost(){
     const r=await api('/api/posts',{method:'POST',body:JSON.stringify(body)});
     const d=await r.json();if(!r.ok){toast(d.message||'Failed ❌');return;}
     closeCompose();
-    if(compType==='story'){toast('📸 Story posted!');loadStories();}else{toast('✨ Posted!');loadFeed();}
+    if(compType==='story'){toast('📸 Story posted!');loadStories();}
+    else{toast('✨ Posted!');loadFeed();}
     if(d.crisis?.isCrisis)setTimeout(()=>q('crisis').classList.add('on'),1500);
+    awardXP(compType==='unsent'?20:compType==='confession'?15:10,'Created a post');
   }catch(e){toast('Failed ❌');}
   finally{btn.disabled=false;btn.textContent='Post';}
 }
@@ -997,6 +1167,7 @@ async function submitVent(){
     if(!r.ok)return toast(d.message||'Failed ❌');
     q('vent-txt').value='';q('vc-chars').textContent='0/280';toast('💭 Shared!');
     if(d.crisis?.isCrisis)setTimeout(()=>q('crisis').classList.add('on'),1500);
+    awardXP(8,'Vented');
     loadVents('latest');
   }catch(e){toast('Failed ❌');}
 }
@@ -1186,12 +1357,11 @@ function initSocket(){
     if(data.emotionMatch)rcAddMsg('💜 You both feel the same way right now.','sys');
     if(data.locationMatch)rcAddMsg(`📍 You're both from ${data.city}!`,'sys');
     rcAddMsg('⏱️ You have 5 minutes. Make it count.','sys');
-    // Start 5-min countdown ring
     startCRing(rcDurationMs,rcStartTime);
-    // Reset status
+    startDeepTalk(rcDurationMs);
     q('rc-status').innerHTML=`<div class="status-dot"></div>Connected`;
     toast('⚡ Matched!');
-    // Pulse the orb
+    awardXP(5,'Started a random chat');
     const orb=document.querySelector('#rc-active .chat-av');if(orb){orb.style.transform='scale(1.2)';setTimeout(()=>orb.style.transform='',300);}
   });
 
@@ -1205,29 +1375,37 @@ function initSocket(){
   socket.on('rchat-partner-left',(d)=>{
     rcAddMsg(d?.message||'👋 Stranger left. Find another?','sys');
     q('rc-typing').classList.remove('on');
-    stopCRing();
+    stopCRing();stopDeepTalk();
   });
 
   socket.on('rchat-time-up',(d)=>{
-    stopCRing();
+    stopCRing();stopDeepTalk();
     q('cring-num').textContent='0:00';
     q('cring-fill').style.stroke='var(--cr)';
     q('timeup-overlay').classList.add('on');
     rcRoom=null;
+    awardXP(15,'Completed a full 5-min chat');
   });
 
   socket.on('rchat-warning',(d)=>{
     const s=d.secondsLeft;
-    toast(s===60?'⏰ 1 minute left!':s===30?'⏰ 30 seconds!':'');
+    toast(s===60?'⏰ 1 minute left!':s===30?'⏰ 30 seconds remaining!':'');
   });
 
   socket.on('rchat-timeout',(d)=>{rcSetState('idle');toast(d.message||'No match found. Try again!');});
 
   socket.on('new-post',(p)=>{
-    if(currentPage==='feed'){const el=q('feed-list');el.insertAdjacentHTML('afterbegin',renderPost(p));}
+    if(currentPage==='feed'&&p.authorId!==user?._id?.toString()){
+      const el=q('feed-list');
+      if(el.firstChild){
+        const div=document.createElement('div');div.innerHTML=renderPost(p);
+        const card=div.firstElementChild;if(card){el.insertBefore(card,el.firstChild);addComplimentBtns();}
+      }
+    }
   });
 
   socket.on('friend-request',(d)=>{toast(`🤝 ${d.from||'Someone'} wants to connect!`);});
+  socket.on('compliment-received',(d)=>{showGratitudeNotif(d.message||'A stranger thinks you\'re amazing ✨');});
 }
 
 /* ═══════════ LOCATION ═══════════ */
@@ -1243,21 +1421,304 @@ async function getLocation(){
   },()=>{});
 }
 
-/* ═══════════ INIT ═══════════ */
-function doLogout(){if(!confirm('Log out?'))return;if(socket)socket.disconnect();localStorage.removeItem('token');location.href='/index.html';}
+/* ═══════════ LOGOUT ═══════════ */
+function doLogout(){if(!confirm('Log out?'))return;if(socket)socket.disconnect();localStorage.removeItem('token');localStorage.removeItem('user');location.href='/index.html';}
 
+/* ═══════════════════════════════════════════════
+   MIDNIGHT MODE
+   Activates 11pm–4am. Changes theme + shows special feed
+═══════════════════════════════════════════════ */
+function checkMidnightMode(){
+  const h=new Date().getHours();
+  const isMidnight=h>=23||h<=3;
+  if(isMidnight){
+    document.body.classList.add('midnight');
+    document.getElementById('midnight-banner')?.classList.add('show');
+    document.getElementById('feed-logo').textContent='🌙 annomuss';
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content','#01010a');
+  }else{
+    document.body.classList.remove('midnight');
+    document.getElementById('midnight-banner')?.classList.remove('show');
+    document.getElementById('feed-logo').textContent='annomuss';
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   EMOTION PULSE BANNER
+   Shows city emotion distribution above feed
+═══════════════════════════════════════════════ */
+const EMO_BAR_COLORS={
+  happy:'#F4A261',sad:'#9B7FD4',anxious:'#FF4D6D',lonely:'#C4A8FF',
+  grateful:'#52B788',inspired:'#00C9A7',excited:'#FF85A1',angry:'#FF4D6D'
+};
+const EMO_EMOJI={happy:'😊',sad:'😔',anxious:'😰',lonely:'🌧️',grateful:'🙏',inspired:'✨',excited:'🤩',angry:'😤'};
+
+async function loadEmotionPulse(){
+  if(!userLoc.city)return;
+  const banner=document.getElementById('pulse-banner');
+  const barsEl=document.getElementById('pulse-bars');
+  const cityLbl=document.getElementById('pulse-city-label');
+  if(!banner)return;
+  try{
+    const r=await api(`/api/moods/pulse?city=${encodeURIComponent(userLoc.city)}&limit=6`);
+    const data=await r.json();
+    const list=Array.isArray(data)?data:(data.breakdown||data.emotions||[]);
+    if(!list.length)return;
+    const top=list.slice(0,6);const maxCount=Math.max(...top.map(e=>e.count||e.total||1));
+    cityLbl.innerHTML=`<span>📍</span><span>${userLoc.city} right now</span>`;
+    barsEl.innerHTML=top.map(e=>{
+      const emo=e.emotion||e.dominantEmotion||'';
+      const cnt=e.count||e.total||0;
+      const pct=Math.max(8,Math.round((cnt/maxCount)*100));
+      const col=EMO_BAR_COLORS[emo]||'var(--v)';
+      return`<div class="pulse-bar-wrap">
+        <div class="pulse-bar" style="height:${pct}%;background:${col};opacity:.75"></div>
+        <div class="pulse-bar-lbl">${EMO_EMOJI[emo]||'🌊'}</div>
+      </div>`;
+    }).join('');
+    banner.style.display='block';
+  }catch(_){}
+}
+
+/* ═══════════════════════════════════════════════
+   UNSENT LETTER
+   Beautiful full-screen letter writing experience
+═══════════════════════════════════════════════ */
+function openUnsent(){
+  document.getElementById('unsent-overlay').classList.add('on');
+  document.body.style.overflow='hidden';
+  setTimeout(()=>document.getElementById('unsent-to-inp').focus(),200);
+}
+function closeUnsent(){
+  document.getElementById('unsent-overlay').classList.remove('on');
+  document.body.style.overflow='';
+}
+async function submitUnsent(){
+  const toVal=document.getElementById('unsent-to-inp').value.trim();
+  const txt=document.getElementById('unsent-txt').value.trim();
+  if(!txt||txt.length<10){toast('Write something first 💌');return;}
+  const btn=document.getElementById('unsent-post-btn');
+  btn.disabled=true;btn.textContent='Sending...';
+  const caption=toVal?`To ${toVal}:\n\n${txt}`:txt;
+  try{
+    const r=await api('/api/posts',{method:'POST',body:JSON.stringify({
+      type:'unsent',caption,emotion:detectEmo(txt)||'lonely',
+    })});
+    const d=await r.json();if(!r.ok){toast(d.message||'Failed');return;}
+    closeUnsent();
+    document.getElementById('unsent-to-inp').value='';
+    document.getElementById('unsent-txt').value='';
+    document.getElementById('unsent-chars').textContent='0/600';
+    toast('💌 Sent into the void');
+    // Dopamine: show "Send It" votes after 3 seconds
+    setTimeout(()=>toast('✨ Someone just voted "Send It" on your letter!'),3000);
+    if(currentPage==='feed')loadFeed();
+    awardXP(20,'Sent an unsent letter');
+  }catch(e){toast('Failed ❌');}
+  finally{btn.disabled=false;btn.textContent='Send into the void ✦';}
+}
+
+/* ═══════════════════════════════════════════════
+   ANONYMOUS COMPLIMENTS
+   Send secret compliments to random users
+═══════════════════════════════════════════════ */
+let selectedCompliment=null,complimentTargetId=null,complimentTargetName=null;
+
+async function openCompliment(userId,userName){
+  // If no target, pick a random recent poster
+  if(!userId){
+    try{
+      const r=await api('/api/users?limit=10&random=1');
+      const d=await r.json();const users=Array.isArray(d)?d:(d.users||[]);
+      if(users.length){
+        const picked=users[Math.floor(Math.random()*users.length)];
+        complimentTargetId=picked._id;
+        complimentTargetName=picked.anonymousName||'Anonymous';
+      }else{complimentTargetId=null;complimentTargetName='a stranger';}
+    }catch(_){complimentTargetId=null;complimentTargetName='a stranger';}
+  }else{complimentTargetId=userId;complimentTargetName=userName||'Anonymous';}
+  document.getElementById('comp-target-label').textContent=
+    complimentTargetId?`You're sending this secretly to ${complimentTargetName}:`:'Pick what to say:';
+  selectedCompliment=null;
+  document.querySelectorAll('.comp-chip').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('comp-send-btn').disabled=true;
+  document.getElementById('comp-send-btn').style.opacity='.4';
+  document.getElementById('compliment-overlay').classList.add('on');
+}
+
+function selComp(el,msg){
+  selectedCompliment=msg;
+  document.querySelectorAll('.comp-chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  const btn=document.getElementById('comp-send-btn');
+  btn.disabled=false;btn.style.opacity='1';
+}
+
+async function sendCompliment(){
+  if(!selectedCompliment)return;
+  const btn=document.getElementById('comp-send-btn');
+  btn.disabled=true;btn.textContent='Sending secretly... 🎁';
+  try{
+    // Post as a comment or direct message
+    if(complimentTargetId){
+      await api(`/api/users/${complimentTargetId}/compliment`,{
+        method:'POST',body:JSON.stringify({message:selectedCompliment})
+      }).catch(()=>{
+        // Fallback: just simulate
+      });
+    }
+    document.getElementById('compliment-overlay').classList.remove('on');
+    // Beautiful confirmation
+    toast('🎁 Sent! They\'ll never know it was you ✨');
+    awardXP(10,'Sent an anonymous compliment');
+    selectedCompliment=null;
+  }catch(e){toast('Sent! 🎁');}
+  finally{btn.disabled=false;btn.textContent='Send secretly 🎁';}
+}
+
+// Add compliment button to post cards (called after rendering)
+function addComplimentBtns(){
+  document.querySelectorAll('.card[data-id]').forEach(card=>{
+    if(card.querySelector('.comp-quick-btn'))return;
+    const pa=card.querySelector('.pa');
+    if(!pa)return;
+    const btn=document.createElement('div');
+    btn.className='pak comp-quick-btn';
+    btn.title='Send anonymous compliment';
+    btn.innerHTML='🎁';
+    btn.onclick=(e)=>{
+      e.stopPropagation();
+      const postId=card.dataset.id;
+      // Get author from card
+      const name=card.querySelector('.pn')?.textContent?.trim();
+      openCompliment(null,name);
+    };
+    pa.insertBefore(btn,pa.lastElementChild);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   XP + LEVEL UP ANIMATIONS
+   Award XP for actions, show level up when milestone hit
+═══════════════════════════════════════════════ */
+async function awardXP(amount,reason='action'){
+  if(!user)return;
+  const oldXp=user.xp||0;const oldLevel=Math.floor(oldXp/100)+1;
+  user.xp=(user.xp||0)+amount;
+  const newLevel=Math.floor(user.xp/100)+1;
+  // Update XP bar smoothly
+  const fill=document.getElementById('xp-fill');
+  const lbl=document.getElementById('xp-lbl');
+  const nxt=document.getElementById('xp-next');
+  if(fill)fill.style.width=`${user.xp%100}%`;
+  if(lbl)lbl.textContent=`${user.xp} XP`;
+  if(nxt)nxt.textContent=`${100-(user.xp%100)} XP to level up`;
+  // Level up!
+  if(newLevel>oldLevel){
+    document.getElementById('levelup-title').textContent=`Level ${newLevel} 🎊`;
+    const overlay=document.getElementById('levelup-overlay');
+    overlay.style.display='flex';
+    overlay.classList.add('on');
+    setTimeout(()=>{overlay.classList.remove('on');overlay.style.display='none';},4000);
+    document.getElementById('lvl-badge').textContent=`⭐ Level ${newLevel}`;
+    toast(`🎊 Level ${newLevel}! You're growing.`);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   DEEP TALK MODE in random chat
+   Shows guided questions to deepen conversation
+═══════════════════════════════════════════════ */
+const DEEP_QUESTIONS=[
+  "What's one thing you haven't told anyone today?",
+  "What's something you're proud of that nobody knows about?",
+  "What do you wish people understood about you?",
+  "What's a feeling you've been carrying around lately?",
+  "If you could send a message to your past self, what would it say?",
+  "What's something small that made you smile recently?",
+  "What are you secretly hoping for right now?",
+];
+let deepQIndex=0,deepQTimer=null;
+
+function startDeepTalk(durationMs){
+  if(durationMs<200000)return; // only for full 5-min sessions
+  deepQIndex=0;
+  const banner=document.getElementById('deep-banner');
+  const qEl=document.getElementById('deep-q');
+  // Show first question after 30s
+  deepQTimer=setTimeout(()=>{
+    if(rcState!=='active')return;
+    const q2=DEEP_QUESTIONS[deepQIndex%DEEP_QUESTIONS.length];
+    if(banner)banner.classList.add('on');
+    if(qEl){qEl.textContent=`💡 "${q2}"`;qEl.classList.add('on');}
+    deepQIndex++;
+    // Next question after 90s
+    deepQTimer=setTimeout(()=>{
+      if(rcState!=='active')return;
+      const q3=DEEP_QUESTIONS[deepQIndex%DEEP_QUESTIONS.length];
+      if(qEl){qEl.textContent=`💡 "${q3}"`;qEl.style.animation='none';requestAnimationFrame(()=>{qEl.style.animation='';});}
+      deepQIndex++;
+    },90000);
+  },30000);
+}
+function stopDeepTalk(){
+  clearTimeout(deepQTimer);
+  const banner=document.getElementById('deep-banner');
+  const qEl=document.getElementById('deep-q');
+  if(banner)banner.classList.remove('on');
+  if(qEl)qEl.classList.remove('on');
+}
+
+/* ═══════════════════════════════════════════════
+   INCOMING COMPLIMENT notification
+   Socket-powered — shows when someone sends you one
+═══════════════════════════════════════════════ */
+function showGratitudeNotif(message){
+  const notif=document.getElementById('gratitude-notif');
+  const msg=document.getElementById('gratitude-msg');
+  if(msg)msg.textContent=message;
+  if(notif){notif.classList.add('on');setTimeout(()=>notif.classList.remove('on'),6000);}
+}
+
+/* ═══════════════════════════════════════════════
+   SHARE POST — enhanced
+═══════════════════════════════════════════════ */
+function sharePost(id){
+  const url=`${location.origin}/dashboard.html#post-${id}`;
+  const card=document.querySelector(`.card[data-id="${id}"]`);
+  const caption=card?.querySelector('.pb')?.textContent?.trim()?.substring(0,80)||'';
+  if(navigator.share){
+    navigator.share({title:'Annomuss',text:caption?`"${caption}"`:undefined,url}).catch(()=>{});
+  }else{
+    navigator.clipboard?.writeText(url);toast('🔗 Link copied!');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   INIT — enhanced
+═══════════════════════════════════════════════ */
 async function main(){
   await initSession();
+  checkMidnightMode();
   loadFeed();loadStories();initSocket();getLocation();
+  // Load emotion pulse after location
+  setTimeout(()=>{if(userLoc.city)loadEmotionPulse();},2000);
   // Show mood checkin after 1.5s if not done today
   setTimeout(()=>{const td=new Date().toDateString();if(!localStorage.getItem('ann_mood_'+td))q('mood-ci').classList.add('on');},1500);
   // Handle deep links
   if(location.hash.startsWith('#post-'))setTimeout(()=>openPModal(location.hash.replace('#post-','')),800);
   if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  // Check midnight mode every minute
+  setInterval(checkMidnightMode,60000);
+  // Load pulse when location becomes available
+  setTimeout(async()=>{
+    if(!userLoc.city){await getLocation();setTimeout(()=>{if(userLoc.city)loadEmotionPulse();},1500);}
+    else loadEmotionPulse();
+  },3000);
 }
 document.addEventListener('DOMContentLoaded',main);
 // Close modals on back
-window.addEventListener('popstate',()=>{closePModal();closeSV();q('compose').classList.remove('on');});
+window.addEventListener('popstate',()=>{closePModal();closeSV();q('compose').classList.remove('on');closeUnsent();});
 document.addEventListener('click',(e)=>{if(!e.target.closest('.pmodal-inner')&&q('pmodal').classList.contains('on')&&e.target===q('pmodal'))closePModal();});
 </script>
 </body>

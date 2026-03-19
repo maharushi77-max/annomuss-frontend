@@ -24,17 +24,37 @@
 html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--fB);font-size:15px;line-height:1.5;overflow:hidden}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 input,textarea{font-family:inherit;color:var(--tx);background:none;border:none;outline:none;resize:none}
-::-webkit-scrollbar{width:0}
+::-webkit-scrollbar{width:0;height:0}
 /* ambient */
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(ellipse 80% 60% at 20% -20%,rgba(123,94,167,.07),transparent 55%),
     radial-gradient(ellipse 60% 40% at 80% 110%,rgba(0,201,167,.04),transparent 50%)}
 /* layout */
 #app{display:flex;flex-direction:column;height:100%;position:relative;z-index:1;overflow:hidden}
-#pages{flex:1;overflow:hidden;position:relative}
-.page{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav) + var(--safe) + 16px)}
+#pages{flex:1;position:relative;overflow:hidden}
+/* page must scroll vertically, never clip horizontal rows */
+.page{
+  position:absolute;inset:0;display:none;flex-direction:column;
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:calc(var(--nav) + var(--safe) + 20px)
+}
 .page.active{display:flex;animation:pgIn .2s cubic-bezier(.4,0,.2,1)}
 @keyframes pgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+/* horizontal scroll rows inside pages need overflow-x:auto but parent clips it —
+   use negative margin trick so they touch edges */
+.hscroll{
+  display:flex;gap:9px;
+  padding:2px 14px 12px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  flex-shrink:0;
+}
+.hscroll::-webkit-scrollbar{display:none}
+/* stories row */
+.stories{padding:14px 0 10px 14px;display:flex;gap:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;scrollbar-width:none}
+.stories::-webkit-scrollbar{display:none}
 /* nav */
 #nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav) + var(--safe));padding-bottom:var(--safe);
   background:rgba(3,3,8,.94);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
@@ -53,16 +73,16 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-top:-14px;
   box-shadow:0 6px 28px rgba(123,94,167,.5);transition:transform .15s}
 .nb-fab:active{transform:scale(.9)}
-/* topbar */
-.tb{position:sticky;top:0;z-index:50;background:rgba(3,3,8,.9);backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--bd);padding:12px 18px;display:flex;align-items:center;gap:12px}
+/* topbar — sticky, lower z-index than overlays */
+.tb{position:sticky;top:0;z-index:20;background:rgba(3,3,8,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--bd);padding:12px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0}
 .tb-logo{font-family:var(--fD);font-size:1.3rem;font-weight:700;letter-spacing:-.5px;
   background:linear-gradient(120deg,var(--v3),var(--pk),var(--v2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .tb-title{font-family:var(--fD);font-size:1rem;font-weight:700;flex:1;letter-spacing:-.2px}
 .ico-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:1rem;color:var(--tx2);background:var(--bg2);border:1px solid var(--bd);transition:all .15s}
+  font-size:1rem;color:var(--tx2);background:var(--bg2);border:1px solid var(--bd);transition:all .15s;flex-shrink:0}
 .ico-btn:active{background:var(--bg3);color:var(--tx)}
-.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--lm);animation:hb 2.2s ease-in-out infinite}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--lm);animation:hb 2.2s ease-in-out infinite;flex-shrink:0}
 @keyframes hb{0%,100%{box-shadow:0 0 0 0 rgba(82,183,136,.4)}50%{box-shadow:0 0 0 5px rgba(82,183,136,0)}}
 /* cards */
 .card{background:var(--bg1);border:1px solid var(--bd);border-radius:20px;overflow:hidden;
@@ -71,8 +91,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .card:active{transform:scale(.99)}
 /* post card emotion accent */
 .card::before{content:'';display:block;height:2px;background:var(--emo-color,var(--v));opacity:.5}
-/* stories */
-.stories{padding:14px 0 10px 16px;display:flex;gap:14px;overflow-x:auto;flex-shrink:0}
+/* stories — remove duplicate, defined above */
 .s-ring{width:62px;height:62px;border-radius:50%;
   background:conic-gradient(var(--v),var(--cr),var(--go),var(--v));padding:2.5px;
   cursor:pointer;transition:transform .15s;flex-shrink:0}
@@ -85,7 +104,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .s-add{width:62px;height:62px;border-radius:50%;background:var(--bg2);border:2px dashed var(--bd3);
   display:flex;align-items:center;justify-content:center;font-size:1.35rem;cursor:pointer;flex-shrink:0}
 /* emotion filter */
-.emo-bar{padding:5px 0 8px 16px;display:flex;gap:7px;overflow-x:auto;flex-shrink:0}
+.emo-bar{padding:5px 14px 8px;display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;scrollbar-width:none}
+.emo-bar::-webkit-scrollbar{display:none}
 .ec{padding:6px 13px;border-radius:100px;background:var(--bg2);border:1px solid var(--bd);
   font-size:.74rem;font-weight:700;color:var(--tx3);cursor:pointer;white-space:nowrap;
   flex-shrink:0;font-family:var(--fD);letter-spacing:.03em;transition:all .15s}
@@ -607,16 +627,12 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <span style="color:var(--tx3);margin-left:auto;font-size:1.1rem">›</span>
   </div>
 
+  <!-- STORIES STRIP -->
   <div class="stories" id="stories-strip"><div class="s-add" onclick="openCompose('story')">➕</div></div>
 
-  <!-- EMOTION PULSE BANNER -->
-  <div class="pulse-banner" id="pulse-banner" style="display:none">
-    <div class="pulse-city" id="pulse-city-label"><span>📍</span><span>Loading pulse...</span></div>
-    <div class="pulse-bars" id="pulse-bars"></div>
-  </div>
-
+  <!-- EMOTION FILTER -->
   <div class="emo-bar">
-    <div class="ec on" onclick="filterEmo('',this)">🌊 All</div>
+    <div class="ec on" onclick="filterEmo('',this)">All</div>
     <div class="ec" onclick="filterEmo('happy',this)">😊 Happy</div>
     <div class="ec" onclick="filterEmo('sad',this)">😔 Sad</div>
     <div class="ec" onclick="filterEmo('excited',this)">🤩 Excited</div>
@@ -627,34 +643,42 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div class="ec" onclick="filterEmo('inspired',this)">✨ Inspired</div>
   </div>
 
-  <!-- FEATURE CARDS ROW -->
-  <div style="padding:0 14px 10px;display:flex;gap:8px;overflow-x:auto">
-    <!-- Unsent Letter -->
-    <div onclick="openUnsent()" style="flex-shrink:0;padding:12px 14px;background:linear-gradient(135deg,rgba(123,94,167,.14),rgba(3,3,8,.8));border:1px solid rgba(196,168,255,.2);border-radius:14px;cursor:pointer;min-width:140px">
-      <div style="font-size:1.4rem;margin-bottom:5px">💌</div>
-      <div style="font-family:var(--fD);font-weight:700;font-size:.8rem;color:var(--v3)">Unsent Letter</div>
-      <div style="font-size:.7rem;color:var(--tx3);margin-top:2px">Say the unsayable</div>
+  <!-- EMOTION PULSE BANNER -->
+  <div class="pulse-banner" id="pulse-banner" style="display:none">
+    <div class="pulse-city" id="pulse-city-label"><span>📍</span><span>Loading...</span></div>
+    <div class="pulse-bars" id="pulse-bars"></div>
+  </div>
+
+  <!-- QUICK ACTION ROW — horizontal scroll, no overflow clipping -->
+  <div style="display:flex;gap:9px;padding:2px 14px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0">
+    <div onclick="openUnsent()" style="flex:0 0 auto;padding:11px 14px;background:rgba(123,94,167,.1);border:1px solid rgba(196,168,255,.18);border-radius:13px;cursor:pointer;width:130px">
+      <div style="font-size:1.3rem;margin-bottom:4px">💌</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--v3)">Unsent Letter</div>
+      <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4">Say the unsayable</div>
     </div>
-    <!-- Confess -->
-    <div onclick="openCompose('confession')" style="flex-shrink:0;padding:12px 14px;background:linear-gradient(135deg,rgba(255,77,109,.12),rgba(3,3,8,.8));border:1px solid rgba(255,77,109,.2);border-radius:14px;cursor:pointer;min-width:140px">
-      <div style="font-size:1.4rem;margin-bottom:5px">🤫</div>
-      <div style="font-family:var(--fD);font-weight:700;font-size:.8rem;color:var(--cr)">Confess</div>
-      <div style="font-size:.7rem;color:var(--tx3);margin-top:2px">No names. Just truth.</div>
+    <div onclick="openCompose('confession')" style="flex:0 0 auto;padding:11px 14px;background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.18);border-radius:13px;cursor:pointer;width:130px">
+      <div style="font-size:1.3rem;margin-bottom:4px">🤫</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--cr)">Confess</div>
+      <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4">No names. Just truth.</div>
     </div>
-    <!-- Compliment -->
-    <div onclick="openCompliment(null)" style="flex-shrink:0;padding:12px 14px;background:linear-gradient(135deg,rgba(255,133,161,.12),rgba(3,3,8,.8));border:1px solid rgba(255,133,161,.2);border-radius:14px;cursor:pointer;min-width:140px">
-      <div style="font-size:1.4rem;margin-bottom:5px">🎁</div>
-      <div style="font-family:var(--fD);font-weight:700;font-size:.8rem;color:var(--pk)">Compliment</div>
-      <div style="font-size:.7rem;color:var(--tx3);margin-top:2px">Send secretly</div>
+    <div onclick="openCompliment(null)" style="flex:0 0 auto;padding:11px 14px;background:rgba(255,133,161,.08);border:1px solid rgba(255,133,161,.18);border-radius:13px;cursor:pointer;width:130px">
+      <div style="font-size:1.3rem;margin-bottom:4px">🎁</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--pk)">Compliment</div>
+      <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4">Send secretly</div>
     </div>
-    <!-- Random Chat -->
-    <div onclick="goPage('connect')" style="flex-shrink:0;padding:12px 14px;background:linear-gradient(135deg,rgba(92,232,255,.1),rgba(3,3,8,.8));border:1px solid rgba(92,232,255,.18);border-radius:14px;cursor:pointer;min-width:140px">
-      <div style="font-size:1.4rem;margin-bottom:5px">⚡</div>
-      <div style="font-family:var(--fD);font-weight:700;font-size:.8rem;color:var(--bl)">Random Chat</div>
-      <div style="font-size:.7rem;color:var(--tx3);margin-top:2px">5 min · matched by mood</div>
+    <div onclick="goPage('connect')" style="flex:0 0 auto;padding:11px 14px;background:rgba(92,232,255,.07);border:1px solid rgba(92,232,255,.16);border-radius:13px;cursor:pointer;width:130px">
+      <div style="font-size:1.3rem;margin-bottom:4px">⚡</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--bl)">Random Chat</div>
+      <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4">5 min · by mood</div>
+    </div>
+    <div onclick="goPage('vent')" style="flex:0 0 auto;padding:11px 14px;background:rgba(0,201,167,.07);border:1px solid rgba(0,201,167,.16);border-radius:13px;cursor:pointer;width:130px">
+      <div style="font-size:1.3rem;margin-bottom:4px">💭</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--tl)">Vent Board</div>
+      <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4">Let it all out</div>
     </div>
   </div>
 
+  <!-- FEED -->
   <div id="feed-list"></div>
   <div id="load-more" style="padding:14px;text-align:center;display:none"><button class="btn btn-g" onclick="loadMore()">Load more</button></div>
 </div>

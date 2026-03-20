@@ -745,6 +745,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div style="font-size:.82rem;color:var(--tx2)">Scanning for someone on the same wavelength</div>
       <div style="font-family:var(--fM);font-size:1.6rem;color:var(--go);font-weight:700" id="srch-time">0:00</div>
       <div style="font-size:.7rem;color:var(--tx3)" id="srch-pos">In queue...</div>
+      <div id="srch-hint" style="font-size:.75rem;color:var(--v2);max-width:220px;line-height:1.65;opacity:0;transition:opacity .6s;min-height:36px;text-align:center"></div>
       <button class="btn btn-g btn-sm" onclick="rcCancel()" style="margin-top:6px">✕ Cancel</button>
     </div>
 
@@ -1295,11 +1296,75 @@ function rcSetState(s){
 function rcStart(){
   if(!socket||!socket.connected){toast('⚡ Connecting...');initSocket();setTimeout(rcStart,1200);return;}
   rcSetState('searching');rcSearchSecs=0;clearInterval(rcSearchIv);
-  rcSearchIv=setInterval(()=>{rcSearchSecs++;const m=Math.floor(rcSearchSecs/60),s=rcSearchSecs%60;const el=q('srch-time');if(el)el.textContent=`${m}:${String(s).padStart(2,'0')}`;},1000);
+  // Reset hint
+  const pos = q('srch-pos'); if(pos) { pos.textContent='In queue...'; pos.style.color='var(--tx3)'; }
+  const hint = q('srch-hint'); if(hint) hint.style.opacity='0';
+
+  rcSearchIv=setInterval(()=>{
+    rcSearchSecs++;
+    const m=Math.floor(rcSearchSecs/60),s=rcSearchSecs%60;
+    const el=q('srch-time');if(el)el.textContent=`${m}:${String(s).padStart(2,'0')}`;
+    // After 20s show a soft hint so user knows we're still trying
+    if(rcSearchSecs===20){
+      const h=q('srch-hint');if(h){h.style.opacity='1';h.textContent='Still looking... you might be the first one here tonight 🌙';}
+    }
+    // After 45s change hint
+    if(rcSearchSecs===45){
+      const h=q('srch-hint');if(h)h.textContent='Expanding search to find anyone available...';
+    }
+  },1000);
   socket.emit('join-random-chat',{emotion:rcMoodMatch==='any'?null:rcMoodMatch,genderPref:rcGenderPref,city:userLoc.city,state:userLoc.state,country:userLoc.country});
 }
 
 function rcCancel(){clearInterval(rcSearchIv);if(socket)socket.emit('leave-queue');rcSetState('idle');toast('Search cancelled');}
+
+function showNoMatchOverlay(title, sub) {
+  // Remove any existing overlay first
+  const old = document.getElementById('no-match-overlay');
+  if (old) old.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'no-match-overlay';
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:800;
+    background:rgba(3,3,8,.92);
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;animation:pgIn .3s ease;
+  `;
+  overlay.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:24px;padding:32px 24px;text-align:center;max-width:320px;width:100%">
+      <div style="font-size:3rem;margin-bottom:14px">🌙</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:1.15rem;margin-bottom:8px;letter-spacing:-.2px">
+        ${title || "You're one of the first here tonight"}
+      </div>
+      <div style="font-size:.82rem;color:var(--tx2);line-height:1.7;margin-bottom:22px">
+        ${sub || 'No one else is searching right now. The community is just getting started — try again soon, or share something on the feed.'}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <button onclick="document.getElementById('no-match-overlay').remove();rcStart();"
+          style="background:linear-gradient(135deg,var(--v),#6040C4);color:#fff;border:none;border-radius:100px;padding:12px 20px;font-family:var(--fD);font-weight:700;font-size:.85rem;cursor:pointer;letter-spacing:.03em">
+          🔁 Try Again
+        </button>
+        <button onclick="document.getElementById('no-match-overlay').remove();goPage('feed');"
+          style="background:var(--bg3);color:var(--tx2);border:1px solid var(--bd);border-radius:100px;padding:12px 20px;font-family:var(--fD);font-weight:700;font-size:.85rem;cursor:pointer;letter-spacing:.03em">
+          📖 Go to Feed
+        </button>
+        <button onclick="document.getElementById('no-match-overlay').remove();openCompose('post');"
+          style="background:none;border:none;color:var(--tx3);font-size:.78rem;cursor:pointer;padding:6px;font-family:var(--fB)">
+          ✏️ Post something instead
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Auto-dismiss after 30s if user does nothing
+  setTimeout(() => {
+    const el = document.getElementById('no-match-overlay');
+    if (el) { el.style.opacity='0'; el.style.transition='opacity .4s'; setTimeout(()=>el.remove(), 400); }
+  }, 30000);
+}
 
 function rcSend(){
   const inp=q('rc-inp');const txt=inp.value.trim();
@@ -1427,7 +1492,11 @@ function initSocket(){
     toast(s===60?'⏰ 1 minute left!':s===30?'⏰ 30 seconds remaining!':'');
   });
 
-  socket.on('rchat-timeout',(d)=>{rcSetState('idle');toast(d.message||'No match found. Try again!');});
+  socket.on('rchat-timeout',(d)=>{
+    clearInterval(rcSearchIv);
+    rcSetState('idle');
+    showNoMatchOverlay(d.message, d.sub);
+  });
 
   socket.on('new-post',(p)=>{
     if(currentPage==='feed'&&p.authorId!==user?._id?.toString()){

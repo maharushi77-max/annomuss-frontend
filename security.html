@@ -1,627 +1,463 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🔐 Security — Annomuss</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Segoe UI',sans-serif;background:#0d0d1a;color:#fff;min-height:100vh;padding-bottom:40px}
-    .topbar{background:#1a1a2e;padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2a2a40;position:sticky;top:0;z-index:100}
-    .topbar a{color:#8a7cff;text-decoration:none;font-size:.9rem;cursor:pointer}
-    .topbar h2{flex:1;font-size:1rem;font-weight:700}
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#030308"/>
+<title>Settings · Annomuss</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#030308;--bg1:#08080f;--bg2:#0d0d1c;--bg3:#121228;
+  --v:#7B5EA7;--v2:#9B7FD4;--v3:#C4A8FF;--vg:rgba(123,94,167,.12);--vb:rgba(123,94,167,.25);
+  --cr:#FF4D6D;--tl:#00C9A7;--lm:#52B788;
+  --tx:#F5F3FF;--tx2:#9896B8;--tx3:#4E4C6A;
+  --bd:rgba(255,255,255,.06);--bd2:rgba(255,255,255,.1);--bd3:rgba(255,255,255,.16);
+  --safe:env(safe-area-inset-bottom,0px);
+  --fD:'Clash Display',sans-serif;--fB:'Cabinet Grotesk',sans-serif;--fM:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);color:var(--tx);font-family:var(--fB);font-size:15px;line-height:1.5}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:var(--tx)}
+::-webkit-scrollbar{width:0}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 20% -20%,rgba(123,94,167,.07),transparent 55%),
+  radial-gradient(ellipse 50% 40% at 80% 110%,rgba(0,201,167,.04),transparent 50%)}
+#app{min-height:100dvh;position:relative;z-index:1;padding-bottom:calc(40px + var(--safe))}
 
-    .content{max-width:560px;margin:0 auto;padding:16px}
+/* header */
+#hdr{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;
+  padding:13px 18px;padding-top:calc(13px + env(safe-area-inset-top,0px));
+  background:rgba(3,3,8,.88);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  border-bottom:1px solid var(--bd)}
+.bk{width:36px;height:36px;border-radius:50%;background:var(--bg2);border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--tx2);flex-shrink:0}
+.bk:active{background:var(--bg3)}
+.pg-title{font-family:var(--fD);font-weight:700;font-size:1.05rem;flex:1;letter-spacing:-.2px}
+.sv-btn{padding:7px 18px;border-radius:100px;background:linear-gradient(135deg,var(--v),#5a3d9e);
+  color:#fff;font-family:var(--fD);font-weight:700;font-size:.78rem;letter-spacing:.04em;
+  box-shadow:0 3px 12px rgba(123,94,167,.35);transition:all .15s}
+.sv-btn:active{transform:scale(.95)}
+.sv-btn:disabled{opacity:.4;transform:none}
 
-    /* Profile card */
-    .profile-card{background:#1a1a2e;border-radius:20px;padding:28px;border:1px solid #2a2a40;margin-bottom:20px;text-align:center}
-    .avatar-wrap{position:relative;display:inline-block;margin-bottom:14px}
-    .avatar-circle{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#8a7cff,#ff6ec7);display:flex;align-items:center;justify-content:center;font-size:2.8rem;cursor:pointer;border:3px solid #2a2a40;transition:border-color .2s}
-    .avatar-circle:hover{border-color:#8a7cff}
-    .avatar-edit{position:absolute;bottom:0;right:0;background:#8a7cff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer}
-    .profile-name{font-size:1.3rem;font-weight:700;color:#8a7cff;margin-bottom:4px}
-    .profile-email{font-size:.82rem;color:#666;margin-bottom:16px}
-    .profile-stats{display:flex;gap:16px;justify-content:center;margin-bottom:18px}
-    .stat{text-align:center}
-    .stat-val{font-size:1rem;font-weight:700;color:#fff}
-    .stat-label{font-size:.72rem;color:#666}
-    .name-cooldown{font-size:.78rem;color:#ff9632;margin-top:6px}
+/* profile hero */
+.hero{padding:22px 18px;text-align:center;background:var(--bg1);border:1px solid var(--bd);
+  border-radius:18px;margin:16px 18px 0;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;
+  border-radius:50%;background:radial-gradient(circle,rgba(123,94,167,.08),transparent 70%);pointer-events:none}
+.avr{width:76px;height:76px;border-radius:50%;margin:0 auto 10px;
+  background:linear-gradient(135deg,var(--v),var(--cr));padding:2.5px}
+.avi{width:100%;height:100%;border-radius:50%;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;font-size:2.1rem;border:2px solid var(--bg)}
+.uname{font-family:var(--fD);font-weight:700;font-size:1.1rem;letter-spacing:-.2px;margin-bottom:2px}
+.uhandle{font-family:var(--fM);font-size:.72rem;color:var(--tx3)}
+.lpill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:100px;
+  background:var(--vg);border:1px solid var(--vb);font-size:.72rem;font-weight:700;color:var(--v3);
+  font-family:var(--fD);margin-top:10px}
 
-    /* Section */
-    .section{background:#1a1a2e;border-radius:16px;border:1px solid #2a2a40;margin-bottom:14px;overflow:hidden}
-    .section-header{padding:16px 18px;border-bottom:1px solid #2a2a40;display:flex;align-items:center;gap:10px}
-    .section-icon{font-size:1.1rem}
-    .section-title{font-weight:700;font-size:.95rem;flex:1}
-    .section-badge{background:rgba(138,124,255,.15);color:#8a7cff;border:1px solid rgba(138,124,255,.3);border-radius:20px;padding:2px 10px;font-size:.75rem}
-    .section-badge.green{background:rgba(72,199,142,.1);color:#48c78e;border-color:rgba(72,199,142,.3)}
-    .section-badge.red{background:rgba(255,68,68,.1);color:#ff4444;border-color:rgba(255,68,68,.3)}
+/* emoji picker */
+.epick{padding:16px 18px 0}
+.slbl{font-size:.68rem;font-weight:700;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;
+  font-family:var(--fD);margin-bottom:10px}
+.egrid{display:flex;flex-wrap:wrap;gap:7px;padding:14px;background:var(--bg1);border:1px solid var(--bd);border-radius:16px}
+.eb{width:44px;height:44px;border-radius:11px;background:var(--bg2);border:1.5px solid var(--bd);
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer;transition:all .14s}
+.eb:active{transform:scale(.88)}
+.eb.sel{border-color:var(--v2);background:var(--vg);box-shadow:0 0 0 3px rgba(123,94,167,.2);transform:scale(1.08)}
 
-    .row{padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #1a1a2e;cursor:pointer;transition:background .15s}
-    .row:last-child{border-bottom:none}
-    .row:hover{background:rgba(138,124,255,.04)}
-    .row-icon{font-size:1.1rem;width:28px;text-align:center}
-    .row-text{flex:1}
-    .row-label{font-size:.9rem;font-weight:600}
-    .row-sub{font-size:.76rem;color:#666;margin-top:2px}
-    .row-arrow{color:#444;font-size:.8rem}
-    .row-toggle{width:44px;height:24px;background:#2a2a40;border-radius:12px;position:relative;cursor:pointer;flex-shrink:0;border:none;transition:background .2s}
-    .row-toggle.on{background:#8a7cff}
-    .row-toggle::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s}
-    .row-toggle.on::after{left:23px}
+/* sections */
+.sec{padding:18px 18px 0}
+.sc{background:var(--bg1);border:1px solid var(--bd);border-radius:18px;overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--bd);transition:background .15s;cursor:pointer}
+.row:last-child{border-bottom:none}
+.row:active{background:var(--bg2)}
+.ri{font-size:1.05rem;width:22px;text-align:center;flex-shrink:0}
+.rb{flex:1;min-width:0}
+.rt{font-size:.87rem;font-weight:500;color:var(--tx)}
+.rs{font-size:.73rem;color:var(--tx3);margin-top:2px;line-height:1.5}
 
-    /* Danger zone */
-    .danger-section{background:rgba(255,68,68,.04);border-color:rgba(255,68,68,.2)}
-    .danger-row{padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,68,68,.1);cursor:pointer;transition:background .15s}
-    .danger-row:last-child{border-bottom:none}
-    .danger-row:hover{background:rgba(255,68,68,.06)}
-    .danger-label{font-size:.9rem;font-weight:600;color:#ff4444}
-    .danger-sub{font-size:.76rem;color:#994444;margin-top:2px}
+/* toggle */
+.tog{width:44px;height:25px;border-radius:13px;background:var(--bg3);border:1.5px solid var(--bd2);
+  position:relative;cursor:pointer;transition:all .25s;flex-shrink:0}
+.tog.on{background:var(--v);border-color:var(--v2)}
+.tog::after{content:'';position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;
+  background:#fff;transition:transform .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.tog.on::after{transform:translateX(19px)}
 
-    /* Modal */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:flex-end;justify-content:center}
-    .modal-overlay.open{display:flex}
-    .modal{background:#1a1a2e;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:560px;max-height:85vh;overflow-y:auto}
-    .modal h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}
-    .modal p{font-size:.85rem;color:#888;margin-bottom:20px}
+/* select */
+.sel{background:var(--bg2);border:1.5px solid var(--bd2);border-radius:10px;padding:7px 28px 7px 11px;
+  color:var(--tx2);font-size:.8rem;font-family:var(--fB);appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234E4C6A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;cursor:pointer;min-width:120px}
+.sel:focus{outline:none;border-color:var(--v)}
 
-    /* PIN dots */
-    .pin-dots{display:flex;gap:14px;justify-content:center;margin:20px 0}
-    .pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid #8a7cff;background:transparent;transition:background .2s}
-    .pin-dot.filled{background:#8a7cff}
-    .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:0 auto 16px}
-    .pin-key{height:58px;border:1.5px solid #2a2a40;border-radius:12px;background:#0d0d1a;color:#fff;font-size:1.3rem;font-weight:600;cursor:pointer;transition:all .2s}
-    .pin-key:hover{border-color:#8a7cff;background:rgba(138,124,255,.08)}
-    .pin-key:active{transform:scale(.94)}
-    .pin-key.del{font-size:1rem;color:#888}
+/* danger */
+.drow{border-color:rgba(255,77,109,.12)!important}
+.drow .rt{color:var(--cr)}
 
-    /* Emoji picker */
-    .emoji-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:12px 0}
-    .emoji-opt{height:46px;border:1.5px solid #2a2a40;border-radius:10px;background:none;font-size:1.4rem;cursor:pointer;transition:all .2s}
-    .emoji-opt:hover,.emoji-opt.selected{border-color:#8a7cff;background:rgba(138,124,255,.1)}
+/* info chip */
+.ic{display:inline-flex;align-items:center;padding:4px 10px;border-radius:100px;
+  background:rgba(0,201,167,.08);border:1px solid rgba(0,201,167,.2);font-size:.68rem;color:var(--tl);font-family:var(--fD);font-weight:700}
 
-    /* Report modal */
-    .report-reasons{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
-    .reason-btn{padding:12px 16px;border:1.5px solid #2a2a40;border-radius:10px;background:none;color:#ccc;text-align:left;cursor:pointer;font-size:.88rem;transition:all .2s}
-    .reason-btn:hover,.reason-btn.selected{border-color:#8a7cff;color:#8a7cff;background:rgba(138,124,255,.08)}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:11px 22px;border-radius:100px;
+  font-size:.83rem;font-weight:700;font-family:var(--fD);letter-spacing:.04em;transition:transform .12s;cursor:pointer}
+.btn:active{transform:scale(.95)}
+.btn-v{background:linear-gradient(135deg,#7B5EA7,#5a3d9e);color:#fff;border:none;box-shadow:0 4px 16px rgba(123,94,167,.35)}
+.btn-cr{background:linear-gradient(135deg,var(--cr),#c4283d);color:#fff;border:none;box-shadow:0 4px 16px rgba(255,77,109,.3)}
+.btn-g{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2)}
+.btn-full{width:100%}
 
-    /* Form inputs */
-    .input{width:100%;background:#0d0d1a;border:1.5px solid #2a2a40;border-radius:10px;color:#fff;padding:11px 14px;font-size:.9rem;outline:none;font-family:inherit;margin-bottom:10px}
-    .input:focus{border-color:#8a7cff}
-    textarea.input{resize:vertical;min-height:80px}
+/* toast */
+#tw{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.t{background:var(--bg3);border:1px solid var(--bd3);border-radius:100px;padding:9px 18px;
+  font-size:.82rem;font-weight:700;font-family:var(--fD);color:var(--tx);
+  box-shadow:0 8px 28px rgba(0,0,0,.5);animation:tIn .22s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.t.out{animation:tOut .18s ease forwards}
+@keyframes tIn{from{opacity:0;transform:translateY(-8px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes tOut{to{opacity:0;transform:translateY(-8px) scale(.9)}}
 
-    .btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:6px}
-    .btn-primary{background:linear-gradient(135deg,#8a7cff,#ff6ec7);color:#fff}
-    .btn-danger{background:linear-gradient(135deg,#ff4444,#cc2222);color:#fff}
-    .btn-cancel{background:#2a2a40;color:#aaa}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
+/* confirm modal */
+#cm{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.82);backdrop-filter:blur(12px);
+  display:none;align-items:center;justify-content:center;padding:24px}
+#cm.on{display:flex}
+.cc{background:var(--bg2);border:1px solid var(--bd2);border-radius:22px;padding:28px 22px;
+  max-width:320px;width:100%;text-align:center}
 
-    .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;border:1px solid #8a7cff;color:#fff;padding:10px 20px;border-radius:20px;font-size:.88rem;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
-    .toast.show{opacity:1}
-    .toast.error{border-color:#ff4444}
+/* session */
+#sm{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.92);
+  display:none;align-items:center;justify-content:center;padding:24px}
+#sm.on{display:flex}
+.smc{background:var(--bg2);border:1px solid var(--bd2);border-radius:22px;padding:32px;text-align:center;max-width:300px;width:100%}
 
-    /* Name change */
-    .name-history{margin-top:12px}
-    .history-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #2a2a40;font-size:.8rem}
-    .history-item:last-child{border-bottom:none}
-  </style>
+/* spinner */
+.spin{width:22px;height:22px;border:2.5px solid var(--bd2);border-top-color:var(--v);
+  border-radius:50%;animation:sp .65s linear infinite;margin:40px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
 
-<div class="topbar">
-  <a onclick="goBack()">← Back</a>
-  <h2>🔐 Security & Profile</h2>
-</div>
+<div id="sm"><div class="smc">
+  <div style="font-size:2.5rem;margin-bottom:12px">🔐</div>
+  <div style="font-family:var(--fD);font-weight:700;font-size:1rem;margin-bottom:16px">Session Expired</div>
+  <button class="btn btn-v" style="padding:9px 22px;font-size:.8rem" onclick="location.href='/index.html'">Log In</button>
+</div></div>
 
-<div class="content">
+<div id="cm"><div class="cc">
+  <div style="font-size:2.8rem;margin-bottom:12px">⚠️</div>
+  <div style="font-family:var(--fD);font-weight:700;font-size:1.05rem;margin-bottom:8px">Delete your account?</div>
+  <div style="font-size:.82rem;color:var(--tx3);line-height:1.65;margin-bottom:20px">
+    This is permanent. Your posts stay anonymous on the feed — but your account, friends, and DMs will be erased forever.
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <button class="btn btn-cr btn-full" id="del-btn" onclick="confirmDelete()">Yes, delete my account</button>
+    <button class="btn btn-g btn-full" onclick="document.getElementById('cm').classList.remove('on')">Cancel — keep my account</button>
+  </div>
+</div></div>
 
-  <!-- Profile Card -->
-  <div class="profile-card">
-    <div class="avatar-wrap">
-      <div class="avatar-circle" id="avatarCircle" onclick="openModal('avatarModal')">🎭</div>
-      <div class="avatar-edit">✏️</div>
-    </div>
-    <div class="profile-name" id="profileName">Loading...</div>
-    <div class="profile-email" id="profileEmail"></div>
-    <div class="profile-stats">
-      <div class="stat"><div class="stat-val" id="statStreak">0</div><div class="stat-label">streak</div></div>
-      <div class="stat"><div class="stat-val" id="statCheckins">0</div><div class="stat-label">check-ins</div></div>
-      <div class="stat"><div class="stat-val" id="statFriends">0</div><div class="stat-label">friends</div></div>
-      <div class="stat"><div class="stat-val" id="statJoined">—</div><div class="stat-label">joined</div></div>
-    </div>
-    <div class="name-cooldown" id="nameCooldown"></div>
+<div id="tw"></div>
+
+<div id="app">
+  <div id="hdr">
+    <button class="bk" onclick="history.back()">←</button>
+    <div class="pg-title">Settings & Privacy</div>
+    <button class="sv-btn" id="sv" onclick="saveAll()" disabled>Save</button>
   </div>
 
-  <!-- Identity -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">👤</span>
-      <span class="section-title">Identity</span>
-    </div>
-    <div class="row" onclick="openModal('nameModal')">
-      <div class="row-icon">🎭</div>
-      <div class="row-text"><div class="row-label">Change Anonymous Name</div><div class="row-sub">Once every 7 days</div></div>
-      <span class="row-arrow">›</span>
-    </div>
-    <div class="row" onclick="openModal('avatarModal')">
-      <div class="row-icon">🌈</div>
-      <div class="row-text"><div class="row-label">Change Avatar Emoji</div><div class="row-sub">Express yourself</div></div>
-      <span class="row-arrow">›</span>
-    </div>
-    <div class="row" onclick="openModal('dobModal')">
-      <div class="row-icon">🎂</div>
-      <div class="row-text"><div class="row-label">Date of Birth</div><div class="row-sub" id="dobDisplay">Not set</div></div>
-      <span class="row-arrow">›</span>
-    </div>
-  </div>
+  <div id="loading"><div class="spin"></div></div>
 
-  <!-- PIN Lock -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">🔒</span>
-      <span class="section-title">App PIN Lock</span>
-      <span class="section-badge" id="pinBadge">OFF</span>
-    </div>
-    <div class="row" onclick="openModal('pinModal')">
-      <div class="row-icon">🔑</div>
-      <div class="row-text"><div class="row-label" id="pinRowLabel">Set PIN Lock</div><div class="row-sub">4-digit PIN to open app</div></div>
-      <span class="row-arrow">›</span>
-    </div>
-    <div class="row" id="removePinRow" style="display:none" onclick="openModal('removePinModal')">
-      <div class="row-icon">🗑️</div>
-      <div class="row-text"><div class="row-label" style="color:#ff9632">Remove PIN</div><div class="row-sub">Disable PIN lock</div></div>
-      <span class="row-arrow">›</span>
-    </div>
-  </div>
+  <div id="cnt" style="display:none">
 
-  <!-- Safety -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-icon">🛡️</span>
-      <span class="section-title">Safety</span>
+    <!-- Profile card -->
+    <div class="hero">
+      <div class="avr"><div class="avi" id="av">🎭</div></div>
+      <div class="uname" id="uname">Anonymous</div>
+      <div class="uhandle" id="uhandle">@anon</div>
+      <div class="lpill" id="lpill">⭐ Level 1</div>
+      <div style="margin-top:10px">
+        <div class="ic" id="xpchip">0 XP</div>
+      </div>
     </div>
-    <div class="row" onclick="openModal('reportModal')">
-      <div class="row-icon">🚨</div>
-      <div class="row-text"><div class="row-label">Report a User</div><div class="row-sub">Report harassment, spam, abuse</div></div>
-      <span class="row-arrow">›</span>
-    </div>
-    <div class="row" onclick="openModal('blockModal')">
-      <div class="row-icon">🚫</div>
-      <div class="row-text"><div class="row-label">Block a User</div><div class="row-sub">They won't see your content</div></div>
-      <span class="row-arrow">›</span>
-    </div>
-  </div>
 
-  <!-- Danger Zone -->
-  <div class="section danger-section">
-    <div class="section-header">
-      <span class="section-icon">⚠️</span>
-      <span class="section-title">Danger Zone</span>
-      <span class="section-badge red">Irreversible</span>
+    <!-- Avatar picker -->
+    <div class="epick" style="margin-top:18px">
+      <div class="slbl">Choose your avatar</div>
+      <div class="egrid" id="egrid"></div>
     </div>
-    <div class="danger-row" onclick="openModal('deleteModal')">
-      <div class="row-icon">🗑️</div>
-      <div class="row-text"><div class="danger-label">Delete Account</div><div class="danger-sub">Permanently delete your account and all data</div></div>
-      <span class="row-arrow" style="color:#ff4444">›</span>
+
+    <!-- Privacy -->
+    <div class="sec" style="margin-top:18px">
+      <div class="slbl">Privacy</div>
+      <div class="sc">
+        <div class="row" onclick="tog('allowDMs')">
+          <div class="ri">💌</div>
+          <div class="rb"><div class="rt">Allow direct messages</div><div class="rs">Let others send you private messages</div></div>
+          <div class="tog" id="t-allowDMs"></div>
+        </div>
+        <div class="row" onclick="tog('showOnline')">
+          <div class="ri">🟢</div>
+          <div class="rb"><div class="rt">Show online status</div><div class="rs">Others can see when you're active</div></div>
+          <div class="tog" id="t-showOnline"></div>
+        </div>
+        <div class="row" style="cursor:default">
+          <div class="ri">👁️</div>
+          <div class="rb"><div class="rt">Profile visibility</div><div class="rs">Who can find you in search</div></div>
+          <select class="sel" id="s-vis" onchange="dirty()">
+            <option value="public">Everyone</option>
+            <option value="friends">Friends only</option>
+            <option value="private">Nobody</option>
+          </select>
+        </div>
+      </div>
     </div>
-  </div>
 
-</div>
-
-<!-- ── MODALS ── -->
-
-<!-- Avatar Modal -->
-<div class="modal-overlay" id="avatarModal">
-  <div class="modal">
-    <h3>🌈 Choose Your Avatar</h3>
-    <p>Pick an emoji that represents you anonymously</p>
-    <div class="emoji-grid" id="emojiGrid"></div>
-    <button class="btn btn-primary" onclick="saveAvatar()">Save Avatar ✅</button>
-    <button class="btn btn-cancel" onclick="closeModal('avatarModal')">Cancel</button>
-  </div>
-</div>
-
-<!-- Name Change Modal -->
-<div class="modal-overlay" id="nameModal">
-  <div class="modal">
-    <h3>🎭 Change Your Name</h3>
-    <p>You can change your name once every 7 days. Choose wisely!</p>
-    <input class="input" id="newNameInput" placeholder="New anonymous name..." maxlength="30"/>
-    <div id="nameHistoryWrap" style="margin-bottom:12px"></div>
-    <button class="btn btn-primary" onclick="changeName()">Change Name 🎭</button>
-    <button class="btn btn-cancel" onclick="closeModal('nameModal')">Cancel</button>
-  </div>
-</div>
-
-<!-- DOB Modal -->
-<div class="modal-overlay" id="dobModal">
-  <div class="modal">
-    <h3>🎂 Date of Birth</h3>
-    <p>Stored privately. Never shown to other users.</p>
-    <input class="input" type="date" id="dobInput"/>
-    <button class="btn btn-primary" onclick="saveDob()">Save 🎂</button>
-    <button class="btn btn-cancel" onclick="closeModal('dobModal')">Cancel</button>
-  </div>
-</div>
-
-<!-- PIN Modal -->
-<div class="modal-overlay" id="pinModal">
-  <div class="modal" style="text-align:center">
-    <h3>🔐 Set PIN Lock</h3>
-    <p id="pinModalSub">Enter a 4-digit PIN to lock your app</p>
-    <div class="pin-dots">
-      <div class="pin-dot" id="d0"></div>
-      <div class="pin-dot" id="d1"></div>
-      <div class="pin-dot" id="d2"></div>
-      <div class="pin-dot" id="d3"></div>
+    <!-- Notifications -->
+    <div class="sec" style="margin-top:18px">
+      <div class="slbl">Notifications</div>
+      <div class="sc">
+        <div class="row" onclick="togLocal('nr')">
+          <div class="ri">❤️</div>
+          <div class="rb"><div class="rt">Reactions on my posts</div><div class="rs">When someone reacts to your confession or post</div></div>
+          <div class="tog on" id="t-nr"></div>
+        </div>
+        <div class="row" onclick="togLocal('nm')">
+          <div class="ri">💬</div>
+          <div class="rb"><div class="rt">New messages</div><div class="rs">When someone sends you a DM</div></div>
+          <div class="tog on" id="t-nm"></div>
+        </div>
+        <div class="row" onclick="togLocal('nf')">
+          <div class="ri">🤝</div>
+          <div class="rb"><div class="rt">Friend requests</div><div class="rs">When someone wants to connect with you</div></div>
+          <div class="tog on" id="t-nf"></div>
+        </div>
+        <div class="row" onclick="togLocal('nc')">
+          <div class="ri">⚡</div>
+          <div class="rb"><div class="rt">Random chat matched</div><div class="rs">When someone is waiting to chat with you</div></div>
+          <div class="tog on" id="t-nc"></div>
+        </div>
+      </div>
     </div>
-    <div class="pin-pad">
-      ${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k =>
-        `<button class="pin-key ${k==='⌫'?'del':''}" onclick="pinKey('${k}')">${k}</button>`).join('')}
-    </div>
-    <button class="btn btn-cancel" onclick="closeModal('pinModal');resetPin()">Cancel</button>
-  </div>
-</div>
 
-<!-- Remove PIN Modal -->
-<div class="modal-overlay" id="removePinModal">
-  <div class="modal" style="text-align:center">
-    <h3>🔓 Remove PIN</h3>
-    <p>Enter your current PIN to disable lock</p>
-    <div class="pin-dots">
-      <div class="pin-dot" id="rd0"></div>
-      <div class="pin-dot" id="rd1"></div>
-      <div class="pin-dot" id="rd2"></div>
-      <div class="pin-dot" id="rd3"></div>
+    <!-- Account info -->
+    <div class="sec" style="margin-top:18px">
+      <div class="slbl">Account info</div>
+      <div class="sc">
+        <div class="row" style="cursor:default">
+          <div class="ri">📧</div>
+          <div class="rb"><div class="rt">Email</div><div class="rs" id="r-email">—</div></div>
+          <div class="ic">Verified ✓</div>
+        </div>
+        <div class="row" style="cursor:default">
+          <div class="ri">🎭</div>
+          <div class="rb"><div class="rt">Anonymous name</div><div class="rs" id="r-name">—</div></div>
+          <div style="font-size:.7rem;color:var(--tx3)">Permanent</div>
+        </div>
+        <div class="row" style="cursor:default">
+          <div class="ri">📅</div>
+          <div class="rb"><div class="rt">Member since</div><div class="rs" id="r-joined">—</div></div>
+        </div>
+        <div class="row" onclick="cpId()">
+          <div class="ri">🔑</div>
+          <div class="rb"><div class="rt">Your User ID</div><div class="rs" id="r-id" style="font-family:var(--fM);font-size:.68rem;word-break:break-all">—</div></div>
+          <div style="font-size:.74rem;color:var(--v3);font-family:var(--fD);font-weight:600;flex-shrink:0">Copy</div>
+        </div>
+      </div>
     </div>
-    <div class="pin-pad">
-      ${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k =>
-        `<button class="pin-key ${k==='⌫'?'del':''}" onclick="removePinKey('${k}')">${k}</button>`).join('')}
-    </div>
-    <button class="btn btn-cancel" onclick="closeModal('removePinModal');resetRemovePin()">Cancel</button>
-  </div>
-</div>
 
-<!-- Report Modal -->
-<div class="modal-overlay" id="reportModal">
-  <div class="modal">
-    <h3>🚨 Report a User</h3>
-    <p>All reports are permanently recorded and reviewed by our team.</p>
-    <input class="input" id="reportName" placeholder="Anonymous name to report..."/>
-    <div class="report-reasons" id="reportReasons">
-      ${[
-        ['harassment','😤 Harassment or bullying'],
-        ['spam','📢 Spam or fake account'],
-        ['hate_speech','🤬 Hate speech'],
-        ['sexual','🔞 Sexual content'],
-        ['violence','⚔️ Violence or threats'],
-        ['other','❓ Other']
-      ].map(([v,l]) => `<button class="reason-btn" onclick="selectReason(this,'${v}')">${l}</button>`).join('')}
+    <!-- Security -->
+    <div class="sec" style="margin-top:18px">
+      <div class="slbl">Security</div>
+      <div class="sc">
+        <div class="row" onclick="logout()">
+          <div class="ri">🚪</div>
+          <div class="rb"><div class="rt">Log out</div><div class="rs">Sign out of this device</div></div>
+          <div style="font-size:.75rem;color:var(--tx3)">›</div>
+        </div>
+        <div class="row" onclick="logoutAll()">
+          <div class="ri">🔒</div>
+          <div class="rb"><div class="rt">Log out everywhere</div><div class="rs">Sign out of all devices at once</div></div>
+          <div style="font-size:.75rem;color:var(--tx3)">›</div>
+        </div>
+      </div>
     </div>
-    <textarea class="input" id="reportDesc" placeholder="Describe what happened (optional)..." rows="3"></textarea>
-    <button class="btn btn-danger" onclick="submitReport()">Submit Report 🚨</button>
-    <button class="btn btn-cancel" onclick="closeModal('reportModal')">Cancel</button>
+
+    <!-- About -->
+    <div class="sec" style="margin-top:18px">
+      <div class="slbl">About</div>
+      <div class="sc">
+        <div class="row" onclick="location.href='mailto:support@annomuss.in'">
+          <div class="ri">📮</div>
+          <div class="rb"><div class="rt">Contact support</div><div class="rs">support@annomuss.in</div></div>
+          <div style="font-size:.75rem;color:var(--tx3)">›</div>
+        </div>
+        <div class="row" style="cursor:default">
+          <div class="ri">ℹ️</div>
+          <div class="rb"><div class="rt">Version</div><div class="rs">Annomuss v1.0 · Made with ❤️ in India</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="sec" style="margin-top:18px">
+      <div class="slbl" style="color:var(--cr)">Danger Zone</div>
+      <div class="sc" style="border-color:rgba(255,77,109,.14)">
+        <div class="row drow" onclick="document.getElementById('cm').classList.add('on')">
+          <div class="ri">🗑️</div>
+          <div class="rb"><div class="rt">Delete account</div><div class="rs">Permanently erase your account. Posts stay anonymous. Cannot be undone.</div></div>
+          <div style="font-size:.75rem;color:var(--cr)">›</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:40px"></div>
   </div>
 </div>
-
-<!-- Block Modal -->
-<div class="modal-overlay" id="blockModal">
-  <div class="modal">
-    <h3>🚫 Block a User</h3>
-    <p>Blocked users cannot see your posts, stories or send you messages.</p>
-    <input class="input" id="blockName" placeholder="Anonymous name to block..."/>
-    <button class="btn btn-danger" onclick="submitBlock()">Block User 🚫</button>
-    <button class="btn btn-cancel" onclick="closeModal('blockModal')">Cancel</button>
-  </div>
-</div>
-
-<!-- Delete Account Modal -->
-<div class="modal-overlay" id="deleteModal">
-  <div class="modal">
-    <h3>⚠️ Delete Account</h3>
-    <p>This will permanently delete your account, posts, and all data. This <strong>cannot be undone</strong>.</p>
-    <div id="deleteStep1">
-      <button class="btn btn-danger" onclick="requestDeletion()">Send Confirmation OTP 📧</button>
-      <button class="btn btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
-    </div>
-    <div id="deleteStep2" style="display:none">
-      <p style="color:#ff9632;margin-bottom:12px">Enter the OTP sent to your email:</p>
-      <input class="input" id="deleteOtp" placeholder="6-digit OTP" maxlength="6" type="number"/>
-      <button class="btn btn-danger" onclick="confirmDeletion()">Permanently Delete Account 🗑️</button>
-      <button class="btn btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-const API   = "https://annomuss-backend-icgp.onrender.com";
-const token = localStorage.getItem("token");
-let user    = null;
-try { user = JSON.parse(localStorage.getItem("user") || "null"); } catch(e) {}
-if (!token || !user) window.location.href = "index.html";
+const API='https://annomuss-backend-icgp.onrender.com';
+let user=null, isDirty=false;
+const ch={avatarEmoji:null,allowDMs:null,showOnline:null,profileVisibility:null};
+const np=JSON.parse(localStorage.getItem('ann_np')||'{"nr":true,"nm":true,"nf":true,"nc":true}');
 
-let selectedAvatar = "🎭";
-let selectedReason = null;
-let pinBuffer      = [];
-let removePinBuffer = [];
-let fullProfile    = null;
+const EMOJIS=['🎭','🦊','🐺','🦁','🐼','🦄','🐉','🌙','⭐','🔥','💫','🌊','🌸','🍃','🦋','🦅','🐬','🦜','🌺','🍀','🌈','⚡','🎪','🎨','🎯','🧩','💎','🔮','🪄','🎸','🦑','🐙','🦞','🌵','🍄','🪸','🦩','🦚','🦘','🪼','🐸','🦎','🦔','🐧','🦀','🦭','🌻','🍁','🌿','🎋'];
 
-const AVATARS = ["🎭","🌊","🔥","⚡","🌙","⭐","🦋","🐉","🌸","💎","🎪","🎨","🎯","🚀","👾","🦊","🐺","🦅","🌈","💫","🎵","🌺","🍀","🎭","👻","🤖","🦁","🐯","🦄","🐉","🌸","💜"];
+function q(id){return document.getElementById(id)}
+function toast(m,d=2800){const w=q('tw'),e=document.createElement('div');e.className='t';e.textContent=m;w.appendChild(e);setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),200)},d);}
+function getToken(){return localStorage.getItem('token')}
 
-function goBack()   { window.location.href = "dashboard.html"; }
-function esc(s)     { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;") }
-
-function showToast(msg, err=false) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.className   = "toast show" + (err ? " error" : "");
-  setTimeout(() => t.classList.remove("show"), 3000);
+async function apiFetch(path,opts={}){
+  const t=getToken();
+  const h={'Content-Type':'application/json',...(opts.headers||{})};
+  if(t)h.Authorization=`Bearer ${t}`;
+  const r=await fetch(`${API}${path}`,{...opts,headers:h});
+  if(r.status===401){q('sm').classList.add('on');throw new Error('401');}
+  return r;
 }
 
-function openModal(id)  { document.getElementById(id).classList.add("open"); }
-function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+function dirty(){isDirty=true;q('sv').disabled=false;}
 
-function apiFetch(path, opts={}) {
-  return fetch(API + path, {
-    ...opts,
-    headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}`, ...(opts.headers||{}) }
+// ── Toggles ──
+function tog(key){
+  const el=q(`t-${key}`);if(!el)return;
+  const v=el.classList.toggle('on');
+  ch[key]=v; dirty();
+}
+function togLocal(key){
+  const el=q(`t-${key}`);if(!el)return;
+  const v=el.classList.toggle('on');
+  np[key]=v;
+  localStorage.setItem('ann_np',JSON.stringify(np));
+  toast(v?'Notifications on ✓':'Notifications off');
+}
+
+// ── Load ──
+async function load(){
+  const tk=getToken();
+  if(!tk){location.href='/index.html';return;}
+  try{
+    const r=await fetch(`${API}/api/users/me`,{headers:{Authorization:`Bearer ${tk}`}});
+    if(!r.ok){q('sm').classList.add('on');return;}
+    user=await r.json();
+  }catch(e){
+    const c=localStorage.getItem('user');
+    if(c)user=JSON.parse(c);else{location.href='/index.html';return;}
+  }
+  applyUI();
+  q('loading').style.display='none';
+  q('cnt').style.display='block';
+}
+
+function applyUI(){
+  const xp=user.xp||0,level=Math.floor(xp/100)+1;
+  const em=user.avatarEmoji||'🎭';
+  const nm=user.anonymousName||'Anonymous';
+  q('av').textContent=em;
+  q('uname').textContent=nm;
+  q('uhandle').textContent='@'+nm.toLowerCase().replace(/\s+/g,'');
+  q('lpill').textContent=`⭐ Level ${level}`;
+  q('xpchip').textContent=`${xp.toLocaleString()} XP total`;
+  q('r-email').textContent=user.email?maskEmail(user.email):'—';
+  q('r-name').textContent=nm;
+  q('r-joined').textContent=user.createdAt?new Date(user.createdAt).toLocaleDateString([],{month:'long',year:'numeric'}):'—';
+  q('r-id').textContent=user._id||'—';
+  setTog('t-allowDMs',  user.allowDMs!==false);
+  setTog('t-showOnline',user.showOnline!==false);
+  setTog('t-nr',np.nr!==false);
+  setTog('t-nm',np.nm!==false);
+  setTog('t-nf',np.nf!==false);
+  setTog('t-nc',np.nc!==false);
+  const vs=q('s-vis');if(vs)vs.value=user.profileVisibility||'public';
+  buildGrid(em);
+}
+
+function maskEmail(e){const[u,d]=e.split('@');if(!d)return e;return u.slice(0,2)+'•'.repeat(Math.max(2,u.length-2))+'@'+d;}
+function setTog(id,v){const e=q(id);if(e)e.classList.toggle('on',!!v);}
+
+// ── Emoji grid ──
+function buildGrid(cur){
+  const g=q('egrid');g.innerHTML='';
+  EMOJIS.forEach(em=>{
+    const b=document.createElement('button');
+    b.className='eb'+(em===cur?' sel':'');
+    b.textContent=em;
+    b.onclick=()=>{
+      document.querySelectorAll('.eb').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      q('av').textContent=em;
+      ch.avatarEmoji=em; dirty();
+    };
+    g.appendChild(b);
   });
 }
 
-// ── Load profile ──────────────────────────────────────────────────────────────
-async function loadProfile() {
-  try {
-    const res  = await apiFetch("/api/security/profile");
-    const data = await res.json();
-    fullProfile = data;
+// ── Save ──
+async function saveAll(){
+  const btn=q('sv');btn.disabled=true;btn.textContent='Saving...';
+  const payload={};
+  if(ch.avatarEmoji!==null)       payload.avatarEmoji=ch.avatarEmoji;
+  if(ch.allowDMs!==null)          payload.allowDMs=ch.allowDMs;
+  if(ch.showOnline!==null)        payload.showOnline=ch.showOnline;
+  const sv=q('s-vis')?.value;
+  if(sv&&sv!==(user.profileVisibility||'public')) payload.profileVisibility=sv;
 
-    document.getElementById("avatarCircle").textContent = data.avatar || "🎭";
-    document.getElementById("profileName").textContent  = data.anonymousName;
-    document.getElementById("profileEmail").textContent = data.email;
-    document.getElementById("statStreak").textContent   = data.currentStreak || 0;
-    document.getElementById("statCheckins").textContent = data.totalCheckIns || 0;
-    document.getElementById("statFriends").textContent  = data.friends?.length || 0;
-    document.getElementById("statJoined").textContent   = data.createdAt
-      ? new Date(data.createdAt).toLocaleDateString("en-IN", {month:"short", year:"numeric"})
-      : "—";
+  if(!Object.keys(payload).length){toast('Nothing to save');btn.textContent='Save';return;}
 
-    selectedAvatar = data.avatar || "🎭";
-
-    if (data.dateOfBirth) {
-      document.getElementById("dobDisplay").textContent =
-        new Date(data.dateOfBirth).toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"});
-      document.getElementById("dobInput").value = data.dateOfBirth.split("T")[0];
-    }
-
-    // PIN badge
-    if (data.pinEnabled) {
-      document.getElementById("pinBadge").textContent = "ON";
-      document.getElementById("pinBadge").className   = "section-badge green";
-      document.getElementById("pinRowLabel").textContent = "Change PIN";
-      document.getElementById("removePinRow").style.display = "flex";
-    }
-
-    // Name cooldown
-    if (data.lastNameChange) {
-      const daysSince = (Date.now() - new Date(data.lastNameChange)) / 86400000;
-      if (daysSince < 7) {
-        const left = Math.ceil(7 - daysSince);
-        document.getElementById("nameCooldown").textContent = `⏳ Name can be changed in ${left} day${left!==1?"s":""}`;
-      }
-    }
-
-    // Name history
-    if (data.nameHistory?.length) {
-      let html = '<div style="font-size:.78rem;color:#666;margin-bottom:6px">Previous names:</div>';
-      html += data.nameHistory.slice(-3).reverse().map(h =>
-        `<div class="history-item"><span>${esc(h.name)}</span><span style="color:#555">${new Date(h.changedAt).toLocaleDateString()}</span></div>`
-      ).join("");
-      document.getElementById("nameHistoryWrap").innerHTML = html;
-    }
-
-  } catch(e) { showToast("Failed to load profile", true); }
+  try{
+    const r=await apiFetch('/api/users/me',{method:'PATCH',body:JSON.stringify(payload)});
+    if(!r.ok){const d=await r.json();toast(d.message||'Failed ❌');return;}
+    const u=await r.json();
+    user={...user,...u};
+    localStorage.setItem('user',JSON.stringify(user));
+    Object.keys(ch).forEach(k=>ch[k]=null);
+    isDirty=false;
+    toast('✅ Settings saved!');
+    btn.textContent='Saved ✓';
+    setTimeout(()=>{btn.textContent='Save';},2000);
+  }catch(e){if(e.message!=='401')toast('Network error ❌');}
+  finally{btn.disabled=false;}
 }
 
-// ── Avatar ────────────────────────────────────────────────────────────────────
-function buildEmojiGrid() {
-  document.getElementById("emojiGrid").innerHTML = AVATARS.map(e =>
-    `<button class="emoji-opt ${e===selectedAvatar?"selected":""}" onclick="pickEmoji(this,'${e}')">${e}</button>`
-  ).join("");
+// ── Actions ──
+function cpId(){const id=user?._id;if(!id)return;navigator.clipboard?.writeText(id).then(()=>toast('🔑 User ID copied!'));}
+function logout(){if(!confirm('Log out of Annomuss?'))return;localStorage.removeItem('token');localStorage.removeItem('user');location.href='/index.html';}
+function logoutAll(){if(!confirm('Log out from all devices?'))return;localStorage.clear();toast('Logged out everywhere 🔒');setTimeout(()=>location.href='/index.html',1200);}
+
+async function confirmDelete(){
+  const btn=q('del-btn');btn.disabled=true;btn.textContent='Deleting...';
+  try{
+    const r=await apiFetch('/api/users/delete-account',{method:'DELETE'});
+    if(!r.ok){const d=await r.json();toast(d.message||'Failed');btn.disabled=false;btn.textContent='Yes, delete my account';return;}
+    localStorage.clear();
+    toast('Account deleted. Goodbye 👋');
+    setTimeout(()=>location.href='/index.html',1500);
+  }catch(e){if(e.message!=='401'){toast('Network error ❌');btn.disabled=false;btn.textContent='Yes, delete my account';}}
 }
 
-function pickEmoji(btn, emoji) {
-  document.querySelectorAll(".emoji-opt").forEach(b => b.classList.remove("selected"));
-  btn.classList.add("selected");
-  selectedAvatar = emoji;
-}
-
-async function saveAvatar() {
-  try {
-    const res  = await apiFetch("/api/security/profile", {
-      method: "PATCH", body: JSON.stringify({ avatar: selectedAvatar })
-    });
-    const data = await res.json();
-    document.getElementById("avatarCircle").textContent = selectedAvatar;
-    showToast("Avatar updated ✅");
-    closeModal("avatarModal");
-  } catch(e) { showToast("Failed ❌", true); }
-}
-
-// ── Name change ───────────────────────────────────────────────────────────────
-async function changeName() {
-  const newName = document.getElementById("newNameInput").value.trim();
-  if (!newName) return showToast("Enter a name!");
-  try {
-    const res  = await apiFetch("/api/security/change-name", {
-      method: "PATCH", body: JSON.stringify({ newName })
-    });
-    const data = await res.json();
-    if (!res.ok) return showToast(data.message, true);
-
-    // Update stored user + token
-    localStorage.setItem("token", data.token);
-    const u = JSON.parse(localStorage.getItem("user") || "{}");
-    u.anonymousName = data.anonymousName;
-    u.avatar        = data.user.avatar;
-    localStorage.setItem("user", JSON.stringify(u));
-
-    document.getElementById("profileName").textContent = data.anonymousName;
-    showToast(data.message);
-    closeModal("nameModal");
-    loadProfile();
-  } catch(e) { showToast("Failed ❌", true); }
-}
-
-// ── DOB ───────────────────────────────────────────────────────────────────────
-async function saveDob() {
-  const dob = document.getElementById("dobInput").value;
-  if (!dob) return showToast("Pick a date!");
-  try {
-    await apiFetch("/api/security/profile", {
-      method: "PATCH", body: JSON.stringify({ dateOfBirth: dob })
-    });
-    document.getElementById("dobDisplay").textContent =
-      new Date(dob).toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"});
-    showToast("Birthday saved 🎂");
-    closeModal("dobModal");
-  } catch(e) { showToast("Failed ❌", true); }
-}
-
-// ── PIN ───────────────────────────────────────────────────────────────────────
-function updatePinDots(buf, prefix="d") {
-  for (let i=0; i<4; i++) {
-    document.getElementById(`${prefix}${i}`).classList.toggle("filled", i < buf.length);
-  }
-}
-
-function pinKey(k) {
-  if (k === "⌫") { pinBuffer.pop(); }
-  else if (k !== "" && pinBuffer.length < 4) { pinBuffer.push(k); }
-  updatePinDots(pinBuffer);
-  if (pinBuffer.length === 4) setTimeout(() => submitPin(), 200);
-}
-
-async function submitPin() {
-  const pin = pinBuffer.join("");
-  pinBuffer  = [];
-  updatePinDots([]);
-  try {
-    const res  = await apiFetch("/api/security/pin/set", {
-      method: "POST", body: JSON.stringify({ pin })
-    });
-    const data = await res.json();
-    if (!res.ok) return showToast(data.message, true);
-
-    document.getElementById("pinBadge").textContent = "ON";
-    document.getElementById("pinBadge").className   = "section-badge green";
-    document.getElementById("pinRowLabel").textContent = "Change PIN";
-    document.getElementById("removePinRow").style.display = "flex";
-    showToast("PIN set! App is now locked 🔐");
-    closeModal("pinModal");
-  } catch(e) { showToast("Failed ❌", true); }
-}
-
-function resetPin() { pinBuffer = []; updatePinDots([]); }
-
-function removePinKey(k) {
-  if (k === "⌫") { removePinBuffer.pop(); }
-  else if (k !== "" && removePinBuffer.length < 4) { removePinBuffer.push(k); }
-  updatePinDots(removePinBuffer, "rd");
-  if (removePinBuffer.length === 4) setTimeout(() => submitRemovePin(), 200);
-}
-
-async function submitRemovePin() {
-  const pin   = removePinBuffer.join("");
-  removePinBuffer = [];
-  updatePinDots([], "rd");
-  try {
-    const res  = await apiFetch("/api/security/pin", {
-      method: "DELETE", body: JSON.stringify({ pin })
-    });
-    const data = await res.json();
-    if (!res.ok) return showToast(data.message, true);
-
-    document.getElementById("pinBadge").textContent = "OFF";
-    document.getElementById("pinBadge").className   = "section-badge";
-    document.getElementById("pinRowLabel").textContent = "Set PIN Lock";
-    document.getElementById("removePinRow").style.display = "none";
-    showToast("PIN removed ✅");
-    closeModal("removePinModal");
-  } catch(e) { showToast("Failed ❌", true); }
-}
-
-function resetRemovePin() { removePinBuffer = []; updatePinDots([], "rd"); }
-
-// ── Report ────────────────────────────────────────────────────────────────────
-function selectReason(btn, reason) {
-  document.querySelectorAll(".reason-btn").forEach(b => b.classList.remove("selected"));
-  btn.classList.add("selected");
-  selectedReason = reason;
-}
-
-async function submitReport() {
-  const name = document.getElementById("reportName").value.trim();
-  const desc = document.getElementById("reportDesc").value.trim();
-  if (!name)           return showToast("Enter the user's name!", true);
-  if (!selectedReason) return showToast("Select a reason!", true);
-
-  try {
-    const res  = await apiFetch("/api/security/report", {
-      method: "POST",
-      body: JSON.stringify({ reportedName: name, reason: selectedReason, description: desc })
-    });
-    const data = await res.json();
-    showToast(res.ok ? data.message : data.message, !res.ok);
-    if (res.ok) closeModal("reportModal");
-  } catch(e) { showToast("Failed ❌", true); }
-}
-
-// ── Block ─────────────────────────────────────────────────────────────────────
-async function submitBlock() {
-  const name = document.getElementById("blockName").value.trim();
-  if (!name) return showToast("Enter a name!", true);
-  try {
-    const res  = await apiFetch(`/api/security/block/${encodeURIComponent(name)}`, { method: "POST" });
-    const data = await res.json();
-    showToast(data.message, !res.ok);
-    if (res.ok) closeModal("blockModal");
-  } catch(e) { showToast("Failed ❌", true); }
-}
-
-// ── Delete account ────────────────────────────────────────────────────────────
-async function requestDeletion() {
-  try {
-    const res = await apiFetch("/api/security/delete-account/request", { method: "POST" });
-    const d   = await res.json();
-    showToast(d.message, !res.ok);
-    if (res.ok) {
-      document.getElementById("deleteStep1").style.display = "none";
-      document.getElementById("deleteStep2").style.display = "block";
-    }
-  } catch(e) { showToast("Failed ❌", true); }
-}
-
-async function confirmDeletion() {
-  const otp = document.getElementById("deleteOtp").value.trim();
-  if (!otp) return showToast("Enter OTP!", true);
-  try {
-    const res = await apiFetch("/api/security/delete-account/confirm", {
-      method: "POST", body: JSON.stringify({ otp })
-    });
-    const d = await res.json();
-    if (!res.ok) return showToast(d.message, true);
-    showToast("Account deleted. Goodbye 👋");
-    setTimeout(() => {
-      localStorage.clear();
-      window.location.href = "index.html";
-    }, 2000);
-  } catch(e) { showToast("Failed ❌", true); }
-}
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-buildEmojiGrid();
-loadProfile();
+window.addEventListener('beforeunload',e=>{if(isDirty){e.preventDefault();e.returnValue='';}});
+document.addEventListener('DOMContentLoaded',load);
 </script>
 </body>
 </html>

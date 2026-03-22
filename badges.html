@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#030308"/>
+<title>Badges & XP · Annomuss</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#030308;--bg1:#08080f;--bg2:#0d0d1c;--bg3:#121228;
+  --v:#7B5EA7;--v2:#9B7FD4;--v3:#C4A8FF;--vg:rgba(123,94,167,.12);--vb:rgba(123,94,167,.25);
+  --cr:#FF4D6D;--cr2:rgba(255,77,109,.1);
+  --tl:#00C9A7;--tl2:rgba(0,201,167,.1);--lm:#52B788;
+  --go:#F4A261;--go2:rgba(244,162,97,.1);--pk:#FF85A1;
+  --tx:#F5F3FF;--tx2:#9896B8;--tx3:#4E4C6A;
+  --bd:rgba(255,255,255,.06);--bd2:rgba(255,255,255,.1);--bd3:rgba(255,255,255,.16);
+  --safe:env(safe-area-inset-bottom,0px);
+  --fD:'Clash Display',sans-serif;--fB:'Cabinet Grotesk',sans-serif;--fM:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);color:var(--tx);font-family:var(--fB);font-size:15px;line-height:1.5}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:var(--tx)}
+::-webkit-scrollbar{width:0}
+
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% -20%,rgba(123,94,167,.08),transparent 55%),
+    radial-gradient(ellipse 60% 40% at 80% 110%,rgba(0,201,167,.05),transparent 50%),
+    radial-gradient(ellipse 40% 30% at 90% 20%,rgba(255,77,109,.04),transparent 50%)}
+
+#app{min-height:100dvh;position:relative;z-index:1;padding-bottom:calc(40px + var(--safe))}
+
+/* ── Header ── */
+#hdr{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;gap:10px;
+  padding:13px 18px;padding-top:calc(13px + env(safe-area-inset-top,0px));
+  background:rgba(3,3,8,.88);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  border-bottom:1px solid var(--bd);
+}
+.bk{width:36px;height:36px;border-radius:50%;background:var(--bg2);border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--tx2);flex-shrink:0}
+.bk:active{background:var(--bg3)}
+.pg-t{font-family:var(--fD);font-weight:700;font-size:1.05rem;flex:1;letter-spacing:-.2px}
+
+/* ── Hero XP card ── */
+.hero{
+  margin:16px 18px 0;padding:24px 20px;
+  background:linear-gradient(135deg,rgba(123,94,167,.18),rgba(255,77,109,.08));
+  border:1px solid rgba(123,94,167,.25);border-radius:22px;
+  position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;
+  border-radius:50%;background:radial-gradient(circle,rgba(123,94,167,.1),transparent 70%);pointer-events:none}
+.hero-top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.hero-av{width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg,var(--v),var(--cr));
+  padding:2.5px;flex-shrink:0}
+.hero-av-in{width:100%;height:100%;border-radius:50%;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;font-size:1.9rem;border:2px solid var(--bg)}
+.hero-info{flex:1;min-width:0}
+.hero-name{font-family:var(--fD);font-weight:700;font-size:1.1rem;letter-spacing:-.2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-level{display:inline-flex;align-items:center;gap:5px;
+  padding:3px 11px;border-radius:100px;
+  background:var(--vg);border:1px solid var(--vb);
+  font-size:.72rem;font-weight:700;color:var(--v3);font-family:var(--fD);margin-top:4px}
+
+/* XP bar */
+.xp-row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:.72rem;font-family:var(--fM)}
+.xp-track{height:8px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
+.xp-fill{height:100%;border-radius:100px;
+  background:linear-gradient(90deg,var(--v),var(--cr),var(--pk));
+  background-size:200%;animation:xpShimmer 3s linear infinite;
+  transition:width 1.2s cubic-bezier(.34,1.2,.64,1);width:0%}
+@keyframes xpShimmer{0%{background-position:0%}100%{background-position:200%}}
+
+/* Stats row */
+.stats-row{display:flex;gap:0;margin-top:16px;
+  background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:14px;overflow:hidden}
+.stat{flex:1;text-align:center;padding:12px 8px;border-right:1px solid var(--bd)}
+.stat:last-child{border-right:none}
+.sn{font-family:var(--fD);font-weight:700;font-size:1.35rem;letter-spacing:-.3px}
+.sl{font-size:.65rem;color:var(--tx3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+
+/* ── XP breakdown ── */
+.sec{padding:18px 18px 0}
+.slbl{font-size:.68rem;font-weight:700;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;font-family:var(--fD);margin-bottom:10px}
+.sc{background:var(--bg1);border:1px solid var(--bd);border-radius:18px;overflow:hidden}
+.xp-row-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--bd)}
+.xp-row-item:last-child{border-bottom:none}
+.xr-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.xr-body{flex:1;min-width:0}
+.xr-t{font-size:.85rem;font-weight:500;color:var(--tx)}
+.xr-s{font-size:.72rem;color:var(--tx3);margin-top:1px}
+.xr-pts{font-family:var(--fM);font-size:.78rem;font-weight:700;color:var(--v3);flex-shrink:0}
+
+/* ── Level road ── */
+.levels-wrap{padding:18px 18px 0}
+.lvl-road{position:relative;padding-left:32px}
+.lvl-road::before{content:'';position:absolute;left:10px;top:8px;bottom:8px;
+  width:2px;background:linear-gradient(180deg,var(--v),var(--cr),var(--tl));opacity:.3;border-radius:2px}
+.lvl-item{position:relative;margin-bottom:12px;display:flex;align-items:flex-start;gap:12px}
+.lvl-dot{width:20px;height:20px;border-radius:50%;flex-shrink:0;margin-top:2px;
+  position:absolute;left:-32px;
+  display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;
+  border:2px solid var(--bg)}
+.lvl-dot.done{background:linear-gradient(135deg,var(--v),var(--cr))}
+.lvl-dot.current{background:linear-gradient(135deg,var(--tl),var(--v));
+  box-shadow:0 0 12px rgba(0,201,167,.4);animation:pulseD 2s ease-in-out infinite}
+@keyframes pulseD{0%,100%{box-shadow:0 0 8px rgba(0,201,167,.3)}50%{box-shadow:0 0 18px rgba(0,201,167,.6)}}
+.lvl-dot.locked{background:var(--bg3);border-color:var(--bd2)}
+.lvl-card{flex:1;padding:12px 14px;border-radius:14px;border:1px solid var(--bd);background:var(--bg1)}
+.lvl-card.current{border-color:rgba(0,201,167,.3);background:rgba(0,201,167,.04)}
+.lvl-card.locked{opacity:.5}
+.lvl-num{font-family:var(--fD);font-weight:700;font-size:.82rem;color:var(--v3);margin-bottom:2px}
+.lvl-title{font-family:var(--fD);font-weight:700;font-size:.95rem;letter-spacing:-.1px}
+.lvl-sub{font-size:.73rem;color:var(--tx3);margin-top:3px;line-height:1.5}
+.lvl-reward{display:inline-flex;align-items:center;gap:4px;margin-top:6px;
+  padding:3px 9px;border-radius:100px;background:var(--vg);
+  font-size:.68rem;font-weight:700;color:var(--v3);font-family:var(--fD)}
+
+/* ── Badges grid ── */
+.badges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.badge-card{
+  padding:14px 10px;border-radius:16px;border:1px solid var(--bd);background:var(--bg1);
+  text-align:center;position:relative;overflow:hidden;
+  transition:transform .15s;cursor:default;
+}
+.badge-card.earned{border-color:var(--vb);background:var(--vg)}
+.badge-card.earned::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(123,94,167,.06),rgba(255,77,109,.03));pointer-events:none}
+.badge-card:active{transform:scale(.97)}
+.b-ico{font-size:2rem;margin-bottom:6px;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.badge-card.earned .b-ico{animation:badgePop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes badgePop{0%{transform:scale(.6)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.badge-card.locked .b-ico{filter:grayscale(1);opacity:.35}
+.b-name{font-family:var(--fD);font-weight:700;font-size:.72rem;letter-spacing:-.1px;
+  color:var(--tx);margin-bottom:2px}
+.badge-card.locked .b-name{color:var(--tx3)}
+.b-sub{font-size:.63rem;color:var(--tx3);line-height:1.4}
+.earned-tick{position:absolute;top:6px;right:6px;
+  width:16px;height:16px;border-radius:50%;
+  background:linear-gradient(135deg,var(--tl),var(--v));
+  display:flex;align-items:center;justify-content:center;
+  font-size:.55rem;color:#fff}
+.b-prog{margin-top:6px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.b-prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--v),var(--cr));transition:width .8s ease}
+
+/* ── Streak section ── */
+.streak-hero{
+  margin:0 18px;padding:20px;
+  background:linear-gradient(135deg,rgba(244,162,97,.12),rgba(255,77,109,.06));
+  border:1px solid rgba(244,162,97,.2);border-radius:18px;
+  display:flex;align-items:center;gap:16px;
+}
+.streak-ico{font-size:2.8rem;flex-shrink:0;animation:flicker 2s ease-in-out infinite}
+@keyframes flicker{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+.streak-num{font-family:var(--fD);font-weight:700;font-size:2.4rem;letter-spacing:-.5px;color:var(--go)}
+.streak-label{font-size:.78rem;color:var(--tx2);margin-top:2px}
+.streak-record{font-size:.68rem;color:var(--tx3);font-family:var(--fM);margin-top:4px}
+
+/* spinner */
+.spin{width:22px;height:22px;border:2.5px solid var(--bd2);border-top-color:var(--v);
+  border-radius:50%;animation:sp .65s linear infinite;margin:40px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* toast */
+#tw{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.t{background:var(--bg3);border:1px solid var(--bd3);border-radius:100px;padding:9px 18px;
+  font-size:.82rem;font-weight:700;font-family:var(--fD);color:var(--tx);
+  box-shadow:0 8px 28px rgba(0,0,0,.5);animation:tIn .22s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.t.out{animation:tOut .18s ease forwards}
+@keyframes tIn{from{opacity:0;transform:translateY(-8px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes tOut{to{opacity:0;transform:translateY(-8px) scale(.9)}}
+
+/* session modal */
+#sm{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:24px}
+#sm.on{display:flex}
+.smc{background:var(--bg2);border:1px solid var(--bd2);border-radius:22px;padding:32px;text-align:center;max-width:300px;width:100%}
+.btn-v{background:linear-gradient(135deg,#7B5EA7,#5a3d9e);color:#fff;border:none;border-radius:100px;padding:9px 22px;font-family:var(--fD);font-weight:700;font-size:.8rem;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div id="sm"><div class="smc">
+  <div style="font-size:2.5rem;margin-bottom:12px">🔐</div>
+  <div style="font-family:var(--fD);font-weight:700;font-size:1rem;margin-bottom:16px">Session Expired</div>
+  <button class="btn-v" onclick="location.href='/index.html'">Log In</button>
+</div></div>
+
+<div id="tw"></div>
+
+<div id="app">
+  <div id="hdr">
+    <button class="bk" onclick="history.back()">←</button>
+    <div class="pg-t">Badges & Rewards</div>
+  </div>
+
+  <div id="loading"><div class="spin"></div></div>
+
+  <div id="cnt" style="display:none">
+
+    <!-- XP Hero -->
+    <div class="hero">
+      <div class="hero-top">
+        <div class="hero-av"><div class="hero-av-in" id="av">🎭</div></div>
+        <div class="hero-info">
+          <div class="hero-name" id="uname">Anonymous</div>
+          <div class="hero-level" id="lvl-pill">⭐ Level 1</div>
+        </div>
+      </div>
+      <div class="xp-row">
+        <span id="xp-lbl" style="color:var(--v3)">0 XP</span>
+        <span id="xp-next" style="color:var(--tx3)">100 XP to Level 2</span>
+      </div>
+      <div class="xp-track"><div class="xp-fill" id="xp-bar"></div></div>
+      <div class="stats-row">
+        <div class="stat"><div class="sn" id="st-posts">0</div><div class="sl">Posts</div></div>
+        <div class="stat"><div class="sn" id="st-streak" style="color:var(--go)">0</div><div class="sl">Streak</div></div>
+        <div class="stat"><div class="sn" id="st-friends" style="color:var(--tl)">0</div><div class="sl">Friends</div></div>
+        <div class="stat"><div class="sn" id="st-level" style="color:var(--v3)">1</div><div class="sl">Level</div></div>
+      </div>
+    </div>
+
+    <!-- Streak -->
+    <div class="sec" style="margin-top:18px">
+      <div class="slbl">🔥 Daily streak</div>
+      <div class="streak-hero">
+        <div class="streak-ico">🔥</div>
+        <div>
+          <div class="streak-num" id="streak-big">0</div>
+          <div class="streak-label">day streak</div>
+          <div class="streak-record" id="streak-msg">Log your mood daily to keep your streak alive!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="sec" style="margin-top:18px">
+      <div class="slbl">🏅 Badges</div>
+      <div class="badges-grid" id="badges-grid"></div>
+    </div>
+
+    <!-- XP Guide -->
+    <div class="sec" style="margin-top:18px">
+      <div class="slbl">⚡ How to earn XP</div>
+      <div class="sc">
+        <div class="xp-row-item">
+          <div class="xr-ico" style="background:var(--vg)">✏️</div>
+          <div class="xr-body"><div class="xr-t">Create a post</div><div class="xr-s">Regular post, story, or challenge</div></div>
+          <div class="xr-pts">+10 XP</div>
+        </div>
+        <div class="xp-row-item">
+          <div class="xr-ico" style="background:rgba(255,77,109,.1)">🤫</div>
+          <div class="xr-body"><div class="xr-t">Post a confession</div><div class="xr-s">Courage gets rewarded</div></div>
+          <div class="xr-pts">+15 XP</div>
+        </div>
+        <div class="xp-row-item">
+          <div class="xr-ico" style="background:rgba(196,168,255,.1)">💌</div>
+          <div class="xr-body"><div class="xr-t">Write an unsent letter</div><div class="xr-s">The most raw form of expression</div></div>
+          <div class="xr-pts">+20 XP</div>
+        </div>
+        <div class="xp-row-item">
+          <div class="xr-ico" style="background:var(--tl2)">⚡</div>
+          <div class="xr-body"><div class="xr-t">Complete a 5-min random chat</div><div class="xr-s">Full session, no early exits</div></div>
+          <div class="xr-pts">+15 XP</div>
+        </div>
+        <div class="xp-row-item">
+          <div class="xr-ico" style="background:rgba(244,162,97,.1)">🎁</div>
+          <div class="xr-body"><div class="xr-t">Send an anonymous compliment</div><div class="xr-s">Spread kindness anonymously</div></div>
+          <div class="xr-pts">+10 XP</div>
+        </div>
+        <div class="xp-row-item">
+          <div class="xr-ico" style="background:rgba(82,183,136,.1)">🌊</div>
+          <div class="xr-body"><div class="xr-t">Log your daily mood</div><div class="xr-s">Check in every day for streak bonus</div></div>
+          <div class="xr-pts">+5 XP</div>
+        </div>
+        <div class="xp-row-item">
+          <div class="xr-ico" style="background:rgba(255,133,161,.1)">💬</div>
+          <div class="xr-body"><div class="xr-t">React to a post</div><div class="xr-s">Show someone they were heard</div></div>
+          <div class="xr-pts">+2 XP</div>
+        </div>
+        <div class="xp-row-item">
+          <div class="xr-ico" style="background:var(--vg)">🔑</div>
+          <div class="xr-body"><div class="xr-t">Daily login</div><div class="xr-s">Just showing up counts</div></div>
+          <div class="xr-pts">+10 XP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level Roadmap -->
+    <div class="levels-wrap" style="margin-top:18px">
+      <div class="slbl">🗺️ Level roadmap</div>
+      <div class="lvl-road" id="lvl-road"></div>
+    </div>
+
+    <div style="height:40px"></div>
+  </div>
+</div>
+
+<script>
+const API='https://annomuss-backend-icgp.onrender.com';
+let user=null;
+
+// ── Badge definitions ──────────────────────────
+const BADGES=[
+  // Posting
+  {id:'first_post',   ico:'✍️', name:'First Words',      desc:'Posted for the first time',          req:'posts',   threshold:1},
+  {id:'post5',        ico:'📝', name:'Regular Voice',    desc:'5 posts shared',                      req:'posts',   threshold:5},
+  {id:'post25',       ico:'📢', name:'Storyteller',      desc:'25 posts — you have things to say',   req:'posts',   threshold:25},
+  {id:'post100',      ico:'🗣️', name:'Loud & Proud',     desc:'100 posts. Iconic.',                  req:'posts',   threshold:100},
+  // Confessions
+  {id:'confess1',     ico:'🤫', name:'First Secret',     desc:'Shared your first confession',        req:'xp',      threshold:15},
+  {id:'confess5',     ico:'🔓', name:'Open Book',        desc:'5 confessions posted',                req:'xp',      threshold:75},
+  // Unsent letters
+  {id:'unsent1',      ico:'💌', name:'Unspoken',         desc:'Wrote your first unsent letter',      req:'xp',      threshold:20},
+  // Streaks
+  {id:'streak3',      ico:'🔥', name:'On Fire',          desc:'3-day streak',                        req:'streak',  threshold:3},
+  {id:'streak7',      ico:'⚡', name:'Week Warrior',     desc:'7-day streak',                        req:'streak',  threshold:7},
+  {id:'streak30',     ico:'💥', name:'Unstoppable',      desc:'30-day streak',                       req:'streak',  threshold:30},
+  // Social
+  {id:'friend1',      ico:'🤝', name:'Connected',        desc:'Made your first friend',              req:'friends', threshold:1},
+  {id:'friend10',     ico:'👥', name:'Social Butterfly', desc:'10 friends on Annomuss',              req:'friends', threshold:10},
+  // Chats
+  {id:'chat1',        ico:'💬', name:'Ice Breaker',      desc:'Completed first random chat',         req:'xp',      threshold:15},
+  {id:'chat10',       ico:'🌊', name:'Deep Diver',       desc:'10 random chats completed',           req:'xp',      threshold:150},
+  // XP milestones
+  {id:'xp100',        ico:'🌱', name:'Sprouting',        desc:'Reached 100 XP',                      req:'xp',      threshold:100},
+  {id:'xp500',        ico:'🌿', name:'Growing',          desc:'Reached 500 XP',                      req:'xp',      threshold:500},
+  {id:'xp1000',       ico:'🌳', name:'Rooted',           desc:'Reached 1000 XP',                     req:'xp',      threshold:1000},
+  {id:'xp5000',       ico:'🏔️', name:'Summit',           desc:'Reached 5000 XP — legendary',        req:'xp',      threshold:5000},
+  // Special
+  {id:'night_owl',    ico:'🌙', name:'Night Owl',        desc:'Posted after midnight',               req:'xp',      threshold:10},
+  {id:'compliment',   ico:'🎁', name:'Gifter',           desc:'Sent an anonymous compliment',        req:'xp',      threshold:10},
+  {id:'level5',       ico:'⭐', name:'Rising Star',      desc:'Reached Level 5',                     req:'level',   threshold:5},
+  {id:'level10',      ico:'🌟', name:'Shining',          desc:'Reached Level 10',                    req:'level',   threshold:10},
+  {id:'level25',      ico:'💎', name:'Diamond Soul',     desc:'Reached Level 25',                    req:'level',   threshold:25},
+  {id:'level50',      ico:'👑', name:'The Crown',        desc:'Reached Level 50 — hall of fame',     req:'level',   threshold:50},
+];
+
+// ── Level definitions ──────────────────────────
+const LEVELS=[
+  {n:1,  title:'Anonymous Seedling', desc:'Everyone starts here. The seed of something real.', reward:'Access to all features'},
+  {n:2,  title:'Whispering Voice',   desc:'You spoke up. People are listening.', reward:'Custom reaction emoji (coming soon)'},
+  {n:3,  title:'Honest Soul',        desc:'Authenticity is your superpower.', reward:'Extended vent length'},
+  {n:5,  title:'Rising Star',        desc:'Something about you resonates with people.', reward:'⭐ Rising Star badge'},
+  {n:7,  title:'Deep Thinker',       desc:'You go beyond the surface.', reward:'Deep Talk mode unlocked'},
+  {n:10, title:'Community Pillar',   desc:'The platform is better because you\'re here.', reward:'🌟 Shining badge'},
+  {n:15, title:'Voice of Truth',     desc:'People feel seen because of what you share.', reward:'Special profile frame (coming soon)'},
+  {n:20, title:'Legend in the Making', desc:'Your impact on the community is undeniable.', reward:'Priority queue for random chat'},
+  {n:25, title:'Diamond Soul',       desc:'Rare. Real. Irreplaceable.', reward:'💎 Diamond Soul badge'},
+  {n:50, title:'The Crown',          desc:'Hall of fame. Only the most dedicated reach here.', reward:'👑 Crown badge + permanent recognition'},
+];
+
+// ── Helpers ──────────────────────────────────
+function q(id){return document.getElementById(id)}
+function toast(m,d=2800){const w=q('tw'),e=document.createElement('div');e.className='t';e.textContent=m;w.appendChild(e);setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),200)},d);}
+function getToken(){return localStorage.getItem('token')}
+async function apiFetch(path,opts={}){
+  const t=getToken(),h={'Content-Type':'application/json',...(opts.headers||{})};
+  if(t)h.Authorization=`Bearer ${t}`;
+  const r=await fetch(`${API}${path}`,{...opts,headers:h});
+  if(r.status===401){q('sm').classList.add('on');throw new Error('401');}
+  return r;
+}
+
+// ── Load ──────────────────────────────────────
+async function load(){
+  const tk=getToken();if(!tk){location.href='/index.html';return;}
+  try{
+    const r=await fetch(`${API}/api/users/me`,{headers:{Authorization:`Bearer ${tk}`}});
+    if(!r.ok){q('sm').classList.add('on');return;}
+    user=await r.json();
+  }catch(e){
+    const c=localStorage.getItem('user');
+    if(c)user=JSON.parse(c);else{location.href='/index.html';return;}
+  }
+  renderAll();
+  q('loading').style.display='none';
+  q('cnt').style.display='block';
+}
+
+function renderAll(){
+  const xp      = user.xp || 0;
+  const level   = Math.floor(xp/100)+1;
+  const xpIn    = xp % 100;
+  const toNext  = 100 - xpIn;
+  const streak  = user.streak || user.moodStreak || 0;
+  const posts   = user.postCount || 0;
+  const friends = (user.friends||[]).length || user.friendCount || 0;
+  const em      = user.avatarEmoji||'🎭';
+
+  // Hero
+  q('av').textContent       = em;
+  q('uname').textContent    = user.anonymousName||'Anonymous';
+  q('lvl-pill').textContent = `⭐ Level ${level}`;
+  q('xp-lbl').textContent   = `${xp.toLocaleString()} XP`;
+  q('xp-next').textContent  = `${toNext} XP to Level ${level+1}`;
+  q('st-posts').textContent   = posts;
+  q('st-streak').textContent  = streak;
+  q('st-friends').textContent = friends;
+  q('st-level').textContent   = level;
+
+  // Animate XP bar after short delay
+  setTimeout(()=>{q('xp-bar').style.width=`${xpIn}%`;},200);
+
+  // Streak hero
+  q('streak-big').textContent = streak;
+  q('streak-msg').textContent = streak >= 7 ? `🔥 ${streak} days! You're on a serious run.`
+    : streak >= 3 ? `Keep it up! Log your mood tomorrow to reach 7 days.`
+    : streak >= 1 ? `Good start! Log your mood every day to build your streak.`
+    : `Log your mood today to start your streak!`;
+
+  // Badges
+  renderBadges(xp, level, streak, posts, friends);
+
+  // Level road
+  renderLevels(level);
+}
+
+function getBadgeProgress(badge, xp, level, streak, posts, friends){
+  switch(badge.req){
+    case 'xp':      return {cur:xp,      max:badge.threshold};
+    case 'level':   return {cur:level,   max:badge.threshold};
+    case 'streak':  return {cur:streak,  max:badge.threshold};
+    case 'posts':   return {cur:posts,   max:badge.threshold};
+    case 'friends': return {cur:friends, max:badge.threshold};
+    default:        return {cur:0,max:badge.threshold};
+  }
+}
+
+function renderBadges(xp,level,streak,posts,friends){
+  const grid=q('badges-grid');grid.innerHTML='';
+  BADGES.forEach((b,i)=>{
+    const {cur,max}=getBadgeProgress(b,xp,level,streak,posts,friends);
+    const earned=cur>=max;
+    const pct=Math.min(100,Math.round((cur/max)*100));
+
+    const card=document.createElement('div');
+    card.className=`badge-card ${earned?'earned':'locked'}`;
+    card.style.animationDelay=`${i*0.04}s`;
+    if(earned)card.style.animation='cardIn .4s cubic-bezier(.4,0,.2,1) both';
+
+    card.innerHTML=`
+      ${earned?'<div class="earned-tick">✓</div>':''}
+      <div class="b-ico">${b.ico}</div>
+      <div class="b-name">${b.name}</div>
+      <div class="b-sub">${earned?b.desc:`${cur}/${max}`}</div>
+      ${!earned?`<div class="b-prog"><div class="b-prog-fill" style="width:${pct}%"></div></div>`:''}
+    `;
+    card.onclick=()=>{
+      if(earned)toast(`🏅 ${b.name} — ${b.desc}`);
+      else toast(`${b.ico} ${b.name}: ${cur}/${max} (${pct}%)`);
+    };
+    grid.appendChild(card);
+  });
+}
+
+function renderLevels(currentLevel){
+  const road=q('lvl-road');road.innerHTML='';
+  // Show current level ±4 and a few future milestones
+  const show=[...LEVELS];
+  // Add current level if not in list
+  if(!show.find(l=>l.n===currentLevel)){
+    show.push({n:currentLevel,title:`Level ${currentLevel}`,desc:'Your current level.',reward:'Keep going!'});
+    show.sort((a,b)=>a.n-b.n);
+  }
+
+  show.forEach(l=>{
+    const done=currentLevel>l.n;
+    const cur=currentLevel===l.n;
+    const locked=currentLevel<l.n;
+
+    const item=document.createElement('div');
+    item.className='lvl-item';
+    item.innerHTML=`
+      <div class="lvl-dot ${done?'done':cur?'current':'locked'}">
+        ${done?'✓':cur?'●':l.n}
+      </div>
+      <div class="lvl-card ${cur?'current':locked?'locked':''}">
+        <div class="lvl-num">Level ${l.n}</div>
+        <div class="lvl-title">${l.title}</div>
+        <div class="lvl-sub">${l.desc}</div>
+        <div class="lvl-reward">🎁 ${l.reward}</div>
+      </div>`;
+    road.appendChild(item);
+  });
+}
+
+document.addEventListener('DOMContentLoaded',load);
+</script>
+</body>
+</html>

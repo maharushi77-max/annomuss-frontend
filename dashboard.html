@@ -1591,6 +1591,11 @@ function initSocket(){
     }
   });
 
+  // Real-time stories — reload strip when anyone posts a story
+  socket.on('new-story', () => {
+    loadStories();
+  });
+
   socket.on('friend-request',(d)=>{
     pendingReqCount++;
     updateReqBadge();

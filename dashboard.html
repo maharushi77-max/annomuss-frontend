@@ -831,6 +831,10 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div class="stab on" onclick="socTab('inbox',this)">📬 Inbox</div>
     <div class="stab" onclick="socTab('friends',this)">👥 Friends</div>
     <div class="stab" onclick="socTab('discover',this)">🔍 Discover</div>
+    <div class="stab" onclick="socTab('requests',this)" id="stab-requests" style="position:relative">
+      🤝 Requests
+      <span id="req-badge" style="display:none;position:absolute;top:6px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--cr)"></span>
+    </div>
   </div>
   <div id="soc-inbox">
     <div style="padding:14px 18px 6px"><button class="btn btn-full btn-v btn-sm" onclick="goPage('connect')">⚡ Start Random Chat</button></div>
@@ -841,6 +845,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div style="padding:12px 18px"><div style="display:flex;align-items:center;gap:8px;background:var(--bg2);border:1.5px solid var(--bd);border-radius:100px;padding:10px 16px"><span style="color:var(--tx3)">🔍</span><input id="search-inp" placeholder="Search users..." oninput="doSearch(this.value)" style="flex:1;font-size:.9rem;color:var(--tx)"/></div></div>
     <div id="search-list"></div>
   </div>
+  <div id="soc-requests" style="display:none"><div id="requests-list"></div></div>
 </div>
 
 <!-- PROFILE -->
@@ -1249,14 +1254,29 @@ function crisisDismiss(){q('crisis').classList.remove('on');}
 function crisisChat(){crisisDismiss();goPage('connect');setTimeout(rcStart,500);}
 
 /* ═══════════ SOCIAL ═══════════ */
+let pendingReqCount = 0;
+
 function socTab(tab,el){
-  ['inbox','friends','discover'].forEach(t=>q(`soc-${t}`).style.display='none');
-  q(`soc-${tab}`).style.display='block';
+  ['inbox','friends','discover','requests'].forEach(t=>{
+    const el2=q(`soc-${t}`); if(el2) el2.style.display='none';
+  });
+  const panel = q(`soc-${tab}`);
+  if(panel) panel.style.display='block';
   document.querySelectorAll('.stab').forEach(t=>t.classList.remove('on'));
-  if(el)el.classList.add('on');
-  if(tab==='inbox')loadInbox();
-  if(tab==='friends')loadFriends();
+  if(el) el.classList.add('on');
+  if(tab==='inbox')    loadInbox();
+  if(tab==='friends')  loadFriends();
+  if(tab==='requests') loadRequests();
+  // Clear badge when user opens requests tab
+  if(tab==='requests') { pendingReqCount=0; updateReqBadge(); }
 }
+
+function updateReqBadge(){
+  const badge = q('req-badge');
+  if(!badge) return;
+  badge.style.display = pendingReqCount > 0 ? 'block' : 'none';
+}
+
 async function loadInbox(){
   const l=q('inbox-list');l.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
   try{const r=await api('/api/messages/inbox');const d=await r.json();const cs=Array.isArray(d)?d:(d.conversations||[]);
@@ -1264,6 +1284,7 @@ async function loadInbox(){
     l.innerHTML=cs.map(c=>`<div class="friend-card" onclick="location.href='/messages.html?with=${c.with||c._id||''}'"><div class="fav">${c.withAvatar||'🎭'}</div><div style="flex:1;min-width:0"><div style="font-family:var(--fD);font-weight:700;font-size:.875rem">${esc(c.withName||'Anonymous')}</div><div style="font-size:.77rem;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${esc(c.lastMessage?.text||'Tap to chat')}</div></div>${c.unread?'<div style="width:8px;height:8px;border-radius:50%;background:var(--v)"></div>':''}</div>`).join('');
   }catch(e){l.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">No messages yet</div></div>';}
 }
+
 async function loadFriends(){
   const l=q('friends-list');l.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
   try{const r=await api('/api/users/friends');const d=await r.json();const fs=Array.isArray(d)?d:(d.friends||[]);
@@ -1271,12 +1292,74 @@ async function loadFriends(){
     l.innerHTML=fs.map(f=>`<div class="friend-card" onclick="location.href='/messages.html?with=${f._id}'"><div class="fav">${f.avatarEmoji||'🎭'}${f.online?'<div class="on-dot"></div>':''}</div><div style="flex:1;min-width:0"><div style="font-family:var(--fD);font-weight:700;font-size:.875rem">${esc(f.anonymousName||'Anonymous')}</div><div style="font-size:.72rem;color:var(--tx3);margin-top:2px">${f.online?'Online now':'Offline'}</div></div><button class="btn btn-sm btn-g" onclick="event.stopPropagation();location.href='/messages.html?with=${f._id}'">Message</button></div>`).join('');
   }catch(e){l.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">Couldn\'t load</div></div>';}
 }
+
+async function loadRequests(){
+  const l=q('requests-list');
+  l.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
+  try{
+    const r=await api('/api/users/friend-requests');
+    const d=await r.json();
+    const reqs=Array.isArray(d)?d:(d.requests||[]);
+    if(!reqs.length){
+      l.innerHTML='<div class="empty"><div style="font-size:3rem">🤝</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">No pending requests</div><div style="font-size:.82rem;color:var(--tx3)">When someone sends you a request it appears here</div></div>';
+      return;
+    }
+    l.innerHTML=reqs.map(req=>`
+      <div class="friend-card" id="req-${req._id}">
+        <div class="fav">${req.avatarEmoji||'🎭'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--fD);font-weight:700;font-size:.875rem">${esc(req.anonymousName||'Anonymous')}</div>
+          <div style="font-size:.72rem;color:var(--tx3);margin-top:2px">Wants to connect</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-tl" onclick="acceptFR('${req._id}','${esc(req.anonymousName||'')}')">✓ Accept</button>
+          <button class="btn btn-sm btn-g" onclick="declineFR('${req._id}')">✕</button>
+        </div>
+      </div>`).join('');
+  }catch(e){
+    l.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">Couldn\'t load requests</div></div>';
+  }
+}
+
+async function acceptFR(id, name){
+  try{
+    await api(`/api/users/friend-requests/${id}/accept`,{method:'POST'});
+    // Animate card out
+    const card=document.getElementById(`req-${id}`);
+    if(card){card.style.opacity='0';card.style.transform='scale(.95)';card.style.transition='.25s';setTimeout(()=>card.remove(),280);}
+    toast(`✅ You and ${name} are now friends!`);
+    // Update friends count on profile
+    const s=q('s-friends');if(s)s.textContent=parseInt(s.textContent||0)+1;
+  }catch(e){toast('Failed to accept — try again');}
+}
+
+async function declineFR(id){
+  try{
+    await api(`/api/users/friend-requests/${id}/decline`,{method:'POST'});
+    const card=document.getElementById(`req-${id}`);
+    if(card){card.style.opacity='0';card.style.transition='.2s';setTimeout(()=>card.remove(),220);}
+    toast('Request declined');
+  }catch(e){toast('Failed — try again');}
+}
+
+async function sendFR(id, nm){
+  try{
+    const r=await api(`/api/users/${id}/friend-request`,{method:'POST'});
+    if(r.status===409){toast('Request already sent or you\'re already friends');return;}
+    if(!r.ok){const d=await r.json();toast(d.message||'Failed');return;}
+    toast(`✅ Request sent to ${nm}!`);
+    // Change the button to show pending state
+    const btn=document.querySelector(`[onclick="sendFR('${id}','${nm}')"]`);
+    if(btn){btn.textContent='⏳ Pending';btn.disabled=true;btn.style.opacity='.6';}
+  }catch(e){toast('Network error — try again');}
+}
+
 function doSearch(q2){clearTimeout(searchDeb);if(!q2.trim()){q('search-list').innerHTML='';return;}
   searchDeb=setTimeout(async()=>{try{const r=await api(`/api/users/search?q=${encodeURIComponent(q2)}`);const d=await r.json();const us=Array.isArray(d)?d:(d.users||d.results||[]);
     const el=q('search-list');if(!us.length){el.innerHTML=`<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">No users found</div></div>`;return;}
     el.innerHTML=us.map(u=>`<div class="friend-card"><div class="fav">${u.avatarEmoji||'🎭'}</div><div style="flex:1;min-width:0"><div style="font-family:var(--fD);font-weight:700;font-size:.875rem">${esc(u.anonymousName||'Anonymous')}</div><div style="font-size:.72rem;color:var(--tx3);margin-top:2px">Level ${Math.floor((u.xp||0)/100)+1}</div></div><button class="btn btn-sm" style="background:var(--vg);color:var(--v3);border:1px solid var(--vb)" onclick="sendFR('${u._id}','${esc(u.anonymousName||'')}')">+ Connect</button></div>`).join('');
-  }catch(_){}},400);}
-async function sendFR(id,nm){try{await api(`/api/users/${id}/friend-request`,{method:'POST'});toast(`✅ Request sent to ${nm}!`);}catch(e){toast('Failed');}}
+  }catch(_){}},400);
+}
 
 /* ═══════════════════════════════════════════
    RANDOM CHAT — WORLD-CLASS IMPLEMENTATION
@@ -1508,7 +1591,18 @@ function initSocket(){
     }
   });
 
-  socket.on('friend-request',(d)=>{toast(`🤝 ${d.from||'Someone'} wants to connect!`);});
+  socket.on('friend-request',(d)=>{
+    pendingReqCount++;
+    updateReqBadge();
+    // Show actionable toast with tap-to-view
+    const t = document.createElement('div');
+    t.className='toast';
+    t.style.cursor='pointer';
+    t.innerHTML=`🤝 <strong>${d.from||'Someone'}</strong> wants to connect! <span style="color:var(--v3);margin-left:6px">View →</span>`;
+    t.onclick=()=>{ goPage('social'); setTimeout(()=>socTab('requests', document.getElementById('stab-requests')),100); t.remove(); };
+    q('toast-wrap').appendChild(t);
+    setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),220);},4000);
+  });
   socket.on('compliment-received',(d)=>{showGratitudeNotif(d.message||'A stranger thinks you\'re amazing ✨');});
 }
 

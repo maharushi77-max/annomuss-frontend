@@ -1984,6 +1984,9 @@ async function main(){
   await initSession();
   checkMidnightMode();
   loadFeed();loadStories();initSocket();getLocation();
+  // Check if confessions.html asked us to open compose
+  const pendingCompose=sessionStorage.getItem('openCompose');
+  if(pendingCompose){sessionStorage.removeItem('openCompose');setTimeout(()=>openCompose(pendingCompose),800);}
   // Load emotion pulse after location
   setTimeout(()=>{if(userLoc.city)loadEmotionPulse();},2000);
   // Show mood checkin after 1.5s if not done today

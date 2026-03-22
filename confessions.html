@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#030308"/>
+<title>My Confessions · Annomuss</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#030308;--bg1:#08080f;--bg2:#0d0d1c;--bg3:#121228;
+  --v:#7B5EA7;--v2:#9B7FD4;--v3:#C4A8FF;--vg:rgba(123,94,167,.12);--vb:rgba(123,94,167,.25);
+  --cr:#FF4D6D;--cr2:rgba(255,77,109,.1);
+  --tl:#00C9A7;--tl2:rgba(0,201,167,.1);--lm:#52B788;
+  --go:#F4A261;--pk:#FF85A1;
+  --tx:#F5F3FF;--tx2:#9896B8;--tx3:#4E4C6A;
+  --bd:rgba(255,255,255,.06);--bd2:rgba(255,255,255,.1);--bd3:rgba(255,255,255,.16);
+  --safe:env(safe-area-inset-bottom,0px);
+  --fD:'Clash Display',sans-serif;--fB:'Cabinet Grotesk',sans-serif;
+  --fS:'Instrument Serif',serif;--fM:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);color:var(--tx);font-family:var(--fB);font-size:15px;line-height:1.5}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:var(--tx)}
+::-webkit-scrollbar{width:0}
+
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 20% -20%,rgba(123,94,167,.08),transparent 55%),
+  radial-gradient(ellipse 50% 35% at 75% 100%,rgba(255,77,109,.05),transparent 50%)}
+
+#app{min-height:100dvh;position:relative;z-index:1;padding-bottom:calc(40px + var(--safe))}
+
+/* ── Header ── */
+#hdr{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;gap:10px;
+  padding:13px 18px;padding-top:calc(13px + env(safe-area-inset-top,0px));
+  background:rgba(3,3,8,.88);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  border-bottom:1px solid var(--bd);
+}
+.bk{width:36px;height:36px;border-radius:50%;background:var(--bg2);border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--tx2);flex-shrink:0}
+.bk:active{background:var(--bg3)}
+.pg-t{font-family:var(--fD);font-weight:700;font-size:1.05rem;flex:1;letter-spacing:-.2px}
+.new-btn{
+  padding:7px 16px;border-radius:100px;
+  background:linear-gradient(135deg,var(--cr),#c4283d);
+  color:#fff;font-family:var(--fD);font-weight:700;font-size:.76rem;
+  letter-spacing:.04em;box-shadow:0 3px 12px rgba(255,77,109,.3);
+  transition:all .15s;
+}
+.new-btn:active{transform:scale(.95)}
+
+/* ── Stats banner ── */
+.stats-bar{
+  display:flex;gap:0;margin:14px 18px 0;
+  background:var(--bg1);border:1px solid var(--bd);border-radius:16px;overflow:hidden;
+}
+.sb{flex:1;text-align:center;padding:12px 8px;border-right:1px solid var(--bd)}
+.sb:last-child{border-right:none}
+.sbn{font-family:var(--fD);font-weight:700;font-size:1.3rem;letter-spacing:-.3px}
+.sbl{font-size:.64rem;color:var(--tx3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+
+/* ── Filter tabs ── */
+.ftabs{
+  display:flex;gap:7px;
+  padding:14px 18px 6px;overflow-x:auto;
+}
+.ft{
+  display:flex;align-items:center;gap:5px;
+  padding:7px 15px;border-radius:100px;
+  background:var(--bg2);border:1.5px solid var(--bd);
+  font-size:.76rem;font-weight:700;color:var(--tx3);
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  font-family:var(--fD);letter-spacing:.03em;transition:all .15s;
+}
+.ft.on{background:var(--vg);border-color:var(--v2);color:var(--v3)}
+.ft:active{opacity:.7}
+
+/* ── Sort bar ── */
+.sort-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 18px 10px;
+}
+.sort-label{font-size:.72rem;color:var(--tx3);font-family:var(--fM)}
+.sort-sel{
+  background:var(--bg2);border:1px solid var(--bd2);border-radius:8px;
+  padding:5px 26px 5px 10px;color:var(--tx2);font-size:.75rem;font-family:var(--fB);
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234E4C6A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;cursor:pointer;
+}
+
+/* ── Post cards ── */
+.post-card{
+  background:var(--bg1);border:1px solid var(--bd);
+  border-radius:20px;margin:0 18px 10px;overflow:hidden;
+  animation:cardIn .3s cubic-bezier(.4,0,.2,1) both;
+  transition:border-color .2s;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.post-card::before{content:'';display:block;height:2.5px;background:var(--type-color,var(--v));opacity:.7}
+
+/* confession style */
+.post-card.confession .post-body{
+  font-family:var(--fS);font-style:italic;font-size:1rem;line-height:1.75;
+  border-left:2.5px solid var(--cr);padding-left:14px;
+  margin:0 14px;
+  background:rgba(255,77,109,.03);border-radius:0 8px 8px 0;
+  padding-top:4px;padding-bottom:4px;
+}
+.post-card.unsent .post-body{
+  font-family:var(--fS);font-style:italic;font-size:.98rem;line-height:1.75;
+  border-left:2.5px solid var(--v2);padding-left:14px;
+  margin:0 14px;
+  background:rgba(123,94,167,.04);border-radius:0 8px 8px 0;
+  padding-top:4px;padding-bottom:4px;
+}
+
+.post-header{display:flex;align-items:center;gap:10px;padding:13px 14px 8px}
+.type-pill{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 10px;border-radius:100px;
+  font-size:.64rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  font-family:var(--fD);
+}
+.post-time{font-size:.7rem;color:var(--tx3);font-family:var(--fM);margin-left:auto}
+
+.post-body{padding:0 14px 12px;font-size:.93rem;line-height:1.65;color:var(--tx);word-break:break-word}
+.post-body.no-padding{padding:0 0 12px}
+
+/* emotion pill */
+.emo-pill{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 8px;border-radius:100px;
+  font-size:.65rem;font-weight:700;text-transform:uppercase;
+  background:var(--vg);color:var(--v3);letter-spacing:.03em;
+}
+
+/* reaction summary */
+.react-row{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 14px 12px;flex-wrap:wrap;
+}
+.react-chip{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:4px 10px;border-radius:100px;
+  background:var(--bg2);border:1px solid var(--bd);
+  font-size:.73rem;color:var(--tx3);
+}
+
+/* post actions */
+.post-actions{
+  display:flex;align-items:center;
+  padding:6px 10px 12px;gap:2px;
+  border-top:1px solid var(--bd);
+}
+.pa{
+  display:flex;align-items:center;gap:4px;
+  padding:7px 10px;border-radius:10px;
+  font-size:.78rem;color:var(--tx3);font-weight:600;
+  font-family:var(--fD);cursor:pointer;transition:all .12s;
+}
+.pa:active{background:var(--bg2)}
+.pa.del{color:var(--cr)}
+.pa-space{flex:1}
+
+/* media */
+.post-media{width:100%;max-height:320px;object-fit:cover;display:block}
+.post-media-wrap{position:relative;overflow:hidden}
+.post-media-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50px;
+  background:linear-gradient(transparent,rgba(3,3,8,.4));pointer-events:none}
+
+/* ── Empty state ── */
+.empty{
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;padding:52px 24px;gap:8px;
+}
+.empty-ico{font-size:3.5rem;margin-bottom:6px}
+.empty-t{font-family:var(--fD);font-weight:700;font-size:1rem;letter-spacing:-.1px}
+.empty-s{font-size:.82rem;color:var(--tx3);max-width:230px;line-height:1.65}
+.btn-cr{background:linear-gradient(135deg,var(--cr),#c4283d);color:#fff;border:none;border-radius:100px;
+  padding:10px 22px;font-family:var(--fD);font-weight:700;font-size:.82rem;cursor:pointer;
+  box-shadow:0 4px 14px rgba(255,77,109,.3);transition:transform .12s;margin-top:10px}
+.btn-cr:active{transform:scale(.95)}
+
+/* ── Skeleton ── */
+.skel{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
+  background-size:200%;animation:shimmer 1.4s infinite;border-radius:6px}
+@keyframes shimmer{from{background-position:200%}to{background-position:-200%}}
+.post-skel{margin:0 18px 10px;border-radius:20px;overflow:hidden;border:1px solid var(--bd)}
+.skel-h{display:flex;align-items:center;gap:10px;padding:13px}
+.skel-c{width:38px;height:38px;border-radius:50%;flex-shrink:0}
+.skel-ls{flex:1;display:flex;flex-direction:column;gap:6px}
+.skel-l{height:10px;border-radius:4px}
+
+/* ── Delete confirm ── */
+#del-modal{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);
+  display:none;align-items:flex-end;justify-content:center;padding:24px}
+#del-modal.on{display:flex}
+.del-sheet{
+  background:var(--bg2);border:1px solid var(--bd2);
+  border-radius:22px 22px 18px 18px;
+  padding:20px 20px calc(20px + var(--safe));width:100%;max-width:440px;
+  animation:slideUp .25s cubic-bezier(.32,1,.4,1);
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+.del-handle{width:36px;height:4px;border-radius:2px;background:var(--bd3);margin:0 auto 16px}
+.btn-g{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);border-radius:100px;
+  padding:10px 22px;font-family:var(--fD);font-weight:700;font-size:.82rem;cursor:pointer;width:100%}
+
+/* toast */
+#tw{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.t{background:var(--bg3);border:1px solid var(--bd3);border-radius:100px;padding:9px 18px;
+  font-size:.82rem;font-weight:700;font-family:var(--fD);color:var(--tx);
+  box-shadow:0 8px 28px rgba(0,0,0,.5);animation:tIn .22s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.t.out{animation:tOut .18s ease forwards}
+@keyframes tIn{from{opacity:0;transform:translateY(-8px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes tOut{to{opacity:0;transform:translateY(-8px) scale(.9)}}
+
+/* session */
+#sm{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:24px}
+#sm.on{display:flex}
+.smc{background:var(--bg2);border:1px solid var(--bd2);border-radius:22px;padding:32px;text-align:center;max-width:300px;width:100%}
+.btn-v{background:linear-gradient(135deg,#7B5EA7,#5a3d9e);color:#fff;border:none;border-radius:100px;padding:9px 22px;font-family:var(--fD);font-weight:700;font-size:.8rem;cursor:pointer}
+
+/* spinner */
+.spin{width:22px;height:22px;border:2.5px solid var(--bd2);border-top-color:var(--v);border-radius:50%;animation:sp .65s linear infinite;margin:40px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="sm"><div class="smc">
+  <div style="font-size:2.5rem;margin-bottom:12px">🔐</div>
+  <div style="font-family:var(--fD);font-weight:700;font-size:1rem;margin-bottom:16px">Session Expired</div>
+  <button class="btn-v" onclick="location.href='/index.html'">Log In</button>
+</div></div>
+
+<!-- Delete confirm sheet -->
+<div id="del-modal">
+  <div class="del-sheet">
+    <div class="del-handle"></div>
+    <div style="font-size:1.8rem;text-align:center;margin-bottom:10px">🗑️</div>
+    <div style="font-family:var(--fD);font-weight:700;font-size:1rem;text-align:center;margin-bottom:6px">Delete this post?</div>
+    <div style="font-size:.82rem;color:var(--tx3);text-align:center;margin-bottom:18px;line-height:1.6">
+      It will be removed from the feed permanently. This can't be undone.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn-cr" id="del-confirm-btn" onclick="confirmDelete()">Yes, delete it</button>
+      <button class="btn-g" onclick="document.getElementById('del-modal').classList.remove('on')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="tw"></div>
+
+<div id="app">
+  <div id="hdr">
+    <button class="bk" onclick="history.back()">←</button>
+    <div class="pg-t">My Confessions</div>
+    <button class="new-btn" onclick="goPost('confession')">+ Confess</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="sb"><div class="sbn" id="st-total">—</div><div class="sbl">Total</div></div>
+    <div class="sb"><div class="sbn" id="st-conf" style="color:var(--cr)">—</div><div class="sbl">Confessions</div></div>
+    <div class="sb"><div class="sbn" id="st-unsent" style="color:var(--v3)">—</div><div class="sbl">Letters</div></div>
+    <div class="sb"><div class="sbn" id="st-likes" style="color:var(--go)">—</div><div class="sbl">Reactions</div></div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="ftabs">
+    <div class="ft on" onclick="setFilter('all',this)">📖 All</div>
+    <div class="ft" onclick="setFilter('confession',this)">🤫 Confessions</div>
+    <div class="ft" onclick="setFilter('unsent',this)">💌 Unsent Letters</div>
+    <div class="ft" onclick="setFilter('post',this)">📢 Posts</div>
+  </div>
+
+  <!-- Sort -->
+  <div class="sort-bar">
+    <span class="sort-label" id="count-label">Loading...</span>
+    <select class="sort-sel" id="sort-sel" onchange="loadPosts(true)">
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first</option>
+      <option value="most_liked">Most liked</option>
+    </select>
+  </div>
+
+  <!-- Posts list -->
+  <div id="posts-list"></div>
+
+  <!-- Load more -->
+  <div id="load-more-wrap" style="padding:8px 18px 16px;display:none">
+    <button onclick="loadPosts(false)"
+      style="width:100%;padding:12px;border-radius:100px;background:var(--bg2);
+      border:1px solid var(--bd2);font-family:var(--fD);font-weight:700;font-size:.8rem;
+      color:var(--tx2);cursor:pointer">
+      Load more
+    </button>
+  </div>
+</div>
+
+<script>
+const API = 'https://annomuss-backend-icgp.onrender.com';
+let user = null;
+let currentFilter = 'all';
+let currentPage = 1;
+let totalPosts = 0;
+let allPosts = []; // cache for client-side sort
+let pendingDeleteId = null;
+
+const TYPE_META = {
+  confession: { label:'Confession', emoji:'🤫', color:'var(--cr)',   bg:'rgba(255,77,109,.1)',   fg:'var(--cr)' },
+  unsent:     { label:'Unsent Letter', emoji:'💌', color:'var(--v2)',  bg:'rgba(155,127,212,.1)',  fg:'var(--v3)' },
+  post:       { label:'Post',       emoji:'📢', color:'var(--tl)',  bg:'rgba(0,201,167,.1)',    fg:'var(--tl)' },
+  vent:       { label:'Vent',       emoji:'💭', color:'var(--go)',  bg:'rgba(244,162,97,.1)',   fg:'var(--go)' },
+  story:      { label:'Story',      emoji:'📸', color:'var(--pk)',  bg:'rgba(255,133,161,.1)',  fg:'var(--pk)' },
+};
+
+const EMO_EMOJI = { happy:'😊',sad:'😢',angry:'😤',anxious:'😰',grateful:'🙏',lonely:'🌧️',excited:'🤩',inspired:'✨',neutral:'😐' };
+
+// ── Helpers ──────────────────────────────────
+function q(id){return document.getElementById(id)}
+function toast(m,d=2800){const w=q('tw'),e=document.createElement('div');e.className='t';e.textContent=m;w.appendChild(e);setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),200)},d);}
+function getToken(){return localStorage.getItem('token')}
+function timeAgo(d){
+  const s=(Date.now()-new Date(d))/1000;
+  if(s<60)return'just now';if(s<3600)return`${Math.floor(s/60)}m ago`;
+  if(s<86400)return`${Math.floor(s/3600)}h ago`;if(s<604800)return`${Math.floor(s/86400)}d ago`;
+  return new Date(d).toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'});
+}
+function fullDate(d){return new Date(d).toLocaleDateString([],{weekday:'short',month:'long',day:'numeric',year:'numeric'});}
+function esc(t){return(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function apiFetch(path,opts={}){
+  const t=getToken(),h={'Content-Type':'application/json',...(opts.headers||{})};
+  if(t)h.Authorization=`Bearer ${t}`;
+  const r=await fetch(`${API}${path}`,{...opts,headers:h});
+  if(r.status===401){q('sm').classList.add('on');throw new Error('401');}
+  return r;
+}
+
+// ── Init ──────────────────────────────────────
+async function init(){
+  const tk=getToken();if(!tk){location.href='/index.html';return;}
+  try{
+    const r=await fetch(`${API}/api/users/me`,{headers:{Authorization:`Bearer ${tk}`}});
+    if(!r.ok){q('sm').classList.add('on');return;}
+    user=await r.json();
+  }catch(e){
+    const c=localStorage.getItem('user');
+    if(c)user=JSON.parse(c);else{location.href='/index.html';return;}
+  }
+  loadPosts(true);
+}
+
+// ── Filter ────────────────────────────────────
+function setFilter(f,el){
+  currentFilter=f;
+  document.querySelectorAll('.ft').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  loadPosts(true);
+}
+
+// ── Load posts ────────────────────────────────
+async function loadPosts(reset=true){
+  if(reset){currentPage=1;allPosts=[];}
+  const list=q('posts-list');
+
+  if(reset){
+    list.innerHTML=`
+      <div class="post-skel"><div class="skel-h"><div class="skel-c skel"></div><div class="skel-ls"><div class="skel-l skel" style="width:60%"></div><div class="skel-l skel" style="width:35%"></div></div></div><div style="padding:14px;display:flex;flex-direction:column;gap:7px"><div class="skel-l skel" style="width:90%"></div><div class="skel-l skel" style="width:75%"></div><div class="skel-l skel" style="width:55%"></div></div></div>
+      <div class="post-skel"><div class="skel-h"><div class="skel-c skel"></div><div class="skel-ls"><div class="skel-l skel" style="width:55%"></div><div class="skel-l skel" style="width:30%"></div></div></div><div style="padding:14px;display:flex;flex-direction:column;gap:7px"><div class="skel-l skel" style="width:82%"></div><div class="skel-l skel" style="width:65%"></div></div></div>`;
+  }
+
+  // Build query
+  const typeParam = currentFilter === 'all'
+    ? 'type=confession&type=unsent&type=post&type=vent'
+    : `type=${currentFilter}`;
+  const sortParam = q('sort-sel')?.value || 'newest';
+  const url = `/api/posts?mine=true&${typeParam}&page=${currentPage}&limit=20`;
+
+  try{
+    const r=await apiFetch(url);
+    const d=await r.json();
+    const posts=Array.isArray(d)?d:(d.posts||[]);
+    totalPosts=d.total||posts.length;
+
+    // Client-side sort
+    let sorted=[...allPosts,...posts];
+    if(sortParam==='oldest')sorted.sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
+    else if(sortParam==='most_liked')sorted.sort((a,b)=>(b.likeCount||0)-(a.likeCount||0));
+    else sorted.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    allPosts=sorted;
+
+    // Update stats on first load
+    if(reset) updateStats(sorted);
+
+    // Render
+    if(reset)list.innerHTML='';
+    if(!sorted.length && reset){
+      renderEmpty();
+      q('count-label').textContent='Nothing here yet';
+      q('load-more-wrap').style.display='none';
+      return;
+    }
+
+    const startIdx = reset ? 0 : allPosts.length - posts.length;
+    sorted.slice(startIdx).forEach((p,i)=>{
+      const div=document.createElement('div');
+      div.innerHTML=renderPost(p);
+      const card=div.firstElementChild;
+      if(card){card.style.animationDelay=`${i*0.04}s`;list.appendChild(card);}
+    });
+
+    // Update count label
+    const label = currentFilter === 'all' ? 'posts' : currentFilter + 's';
+    q('count-label').textContent=`${sorted.length} ${label}`;
+
+    // Load more
+    const hasMore = posts.length >= 20;
+    q('load-more-wrap').style.display = hasMore ? 'block' : 'none';
+    if(hasMore)currentPage++;
+
+  }catch(e){
+    if(e.message!=='401'){
+      if(reset)list.innerHTML=`<div class="empty"><div class="empty-ico">⚡</div><div class="empty-t">Couldn't load</div><div class="empty-s">Check your connection and try again</div><button class="btn-cr" onclick="loadPosts(true)">Retry</button></div>`;
+    }
+  }
+}
+
+function updateStats(posts){
+  const confessions = posts.filter(p=>p.type==='confession').length;
+  const unsent      = posts.filter(p=>p.type==='unsent').length;
+  const totalLikes  = posts.reduce((s,p)=>s+(p.likeCount||0)+(p.reactionCounts?Object.values(p.reactionCounts).reduce((a,b)=>a+b,0):0),0);
+
+  q('st-total').textContent  = posts.length;
+  q('st-conf').textContent   = confessions;
+  q('st-unsent').textContent = unsent;
+  q('st-likes').textContent  = totalLikes;
+}
+
+function renderPost(p){
+  const meta   = TYPE_META[p.type] || TYPE_META.post;
+  const emo    = p.emotion || '';
+  const emoEmo = EMO_EMOJI[emo] || '';
+  const isConf = p.type === 'confession';
+  const isUns  = p.type === 'unsent';
+  const totalReacts = p.reactionCounts
+    ? Object.values(p.reactionCounts).reduce((a,b)=>a+b,0) : 0;
+  const likes = p.likeCount || 0;
+
+  let mediaHtml = '';
+  if(p.mediaUrl){
+    if(p.mediaType==='video'){
+      mediaHtml=`<div class="post-media-wrap"><video style="width:100%;max-height:280px;object-fit:cover;display:block" src="${esc(p.mediaUrl)}" controls playsinline preload="metadata"></video></div>`;
+    } else {
+      mediaHtml=`<div class="post-media-wrap"><img class="post-media" src="${esc(p.mediaUrl)}" alt="" loading="lazy"/></div>`;
+    }
+  }
+
+  const caption = p.caption
+    ? `<div class="post-body${isConf?' confession':isUns?' unsent':''}">${esc(p.caption)}</div>`
+    : '';
+
+  const reactHtml = (likes > 0 || totalReacts > 0) ? `
+    <div class="react-row">
+      ${likes>0?`<div class="react-chip">❤️ ${likes}</div>`:''}
+      ${p.reactionCounts?.heard>0?`<div class="react-chip">💙 ${p.reactionCounts.heard} heard</div>`:''}
+      ${p.reactionCounts?.same>0?`<div class="react-chip">🤝 ${p.reactionCounts.same} same</div>`:''}
+      ${p.reactionCounts?.strength>0?`<div class="react-chip">💪 ${p.reactionCounts.strength} strength</div>`:''}
+      ${p.reactionCounts?.hug>0?`<div class="react-chip">🤗 ${p.reactionCounts.hug} hugs</div>`:''}
+    </div>` : '';
+
+  return `<div class="post-card ${p.type}" style="--type-color:${meta.color}">
+    <div class="post-header">
+      <div class="type-pill" style="background:${meta.bg};color:${meta.fg}">${meta.emoji} ${meta.label}</div>
+      ${emo?`<div class="emo-pill" style="margin-left:6px">${emoEmo} ${emo}</div>`:''}
+      <div class="post-time" title="${fullDate(p.createdAt)}">${timeAgo(p.createdAt)}</div>
+    </div>
+    ${caption}
+    ${mediaHtml}
+    ${reactHtml}
+    <div class="post-actions">
+      <div class="pa" onclick="sharePost('${p._id}','${esc((p.caption||'').slice(0,40))}')">
+        🔗 Share
+      </div>
+      <div class="pa-space"></div>
+      <div class="pa" style="color:var(--tx3)">
+        💬 ${p.commentCount||0}
+      </div>
+      <div class="pa del" onclick="askDelete('${p._id}')">
+        🗑️ Delete
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderEmpty(){
+  const msgs = {
+    confession: { ico:'🤫', t:'No confessions yet', s:'The things you\'ve been holding inside — this is a safe space to let them out.', btn:'Write a confession' },
+    unsent:     { ico:'💌', t:'No unsent letters', s:'Messages you never sent. People you never told. Write it here — they\'ll never know.', btn:'Write a letter' },
+    post:       { ico:'📢', t:'No posts yet', s:'You haven\'t posted anything yet. Share something real.', btn:'Create a post' },
+    all:        { ico:'🌙', t:'Nothing here yet', s:'Everything you post on Annomuss — confessions, letters, posts — will appear here privately.', btn:'Write something' },
+  };
+  const m = msgs[currentFilter] || msgs.all;
+  q('posts-list').innerHTML=`
+    <div class="empty">
+      <div class="empty-ico">${m.ico}</div>
+      <div class="empty-t">${m.t}</div>
+      <div class="empty-s">${m.s}</div>
+      <button class="btn-cr" onclick="goPost('${currentFilter==='all'?'confession':currentFilter}')">${m.btn}</button>
+    </div>`;
+}
+
+// ── Delete ────────────────────────────────────
+function askDelete(id){
+  pendingDeleteId=id;
+  q('del-modal').classList.add('on');
+}
+
+async function confirmDelete(){
+  if(!pendingDeleteId)return;
+  const btn=q('del-confirm-btn');
+  btn.disabled=true;btn.textContent='Deleting...';
+  try{
+    const r=await apiFetch(`/api/posts/${pendingDeleteId}`,{method:'DELETE'});
+    if(!r.ok){toast('Failed to delete ❌');return;}
+    q('del-modal').classList.remove('on');
+    // Remove card from DOM with animation
+    const cards=document.querySelectorAll('.post-card');
+    cards.forEach(c=>{
+      if(c.querySelector(`[onclick*="${pendingDeleteId}"]`)){
+        c.style.opacity='0';c.style.transform='scale(.95)';c.style.transition='.25s';
+        setTimeout(()=>c.remove(),280);
+      }
+    });
+    allPosts=allPosts.filter(p=>p._id!==pendingDeleteId);
+    updateStats(allPosts);
+    toast('🗑️ Deleted');
+    pendingDeleteId=null;
+  }catch(e){if(e.message!=='401')toast('Network error ❌');}
+  finally{btn.disabled=false;btn.textContent='Yes, delete it';}
+}
+
+// ── Share ─────────────────────────────────────
+function sharePost(id,preview){
+  const url=`${location.origin}/dashboard.html#post-${id}`;
+  if(navigator.share)navigator.share({title:'Annomuss',text:preview||'',url});
+  else{navigator.clipboard?.writeText(url);toast('🔗 Link copied!');}
+}
+
+// ── Navigate ──────────────────────────────────
+function goPost(type){
+  // Store desired compose type then go to dashboard
+  sessionStorage.setItem('openCompose',type);
+  location.href='/dashboard.html';
+}
+
+// ── Close modal on backdrop click ─────────────
+document.addEventListener('click',e=>{
+  const modal=q('del-modal');
+  if(e.target===modal)modal.classList.remove('on');
+});
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>

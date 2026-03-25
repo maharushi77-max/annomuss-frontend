@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════
-   ANNOMUSS SERVICE WORKER v3
-   Clean single file — caching + push + offline
+   ANNOMUSS SERVICE WORKER v4
+   Force-replaces any broken old worker
 ═══════════════════════════════════════════ */
 
-const CACHE_NAME  = "annomuss-v3";
+const CACHE_NAME  = "annomuss-v4";
 const OFFLINE_URL = "/offline.html";
 
 const PRECACHE = [
@@ -14,24 +14,30 @@ const PRECACHE = [
   "/badges.html",
   "/confessions.html",
   "/offline.html",
-  "/manifest.json"
 ];
 
-// ── INSTALL ──────────────────────────────────
+// ── INSTALL — skip waiting immediately ───────
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => Promise.allSettled(PRECACHE.map(url => cache.add(url).catch(() => {}))))
-      .then(() => self.skipWaiting())
+      .then(cache => Promise.allSettled(
+        PRECACHE.map(url => cache.add(url).catch(() => {}))
+      ))
+      .then(() => self.skipWaiting()) // ← force activate immediately
   );
 });
 
-// ── ACTIVATE ─────────────────────────────────
+// ── ACTIVATE — delete ALL old caches ─────────
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => {
+          console.log('[SW] Deleting old cache:', k);
+          return caches.delete(k);
+        })
+      ))
+      .then(() => self.clients.claim()) // ← take control of all tabs immediately
   );
 });
 
@@ -40,20 +46,22 @@ self.addEventListener("fetch", event => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Only handle GET
   if (request.method !== "GET") return;
   if (!url.protocol.startsWith("http")) return;
 
-  // Never cache API calls or socket
-  if (
-    url.hostname.includes("onrender.com") ||
-    url.hostname.includes("cloudinary.com") ||
-    url.hostname.includes("socket.io") ||
-    url.pathname.startsWith("/api/")
-  ) return;
+  // ── NEVER intercept these ──
+  if (url.hostname.includes("onrender.com"))    return; // API calls
+  if (url.hostname.includes("cloudinary.com"))  return; // media
+  if (url.hostname.includes("socket.io"))       return; // websocket
+  if (url.hostname.includes("firebasejs"))      return; // firebase SDK
+  if (url.pathname.startsWith("/api/"))         return; // API routes
+  if (url.pathname.includes(".well-known"))     return; // chrome noise
+  if (url.hostname.includes("bigdatacloud"))    return; // location API
+  if (url.hostname.includes("googleapis.com") &&
+      !url.hostname.includes("fonts"))          return; // google APIs except fonts
 
-  if (url.pathname.includes(".well-known")) return;
-
-  // Fonts / CDN → Cache First
+  // ── Fonts / CDN → Cache first ──
   if (
     url.hostname.includes("fonts.googleapis.com") ||
     url.hostname.includes("fonts.gstatic.com") ||
@@ -63,40 +71,55 @@ self.addEventListener("fetch", event => {
       caches.match(request).then(cached => {
         if (cached) return cached;
         return fetch(request).then(resp => {
-          if (resp.ok) caches.open(CACHE_NAME).then(c => c.put(request, resp.clone()));
+          if (resp && resp.ok && resp.status === 200) {
+            const clone = resp.clone(); // clone BEFORE returning
+            caches.open(CACHE_NAME).then(c => c.put(request, clone));
+          }
           return resp;
-        }).catch(() => cached);
+        }).catch(() => cached || new Response('', { status: 503 }));
       })
     );
     return;
   }
 
-  // HTML → Network First, fallback cache, fallback offline page
-  if (request.destination === "document" || request.headers.get("accept")?.includes("text/html")) {
+  // ── HTML pages → Network first ──
+  if (
+    request.destination === "document" ||
+    request.headers.get("accept")?.includes("text/html")
+  ) {
     event.respondWith(
       fetch(request)
         .then(resp => {
-          if (resp.ok) caches.open(CACHE_NAME).then(c => c.put(request, resp.clone()));
+          if (resp && resp.ok && resp.status === 200) {
+            const clone = resp.clone(); // clone BEFORE returning
+            caches.open(CACHE_NAME).then(c => c.put(request, clone));
+          }
           return resp;
         })
-        .catch(() => caches.match(request).then(cached => cached || caches.match(OFFLINE_URL)))
+        .catch(() =>
+          caches.match(request)
+            .then(cached => cached || caches.match(OFFLINE_URL))
+        )
     );
     return;
   }
 
-  // Everything else → Cache First, fallback network
+  // ── Everything else → Cache first, network fallback ──
   event.respondWith(
     caches.match(request).then(cached => {
       if (cached) return cached;
       return fetch(request).then(resp => {
-        if (resp.ok) caches.open(CACHE_NAME).then(c => c.put(request, resp.clone()));
+        if (resp && resp.ok && resp.status === 200) {
+          const clone = resp.clone(); // clone BEFORE returning
+          caches.open(CACHE_NAME).then(c => c.put(request, clone));
+        }
         return resp;
       }).catch(() => new Response("Offline", { status: 503 }));
     })
   );
 });
 
-// ── PUSH NOTIFICATIONS ───────────────────────
+// ── PUSH ─────────────────────────────────────
 self.addEventListener("push", event => {
   if (!event.data) return;
   let data = {};
@@ -105,14 +128,14 @@ self.addEventListener("push", event => {
   }
   event.waitUntil(
     self.registration.showNotification(data.title || "Annomuss 🎭", {
-      body:     data.body || "Something new is waiting for you",
-      icon:     "/icons/icon-192.png",
-      badge:    "/icons/icon-96.png",
-      tag:      data.tag  || "annomuss-notif",
+      body:    data.body || "Something new is waiting for you",
+      icon:    "/icons/icon-192.png",
+      badge:   "/icons/icon-96.png",
+      tag:     data.tag || "annomuss-notif",
       renotify: true,
-      vibrate:  [100, 50, 100],
-      data:     { url: data.url || "/dashboard.html", type: data.type },
-      actions:  [
+      vibrate: [100, 50, 100],
+      data:    { url: data.url || "/dashboard.html", type: data.type },
+      actions: [
         { action: "open",    title: "Open" },
         { action: "dismiss", title: "Dismiss" }
       ]
@@ -124,22 +147,17 @@ self.addEventListener("push", event => {
 self.addEventListener("notificationclick", event => {
   event.notification.close();
   if (event.action === "dismiss") return;
-
-  const url  = event.notification.data?.url  || "/dashboard.html";
-  const type = event.notification.data?.type || "";
-
+  const url = event.notification.data?.url || "/dashboard.html";
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true })
-      .then(clientList => {
-        for (const client of clientList) {
-          if (client.url.includes(self.location.origin) && "focus" in client) {
-            // Tell the open tab what was clicked
-            client.postMessage({ type: "PUSH_CLICK", notifType: type, url });
-            return client.focus();
+      .then(list => {
+        for (const c of list) {
+          if (c.url.includes(self.location.origin) && "focus" in c) {
+            c.postMessage({ type: "PUSH_CLICK", data: event.notification.data });
+            return c.focus();
           }
         }
-        // No open tab — open a new one
-        if (clients.openWindow) return clients.openWindow(url);
+        return clients.openWindow(url);
       })
   );
 });

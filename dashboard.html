@@ -2020,15 +2020,15 @@ async function initPushNotifications(){
   // ── STEP 1: Fill in your Firebase config values here ──
   // Get from: Firebase Console → Project Settings → General → Your apps → Web app
   const FIREBASE_CONFIG = {
-    apiKey:            "AIzaSyBP8ld3jaa4Mas7bCmSLhe6p-d3edJpzY8",   // ← paste here
-    authDomain:        "annomuss-app.firebaseapp.com",   // ← paste here
-    projectId:         "annomuss-app",   // ← paste here
-    storageBucket:     "annomuss-app.firebasestorage.app",   // ← paste here
-    messagingSenderId: "503827912893",   // ← paste here
-    appId:             "1:503827912893:web:4bab6708a692fa78027fd4",   // ← paste here
+    apiKey:            "",   // ← paste here
+    authDomain:        "",   // ← paste here
+    projectId:         "",   // ← paste here
+    storageBucket:     "",   // ← paste here
+    messagingSenderId: "",   // ← paste here
+    appId:             "",   // ← paste here
   };
   // Get from: Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
-  const VAPID_KEY = "BKcr8qaTogJ4ZokqOJyd1kBVTvr8F8sehkG7VVecWfTu4AY5Pv5t2ovdZyNPrgbr7gWmSygyeE_VoV0F6GKy_9Y";      // ← paste here
+  const VAPID_KEY = "";      // ← paste here
 
   // ── Safety check: don't run until config is filled in ──
   const configReady = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('REPLACE')

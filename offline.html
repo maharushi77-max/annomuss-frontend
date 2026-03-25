@@ -3,86 +3,68 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="theme-color" content="#06060f"/>
-<title>Annomuss — Offline</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet"/>
+<meta name="theme-color" content="#030308"/>
+<title>Offline · Annomuss</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>"/>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--v:#7c5cf4;--coral:#ff5c7a;--tx:#edeaff;--tx3:#4a4770;--bg:#06060f;--l2:#10101f}
-body{background:var(--bg);color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;
-  min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:32px 20px;text-align:center;-webkit-font-smoothing:antialiased}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 60% 50% at 50% 20%,rgba(124,92,244,.08),transparent 60%)}
-.emoji{font-size:4rem;margin-bottom:20px;display:block;animation:float 3s ease infinite}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#030308;color:#F5F3FF;font-family:'Cabinet Grotesk',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(123,94,167,.08),transparent 70%)}
+.wrap{position:relative;z-index:1;max-width:320px}
+.ico{font-size:4rem;margin-bottom:16px;animation:float 3s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-h1{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:900;margin-bottom:10px;letter-spacing:-.3px}
-h1 span{background:linear-gradient(135deg,#9d7eff,#ff5c7a);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-p{font-size:.88rem;color:var(--tx3);line-height:1.7;max-width:300px;margin:0 auto 28px}
-.card{background:var(--l2);border:1px solid #1c1c34;border-radius:18px;padding:20px;max-width:340px;width:100%;margin-bottom:20px}
-.card-title{font-family:'Syne',sans-serif;font-size:.78rem;font-weight:900;color:var(--tx3);
-  text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
-.tip{font-size:.82rem;color:#9490c0;line-height:1.65;font-style:italic}
-.btn{display:inline-flex;align-items:center;gap:7px;padding:12px 24px;border-radius:12px;border:none;
-  background:linear-gradient(135deg,var(--v),var(--coral));color:#fff;
-  font-family:'Syne',sans-serif;font-size:.82rem;font-weight:900;cursor:pointer;
-  transition:all .2s;box-shadow:0 4px 16px rgba(124,92,244,.3);text-decoration:none}
-.btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(124,92,244,.45)}
-.status{margin-top:16px;font-size:.7rem;color:var(--tx3);font-family:'Courier New',monospace}
-#online-indicator{display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff5c7a;margin-right:5px;vertical-align:middle}
-#online-indicator.online{background:#3ddc84}
+h1{font-size:1.4rem;font-weight:700;letter-spacing:-.3px;margin-bottom:8px}
+p{font-size:.875rem;color:#9896B8;line-height:1.7;margin-bottom:24px}
+button{
+  padding:12px 28px;border-radius:100px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#7B5EA7,#FF4D6D);
+  color:#fff;font-size:.85rem;font-weight:700;letter-spacing:.04em;
+  transition:transform .15s,box-shadow .15s;
+  box-shadow:0 4px 20px rgba(123,94,167,.4);
+  font-family:inherit;
+}
+button:active{transform:scale(.95)}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:20px}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15)}
+.dot.active{background:#7B5EA7;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
 </style>
 </head>
 <body>
-<span class="emoji">🎭</span>
-<h1>You're <span>offline</span></h1>
-<p>Annomuss needs a connection to load your feed and connect you with others. Check your internet and try again.</p>
-
-<div class="card">
-  <div class="card-title">💭 While you wait</div>
-  <div class="tip" id="tip">"The emotions we feel today are the stories we'll tell tomorrow."</div>
+<div class="wrap">
+  <div class="ico">🌙</div>
+  <h1>You're offline</h1>
+  <p>Annomuss needs a connection to load your feed and chat. Check your internet and try again.</p>
+  <button onclick="retry()">Try again</button>
+  <div class="dots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
 </div>
-
-<a class="btn" onclick="tryReconnect()">↻ Try Again</a>
-
-<div class="status">
-  <span id="online-indicator"></span>
-  <span id="status-txt">Checking connection…</span>
-</div>
-
 <script>
-const tips = [
-  '"The emotions we feel today are the stories we\'ll tell tomorrow."',
-  '"You don\'t have to be perfect to deserve to be heard."',
-  '"Sharing how you feel is an act of bravery, not weakness."',
-  '"Every feeling you have is valid. Every single one."',
-  '"Being anonymous doesn\'t make your feelings less real."',
-  '"Connection begins when someone feels understood."',
-  '"You are not alone in feeling alone."',
-];
-document.getElementById("tip").textContent = tips[Math.floor(Math.random() * tips.length)];
-
-function updateStatus() {
-  const dot = document.getElementById("online-indicator");
-  const txt = document.getElementById("status-txt");
-  if (navigator.onLine) {
-    dot.className = "online";
-    txt.textContent = "Connection restored — reloading…";
-    setTimeout(() => location.reload(), 1000);
-  } else {
-    dot.className = "";
-    txt.textContent = "No internet connection";
+function retry(){
+  if(navigator.onLine){location.href='/dashboard.html';}
+  else{
+    const btn=document.querySelector('button');
+    btn.textContent='Still offline...';
+    setTimeout(()=>btn.textContent='Try again',2000);
   }
 }
-
-function tryReconnect() {
-  updateStatus();
-  if (navigator.onLine) location.reload();
-}
-
-window.addEventListener("online",  updateStatus);
-window.addEventListener("offline", updateStatus);
-updateStatus();
+// Auto-redirect when connection comes back
+window.addEventListener('online',()=>{
+  document.querySelector('h1').textContent='Back online!';
+  document.querySelector('p').textContent='Redirecting you to Annomuss...';
+  setTimeout(()=>location.href='/dashboard.html',800);
+});
+// Animate dots
+let i=0;
+setInterval(()=>{
+  document.querySelectorAll('.dot').forEach(d=>d.classList.remove('active'));
+  document.querySelectorAll('.dot')[i%3].classList.add('active');
+  i++;
+},600);
 </script>
 </body>
 </html>

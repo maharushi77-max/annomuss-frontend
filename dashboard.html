@@ -1605,8 +1605,8 @@ function initSocket(){
     t.style.cursor='pointer';
     t.innerHTML=`🤝 <strong>${d.from||'Someone'}</strong> wants to connect! <span style="color:var(--v3);margin-left:6px">View →</span>`;
     t.onclick=()=>{ goPage('social'); setTimeout(()=>socTab('requests', document.getElementById('stab-requests')),100); t.remove(); };
-    q('toast-wrap').appendChild(t);
-    setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),220);},4000);
+    q('toasts').appendChild(t);
+    setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-8px) scale(.9)';t.style.transition='.2s';setTimeout(()=>t.remove(),220);},4000);
   });
   socket.on('compliment-received',(d)=>{showGratitudeNotif(d.message||'A stranger thinks you\'re amazing ✨');});
 }

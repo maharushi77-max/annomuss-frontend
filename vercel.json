@@ -22,7 +22,14 @@
     {
       "source": "/manifest.json",
       "headers": [
-        { "key": "Content-Type", "value": "application/manifest+json" },
+        { "key": "Content-Type",  "value": "application/manifest+json" },
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/icon.svg",
+      "headers": [
+        { "key": "Content-Type",  "value": "image/svg+xml" },
         { "key": "Cache-Control", "value": "public, max-age=86400" }
       ]
     }
@@ -38,7 +45,7 @@
     { "source": "/messages",  "destination": "/messages.html" }
   ],
   "redirects": [
-    { "source": "/home",       "destination": "/dashboard.html", "permanent": true },
-    { "source": "/app",        "destination": "/dashboard.html", "permanent": true }
+    { "source": "/home", "destination": "/dashboard.html", "permanent": true },
+    { "source": "/app",  "destination": "/dashboard.html", "permanent": true }
   ]
 }

@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════
-   ANNOMUSS SERVICE WORKER v4
-   Force-replaces any broken old worker
+   ANNOMUSS SERVICE WORKER v5
+   Caches all pages, fonts, icon
 ═══════════════════════════════════════════ */
 
-const CACHE_NAME  = "annomuss-v4";
+const CACHE_NAME  = "annomuss-v5";
 const OFFLINE_URL = "/offline.html";
 
 const PRECACHE = [
@@ -13,7 +13,11 @@ const PRECACHE = [
   "/security.html",
   "/badges.html",
   "/confessions.html",
+  "/terms.html",
+  "/404.html",
   "/offline.html",
+  "/manifest.json",
+  "/icon.svg",
 ];
 
 // ── INSTALL — skip waiting immediately ───────
@@ -129,8 +133,8 @@ self.addEventListener("push", event => {
   event.waitUntil(
     self.registration.showNotification(data.title || "Annomuss 🎭", {
       body:    data.body || "Something new is waiting for you",
-      icon:    "/icons/icon-192.png",
-      badge:   "/icons/icon-96.png",
+      icon:    "/icon.svg",
+      badge:   "/icon.svg",
       tag:     data.tag || "annomuss-notif",
       renotify: true,
       vibrate: [100, 50, 100],

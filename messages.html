@@ -215,8 +215,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 <script>
 const API = 'https://annomuss-backend-icgp.onrender.com';
 const params = new URLSearchParams(location.search);
-const WITH_ID   = params.get('with');
-const WITH_NAME = params.get('name') || 'Anonymous'; // fallback from URL
+const WITH_ID    = params.get('with');
+const WITH_NAME  = params.get('name')  || 'Anonymous';
+const WITH_EMOJI = params.get('emoji') || '🎭';
 
 let user = null, token = null, socket = null;
 let typingTimer = null, isTyping = false;
@@ -276,25 +277,21 @@ async function init(){
 }
 
 async function loadPartnerInfo(){
-  // Set name from URL param immediately so it's not blank
+  // Set from URL params instantly — no wait
   q('partner-name').textContent = decodeURIComponent(WITH_NAME);
-  q('partner-status').textContent = 'Loading...';
+  q('partner-av').textContent   = decodeURIComponent(WITH_EMOJI);
+  q('partner-status').textContent = '';
 
   try{
     const r=await api(`/api/users/${WITH_ID}`);
     if(r.ok){
       const u=await r.json();
       q('partner-name').textContent = u.anonymousName || decodeURIComponent(WITH_NAME);
-      q('partner-av').textContent   = u.avatarEmoji   || '🎭';
-      q('partner-status').textContent = u.online ? '🟢 Online now' : 'Offline';
-    } else {
-      // Fallback: name from URL is fine
-      q('partner-name').textContent = decodeURIComponent(WITH_NAME);
-      q('partner-status').textContent = '';
+      q('partner-av').textContent   = u.avatarEmoji   || decodeURIComponent(WITH_EMOJI);
+      q('partner-status').textContent = u.online ? '🟢 Online now' : '';
     }
   }catch(e){
-    q('partner-name').textContent = decodeURIComponent(WITH_NAME);
-    q('partner-status').textContent = '';
+    // URL params already set — silent fail is fine
   }
 }
 

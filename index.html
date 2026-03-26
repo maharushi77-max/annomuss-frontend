@@ -183,6 +183,10 @@ const q=id=>document.getElementById(id);
 const sa=(id,msg,t)=>{const el=q(id);el.textContent=msg;el.className='alert '+t;};
 const ca=id=>{const el=q(id);el.className='alert';el.textContent='';};
 const san=s=>String(s||'').replace(/[<>"'`\\]/g,'').trim();
+/* ── Wake up Render immediately on page load ── */
+/* Render spins down after 15min inactivity — ping it now so it's ready when user submits */
+fetch(API+'/health',{method:'GET'}).catch(()=>{});
+
 /* Particles */
 (()=>{const c=q('canvas'),ctx=c.getContext('2d');const rs=()=>{c.width=innerWidth;c.height=innerHeight};rs();window.addEventListener('resize',rs);const pts=Array.from({length:45},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+.4,dx:(Math.random()-.5)*.22,dy:(Math.random()-.5)*.22,a:Math.random()*.25+.06,col:['rgba(123,94,167,','rgba(0,201,167,','rgba(255,77,109,'][Math.floor(Math.random()*3)]}));const draw=()=>{ctx.clearRect(0,0,c.width,c.height);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.col+p.a+')';ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>c.width)p.dx*=-1;if(p.y<0||p.y>c.height)p.dy*=-1;});requestAnimationFrame(draw);};draw();})();
 /* Auto-login */
@@ -218,7 +222,7 @@ async function doSend(){
     q('s2s').textContent='Code sent to '+email+'. Check your inbox!';
     q('s1').classList.remove('on');q('s2').classList.add('on');q('prog').style.width='100%';
     startTimer(60);setTimeout(()=>boxes[0].focus(),120);
-  }catch(e){clearTimeout(wu);const m=(!e.message||e.message.includes('fetch'))?'Server waking up — wait 15s and try again':e.message;sa('a1',m,'err');}
+  }catch(e){clearTimeout(wu);const m=(!e.message||e.message.includes('fetch'))?'Server is waking up ☕ — this takes ~15s on first visit. Try again!':e.message;sa('a1',m,'err');}
   finally{btn.disabled=false;btn.innerHTML='Get OTP ✉️';}
 }
 /* Resend */
@@ -239,6 +243,12 @@ async function doVerify(){
     const d=await r.json();
     if(!r.ok){shakeOtp();clearOtp();throw new Error(d.message||'Verification failed');}
     localStorage.setItem('token',d.token);localStorage.setItem('user',JSON.stringify(d.user));
+    // Process referral code if present
+    const ref=localStorage.getItem('ann_ref')||new URLSearchParams(location.search).get('ref');
+    if(ref&&d.isNew){
+      try{await fetch(API+'/api/users/referral',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+d.token},body:JSON.stringify({code:ref})});}catch(_){}
+      localStorage.removeItem('ann_ref');
+    }
     showSuccess(d.user,d.isNew);
   }catch(e){sa('a2',e.message,'err');}
   finally{btn.disabled=false;btn.innerHTML='Enter Annomuss 🚀';}

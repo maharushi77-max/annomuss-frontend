@@ -295,7 +295,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
         </div>
         <div class="row" onclick="location.href='mailto:support@annomuss.in'">
           <div class="ri">📮</div>
-          <div class="rb"><div class="rt">Contact support</div><div class="rs">support@annomuss.in</div></div>
+          <div class="rb"><div class="rt">Contact support</div><div class="rs"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f2818782829d8086b2939c9c9d9f878181dc9b9c">[email&#160;protected]</a></div></div>
           <div style="font-size:.75rem;color:var(--tx3)">›</div>
         </div>
         <div class="row" style="cursor:default">
@@ -321,7 +321,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const API='https://annomuss-backend-icgp.onrender.com';
 let user=null, isDirty=false;
 const ch={avatarEmoji:null,allowDMs:null,showOnline:null,profileVisibility:null};
@@ -468,4 +468,20 @@ function logout(){if(!confirm('Log out of Annomuss?'))return;localStorage.remove
 function logoutAll(){if(!confirm('Log out from all devices?'))return;localStorage.clear();toast('Logged out everywhere 🔒');setTimeout(()=>location.href='/index.html',1200);}
 
 async function confirmDelete(){
-  const btn=q('del-btn')
+  const btn=q('del-btn');btn.disabled=true;btn.textContent='Deleting...';
+  try{
+    const r=await apiFetch('/api/users/delete-account',{method:'DELETE'});
+    if(!r.ok){const d=await r.json();toast(d.message||'Failed');btn.disabled=false;btn.textContent='Yes, delete my account';return;}
+    localStorage.clear();
+    toast('Account deleted. Goodbye 👋');
+    setTimeout(()=>location.href='/index.html',1500);
+  }catch(e){if(e.message!=='401'){toast('Network error ❌');btn.disabled=false;btn.textContent='Yes, delete my account';}}
+}
+
+window.addEventListener('beforeunload',e=>{if(isDirty){e.preventDefault();e.returnValue='';}});
+
+// ── BOOT ──
+document.addEventListener('DOMContentLoaded', load);
+</script>
+</body>
+</html>

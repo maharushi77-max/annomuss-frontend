@@ -1043,26 +1043,71 @@ function renderPost(p){
 }
 
 async function doReact(id,type,btn){
-  try{const r=await api(`/api/posts/${id}/react`,{method:'POST',body:JSON.stringify({type})});
-    const d=await r.json();if(!r.ok)return;
-    const cnt=typeof d.reactions==='object'?Object.values(d.reactions).flat().filter(x=>x).length:0;
-    const span=q(`rc-${type}-${id}`);if(span)span.textContent=cnt||'';
-    btn.classList.toggle('on');
-  }catch(e){}
+  // Optimistic toggle immediately
+  const wasOn=btn.classList.contains('on');
+  btn.classList.toggle('on',!wasOn);
+  const span=q(`rc-${type}-${id}`);
+  if(span){const cur=parseInt(span.textContent||0);span.textContent=wasOn?Math.max(0,cur-1)||'':cur+1||'';}
+  try{
+    const r=await api(`/api/posts/${id}/react`,{method:'POST',body:JSON.stringify({type})});
+    const d=await r.json();
+    if(!r.ok){// revert
+      btn.classList.toggle('on',wasOn);
+      if(span){const cur=parseInt(span.textContent||0);span.textContent=wasOn?cur+1||'':Math.max(0,cur-1)||'';}
+      return;
+    }
+    // Sync exact count from server
+    if(d.count!==undefined&&span)span.textContent=d.count||'';
+  }catch(e){
+    // revert on network error
+    btn.classList.toggle('on',wasOn);
+    if(span){const cur=parseInt(span.textContent||0);span.textContent=wasOn?cur+1||'':Math.max(0,cur-1)||'';}
+  }
 }
 async function doLike(id,btn){
   const ico=btn.querySelector('span:first-child'),lc=q(`lc-${id}`);
   const was=btn.classList.contains('liked');
-  btn.classList.toggle('liked',!was);ico.textContent=was?'🤍':'❤️';lc.textContent=parseInt(lc.textContent||0)+(was?-1:1);
-  try{const r=await api(`/api/posts/${id}/like`,{method:'POST'});const d=await r.json();
-    const c=typeof d.likes==='number'?d.likes:(d.likeCount??parseInt(lc.textContent));
-    lc.textContent=c;btn.classList.toggle('liked',!!d.liked);ico.textContent=d.liked?'❤️':'🤍';
-  }catch(e){btn.classList.toggle('liked',was);ico.textContent=was?'❤️':'🤍';lc.textContent=parseInt(lc.textContent||0)+(was?1:-1);}
+  // Optimistic update
+  btn.classList.toggle('liked',!was);
+  ico.textContent=was?'🤍':'❤️';
+  lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?-1:1));
+  try{
+    const r=await api(`/api/posts/${id}/like`,{method:'POST'});
+    const d=await r.json();
+    if(!r.ok){// revert
+      btn.classList.toggle('liked',was);ico.textContent=was?'❤️':'🤍';
+      lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?1:-1));return;
+    }
+    // Sync with server
+    const count=typeof d.likeCount==='number'?d.likeCount:(typeof d.likes==='number'?d.likes:null);
+    if(count!==null)lc.textContent=count;
+    if(d.liked!==undefined){btn.classList.toggle('liked',!!d.liked);ico.textContent=d.liked?'❤️':'🤍';}
+  }catch(e){
+    // revert on network error
+    btn.classList.toggle('liked',was);ico.textContent=was?'❤️':'🤍';
+    lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?1:-1));
+  }
 }
 function sharePost(id){const url=`${location.origin}/dashboard.html#post-${id}`;if(navigator.share)navigator.share({url});else{navigator.clipboard?.writeText(url);toast('🔗 Link copied!');}}
 function ctxMenu(e,id,isOwn){
   e.stopPropagation();
-  const actions=isOwn?[{t:'🗑️ Delete',a:()=>{if(confirm('Delete this post?'))api(`/api/posts/${id}`,{method:'DELETE'}).then(()=>{const c=document.querySelector(`.card[data-id="${id}"]`);if(c){c.style.opacity='0';c.style.transition='.25s';setTimeout(()=>c.remove(),280);}toast('🗑️ Deleted');});}}]:[{t:'⚠️ Report',a:()=>{api(`/api/posts/${id}/report`,{method:'POST',body:JSON.stringify({reason:'reported'})}).then(()=>toast('⚠️ Reported'));}}];
+  const actions=isOwn
+    ?[{t:'🗑️ Delete',a:()=>{
+        if(!confirm('Delete this post?'))return;
+        api(`/api/posts/${id}`,{method:'DELETE'}).then(r=>{
+          if(!r.ok){toast('Delete failed ❌');return;}
+          const c=document.querySelector(`.card[data-id="${id}"]`);
+          if(c){c.style.opacity='0';c.style.transform='scale(.96)';c.style.transition='all .25s';setTimeout(()=>c.remove(),280);}
+          toast('🗑️ Deleted');
+          // Update post count immediately
+          const sp=q('s-posts');if(sp)sp.textContent=Math.max(0,parseInt(sp.textContent||0)-1);
+          if(user&&user.postCount)user.postCount=Math.max(0,user.postCount-1);
+        }).catch(()=>toast('Delete failed ❌'));
+      }}]
+    :[{t:'⚠️ Report',a:()=>{
+        api(`/api/posts/${id}/report`,{method:'POST',body:JSON.stringify({reason:'reported'})})
+          .then(()=>toast('⚠️ Reported — thank you'));
+      }}];
   if(!actions.length)return;actions[0].a();
 }
 
@@ -1114,8 +1159,28 @@ async function openPModal(id){
 }
 function closePModal(){q('pmodal').classList.remove('on');document.body.style.overflow='';currentPost=null;}
 async function submitComment(){
-  if(!currentPost)return;const inp=q('comment-inp');const txt=inp.value.trim();if(!txt)return;inp.value='';
-  try{await api(`/api/posts/${currentPost}/comments`,{method:'POST',body:JSON.stringify({text:txt})});toast('💬 Added!');openPModal(currentPost);}catch(e){toast('Failed');}
+  if(!currentPost)return;
+  const inp=q('comment-inp');const txt=inp.value.trim();if(!txt)return;
+  inp.value='';inp.disabled=true;
+  try{
+    const r=await api(`/api/posts/${currentPost}/comments`,{method:'POST',body:JSON.stringify({text:txt})});
+    if(!r.ok){inp.value=txt;toast('Failed to comment ❌');return;}
+    const c=await r.json();
+    // Instantly insert the new comment at bottom
+    const cl=q('comments-list');
+    const div=document.createElement('div');
+    div.style.cssText='padding:10px 0;border-bottom:1px solid var(--bd);animation:cdIn .2s ease both';
+    div.innerHTML=`<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span>${user?.avatarEmoji||'🎭'}</span><b style="font-size:.82rem;font-family:var(--fD)">${esc(user?.anonymousName||'Anonymous')}</b><span style="font-size:.7rem;color:var(--tx3)">just now</span></div><div style="font-size:.875rem;padding-left:24px">${esc(txt)}</div>`;
+    // Remove "no comments" placeholder if present
+    if(cl.textContent.includes('No comments yet'))cl.innerHTML='';
+    cl.appendChild(div);
+    // Update comment count on the card
+    const cc=document.querySelector(`.card[data-id="${currentPost}"] .pak:nth-child(2) span`);
+    if(cc)cc.textContent=parseInt(cc.textContent||0)+1;
+    toast('💬 Added!');
+    awardXP(2,'Commented');
+  }catch(e){inp.value=txt;toast('Network error ❌');}
+  finally{inp.disabled=false;inp.focus();}
 }
 
 /* ═══════════ COMPOSE — FIXED ═══════════ */
@@ -1192,8 +1257,26 @@ async function submitPost(){
     if(r.status===429){toast('⏳ Slow down a bit! Try again in a moment.');return;}
     if(!r.ok){toast(d.message||'Failed to post ❌');return;}
     closeCompose();
-    if(compType==='story'){toast('📸 Story posted!');loadStories();}
-    else{toast('✨ Posted!');loadFeed();}
+    if(compType==='story'){
+      toast('📸 Story posted!');
+      loadStories(); // stories strip always needs reload
+    } else {
+      toast('✨ Posted!');
+      // Optimistically insert at top of feed — instant, no full reload
+      const el=q('feed-list');
+      if(el&&d._id){
+        // Give the post the current user's info since backend may not return full object
+        const enriched={...d,authorName:user?.anonymousName,authorEmoji:user?.avatarEmoji||'🎭',likes:[],reactions:{},commentCount:0};
+        const div=document.createElement('div');div.innerHTML=renderPost(enriched);
+        const card=div.firstElementChild;
+        if(card){card.style.animationDelay='0s';el.insertBefore(card,el.firstChild);addComplimentBtns();}
+      } else {
+        loadFeed(); // fallback if no id returned
+      }
+      // Update post count on profile immediately
+      const sp=q('s-posts');if(sp)sp.textContent=parseInt(sp.textContent||0)+1;
+      if(user)user.postCount=(user.postCount||0)+1;
+    }
     if(d.crisis?.isCrisis)setTimeout(()=>q('crisis').classList.add('on'),1500);
     awardXP(compType==='unsent'?20:compType==='confession'?15:10,'Created a post');
   }catch(e){toast('Network error — please try again ❌');}
@@ -1210,10 +1293,30 @@ async function submitVent(){
     const d=await r.json();
     if(r.status===429){return toast('⏳ Take a breath — try again in a moment.');}
     if(!r.ok)return toast(d.message||'Failed ❌');
-    q('vent-txt').value='';q('vc-chars').textContent='0/280';toast('💭 Shared!');
+    q('vent-txt').value='';q('vc-chars').textContent='0/280';
+    q('vent-emo').value='';
+    toast('💭 Shared!');
     if(d.crisis?.isCrisis)setTimeout(()=>q('crisis').classList.add('on'),1500);
     awardXP(8,'Vented');
-    loadVents('latest');
+    // Instant insert at top — no full reload
+    const list=q('vent-list');
+    const ec=EMO_C[emo]||{};
+    const newVent={_id:d._id||'tmp'+Date.now(),text:txt,emotion:emo,authorName:user?.anonymousName,authorEmoji:user?.avatarEmoji||'🎭',createdAt:new Date(),hugs:[]};
+    const div=document.createElement('div');
+    div.innerHTML=`<div class="vc" id="vc-${newVent._id}" style="animation:cdIn .3s ease both">
+      <div class="ph"><div class="pav">${newVent.authorEmoji}</div>
+        <div style="flex:1;min-width:0"><div class="pn">${esc(newVent.authorName||'Anonymous')}${emo?` <span class="epill" style="background:${ec.bg||'var(--vg)'};color:${ec.fg||'var(--v3)'}">${emo}</span>`:''}</div>
+        <div class="pt">just now</div></div>
+      </div>
+      <div class="vb">${esc(txt)}</div>
+      <div style="display:flex;gap:6px;padding:4px 14px 14px;flex-wrap:wrap">
+        <button class="rb" onclick="hugVent('${newVent._id}',this)">🤗 <span id="hg-${newVent._id}"></span></button>
+        <button class="rb" style="margin-left:auto;color:var(--cr)" onclick="delVent('${newVent._id}',this.closest('.vc'))">🗑️</button>
+      </div>
+    </div>`;
+    // Insert after the compose box (first child is compose, second is tabs, third is list content)
+    if(list.firstChild)list.insertBefore(div.firstChild,list.firstChild);
+    else list.appendChild(div.firstChild);
   }catch(e){toast('Network error — try again ❌');}
 }
 async function loadVents(tab='latest'){
@@ -1238,8 +1341,32 @@ async function loadVents(tab='latest'){
     </div>`}).join('');
   }catch(e){list.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">Couldn\'t load vents</div></div>';}
 }
-async function hugVent(id,btn){try{const r=await api(`/api/vents/${id}/hug`,{method:'POST'});const d=await r.json();const s=q(`hg-${id}`);if(s)s.textContent=d.hugCount||'';btn.classList.toggle('on');}catch(e){}}
-async function delVent(id,card){if(!confirm('Delete?'))return;try{await api(`/api/vents/${id}`,{method:'DELETE'});card.style.opacity='0';setTimeout(()=>card.remove(),280);toast('Deleted');}catch(e){toast('Failed');}}
+async function hugVent(id,btn){
+  const wasOn=btn.classList.contains('on');
+  btn.classList.toggle('on',!wasOn);
+  const sp=q(`hg-${id}`);
+  if(sp){const c=parseInt(sp.textContent||0);sp.textContent=wasOn?Math.max(0,c-1)||'':c+1||'';}
+  try{
+    const r=await api(`/api/vents/${id}/hug`,{method:'POST'});
+    const d=await r.json();
+    if(!r.ok){btn.classList.toggle('on',wasOn);if(sp){const c=parseInt(sp.textContent||0);sp.textContent=wasOn?c+1||'':Math.max(0,c-1)||'';}return;}
+    if(d.hugCount!==undefined&&sp)sp.textContent=d.hugCount||'';
+  }catch(e){
+    btn.classList.toggle('on',wasOn);
+    if(sp){const c=parseInt(sp.textContent||0);sp.textContent=wasOn?c+1||'':Math.max(0,c-1)||'';}
+  }
+}
+async function delVent(id,card){
+  if(!confirm('Delete this vent?'))return;
+  // Instantly hide card
+  card.style.opacity='0';card.style.transform='scale(.96)';card.style.transition='all .22s';
+  try{
+    const r=await api(`/api/vents/${id}`,{method:'DELETE'});
+    if(!r.ok){card.style.opacity='1';card.style.transform='';toast('Delete failed ❌');return;}
+    setTimeout(()=>card.remove(),240);
+    toast('💭 Vent deleted');
+  }catch(e){card.style.opacity='1';card.style.transform='';toast('Failed ❌');}
+}
 
 /* ═══════════ MOOD CHECK-IN ═══════════ */
 function ciSel(m,el){ciMood=m;document.querySelectorAll('.ci-tile').forEach(t=>t.classList.remove('sel'));el.classList.add('sel');q('ci-btn').disabled=false;}
@@ -1249,7 +1376,11 @@ async function ciSubmit(){
   q('mood-ci').classList.remove('on');
   try{await api('/api/moods',{method:'POST',body:JSON.stringify({emotion:ciMood,city:userLoc.city,state:userLoc.state,country:userLoc.country})});}catch(_){}
   const msgs={happy:'😊 Sending good vibes!',sad:'💙 You\'re not alone.',anxious:'💜 You\'re safe here.',lonely:'💙 You belong here.',inspired:'✨ Go create!'};
-  toast(msgs[ciMood]||'✨ Mood logged!');applyUser();
+  toast(msgs[ciMood]||'✨ Mood logged!');
+  applyUser();
+  awardXP(5,'Logged mood');
+  // Refresh pulse banner with new mood data
+  setTimeout(()=>{if(userLoc.city)loadEmotionPulse();},500);
 }
 function ciSkip(){q('mood-ci').classList.remove('on');}
 
@@ -1333,12 +1464,14 @@ async function loadRequests(){
 async function acceptFR(id, name){
   try{
     await api(`/api/users/friend-requests/${id}/accept`,{method:'POST'});
-    // Animate card out
     const card=document.getElementById(`req-${id}`);
     if(card){card.style.opacity='0';card.style.transform='scale(.95)';card.style.transition='.25s';setTimeout(()=>card.remove(),280);}
     toast(`✅ You and ${name} are now friends!`);
-    // Update friends count on profile
-    const s=q('s-friends');if(s)s.textContent=parseInt(s.textContent||0)+1;
+    // Update friends count on profile immediately
+    const sf=q('s-friends');if(sf)sf.textContent=parseInt(sf.textContent||0)+1;
+    if(user)user.friends=[...(user.friends||[]),id];
+    // Silently refresh friends list so new friend appears instantly
+    setTimeout(()=>loadFriends(),400);
   }catch(e){toast('Failed to accept — try again');}
 }
 
@@ -1743,7 +1876,17 @@ async function submitUnsent(){
     document.getElementById('unsent-chars').textContent='0/600';
     toast('💌 Sent into the void');
     setTimeout(()=>toast('✨ Someone just voted "Send It" on your letter!'),3000);
-    if(currentPage==='feed')loadFeed();
+    // Optimistically insert into feed if on feed page
+    const feedEl=q('feed-list');
+    if(feedEl&&d._id){
+      const enriched={...d,authorName:user?.anonymousName,authorEmoji:user?.avatarEmoji||'🎭',likes:[],reactions:{},commentCount:0};
+      const div=document.createElement('div');div.innerHTML=renderPost(enriched);
+      const card=div.firstElementChild;
+      if(card){card.style.animationDelay='0s';feedEl.insertBefore(card,feedEl.firstChild);addComplimentBtns();}
+    } else if(currentPage==='feed'){loadFeed();}
+    // Update post count
+    const sp=q('s-posts');if(sp)sp.textContent=parseInt(sp.textContent||0)+1;
+    if(user)user.postCount=(user.postCount||0)+1;
     awardXP(20,'Sent an unsent letter');
   }catch(e){toast('Failed ❌');}
   finally{btn.disabled=false;btn.textContent='Send into the void ✦';}

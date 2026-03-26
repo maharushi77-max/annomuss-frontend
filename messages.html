@@ -183,6 +183,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div id="partner-name">Loading...</div>
       <div id="partner-status">...</div>
     </div>
+    <button onclick="showMsgMenu()" style="width:34px;height:34px;border-radius:50%;background:var(--bg2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--tx2);flex-shrink:0">⋯</button>
+  </div>
+
+  <!-- Message action menu -->
+  <div id="msg-menu" style="display:none;position:fixed;top:70px;right:14px;z-index:200;background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.4);min-width:160px">
+    <div onclick="reportUser()" style="padding:12px 16px;font-size:.85rem;color:var(--tx2);cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)">⚠️ Report user</div>
+    <div onclick="blockUser()" style="padding:12px 16px;font-size:.85rem;color:var(--cr);cursor:pointer;display:flex;align-items:center;gap:10px">🚫 Block user</div>
   </div>
 
   <div id="msgs-wrap">
@@ -481,6 +488,31 @@ function initSocket(){
   socket.on('user-offline',(d)=>{
     if(d.userId===WITH_ID)q('partner-status').textContent='Last seen recently';
   });
+}
+
+// ── Message menu (block / report) ─────────────
+function showMsgMenu(){
+  const m=document.getElementById('msg-menu');
+  if(!m)return;
+  m.style.display=m.style.display==='none'?'block':'none';
+  // Close on outside click
+  setTimeout(()=>document.addEventListener('click',()=>{m.style.display='none';},{once:true}),50);
+}
+
+async function blockUser(){
+  if(!confirm(`Block this user? They won't be able to message you.`))return;
+  try{
+    await api(`/api/users/block/${WITH_ID}`,{method:'POST'});
+    toast('🚫 User blocked');
+    setTimeout(()=>history.back(),1200);
+  }catch(e){toast('Failed — try again');}
+}
+
+function reportUser(){
+  if(!confirm('Report this user for inappropriate behaviour?'))return;
+  api(`/api/users/${WITH_ID}/report`,{method:'POST',body:JSON.stringify({reason:'inappropriate_dm'})})
+    .then(()=>toast('⚠️ Reported — thank you. We\'ll review within 24h.'))
+    .catch(()=>toast('⚠️ Reported'));
 }
 
 // ── Enter key ─────────────────────────────────

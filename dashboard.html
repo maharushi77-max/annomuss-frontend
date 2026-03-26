@@ -413,7 +413,63 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 .comp-chip.sel{background:rgba(255,133,161,.2);border-color:var(--pk);transform:scale(1.05)}
 .comp-target{font-size:.85rem;color:var(--tx2);margin-bottom:12px}
 
-/* ══ EMOTION PULSE BANNER ══ */
+/* ══ DAILY PROMPT ══ */
+.daily-prompt{margin:0 14px 12px;padding:16px;background:linear-gradient(135deg,rgba(196,168,255,.1),rgba(255,133,161,.06));border:1px solid rgba(196,168,255,.22);border-radius:18px;cursor:pointer;transition:transform .15s,border-color .2s;position:relative;overflow:hidden}
+.daily-prompt:active{transform:scale(.98)}
+.daily-prompt::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(123,94,167,.04),transparent);pointer-events:none}
+.dp-label{font-size:.64rem;font-weight:700;color:var(--v3);letter-spacing:.1em;text-transform:uppercase;font-family:var(--fD);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.dp-q{font-family:var(--fD);font-size:.96rem;font-weight:700;color:var(--tx);line-height:1.45;letter-spacing:-.1px;margin-bottom:10px}
+.dp-cta{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;background:var(--vg);border:1px solid var(--vb);border-radius:100px;font-size:.73rem;font-weight:700;color:var(--v3);font-family:var(--fD)}
+
+/* ══ FEED TABS (Latest / Trending) ══ */
+.feed-tabs{display:flex;gap:0;padding:0 14px 10px;flex-shrink:0}
+.ftab{flex:1;padding:8px 0;text-align:center;font-size:.76rem;font-weight:700;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fD);letter-spacing:.03em;transition:all .15s}
+.ftab.on{color:var(--v3);border-color:var(--v)}
+
+/* ══ SKELETON LOADER ══ */
+.skel-card{background:var(--bg1);border:1px solid var(--bd);border-radius:20px;margin:0 14px 10px;overflow:hidden;animation:cdIn .3s ease both}
+.skel-line{border-radius:6px;background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:300%;animation:shim 1.4s infinite}
+@keyframes shim{from{background-position:100%}to{background-position:-100%}}
+
+/* ══ IMAGE LIGHTBOX ══ */
+#lightbox{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;cursor:zoom-out}
+#lightbox.on{display:flex;animation:pgIn .2s ease}
+#lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px}
+#lightbox-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;cursor:pointer;z-index:1}
+
+/* ══ SHARE SHEET ══ */
+#share-sheet{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:flex-end}
+#share-sheet.on{display:flex}
+.ss-inner{width:100%;background:var(--bg1);border-radius:22px 22px 0 0;padding:16px 18px calc(28px + var(--safe));animation:shUp .25s cubic-bezier(.32,1,.4,1)}
+.ss-handle{width:36px;height:4px;background:var(--bd3);border-radius:2px;margin:0 auto 16px}
+.ss-title{font-family:var(--fD);font-weight:700;font-size:.95rem;margin-bottom:14px;letter-spacing:-.1px}
+.ss-row{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.ss-row::-webkit-scrollbar{display:none}
+.ss-btn{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;min-width:64px}
+.ss-ico{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;transition:transform .12s}
+.ss-btn:active .ss-ico{transform:scale(.88)}
+.ss-lbl{font-size:.65rem;color:var(--tx3);font-family:var(--fD);font-weight:600;text-align:center}
+
+/* ══ STREAK REMINDER ══ */
+.streak-reminder{margin:0 14px 12px;padding:14px 16px;background:linear-gradient(135deg,rgba(244,162,97,.1),rgba(255,77,109,.06));border:1.5px solid rgba(244,162,97,.25);border-radius:16px;display:none;align-items:center;gap:12px;animation:cdIn .3s ease}
+.streak-reminder.show{display:flex}
+
+/* ══ ONBOARDING CARDS (empty feed) ══ */
+.onboard-cards{padding:8px 14px;display:flex;flex-direction:column;gap:10px}
+.ob-card{padding:18px 16px;border-radius:18px;border:1px solid var(--bd);display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .14s,border-color .15s}
+.ob-card:active{transform:scale(.98)}
+.ob-ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.ob-title{font-family:var(--fD);font-weight:700;font-size:.9rem;margin-bottom:3px}
+.ob-sub{font-size:.77rem;color:var(--tx3);line-height:1.5}
+
+/* ══ SEARCH OVERLAY ══ */
+#search-overlay{position:fixed;inset:0;z-index:400;background:var(--bg);display:none;flex-direction:column}
+#search-overlay.on{display:flex;animation:pgIn .18s ease}
+.so-header{display:flex;align-items:center;gap:10px;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px));border-bottom:1px solid var(--bd);flex-shrink:0}
+.so-inp{flex:1;background:var(--bg2);border:1.5px solid var(--bd2);border-radius:100px;padding:9px 16px;font-size:.9rem;color:var(--tx)}
+.so-inp:focus{border-color:var(--v);outline:none}
+#so-results{flex:1;overflow-y:auto;padding:12px 0}
+
 .pulse-banner{margin:0 14px 10px;padding:14px 16px;background:var(--bg1);border:1px solid var(--bd);border-radius:18px;overflow:hidden;position:relative}
 .pulse-banner::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(123,94,167,.05),transparent);pointer-events:none}
 .pulse-city{font-family:var(--fD);font-size:.78rem;font-weight:700;color:var(--tx3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -616,6 +672,51 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <div id="sv-content" style="flex:1;display:flex;align-items:center;justify-content:center;position:relative"></div>
 </div>
 
+<!-- IMAGE LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()">
+  <div id="lightbox-close" onclick="closeLightbox()">✕</div>
+  <img id="lightbox-img" src="" alt=""/>
+</div>
+
+<!-- SHARE SHEET -->
+<div id="share-sheet" onclick="if(event.target===this)closeShare()">
+  <div class="ss-inner">
+    <div class="ss-handle"></div>
+    <div class="ss-title">Share this post</div>
+    <div class="ss-row">
+      <div class="ss-btn" onclick="shareVia('whatsapp')">
+        <div class="ss-ico" style="background:rgba(37,211,102,.12)">💚</div>
+        <div class="ss-lbl">WhatsApp</div>
+      </div>
+      <div class="ss-btn" onclick="shareVia('copy')">
+        <div class="ss-ico" style="background:var(--vg)">🔗</div>
+        <div class="ss-lbl">Copy link</div>
+      </div>
+      <div class="ss-btn" onclick="shareVia('native')">
+        <div class="ss-ico" style="background:var(--bg2);border:1px solid var(--bd2)">📤</div>
+        <div class="ss-lbl">More</div>
+      </div>
+      <div class="ss-btn" onclick="shareVia('twitter')">
+        <div class="ss-ico" style="background:rgba(29,155,240,.1)">🐦</div>
+        <div class="ss-lbl">Twitter</div>
+      </div>
+    </div>
+    <button class="btn btn-g btn-full" style="margin-top:14px" onclick="closeShare()">Cancel</button>
+  </div>
+</div>
+
+<!-- SEARCH OVERLAY -->
+<div id="search-overlay">
+  <div class="so-header">
+    <button class="ico-btn" onclick="closeSearch()">←</button>
+    <input class="so-inp" id="so-inp" placeholder="Search posts, #hashtags..." oninput="doPostSearch(this.value)" autocomplete="off"/>
+    <button style="font-size:.8rem;color:var(--tx3);padding:6px;cursor:pointer;font-family:var(--fB)" onclick="closeSearch()">Cancel</button>
+  </div>
+  <div id="so-results">
+    <div style="padding:40px 24px;text-align:center;color:var(--tx3);font-size:.88rem">Search for posts, confessions, or #hashtags</div>
+  </div>
+</div>
+
 <!-- MAIN APP -->
 <div id="app">
 <div id="pages">
@@ -625,14 +726,25 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <div class="tb">
     <div class="tb-logo" id="feed-logo">annomuss</div>
     <div style="flex:1"></div>
-    <div style="display:flex;align-items:center;gap:5px;margin-right:10px">
+    <div style="display:flex;align-items:center;gap:5px;margin-right:8px">
       <div class="pulse-dot"></div>
       <span id="online-num" style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">...</span>
     </div>
+    <button class="ico-btn" onclick="openSearch()" style="margin-right:6px">🔍</button>
     <button class="ico-btn" onclick="goPage('social')" style="position:relative">🔔<span id="notif-badge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--cr);border:1.5px solid var(--bg)"></span></button>
   </div>
 
-  <!-- MIDNIGHT BANNER — shows 11pm–4am -->
+  <!-- STREAK REMINDER — shows if streak at risk -->
+  <div class="streak-reminder" id="streak-reminder">
+    <div style="font-size:1.5rem">🔥</div>
+    <div style="flex:1">
+      <div style="font-family:var(--fD);font-weight:700;font-size:.85rem;color:var(--go)">Don't break your streak!</div>
+      <div style="font-size:.75rem;color:var(--tx2);margin-top:2px">Log your mood today to keep it alive</div>
+    </div>
+    <button class="btn btn-sm" style="background:var(--go);color:#000;font-size:.72rem;padding:6px 12px;border-radius:100px" onclick="q('mood-ci').classList.add('on');q('streak-reminder').classList.remove('show')">Log now</button>
+  </div>
+
+  <!-- MIDNIGHT BANNER -->
   <div class="midnight-banner" id="midnight-banner" onclick="filterEmo('midnight',null)">
     <div class="midnight-orb">🌙</div>
     <div>
@@ -644,6 +756,19 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 
   <!-- STORIES STRIP -->
   <div class="stories" id="stories-strip"><div class="s-add" onclick="openCompose('story')">➕</div></div>
+
+  <!-- DAILY PROMPT -->
+  <div class="daily-prompt" id="daily-prompt" onclick="openCompose('post');setTimeout(()=>{const t=q('ctxt');if(t){t.placeholder=currentPrompt;t.focus();}},300)" style="display:none">
+    <div class="dp-label">📅 Today's question</div>
+    <div class="dp-q" id="dp-text">Loading...</div>
+    <div class="dp-cta">✍️ Answer anonymously</div>
+  </div>
+
+  <!-- FEED TABS -->
+  <div class="feed-tabs">
+    <div class="ftab on" id="ftab-latest" onclick="switchFeedTab('latest',this)">✨ Latest</div>
+    <div class="ftab" id="ftab-trending" onclick="switchFeedTab('trending',this)">🔥 Trending</div>
+  </div>
 
   <!-- EMOTION FILTER -->
   <div class="emo-bar">
@@ -664,7 +789,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div class="pulse-bars" id="pulse-bars"></div>
   </div>
 
-  <!-- QUICK ACTION ROW — horizontal scroll, no overflow clipping -->
+  <!-- QUICK ACTION ROW -->
   <div style="display:flex;gap:9px;padding:2px 14px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0">
     <div onclick="openUnsent()" style="flex:0 0 auto;padding:11px 14px;background:rgba(123,94,167,.1);border:1px solid rgba(196,168,255,.18);border-radius:13px;cursor:pointer;width:130px">
       <div style="font-size:1.3rem;margin-bottom:4px">💌</div>
@@ -1011,18 +1136,34 @@ async function loadFeed(reset=true){
   if(feedLoading)return;if(reset){feedPage=1;feedDone=false;}
   feedLoading=true;
   const el=q('feed-list');
-  if(reset)el.innerHTML=`<div style="padding:32px;text-align:center"><div class="spin"></div></div>`;
+  if(reset) showSkeletons(3); // skeleton instead of spinner
   try{
-    const r=await api(`/api/posts?page=${feedPage}&limit=15${feedEmo?`&emotion=${feedEmo}`:''}`);
+    // Trending tab uses different endpoint
+    let url;
+    if(feedTab==='trending'){
+      url=`/api/posts/trending?limit=20`;
+    } else {
+      url=`/api/posts?page=${feedPage}&limit=15${feedEmo?`&emotion=${feedEmo}`:''}`;
+    }
+    const r=await api(url);
     const data=await r.json();const posts=Array.isArray(data)?data:(data.posts||[]);
     feedLoading=false;if(reset)el.innerHTML='';
-    if(!posts.length&&reset){el.innerHTML=`<div class="empty"><div style="font-size:3rem">🌱</div><div style="font-family:var(--fD);font-weight:700;font-size:1rem">Nothing here yet</div><div style="font-size:.82rem;color:var(--tx3);max-width:200px;line-height:1.65">Be the first to share something real</div><button class="btn btn-v btn-sm" style="margin-top:14px" onclick="openCompose('post')">Create post ✨</button></div>`;return;}
-    posts.forEach((p,i)=>{const d=document.createElement('div');d.innerHTML=renderPost(p);const c=d.firstElementChild;if(c){c.style.animationDelay=`${i*.05}s`;el.appendChild(c);}});
-    feedDone=posts.length<15;q('load-more').style.display=feedDone?'none':'block';
+    if(!posts.length&&reset){
+      // First-time user → onboarding; returning user → empty state
+      const hasPosted=user?.postCount>0||localStorage.getItem('ann_has_posted');
+      if(!hasPosted){showOnboardingCards();}
+      else{el.innerHTML=`<div class="empty"><div style="font-size:3rem">${feedTab==='trending'?'🔥':'🌱'}</div><div style="font-family:var(--fD);font-weight:700;font-size:1rem">${feedTab==='trending'?'No trending posts yet':'Nothing here yet'}</div><div style="font-size:.82rem;color:var(--tx3);max-width:200px;line-height:1.65">${feedTab==='trending'?'Check back later — posts that get reactions appear here':'Be the first to share something real'}</div><button class="btn btn-v btn-sm" style="margin-top:14px" onclick="openCompose('post')">Create post ✨</button></div>`;}
+      return;
+    }
+    posts.forEach((p,i)=>{const d=document.createElement('div');d.innerHTML=renderPost(p);const c=d.firstElementChild;if(c){c.style.animationDelay=`${i*.04}s`;el.appendChild(c);}});
+    feedDone=posts.length<15||feedTab==='trending';
+    q('load-more').style.display=feedDone?'none':'block';
     feedPage++;
-    // Add compliment buttons after cards render
     setTimeout(addComplimentBtns,100);
-  }catch(e){feedLoading=false;if(reset)el.innerHTML=`<div class="empty"><div style="font-size:3rem">⚡</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">Couldn't load feed</div><button class="btn btn-g btn-sm" style="margin-top:12px" onclick="loadFeed()">Retry</button></div>`;}
+  }catch(e){
+    feedLoading=false;
+    if(reset)el.innerHTML=`<div class="empty"><div style="font-size:3rem">⚡</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">Couldn't load feed</div><button class="btn btn-g btn-sm" style="margin-top:12px" onclick="loadFeed()">Retry</button></div>`;
+  }
 }
 function loadMore(){if(!feedDone)loadFeed(false);}
 function filterEmo(emo,el){feedEmo=emo;document.querySelectorAll('.ec').forEach(c=>c.classList.remove('on'));if(el)el.classList.add('on');loadFeed();}
@@ -1038,8 +1179,13 @@ function renderPost(p){
   const isMid=()=>{const h=new Date(p.createdAt).getHours();return h>=23||h<=3;};
   const st=ec.c?`--emo-color:${ec.c};--emo-bg:${ec.bg};--emo-fg:${ec.fg}`:'';
   let media='';
-  if(p.mediaUrl){media=p.mediaType==='video'?`<div class="pm"><video src="${esc(p.mediaUrl)}" controls playsinline preload="metadata"></video></div>`:`<div class="pm"><img src="${esc(p.mediaUrl)}" alt="" loading="lazy" onclick="openPModal('${p._id}')"/></div>`;}
-  const cap=p.caption?`<div class="pb ${isConf?'conf':''}">${esc(p.caption).replace(/#(\w+)/g,`<span class="tag" onclick="filterEmo('$1',null)">#$1</span>`)}</div>`:'';
+  if(p.mediaUrl){
+    media=p.mediaType==='video'
+      ?`<div class="pm"><video src="${esc(p.mediaUrl)}" controls playsinline preload="metadata"></video></div>`
+      :`<div class="pm"><img src="${esc(p.mediaUrl)}" alt="" loading="lazy" style="cursor:zoom-in" onclick="openLightbox('${esc(p.mediaUrl)}')"/></div>`;
+  }
+  // Caption — hashtags now open search/filter
+  const cap=p.caption?`<div class="pb ${isConf?'conf':''}">${esc(p.caption).replace(/#(\w+)/g,`<span class="tag" onclick="searchHashtag('$1')">#$1</span>`)}</div>`:'';
   const epill=p.emotion?`<span class="epill" style="background:${ec.bg||'var(--vg)'};color:${ec.fg||'var(--v3)'}"> ${p.emotion}</span>`:'';
   const stbdg=p.type==='story'?'<span class="epill stbadge">📸 Story</span>':'';
   const mnbdg=isMid()&&p.type==='post'?'<span class="epill mnbadge">🌙 Midnight</span>':'';
@@ -1058,7 +1204,7 @@ function renderPost(p){
       </div>
       <div class="pak" onclick="openPModal('${p._id}')">💬 <span>${p.commentCount||0}</span></div>
       <div style="flex:1"></div>
-      <div class="pak" onclick="sharePost('${p._id}')">🔗</div>
+      <div class="pak" onclick="openShareSheet('${p._id}','${esc(p.caption||'').substring(0,60)}')">🔗</div>
     </div>
   </div>`;
 }
@@ -2089,6 +2235,169 @@ function addComplimentBtns(){
 }
 
 /* ═══════════════════════════════════════════════
+   DAILY PROMPT — drives posting habit
+═══════════════════════════════════════════════ */
+const DAILY_PROMPTS=[
+  "What's something you've never told anyone?",
+  "What's weighing on your heart right now?",
+  "What's something you wish someone would say to you today?",
+  "What's a feeling you've been carrying around lately?",
+  "What's the last thing that genuinely made you smile?",
+  "What's something you pretend to be okay with?",
+  "What would you say to someone who needs to hear they matter?",
+  "What's a memory that still hurts to think about?",
+  "What's one thing you want to let go of?",
+  "What's something you're secretly proud of?",
+  "What's a truth you've been afraid to admit, even to yourself?",
+  "What's something you wish people understood about you?",
+  "If you could send one anonymous message to someone from your past, what would it say?",
+  "What emotion have you been avoiding?",
+  "What's something you've been putting off saying?",
+];
+let currentPrompt='';
+
+function showDailyPrompt(){
+  const dayOfYear=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);
+  currentPrompt=DAILY_PROMPTS[dayOfYear%DAILY_PROMPTS.length];
+  const el=q('dp-text');if(el)el.textContent=currentPrompt;
+  const dp=q('daily-prompt');if(dp)dp.style.display='block';
+}
+
+/* ═══════════════════════════════════════════════
+   FEED TABS — Latest / Trending
+═══════════════════════════════════════════════ */
+let feedTab='latest';
+
+function switchFeedTab(tab,el){
+  feedTab=tab;
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  feedEmo='';
+  document.querySelectorAll('.ec').forEach(c=>c.classList.remove('on'));
+  document.querySelector('.ec')?.classList.add('on');
+  loadFeed();
+}
+
+/* ═══════════════════════════════════════════════
+   SKELETON LOADERS
+═══════════════════════════════════════════════ */
+function showSkeletons(count=3){
+  const el=q('feed-list');
+  el.innerHTML=Array.from({length:count},()=>`
+    <div class="skel-card" style="padding:14px">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+        <div class="skel-line" style="width:42px;height:42px;border-radius:50%;flex-shrink:0"></div>
+        <div style="flex:1"><div class="skel-line" style="height:13px;width:40%;margin-bottom:7px"></div><div class="skel-line" style="height:10px;width:25%"></div></div>
+      </div>
+      <div class="skel-line" style="height:13px;width:100%;margin-bottom:7px"></div>
+      <div class="skel-line" style="height:13px;width:80%;margin-bottom:14px"></div>
+      <div style="display:flex;gap:6px">${[80,70,70,65,75].map(w=>`<div class="skel-line" style="height:30px;width:${w}px;border-radius:100px"></div>`).join('')}</div>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   ONBOARDING CARDS
+═══════════════════════════════════════════════ */
+function showOnboardingCards(){
+  const el=q('feed-list');
+  el.innerHTML=`<div class="onboard-cards">
+    <div style="text-align:center;padding:20px 0 4px">
+      <div style="font-size:2.5rem;margin-bottom:8px">🎭</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:1.1rem;margin-bottom:4px">Welcome to Annomuss</div>
+      <div style="font-size:.83rem;color:var(--tx3);line-height:1.6">No names. Just real. Start here:</div>
+    </div>
+    <div class="ob-card" style="background:rgba(255,77,109,.05);border-color:rgba(255,77,109,.15)" onclick="openCompose('confession')">
+      <div class="ob-ico" style="background:rgba(255,77,109,.1)">🤫</div>
+      <div><div class="ob-title" style="color:var(--cr)">Write your first confession</div><div class="ob-sub">Something you've never been able to say. No one will know it's you.</div></div>
+    </div>
+    <div class="ob-card" style="background:rgba(123,94,167,.05);border-color:rgba(123,94,167,.15)" onclick="goPage('connect')">
+      <div class="ob-ico" style="background:var(--vg)">⚡</div>
+      <div><div class="ob-title" style="color:var(--v3)">Try random chat</div><div class="ob-sub">Matched by emotion. 5 minutes. Anonymous. Genuinely real.</div></div>
+    </div>
+    <div class="ob-card" style="background:rgba(0,201,167,.04);border-color:rgba(0,201,167,.14)" onclick="q('mood-ci').classList.add('on')">
+      <div class="ob-ico" style="background:rgba(0,201,167,.1)">🌊</div>
+      <div><div class="ob-title" style="color:var(--tl)">Log how you're feeling</div><div class="ob-sub">Your mood shapes your feed and chat matches.</div></div>
+    </div>
+    <div class="ob-card" style="background:rgba(196,168,255,.04);border-color:rgba(196,168,255,.14)" onclick="openUnsent()">
+      <div class="ob-ico" style="background:rgba(196,168,255,.1)">💌</div>
+      <div><div class="ob-title" style="color:var(--v3)">Write an unsent letter</div><div class="ob-sub">To a person, a feeling, a version of yourself.</div></div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   IMAGE LIGHTBOX
+═══════════════════════════════════════════════ */
+function openLightbox(src){
+  const lb=q('lightbox'),img=q('lightbox-img');
+  if(!lb||!img)return;
+  img.src=src;lb.classList.add('on');document.body.style.overflow='hidden';
+}
+function closeLightbox(){q('lightbox')?.classList.remove('on');document.body.style.overflow='';}
+
+/* ═══════════════════════════════════════════════
+   SHARE SHEET — WhatsApp, copy, native
+═══════════════════════════════════════════════ */
+let sharePostId=null,shareCaption='';
+
+function openShareSheet(id,caption){sharePostId=id;shareCaption=caption||'';q('share-sheet')?.classList.add('on');}
+function closeShare(){q('share-sheet')?.classList.remove('on');}
+
+function shareVia(method){
+  const url=`${location.origin}/dashboard.html#post-${sharePostId}`;
+  const text=shareCaption?`"${shareCaption}..." on Annomuss 🎭\n${url}`:`Check this on Annomuss 🎭\n${url}`;
+  if(method==='whatsapp')window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
+  else if(method==='twitter')window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,'_blank');
+  else if(method==='copy')navigator.clipboard?.writeText(url).then(()=>toast('🔗 Link copied!'));
+  else if(method==='native')navigator.share?.({title:'Annomuss',text:shareCaption,url}).catch(()=>{});
+  closeShare();
+}
+function sharePost(id){openShareSheet(id,'');}
+
+/* ═══════════════════════════════════════════════
+   POST SEARCH + HASHTAG FEEDS
+═══════════════════════════════════════════════ */
+let searchPostDeb2=null;
+
+function openSearch(){q('search-overlay')?.classList.add('on');setTimeout(()=>q('so-inp')?.focus(),120);}
+function closeSearch(){
+  q('search-overlay')?.classList.remove('on');
+  if(q('so-inp'))q('so-inp').value='';
+  q('so-results').innerHTML='<div style="padding:40px 24px;text-align:center;color:var(--tx3);font-size:.88rem">Search for posts, confessions, or #hashtags</div>';
+}
+
+function searchHashtag(tag){openSearch();const inp=q('so-inp');if(inp){inp.value='#'+tag;doPostSearch('#'+tag);}}
+
+function doPostSearch(raw){
+  clearTimeout(searchPostDeb2);
+  const q2=raw.trim();
+  if(!q2){q('so-results').innerHTML='<div style="padding:40px 24px;text-align:center;color:var(--tx3);font-size:.88rem">Search for posts, confessions, or #hashtags</div>';return;}
+  q('so-results').innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
+  searchPostDeb2=setTimeout(async()=>{
+    try{
+      const isTag=q2.startsWith('#');
+      const param=isTag?`hashtag=${encodeURIComponent(q2.slice(1))}`:`q=${encodeURIComponent(q2)}`;
+      const r=await api(`/api/posts/search?${param}&limit=20`);
+      const d=await r.json();const posts=Array.isArray(d)?d:(d.posts||[]);
+      const res=q('so-results');
+      if(!posts.length){res.innerHTML=`<div class="empty"><div style="font-size:2.5rem">🔍</div><div style="font-family:var(--fD);font-weight:700;font-size:.9rem;margin-top:8px">No results for "${esc(q2)}"</div></div>`;return;}
+      res.innerHTML=posts.map(p=>renderPost(p)).join('');
+      setTimeout(addComplimentBtns,100);
+    }catch(e){q('so-results').innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">Search not available right now</div></div>';}
+  },350);
+}
+
+/* ═══════════════════════════════════════════════
+   STREAK REMINDER
+═══════════════════════════════════════════════ */
+function checkStreakReminder(){
+  const streak=user?.streak||0;if(streak<2)return;
+  const td=new Date().toDateString();if(localStorage.getItem('ann_mood_'+td))return;
+  const h=new Date().getHours();if(h<18)return;
+  q('streak-reminder')?.classList.add('show');
+}
+
+/* ═══════════════════════════════════════════════
    XP + LEVEL UP ANIMATIONS
    Award XP for actions, show level up when milestone hit
 ═══════════════════════════════════════════════ */
@@ -2192,6 +2501,7 @@ async function main(){
   await initSession();
   checkMidnightMode();
   loadFeed();loadStories();initSocket();getLocation();
+  showDailyPrompt(); // show today's question on feed
   // Check if confessions.html asked us to open compose
   const pendingCompose=sessionStorage.getItem('openCompose');
   if(pendingCompose){sessionStorage.removeItem('openCompose');setTimeout(()=>openCompose(pendingCompose),800);}
@@ -2204,6 +2514,8 @@ async function main(){
     const logged=localStorage.getItem('ann_mood_'+td);
     if(!logged&&!skipped)q('mood-ci').classList.add('on');
   },2000);
+  // Check streak at risk (shows after 6pm if mood not logged)
+  setTimeout(checkStreakReminder,3500);
   // Silently check inbox for unread badge on load
   setTimeout(async()=>{
     try{const r=await api('/api/messages/inbox');const d=await r.json();const cs=Array.isArray(d)?d:(d.conversations||[]);
@@ -2212,7 +2524,7 @@ async function main(){
     }catch(_){}
   },1500);
   // Pull-to-refresh on feed page
-  let ptr_startY=0,ptr_pulling=false;
+  let ptr_startY=0;
   const ptrEl=q('pg-feed');
   if(ptrEl){
     ptrEl.addEventListener('touchstart',e=>{if(ptrEl.scrollTop===0)ptr_startY=e.touches[0].clientY;},{ passive:true });

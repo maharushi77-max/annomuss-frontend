@@ -48,8 +48,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   -webkit-overflow-scrolling:touch;
   padding-bottom:calc(var(--nav) + var(--safe) + 20px)
 }
-.page.active{display:flex;animation:pgIn .2s cubic-bezier(.4,0,.2,1)}
-@keyframes pgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.page.active{display:flex;animation:pgIn .22s cubic-bezier(.4,0,.2,1)}
+.page.slide-in{animation:slideIn .22s cubic-bezier(.4,0,.2,1)}
+.page.slide-out{animation:slideOut .18s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes pgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes slideIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes slideOut{to{opacity:0;transform:translateX(-16px)}}
 /* horizontal scroll rows inside pages need overflow-x:auto but parent clips it —
    use negative margin trick so they touch edges */
 .hscroll{
@@ -769,6 +773,10 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div class="ftab on" id="ftab-latest" onclick="switchFeedTab('latest',this)">✨ Latest</div>
     <div class="ftab" id="ftab-trending" onclick="switchFeedTab('trending',this)">🔥 Trending</div>
   </div>
+  <!-- Live writing indicator -->
+  <div id="live-writing" style="display:none;padding:6px 16px;font-size:.72rem;color:var(--tx3);font-family:var(--fD);animation:pgIn .3s ease">
+    <span id="live-writing-txt">✍️ Someone is writing right now...</span>
+  </div>
 
   <!-- EMOTION FILTER -->
   <div class="emo-bar">
@@ -815,6 +823,11 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div style="font-size:1.3rem;margin-bottom:4px">💭</div>
       <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--tl)">Vent Board</div>
       <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4">Let it all out</div>
+    </div>
+    <div onclick="openMoodRooms()" style="flex:0 0 auto;padding:11px 14px;background:rgba(244,162,97,.07);border:1px solid rgba(244,162,97,.16);border-radius:13px;cursor:pointer;width:130px">
+      <div style="font-size:1.3rem;margin-bottom:4px">🌊</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--go)">Mood Rooms</div>
+      <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4">Find your vibe</div>
     </div>
   </div>
 
@@ -985,32 +998,81 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 <!-- PROFILE -->
 <div class="page" id="pg-profile">
   <div class="tb"><div class="tb-title">Profile</div><button class="ico-btn" onclick="location.href='/security.html'">⚙️</button></div>
-  <div style="padding:24px 18px 14px;text-align:center">
+
+  <!-- Hero card -->
+  <div style="padding:22px 18px 14px;text-align:center">
     <div class="pav-ring"><div class="pav-in" id="pav">🎭</div></div>
     <div style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:100px;background:var(--vg);border:1px solid var(--vb);font-size:.75rem;font-weight:700;color:var(--v3);font-family:var(--fD);margin-bottom:10px" id="lvl-badge">⭐ Level 1</div>
     <div style="font-family:var(--fD);font-weight:700;font-size:1.3rem;letter-spacing:-.3px;margin-bottom:3px" id="pname">Anonymous</div>
     <div style="font-family:var(--fM);font-size:.77rem;color:var(--tx3)" id="phandle">@anon</div>
     <div id="pmood" style="margin-top:8px;font-size:.82rem;color:var(--tx2)">No mood logged today</div>
   </div>
+
+  <!-- XP bar -->
   <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
   <div style="display:flex;justify-content:space-between;margin:5px 18px 0;font-size:.68rem;color:var(--tx3);font-family:var(--fM)">
     <span id="xp-lbl">0 XP</span><span id="xp-next">100 XP to level up</span>
   </div>
+
+  <!-- Stats -->
   <div class="pstats" style="margin-top:18px">
     <div class="ps"><div class="psn" id="s-posts">0</div><div class="psl">Posts</div></div>
-    <div class="ps"><div class="psn" id="s-streak">0</div><div class="psl">Streak</div></div>
+    <div class="ps"><div class="psn" id="s-streak" style="color:var(--go)">0</div><div class="psl">Streak 🔥</div></div>
     <div class="ps"><div class="psn" id="s-chats">0</div><div class="psl">Chats</div></div>
-    <div class="ps"><div class="psn" id="s-friends">0</div><div class="psl">Friends</div></div>
+    <div class="ps"><div class="psn" id="s-friends" style="color:var(--tl)">0</div><div class="psl">Friends</div></div>
   </div>
-  <div style="display:flex;gap:10px;padding:16px 18px;justify-content:center">
+
+  <!-- Action buttons -->
+  <div style="display:flex;gap:8px;padding:14px 18px 0;justify-content:center">
     <button class="btn btn-v btn-sm" onclick="openCompose('post')">✏️ New Post</button>
-    <button class="btn btn-g btn-sm" onclick="document.getElementById('mood-ci').classList.add('on')">🌊 Log Mood</button>
+    <button class="btn btn-g btn-sm" onclick="document.getElementById('mood-ci').classList.add('on')">🌊 Mood</button>
+    <button class="btn btn-g btn-sm" onclick="shareInvite()">🎁 Invite</button>
   </div>
-  <div style="margin:0 18px">
+
+  <!-- Profile tabs -->
+  <div style="display:flex;border-bottom:1px solid var(--bd);margin-top:14px;padding:0 18px">
+    <div class="ptab on" id="pt-posts" onclick="profileTab('posts',this)" style="flex:1;padding:10px 0;text-align:center;font-size:.73rem;font-weight:700;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fD);letter-spacing:.03em">📢 Posts</div>
+    <div class="ptab" id="pt-menu" onclick="profileTab('menu',this)" style="flex:1;padding:10px 0;text-align:center;font-size:.73rem;font-weight:700;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fD);letter-spacing:.03em">☰ Menu</div>
+  </div>
+
+  <!-- Posts tab -->
+  <div id="profile-posts">
+    <div id="profile-feed" style="padding-top:8px"></div>
+  </div>
+
+  <!-- Menu tab -->
+  <div id="profile-menu" style="display:none;margin:8px 18px 0">
     <div class="pmi" onclick="location.href='/confessions.html'"><span style="font-size:1.1rem;width:22px">🤫</span><span style="flex:1;font-size:.88rem;font-weight:500">My Confessions</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="location.href='/badges.html'"><span style="font-size:1.1rem;width:22px">🏅</span><span style="flex:1;font-size:.88rem;font-weight:500">Badges & Rewards</span><span style="color:var(--tx3)">›</span></div>
+    <div class="pmi" onclick="showLeaderboard()"><span style="font-size:1.1rem;width:22px">🏆</span><span style="flex:1;font-size:.88rem;font-weight:500">Weekly Leaderboard</span><span style="color:var(--tx3)">›</span></div>
+    <div class="pmi" onclick="shareInvite()"><span style="font-size:1.1rem;width:22px">🎁</span><span style="flex:1;font-size:.88rem;font-weight:500">Invite Friends — earn 50 XP</span><span style="color:var(--v3)">Share</span></div>
     <div class="pmi" onclick="location.href='/security.html'"><span style="font-size:1.1rem;width:22px">🔒</span><span style="flex:1;font-size:.88rem;font-weight:500">Security & Privacy</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="doLogout()" style="color:var(--cr)"><span style="font-size:1.1rem;width:22px">🚪</span><span style="flex:1;font-size:.88rem;font-weight:500">Log Out</span></div>
+  </div>
+</div>
+<!-- LEADERBOARD MODAL -->
+<div id="leaderboard-modal" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.82);backdrop-filter:blur(12px);display:none;align-items:flex-end">
+  <div style="width:100%;background:var(--bg1);border-radius:22px 22px 0 0;padding:16px 18px calc(32px + var(--safe));max-height:85vh;overflow-y:auto;animation:shUp .25s cubic-bezier(.32,1,.4,1)">
+    <div style="width:36px;height:4px;background:var(--bd3);border-radius:2px;margin:0 auto 16px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-family:var(--fD);font-weight:700;font-size:1.05rem">🏆 Weekly Leaderboard</div>
+      <button onclick="q('leaderboard-modal').style.display='none'" style="color:var(--tx3);font-size:1rem;padding:4px">✕</button>
+    </div>
+    <div style="font-size:.75rem;color:var(--tx3);margin-bottom:14px;font-family:var(--fD)">Top voices this week · resets every Monday</div>
+    <div id="leaderboard-list"><div style="padding:24px;text-align:center"><div class="spin"></div></div></div>
+  </div>
+</div>
+
+<!-- MOOD ROOMS MODAL -->
+<div id="mood-rooms-modal" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.82);backdrop-filter:blur(12px);display:none;align-items:flex-end">
+  <div style="width:100%;background:var(--bg1);border-radius:22px 22px 0 0;padding:16px 18px calc(32px + var(--safe));max-height:90vh;overflow-y:auto;animation:shUp .25s cubic-bezier(.32,1,.4,1)">
+    <div style="width:36px;height:4px;background:var(--bd3);border-radius:2px;margin:0 auto 16px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="font-family:var(--fD);font-weight:700;font-size:1.05rem">🌊 Mood Rooms</div>
+      <button onclick="q('mood-rooms-modal').style.display='none'" style="color:var(--tx3);font-size:1rem;padding:4px">✕</button>
+    </div>
+    <div style="font-size:.8rem;color:var(--tx3);margin-bottom:16px">Join a room. See only posts from people feeling like you.</div>
+    <div id="mood-rooms-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
   </div>
 </div>
 
@@ -1126,7 +1188,7 @@ function goPage(n){
   currentPage=n;
   if(n==='vent')loadVents('latest');
   if(n==='social'){socTab('inbox',null);const badge=q('notif-badge');if(badge)badge.style.display='none';}
-  if(n==='profile')applyUser();
+  if(n==='profile'){applyUser();profileTab('posts',q('pt-posts'));}
   // scroll page back to top when switching
   if(pg)pg.scrollTop=0;
 }
@@ -1369,9 +1431,14 @@ function openCompose(type='post'){
   const h=new Date().getHours();let hint=null;
   if(h>=0&&h<=3)hint='lonely';else if(h>=22)hint='lonely';
   if(hint){q('emo-hint-txt').textContent=`You might be feeling ${hint}`;q('emo-hint').style.display='flex';}else q('emo-hint').style.display='none';
+  // Load draft if it exists (only for regular posts)
+  if(type==='post')setTimeout(loadDraft,150);
   setTimeout(()=>q('ctxt').focus(),100);
 }
-function closeCompose(){q('compose').classList.remove('on');}
+function closeCompose(){
+  saveDraft(); // save before closing
+  q('compose').classList.remove('on');
+}
 function selType(t,el){compType=t;document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));el?.classList.add('on');
   q('story-notice').style.display=t==='story'?'block':'none';q('unsent-notice').style.display=t==='unsent'?'block':'none';
   const phs={post:'Say something real...',story:'What\'s happening right now?',confession:'Your deepest truth...',unsent:'What do you wish you could say?'};
@@ -1386,6 +1453,11 @@ function onCompose(el){
   const l=el.value.length,c=q('char-c');
   c.textContent=`${l} / 1000`;c.style.color=l>950?'var(--cr)':l>800?'var(--go)':'var(--tx3)';
   if(l>10&&!compEmo){const d=detectEmo(el.value);if(d){q('emo-hint-txt').textContent=`Detected: you seem ${d}`;q('emo-hint').style.display='flex';}}
+  // Tell other users someone is writing (debounced, no personal info)
+  if(socket&&socket.connected&&l>5){
+    clearTimeout(window._composeWriteTimer);
+    window._composeWriteTimer=setTimeout(()=>socket.emit('user-writing'),800);
+  }
 }
 
 /* file upload */
@@ -1424,6 +1496,7 @@ async function submitPost(){
     if(r.status===429){toast('⏳ Slow down a bit! Try again in a moment.');return;}
     if(!r.ok){toast(d.message||'Failed to post ❌');return;}
     closeCompose();
+    clearDraft(); // clear saved draft on successful post
     if(compType==='story'){
       toast('📸 Story posted!');
       loadStories(); // stories strip always needs reload
@@ -1932,6 +2005,15 @@ function initSocket(){
     loadStories();
   });
 
+  // Live writing indicator — shows when someone is composing
+  socket.on('user-writing', () => {
+    const el = q('live-writing');
+    if(!el || currentPage !== 'feed') return;
+    el.style.display = 'block';
+    clearTimeout(window._writeTimer);
+    window._writeTimer = setTimeout(() => { el.style.display = 'none'; }, 4000);
+  });
+
   socket.on('friend-request',(d)=>{
     pendingReqCount++;
     updateReqBadge();
@@ -1950,6 +2032,13 @@ function initSocket(){
       const badge=q('notif-badge');if(badge)badge.style.display='block';
       toast(`💬 New message from ${d.from||'someone'}`);
     }
+  });
+
+  // Real-time reaction on your post
+  socket.on('post-reaction',(d)=>{
+    const REACT_LABELS={heard:'💙 Someone felt heard by your post',same:'🤝 Someone said "same" to your post',strong:'🔥 Your post gave someone strength',love:'🌊 Someone loved your post',helped:'✨ Your post helped someone'};
+    const msg=REACT_LABELS[d.type]||'❤️ Someone reacted to your post';
+    toast(msg, 3500);
   });
 
   socket.on('compliment-received',(d)=>{showGratitudeNotif(d.message||'A stranger thinks you\'re amazing ✨');});
@@ -2388,6 +2477,195 @@ function doPostSearch(raw){
 }
 
 /* ═══════════════════════════════════════════════
+   PROFILE TABS — Posts / Menu
+═══════════════════════════════════════════════ */
+function profileTab(tab, el){
+  document.querySelectorAll('.ptab').forEach(t=>{t.classList.remove('on');t.style.color='var(--tx3)';t.style.borderBottomColor='transparent';});
+  if(el){el.classList.add('on');el.style.color='var(--v3)';el.style.borderBottomColor='var(--v)';}
+  q('profile-posts').style.display = tab==='posts'?'block':'none';
+  q('profile-menu').style.display  = tab==='menu' ?'block':'none';
+  if(tab==='posts') loadProfilePosts();
+}
+
+async function loadProfilePosts(){
+  const feed=q('profile-feed');
+  feed.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
+  try{
+    const r=await api('/api/posts?mine=true&limit=20');
+    const d=await r.json();const posts=Array.isArray(d)?d:(d.posts||[]);
+    if(!posts.length){
+      feed.innerHTML=`<div class="empty"><div style="font-size:3rem">✍️</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">No posts yet</div><div style="font-size:.82rem;color:var(--tx3)">Your posts will appear here</div><button class="btn btn-v btn-sm" style="margin-top:12px" onclick="openCompose('post')">Create post ✨</button></div>`;
+      return;
+    }
+    feed.innerHTML='';
+    posts.forEach((p,i)=>{
+      const d2=document.createElement('div');d2.innerHTML=renderPost(p);
+      const c=d2.firstElementChild;if(c){c.style.animationDelay=`${i*.04}s`;feed.appendChild(c);}
+    });
+    setTimeout(addComplimentBtns,100);
+  }catch(e){feed.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">Couldn\'t load posts</div></div>';}
+}
+
+// Auto-load profile posts when profile tab is opened
+const _origApplyUser=typeof applyUser==='function'?applyUser:null;
+
+/* ═══════════════════════════════════════════════
+   WEEKLY LEADERBOARD
+═══════════════════════════════════════════════ */
+async function showLeaderboard(){
+  q('leaderboard-modal').style.display='flex';
+  const list=q('leaderboard-list');
+  list.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
+  try{
+    const r=await api('/api/posts/trending?limit=10');
+    const d=await r.json();const posts=Array.isArray(d)?d:(d.posts||[]);
+    if(!posts.length){list.innerHTML='<div style="padding:20px;text-align:center;color:var(--tx3)">No posts this week yet</div>';return;}
+    const medals=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+    list.innerHTML=posts.map((p,i)=>{
+      const score=((p.likes||[]).length*2)+(p.commentCount||0)*1.5;
+      const author=p.authorName||p.anonymousName||'Anonymous';
+      const preview=(p.caption||'').substring(0,60)+(p.caption?.length>60?'...':'');
+      return`<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--bd);cursor:pointer" onclick="q('leaderboard-modal').style.display='none';openPModal('${p._id}')">
+        <div style="font-size:1.4rem;width:28px;flex-shrink:0;text-align:center">${medals[i]||''}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--fD);font-weight:700;font-size:.85rem;margin-bottom:3px">${esc(author)}</div>
+          <div style="font-size:.78rem;color:var(--tx2);line-height:1.5">${esc(preview)}</div>
+          <div style="font-size:.68rem;color:var(--tx3);margin-top:4px;font-family:var(--fM)">❤️ ${(p.likes||[]).length} · 💬 ${p.commentCount||0}</div>
+        </div>
+        <div style="font-family:var(--fM);font-size:.78rem;color:var(--v3);font-weight:700;flex-shrink:0">${Math.round(score)}pts</div>
+      </div>`;
+    }).join('');
+  }catch(e){list.innerHTML='<div style="padding:20px;text-align:center;color:var(--tx3)">Couldn\'t load leaderboard</div>';}
+}
+
+/* ═══════════════════════════════════════════════
+   MOOD ROOMS
+═══════════════════════════════════════════════ */
+const MOOD_ROOMS=[
+  {emo:'sad',    ico:'😔', label:'Sad',      color:'rgba(155,127,212,.12)', border:'rgba(155,127,212,.25)', fg:'#C4A8FF'},
+  {emo:'anxious',ico:'😰', label:'Anxious',  color:'rgba(255,77,109,.08)',  border:'rgba(255,77,109,.2)',   fg:'#FF7A92'},
+  {emo:'lonely', ico:'🌧️', label:'Lonely',   color:'rgba(92,232,255,.07)', border:'rgba(92,232,255,.18)',  fg:'var(--bl)'},
+  {emo:'happy',  ico:'😊', label:'Happy',    color:'rgba(244,162,97,.08)',  border:'rgba(244,162,97,.2)',   fg:'var(--go)'},
+  {emo:'grateful',ico:'🙏',label:'Grateful', color:'rgba(82,183,136,.08)', border:'rgba(82,183,136,.2)',   fg:'var(--lm)'},
+  {emo:'angry',  ico:'😤', label:'Angry',    color:'rgba(255,77,109,.08)', border:'rgba(255,77,109,.2)',   fg:'var(--cr)'},
+  {emo:'inspired',ico:'✨',label:'Inspired', color:'rgba(0,201,167,.07)',  border:'rgba(0,201,167,.18)',   fg:'var(--tl)'},
+  {emo:'excited',ico:'🤩', label:'Excited',  color:'rgba(255,133,161,.07)',border:'rgba(255,133,161,.18)', fg:'var(--pk)'},
+];
+
+function openMoodRooms(){
+  q('mood-rooms-modal').style.display='flex';
+  const grid=q('mood-rooms-grid');
+  if(grid.children.length)return; // already built
+  grid.innerHTML=MOOD_ROOMS.map(r=>`
+    <div onclick="enterMoodRoom('${r.emo}','${r.label}');q('mood-rooms-modal').style.display='none'"
+      style="padding:18px 14px;border-radius:16px;border:1.5px solid ${r.border};background:${r.color};cursor:pointer;text-align:center;transition:transform .14s"
+      onmousedown="this.style.transform='scale(.96)'" onmouseup="this.style.transform=''">
+      <div style="font-size:2rem;margin-bottom:6px">${r.ico}</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.88rem;color:${r.fg}">${r.label}</div>
+      <div style="font-size:.65rem;color:var(--tx3);margin-top:3px">Tap to enter</div>
+    </div>`).join('');
+}
+
+function enterMoodRoom(emo, label){
+  feedEmo=emo;
+  document.querySelectorAll('.ec').forEach(c=>c.classList.remove('on'));
+  document.querySelectorAll('.ec').forEach(c=>{if(c.textContent.toLowerCase().includes(label.toLowerCase()))c.classList.add('on');});
+  feedTab='latest';
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'));
+  q('ftab-latest')?.classList.add('on');
+  goPage('feed');
+  loadFeed();
+  toast(`🌊 Entered ${label} room`);
+}
+
+/* ═══════════════════════════════════════════════
+   INVITE / REFERRAL SYSTEM
+═══════════════════════════════════════════════ */
+function shareInvite(){
+  const name=user?.anonymousName||'Anonymous';
+  const code=btoa(user?._id||'').slice(0,8).toUpperCase();
+  const url=`${location.origin}/index.html?ref=${code}`;
+  const text=`I'm on Annomuss — the anonymous app where people say what they really feel. No names. Just truth.\n\nJoin here: ${url}`;
+
+  if(navigator.share){
+    navigator.share({title:'Join me on Annomuss 🎭',text,url}).catch(()=>{});
+  } else {
+    // Show share sheet
+    sharePostId='invite';shareCaption=text;
+    const ss=q('share-sheet');
+    if(ss){
+      // Temporarily patch shareVia for invite
+      ss.querySelector('.ss-btn:nth-child(1)').onclick=()=>{
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
+        closeShare();
+      };
+      ss.querySelector('.ss-btn:nth-child(2)').onclick=()=>{
+        navigator.clipboard?.writeText(url).then(()=>toast('🔗 Invite link copied!'));
+        closeShare();
+        toast('🎁 Share your link — earn 50 XP when they join!');
+      };
+      ss.classList.add('on');
+    } else {
+      navigator.clipboard?.writeText(url).then(()=>toast('🔗 Invite link copied!'));
+    }
+  }
+  toast('🎁 Share your link — earn 50 XP when they join!');
+}
+
+// Check for referral code on registration
+function checkReferral(){
+  const params=new URLSearchParams(location.search);
+  const ref=params.get('ref');
+  if(ref)localStorage.setItem('ann_ref',ref);
+}
+
+/* ═══════════════════════════════════════════════
+   PWA INSTALL PROMPT
+═══════════════════════════════════════════════ */
+let pwaPrompt=null;
+
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  pwaPrompt=e;
+  // Show install banner after 30s if user hasn't dismissed it
+  setTimeout(showPWABanner, 30000);
+});
+
+function showPWABanner(){
+  if(!pwaPrompt)return;
+  if(localStorage.getItem('ann_pwa_dismissed'))return;
+  // Inject banner if not already there
+  if(q('pwa-banner'))return;
+  const banner=document.createElement('div');
+  banner.id='pwa-banner';
+  banner.style.cssText='position:fixed;bottom:calc(72px + var(--safe));left:14px;right:14px;z-index:300;background:var(--bg1);border:1px solid var(--vb);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:shUp .3s cubic-bezier(.34,1.56,.64,1)';
+  banner.innerHTML=`
+    <div style="font-size:1.8rem;flex-shrink:0">🎭</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-family:var(--fD);font-weight:700;font-size:.85rem;margin-bottom:2px">Add Annomuss to home screen</div>
+      <div style="font-size:.72rem;color:var(--tx3)">Opens like a real app, works offline</div>
+    </div>
+    <button onclick="installPWA()" style="padding:7px 14px;background:linear-gradient(135deg,var(--v),#6040C4);color:#fff;border:none;border-radius:100px;font-family:var(--fD);font-size:.74rem;font-weight:700;cursor:pointer;flex-shrink:0">Install</button>
+    <button onclick="dismissPWA()" style="color:var(--tx3);font-size:.9rem;padding:4px;cursor:pointer;background:none;border:none;flex-shrink:0">✕</button>
+  `;
+  document.body.appendChild(banner);
+}
+
+async function installPWA(){
+  if(!pwaPrompt)return;
+  pwaPrompt.prompt();
+  const result=await pwaPrompt.userChoice;
+  if(result.outcome==='accepted'){toast('🎉 Annomuss installed!');awardXP(25,'Installed app');}
+  pwaPrompt=null;
+  const b=q('pwa-banner');if(b)b.remove();
+}
+
+function dismissPWA(){
+  localStorage.setItem('ann_pwa_dismissed','1');
+  const b=q('pwa-banner');if(b){b.style.opacity='0';b.style.transition='.2s';setTimeout(()=>b.remove(),220);}
+}
+
+/* ═══════════════════════════════════════════════
    STREAK REMINDER
 ═══════════════════════════════════════════════ */
 function checkStreakReminder(){
@@ -2502,6 +2780,7 @@ async function main(){
   checkMidnightMode();
   loadFeed();loadStories();initSocket();getLocation();
   showDailyPrompt(); // show today's question on feed
+  checkReferral();   // save invite code if present in URL
   // Check if confessions.html asked us to open compose
   const pendingCompose=sessionStorage.getItem('openCompose');
   if(pendingCompose){sessionStorage.removeItem('openCompose');setTimeout(()=>openCompose(pendingCompose),800);}
@@ -2547,11 +2826,47 @@ async function main(){
     else loadEmotionPulse();
   },3000);
 }
-// Close modals on back
-window.addEventListener('popstate',()=>{closePModal();closeSV();q('compose').classList.remove('on');closeUnsent();});
-document.addEventListener('click',(e)=>{if(!e.target.closest('.pmodal-inner')&&q('pmodal').classList.contains('on')&&e.target===q('pmodal'))closePModal();});
+// ── BACK BUTTON — closes modals in order (Android) ──
+window.addEventListener('popstate',()=>{
+  // Close in priority order — topmost first
+  if(q('lightbox')?.classList.contains('on')){closeLightbox();history.pushState(null,'',location.href);return;}
+  if(q('search-overlay')?.classList.contains('on')){closeSearch();history.pushState(null,'',location.href);return;}
+  if(q('share-sheet')?.classList.contains('on')){closeShare();history.pushState(null,'',location.href);return;}
+  if(q('leaderboard-modal')?.style.display==='flex'){q('leaderboard-modal').style.display='none';history.pushState(null,'',location.href);return;}
+  if(q('mood-rooms-modal')?.style.display==='flex'){q('mood-rooms-modal').style.display='none';history.pushState(null,'',location.href);return;}
+  if(q('pmodal')?.classList.contains('on')){closePModal();history.pushState(null,'',location.href);return;}
+  if(q('sv')?.classList.contains('on')){closeSV();history.pushState(null,'',location.href);return;}
+  if(q('compose')?.classList.contains('on')){closeCompose();history.pushState(null,'',location.href);return;}
+  if(document.getElementById('unsent-overlay')?.classList.contains('on')){closeUnsent();history.pushState(null,'',location.href);return;}
+});
 
-// ══ BOOT — must be last ══
+// ── DRAFT SAVE — never lose what you were writing ──
+function saveDraft(){
+  const txt=q('ctxt')?.value?.trim();
+  if(txt&&txt.length>5){localStorage.setItem('ann_draft',JSON.stringify({text:txt,type:compType,emo:compEmo,ts:Date.now()}));}
+}
+function loadDraft(){
+  try{
+    const d=JSON.parse(localStorage.getItem('ann_draft')||'null');
+    if(!d||Date.now()-d.ts>3600000)return; // older than 1hr, ignore
+    if(d.text&&q('ctxt')&&!q('ctxt').value){
+      q('ctxt').value=d.text;
+      q('char-c').textContent=`${d.text.length} / 1000`;
+      if(d.emo)compEmo=d.emo;
+      toast('📝 Draft restored');
+    }
+  }catch(_){}
+}
+function clearDraft(){localStorage.removeItem('ann_draft');}
+
+// ── CLICK OUTSIDE to close modals ──
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.pmodal-inner')&&q('pmodal')?.classList.contains('on')&&e.target===q('pmodal'))closePModal();
+  if(e.target===q('leaderboard-modal'))q('leaderboard-modal').style.display='none';
+  if(e.target===q('mood-rooms-modal'))q('mood-rooms-modal').style.display='none';
+});
+
+// ── BOOT — must be last ──
 document.addEventListener('DOMContentLoaded', main);
 </script>
 </body>

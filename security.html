@@ -295,7 +295,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
         </div>
         <div class="row" onclick="location.href='mailto:support@annomuss.in'">
           <div class="ri">📮</div>
-          <div class="rb"><div class="rt">Contact support</div><div class="rs"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f2818782829d8086b2939c9c9d9f878181dc9b9c">[email&#160;protected]</a></div></div>
+          <div class="rb"><div class="rt">Contact support</div><div class="rs">support@annomuss.in</div></div>
           <div style="font-size:.75rem;color:var(--tx3)">›</div>
         </div>
         <div class="row" style="cursor:default">
@@ -321,7 +321,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const API='https://annomuss-backend-icgp.onrender.com';
 let user=null, isDirty=false;
 const ch={avatarEmoji:null,allowDMs:null,showOnline:null,profileVisibility:null};
@@ -363,48 +363,44 @@ async function load(){
   const tk=getToken();
   if(!tk){location.href='/index.html';return;}
 
-  // Show cached user instantly — no loading spinner wait
+  // Show cached user instantly
   const cached=localStorage.getItem('user');
   if(cached){
-    try{
-      user=JSON.parse(cached);
-      applyUI();
-      q('loading').style.display='none';
-      q('cnt').style.display='block';
-    }catch(_){}
+    try{user=JSON.parse(cached);}catch(_){}
   }
 
-  // Verify token + refresh in background
+  // Always show content — don't wait for network
+  q('loading').style.display='none';
+  q('cnt').style.display='block';
+  if(user) applyUI();
+
+  // Verify + refresh in background
   try{
     const r=await fetch(`${API}/api/users/me`,{headers:{Authorization:`Bearer ${tk}`}});
     if(!r.ok){if(r.status===401)q('sm').classList.add('on');return;}
     user=await r.json();
     localStorage.setItem('user',JSON.stringify(user));
-    applyUI(); // re-apply with fresh data silently
+    applyUI();
   }catch(e){
-    if(!user){location.href='/index.html';return;}
-  }
-
-  // If no cache existed, show now
-  if(!cached){
-    q('loading').style.display='none';
-    q('cnt').style.display='block';
+    if(!user){location.href='/index.html';}
   }
 }
 
 function applyUI(){
+  if(!user)return;
   const xp=user.xp||0,level=Math.floor(xp/100)+1;
   const em=user.avatarEmoji||'🎭';
   const nm=user.anonymousName||'Anonymous';
-  q('av').textContent=em;
-  q('uname').textContent=nm;
-  q('uhandle').textContent='@'+nm.toLowerCase().replace(/\s+/g,'');
-  q('lpill').textContent=`⭐ Level ${level}`;
-  q('xpchip').textContent=`${xp.toLocaleString()} XP total`;
-  q('r-email').textContent=user.email?maskEmail(user.email):'—';
-  q('r-name').textContent=nm;
-  q('r-joined').textContent=user.createdAt?new Date(user.createdAt).toLocaleDateString([],{month:'long',year:'numeric'}):'—';
-  q('r-id').textContent=user._id||'—';
+  const set=(id,v)=>{const e=q(id);if(e)e.textContent=v;};
+  set('av',em);
+  set('uname',nm);
+  set('uhandle','@'+nm.toLowerCase().replace(/\s+/g,''));
+  set('lpill',`⭐ Level ${level}`);
+  set('xpchip',`${xp.toLocaleString()} XP total`);
+  set('r-email',user.email?maskEmail(user.email):'—');
+  set('r-name',nm);
+  set('r-joined',user.createdAt?new Date(user.createdAt).toLocaleDateString([],{month:'long',year:'numeric'}):'—');
+  set('r-id',user._id||'—');
   setTog('t-allowDMs',  user.allowDMs!==false);
   setTog('t-showOnline',user.showOnline!==false);
   setTog('t-nr',np.nr!==false);
@@ -420,7 +416,9 @@ function setTog(id,v){const e=q(id);if(e)e.classList.toggle('on',!!v);}
 
 // ── Emoji grid ──
 function buildGrid(cur){
-  const g=q('egrid');g.innerHTML='';
+  const g=q('egrid');
+  if(!g)return; // guard against null
+  g.innerHTML='';
   EMOJIS.forEach(em=>{
     const b=document.createElement('button');
     b.className='eb'+(em===cur?' sel':'');

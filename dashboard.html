@@ -963,7 +963,8 @@ function applyUser(){
   q('xp-next').textContent=`${100-xpIn} XP to level up`;
   q('s-posts').textContent=user.postCount||0;
   q('s-streak').textContent=user.streak||0;
-  q('s-friends').textContent=(user.friends||[]).length||0;
+  q('s-chats').textContent=user.chatCount||user.totalChats||0;
+  q('s-friends').textContent=(user.friends||[]).length||user.friendCount||0;
   const mood=localStorage.getItem('ann_mood_'+new Date().toDateString());
   if(mood){const em2={happy:'😊',sad:'😔',excited:'🤩',anxious:'😰',grateful:'🙏',lonely:'🌧️',angry:'😤',inspired:'✨'};q('pmood').textContent=`${em2[mood]||'🌊'} Feeling ${mood} today`;}
 }
@@ -974,11 +975,14 @@ function goPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   const pg=q(`pg-${n}`),nb=q(`nb-${n}`);
-  if(pg)pg.classList.add('active');if(nb)nb.classList.add('on');
+  if(pg)pg.classList.add('active');
+  if(nb)nb.classList.add('on');
   currentPage=n;
   if(n==='vent')loadVents('latest');
   if(n==='social')socTab('inbox',null);
   if(n==='profile')applyUser();
+  // scroll page back to top when switching
+  if(pg)pg.scrollTop=0;
 }
 
 /* ═══════════ FEED ═══════════ */
@@ -1264,10 +1268,15 @@ function socTab(tab,el){
   if(panel) panel.style.display='block';
   document.querySelectorAll('.stab').forEach(t=>t.classList.remove('on'));
   if(el) el.classList.add('on');
+  else {
+    // Find and activate the correct tab button by text match
+    document.querySelectorAll('.stab').forEach(t=>{
+      if(t.id===`stab-${tab}`||(t.textContent||'').toLowerCase().includes(tab))t.classList.add('on');
+    });
+  }
   if(tab==='inbox')    loadInbox();
   if(tab==='friends')  loadFriends();
   if(tab==='requests') loadRequests();
-  // Clear badge when user opens requests tab
   if(tab==='requests') { pendingReqCount=0; updateReqBadge(); }
 }
 
@@ -1515,12 +1524,22 @@ function rcEnd(){
   stopCRing();clearInterval(rcSearchIv);rcRoom=null;rcSetState('idle');toast('Chat ended 👋');
 }
 
-function rcAgain(){q('timeup-overlay').classList.remove('on');q('rc-msgs').innerHTML='';rcStart();}
+function rcAgain(){
+  q('timeup-overlay').classList.remove('on');
+  q('rc-msgs').innerHTML='';
+  // Make sure socket is alive
+  if(!socket||!socket.connected){initSocket();setTimeout(rcStart,1200);}
+  else rcStart();
+}
 
 /* ═══════════ SOCKET ═══════════ */
 function initSocket(){
+  // If socket exists and is connected, do nothing
   if(socket&&socket.connected)return;
-  socket=io(API,{auth:{token:getToken()},transports:['websocket','polling'],reconnection:true,reconnectionDelay:1000});
+  // If socket exists but disconnected, reconnect it (don't create new one)
+  if(socket&&!socket.connected){socket.connect();return;}
+  // Create new socket
+  socket=io(API,{auth:{token:getToken()},transports:['websocket','polling'],reconnection:true,reconnectionDelay:1000,reconnectionAttempts:10});
 
   socket.on('connect',()=>{socket.emit('register');console.log('✅ Socket connected');});
   socket.on('disconnect',()=>{if(rcState==='active')rcAddMsg('⚠️ Connection lost...','sys');});
@@ -1574,6 +1593,8 @@ function initSocket(){
     q('timeup-overlay').classList.add('on');
     rcRoom=null;
     awardXP(15,'Completed a full 5-min chat');
+    // Increment chat count in UI
+    const sc=q('s-chats');if(sc)sc.textContent=parseInt(sc.textContent||0)+1;
   });
 
   socket.on('rchat-warning',(d)=>{
@@ -2011,6 +2032,9 @@ async function main(){
 // Close modals on back
 window.addEventListener('popstate',()=>{closePModal();closeSV();q('compose').classList.remove('on');closeUnsent();});
 document.addEventListener('click',(e)=>{if(!e.target.closest('.pmodal-inner')&&q('pmodal').classList.contains('on')&&e.target===q('pmodal'))closePModal();});
+
+// ══ BOOT — must be last ══
+document.addEventListener('DOMContentLoaded', main);
 </script>
 </body>
 </html>

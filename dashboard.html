@@ -1377,7 +1377,13 @@ function rcSetState(s){
 }
 
 function rcStart(){
-  if(!socket||!socket.connected){toast('⚡ Connecting...');initSocket();setTimeout(rcStart,1200);return;}
+  if(!socket||!socket.connected){
+    // Only try once — don't recurse if already reconnecting
+    if(!socket){initSocket();}
+    else{socket.connect();}
+    toast('⚡ Connecting... try again in a moment');
+    return;
+  }
   rcSetState('searching');rcSearchSecs=0;clearInterval(rcSearchIv);
   // Reset hint
   const pos = q('srch-pos'); if(pos) { pos.textContent='In queue...'; pos.style.color='var(--tx3)'; }

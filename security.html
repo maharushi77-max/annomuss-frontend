@@ -288,6 +288,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="sec" style="margin-top:18px">
       <div class="slbl">About</div>
       <div class="sc">
+        <div class="row" onclick="location.href='/terms.html'">
+          <div class="ri">📋</div>
+          <div class="rb"><div class="rt">Terms & Privacy</div><div class="rs">Terms of service, privacy policy & safety</div></div>
+          <div style="font-size:.75rem;color:var(--tx3)">›</div>
+        </div>
         <div class="row" onclick="location.href='mailto:support@annomuss.in'">
           <div class="ri">📮</div>
           <div class="rb"><div class="rt">Contact support</div><div class="rs">support@annomuss.in</div></div>
@@ -316,7 +321,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const API='https://annomuss-backend-icgp.onrender.com';
 let user=null, isDirty=false;
 const ch={avatarEmoji:null,allowDMs:null,showOnline:null,profileVisibility:null};
@@ -453,11 +458,4 @@ async function confirmDelete(){
     localStorage.clear();
     toast('Account deleted. Goodbye 👋');
     setTimeout(()=>location.href='/index.html',1500);
-  }catch(e){if(e.message!=='401'){toast('Network error ❌');btn.disabled=false;btn.textContent='Yes, delete my account';}}
-}
-
-window.addEventListener('beforeunload',e=>{if(isDirty){e.preventDefault();e.returnValue='';}});
-document.addEventListener('DOMContentLoaded',load);
-</script>
-</body>
-</html>
+  }catch(e){if(e.message!=='401'){toast('Network error ❌');btn.disabl

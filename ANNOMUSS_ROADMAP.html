@@ -1,3 +1,4 @@
+<script src="/api.js"></script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -126,6 +127,31 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .divider{height:1px;background:linear-gradient(90deg,transparent,var(--b),transparent);margin:28px 0}
 </style>
 </head>
+
+<script>
+// Global authenticated fetch — replaces all raw fetch() calls
+window.apiFetch = async (url, options = {}) => {
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = '/index.html'; return null; }
+
+  const res = await fetch(`http://localhost:3000${url}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...options.headers
+    }
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem('token');
+    window.location.href = '/index.html';
+    return null;
+  }
+  return res;
+};
+</script>
+
 <body>
 <div class="wrap">
 

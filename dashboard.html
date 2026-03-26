@@ -4,6 +4,15 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#030308"/>
+<meta name="description" content="Express yourself anonymously. Confess, vent, connect. No names. Just truth."/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Annomuss"/>
+<meta property="og:title" content="Annomuss 🎭"/>
+<meta property="og:description" content="Say what you can't say out loud. Anonymously."/>
+<meta property="og:image" content="https://annomuss.vercel.app/og-image.png"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icons/icon-192.png"/>
 <title>Annomuss 🎭</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>"/>
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
@@ -620,7 +629,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div class="pulse-dot"></div>
       <span id="online-num" style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">...</span>
     </div>
-    <button class="ico-btn" onclick="goPage('social')">🔔</button>
+    <button class="ico-btn" onclick="goPage('social')" style="position:relative">🔔<span id="notif-badge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--cr);border:1.5px solid var(--bg)"></span></button>
   </div>
 
   <!-- MIDNIGHT BANNER — shows 11pm–4am -->
@@ -979,7 +988,7 @@ function goPage(n){
   if(nb)nb.classList.add('on');
   currentPage=n;
   if(n==='vent')loadVents('latest');
-  if(n==='social')socTab('inbox',null);
+  if(n==='social'){socTab('inbox',null);const badge=q('notif-badge');if(badge)badge.style.display='none';}
   if(n==='profile')applyUser();
   // scroll page back to top when switching
   if(pg)pg.scrollTop=0;
@@ -1382,7 +1391,11 @@ async function ciSubmit(){
   // Refresh pulse banner with new mood data
   setTimeout(()=>{if(userLoc.city)loadEmotionPulse();},500);
 }
-function ciSkip(){q('mood-ci').classList.remove('on');}
+function ciSkip(){
+  q('mood-ci').classList.remove('on');
+  // Don't show again today
+  localStorage.setItem('ann_mood_skip_'+new Date().toDateString(),'1');
+}
 
 /* ═══════════ CRISIS ═══════════ */
 function crisisDismiss(){q('crisis').classList.remove('on');}
@@ -1419,9 +1432,13 @@ function updateReqBadge(){
 
 async function loadInbox(){
   const l=q('inbox-list');l.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
-  try{const r=await api('/api/messages/inbox');const d=await r.json();const cs=Array.isArray(d)?d:(d.conversations||[]);
+  try{
+    const r=await api('/api/messages/inbox');const d=await r.json();const cs=Array.isArray(d)?d:(d.conversations||[]);
     if(!cs.length){l.innerHTML='<div class="empty"><div style="font-size:3rem">📬</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">No messages yet</div></div>';return;}
-    l.innerHTML=cs.map(c=>`<div class="friend-card" onclick="location.href='/messages.html?with=${c.with||c._id||''}'"><div class="fav">${c.withAvatar||'🎭'}</div><div style="flex:1;min-width:0"><div style="font-family:var(--fD);font-weight:700;font-size:.875rem">${esc(c.withName||'Anonymous')}</div><div style="font-size:.77rem;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${esc(c.lastMessage?.text||'Tap to chat')}</div></div>${c.unread?'<div style="width:8px;height:8px;border-radius:50%;background:var(--v)"></div>':''}</div>`).join('');
+    // Count unread and update bell badge
+    const unreadCount=cs.filter(c=>c.unread).length;
+    const badge=q('notif-badge');if(badge)badge.style.display=unreadCount>0?'block':'none';
+    l.innerHTML=cs.map(c=>`<div class="friend-card" onclick="location.href='/messages.html?with=${c.with||c._id||''}&name=${encodeURIComponent(c.withName||'Anonymous')}&emoji=${encodeURIComponent(c.withAvatar||'🎭')}'"><div class="fav">${c.withAvatar||'🎭'}</div><div style="flex:1;min-width:0"><div style="font-family:var(--fD);font-weight:700;font-size:.875rem">${esc(c.withName||'Anonymous')}</div><div style="font-size:.77rem;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${esc(c.lastMessage?.text||'Tap to chat')}</div></div>${c.unread?'<div style="width:8px;height:8px;border-radius:50%;background:var(--v)"></div>':''}</div>`).join('');
   }catch(e){l.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">No messages yet</div></div>';}
 }
 
@@ -1429,7 +1446,7 @@ async function loadFriends(){
   const l=q('friends-list');l.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
   try{const r=await api('/api/users/friends');const d=await r.json();const fs=Array.isArray(d)?d:(d.friends||[]);
     if(!fs.length){l.innerHTML='<div class="empty"><div style="font-size:3rem">👥</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">No friends yet</div><div style="font-size:.82rem;color:var(--tx3)">Discover people in the Discover tab</div></div>';return;}
-    l.innerHTML=fs.map(f=>`<div class="friend-card" onclick="location.href='/messages.html?with=${f._id}'"><div class="fav">${f.avatarEmoji||'🎭'}${f.online?'<div class="on-dot"></div>':''}</div><div style="flex:1;min-width:0"><div style="font-family:var(--fD);font-weight:700;font-size:.875rem">${esc(f.anonymousName||'Anonymous')}</div><div style="font-size:.72rem;color:var(--tx3);margin-top:2px">${f.online?'Online now':'Offline'}</div></div><button class="btn btn-sm btn-g" onclick="event.stopPropagation();location.href='/messages.html?with=${f._id}'">Message</button></div>`).join('');
+    l.innerHTML=fs.map(f=>`<div class="friend-card" onclick="location.href='/messages.html?with=${f._id}&name=${encodeURIComponent(f.anonymousName||'Anonymous')}&emoji=${encodeURIComponent(f.avatarEmoji||'🎭')}'"><div class="fav">${f.avatarEmoji||'🎭'}${f.online?'<div class="on-dot"></div>':''}</div><div style="flex:1;min-width:0"><div style="font-family:var(--fD);font-weight:700;font-size:.875rem">${esc(f.anonymousName||'Anonymous')}</div><div style="font-size:.72rem;color:var(--tx3);margin-top:2px">${f.online?'Online now':'Offline'}</div></div><button class="btn btn-sm btn-g" onclick="event.stopPropagation();location.href='/messages.html?with=${f._id}&name=${encodeURIComponent(f.anonymousName||'Anonymous')}&emoji=${encodeURIComponent(f.avatarEmoji||'🎭')}'">Message</button></div>`).join('');
   }catch(e){l.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">Couldn\'t load</div></div>';}
 }
 
@@ -1768,6 +1785,14 @@ function initSocket(){
     q('toasts').appendChild(t);
     setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-8px) scale(.9)';t.style.transition='.2s';setTimeout(()=>t.remove(),220);},4000);
   });
+  socket.on('new-message',(d)=>{
+    // Show red dot on bell if not currently on social/inbox page
+    if(currentPage!=='social'){
+      const badge=q('notif-badge');if(badge)badge.style.display='block';
+      toast(`💬 New message from ${d.from||'someone'}`);
+    }
+  });
+
   socket.on('compliment-received',(d)=>{showGratitudeNotif(d.message||'A stranger thinks you\'re amazing ✨');});
 }
 
@@ -2159,8 +2184,33 @@ async function main(){
   if(pendingCompose){sessionStorage.removeItem('openCompose');setTimeout(()=>openCompose(pendingCompose),800);}
   // Load emotion pulse after location
   setTimeout(()=>{if(userLoc.city)loadEmotionPulse();},2000);
-  // Show mood checkin after 1.5s if not done today
-  setTimeout(()=>{const td=new Date().toDateString();if(!localStorage.getItem('ann_mood_'+td))q('mood-ci').classList.add('on');},1500);
+  // Show mood checkin after 2s only if not done AND not skipped today
+  setTimeout(()=>{
+    const td=new Date().toDateString();
+    const skipped=localStorage.getItem('ann_mood_skip_'+td);
+    const logged=localStorage.getItem('ann_mood_'+td);
+    if(!logged&&!skipped)q('mood-ci').classList.add('on');
+  },2000);
+  // Silently check inbox for unread badge on load
+  setTimeout(async()=>{
+    try{const r=await api('/api/messages/inbox');const d=await r.json();const cs=Array.isArray(d)?d:(d.conversations||[]);
+      const unread=cs.filter(c=>c.unread).length;
+      const badge=q('notif-badge');if(badge)badge.style.display=unread>0?'block':'none';
+    }catch(_){}
+  },1500);
+  // Pull-to-refresh on feed page
+  let ptr_startY=0,ptr_pulling=false;
+  const ptrEl=q('pg-feed');
+  if(ptrEl){
+    ptrEl.addEventListener('touchstart',e=>{if(ptrEl.scrollTop===0)ptr_startY=e.touches[0].clientY;},{ passive:true });
+    ptrEl.addEventListener('touchend',e=>{
+      if(ptr_startY>0){
+        const dy=e.changedTouches[0].clientY-ptr_startY;
+        if(dy>65){toast('🔄 Refreshing...');loadFeed();loadStories();}
+        ptr_startY=0;
+      }
+    },{ passive:true });
+  }
   // Handle deep links
   if(location.hash.startsWith('#post-'))setTimeout(()=>openPModal(location.hash.replace('#post-','')),800);
   if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});

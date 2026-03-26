@@ -1,3 +1,4 @@
+<script src="/api.js"></script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -72,6 +73,31 @@
     .btn-cancel-report{background:none;border:none;color:#888;cursor:pointer;width:100%;margin-top:10px;font-size:.9rem}
   </style>
 </head>
+
+<script>
+// Global authenticated fetch — replaces all raw fetch() calls
+window.apiFetch = async (url, options = {}) => {
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = '/index.html'; return null; }
+
+  const res = await fetch(`http://localhost:3000${url}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...options.headers
+    }
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem('token');
+    window.location.href = '/index.html';
+    return null;
+  }
+  return res;
+};
+</script>
+
 <body>
 
 <div class="topbar">

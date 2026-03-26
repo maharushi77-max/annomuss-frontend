@@ -2,129 +2,248 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Terms of Service — Annomuss</title>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#030308"/>
+<title>Terms & Privacy · Annomuss</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"/>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#03030c;--card:#0e0e26;--b:#1a1a3e;--v:#7c5cf4;--v2:#a58bff;--tx:#e0dcff;--tx2:#8e8ab5;--tx3:#4a4768;--rose:#ff4f87;--fD:'Bricolage Grotesque',sans-serif;--fB:'Instrument Sans',sans-serif}
-body{background:var(--bg);color:var(--tx);font-family:var(--fB);line-height:1.7;padding:20px}
-body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 0%,rgba(124,92,244,.05),transparent 55%);pointer-events:none}
-.wrap{max-width:680px;margin:0 auto;position:relative;z-index:1;padding:20px 0 60px}
-.back{display:inline-flex;align-items:center;gap:6px;color:var(--tx3);font-size:.8rem;text-decoration:none;padding:8px 14px;border:1px solid var(--b);border-radius:10px;background:var(--card);margin-bottom:28px;transition:all .15s;font-weight:600}
-.back:hover{border-color:var(--v);color:var(--v2)}
-h1{font-family:var(--fD);font-size:1.7rem;font-weight:800;margin-bottom:6px;letter-spacing:-.3px}
-.logo{font-family:var(--fD);font-size:.9rem;font-weight:800;background:linear-gradient(135deg,#7c5cf4,#ff4f87);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px;display:block}
-.updated{font-size:.74rem;color:var(--tx3);margin-bottom:28px;padding:7px 12px;background:var(--card);border:1px solid var(--b);border-radius:8px;display:inline-block}
-h2{font-family:var(--fD);font-size:1.05rem;font-weight:800;color:var(--v2);margin:28px 0 10px}
-p{font-size:.88rem;color:var(--tx2);margin-bottom:10px}
-ul{padding-left:18px;margin-bottom:10px}
-li{font-size:.88rem;color:var(--tx2);margin-bottom:5px}
-.highlight{background:rgba(255,79,135,.07);border:1px solid rgba(255,79,135,.2);border-radius:10px;padding:13px 15px;margin:14px 0}
-.highlight p{margin:0;color:var(--tx)}
-.highlight.ok{background:rgba(124,92,244,.08);border-color:rgba(124,92,244,.2)}
-strong{color:var(--tx);font-weight:600}
-.contact{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:18px;margin-top:28px;text-align:center}
-.contact p{margin-bottom:6px}
-.contact a{color:var(--v2);text-decoration:none;font-weight:600}
+:root{--bg:#030308;--bg1:#08080f;--bg2:#0d0d1c;--v:#7B5EA7;--v3:#C4A8FF;--vg:rgba(123,94,167,.1);--vb:rgba(123,94,167,.22);--tl:#00C9A7;--cr:#FF4D6D;--tx:#F5F3FF;--tx2:#9896B8;--tx3:#4E4C6A;--bd:rgba(255,255,255,.06);--bd2:rgba(255,255,255,.1);--safe:env(safe-area-inset-bottom,0px);--fD:'Clash Display',sans-serif;--fB:'Cabinet Grotesk',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);color:var(--tx);font-family:var(--fB);font-size:15px;line-height:1.7}
+::-webkit-scrollbar{width:0}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(123,94,167,.06),transparent 55%)}
+#app{max-width:640px;margin:0 auto;padding:0 0 calc(40px + var(--safe));position:relative;z-index:1}
+/* header */
+.hdr{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;padding:14px 18px;padding-top:calc(14px + env(safe-area-inset-top,0px));background:rgba(3,3,8,.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--bd)}
+.bk{width:36px;height:36px;border-radius:50%;background:var(--bg2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--tx2);cursor:pointer;flex-shrink:0;text-decoration:none}
+.logo{font-family:var(--fD);font-weight:700;font-size:1rem;background:linear-gradient(120deg,var(--v3),#ff85a1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+/* tabs */
+.tabs{display:flex;border-bottom:1px solid var(--bd);padding:0 18px;background:rgba(3,3,8,.7);backdrop-filter:blur(12px);position:sticky;top:65px;z-index:40}
+.tab{flex:1;padding:12px 0;text-align:center;font-size:.78rem;font-weight:700;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fD);letter-spacing:.03em;transition:all .15s}
+.tab.on{color:var(--v3);border-color:var(--v)}
+/* content */
+.section{padding:28px 18px 0}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:100px;background:var(--vg);border:1px solid var(--vb);font-size:.72rem;font-weight:700;color:var(--v3);font-family:var(--fD);margin-bottom:14px}
+h1{font-family:var(--fD);font-size:1.6rem;font-weight:700;letter-spacing:-.4px;margin-bottom:8px;line-height:1.2}
+.subtitle{font-size:.85rem;color:var(--tx2);margin-bottom:24px;line-height:1.6}
+.updated{font-size:.72rem;color:var(--tx3);font-family:var(--fD);margin-bottom:28px;padding:6px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;display:inline-block}
+h2{font-family:var(--fD);font-size:1.05rem;font-weight:700;margin:28px 0 10px;color:var(--tx);letter-spacing:-.1px}
+h2::before{content:'';display:inline-block;width:3px;height:14px;background:var(--v);border-radius:2px;margin-right:10px;vertical-align:middle}
+p{font-size:.9rem;color:var(--tx2);margin-bottom:12px;line-height:1.75}
+ul{padding-left:0;list-style:none;margin-bottom:14px}
+li{font-size:.9rem;color:var(--tx2);padding:5px 0 5px 20px;position:relative;line-height:1.65}
+li::before{content:'•';position:absolute;left:6px;color:var(--v3)}
+.highlight{background:var(--vg);border:1px solid var(--vb);border-radius:12px;padding:14px 16px;margin:16px 0;font-size:.87rem;color:var(--tx);line-height:1.7}
+.highlight strong{color:var(--v3)}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:12px 0}
+.card-title{font-family:var(--fD);font-weight:700;font-size:.88rem;margin-bottom:6px;color:var(--tx)}
+.card-body{font-size:.83rem;color:var(--tx2);line-height:1.65}
+.crisis-box{background:rgba(0,201,167,.07);border:1.5px solid rgba(0,201,167,.2);border-radius:14px;padding:16px;margin:20px 0}
+.crisis-box a{color:var(--tl);font-weight:600}
+.danger-box{background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.15);border-radius:12px;padding:14px 16px;margin:12px 0;font-size:.85rem;color:var(--tx2);line-height:1.7}
+.pane{display:none}
+.pane.on{display:block}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <a class="back" href="index.html">← Back</a>
-  <span class="logo">🎭 annomuss</span>
-  <h1>Terms of Service</h1>
-  <div class="updated">Last updated: March 2026</div>
-
-  <div class="highlight ok">
-    <p>🎭 <strong>Annomuss exists for anonymous emotional expression.</strong> These terms exist to keep the platform safe and respectful for everyone. By using Annomuss, you agree to these terms.</p>
+<div id="app">
+  <div class="hdr">
+    <a class="bk" href="javascript:history.back()">←</a>
+    <div class="logo">annomuss</div>
+    <div style="flex:1"></div>
+    <div style="font-size:.72rem;color:var(--tx3);font-family:var(--fD)">Legal</div>
   </div>
 
-  <h2>1. Eligibility</h2>
-  <p>You must be at least 13 years old to use Annomuss. By creating an account, you confirm you meet this requirement. Users under 18 should have parental awareness of their use of this platform.</p>
-
-  <h2>2. Accounts</h2>
-  <ul>
-    <li>One account per person. Creating multiple accounts to evade bans is prohibited.</li>
-    <li>You are responsible for maintaining the security of your account.</li>
-    <li>Your anonymous name is yours — but we reserve the right to reclaim names that violate these terms.</li>
-    <li>OTP-based login means you control access through your email. Keep your email secure.</li>
-  </ul>
-
-  <h2>3. Acceptable Use</h2>
-  <div class="highlight ok">
-    <p>✅ <strong>You CAN:</strong> Share feelings anonymously, confess things safely, support other users, express your emotions freely, post creative content, and connect with strangers respectfully.</p>
+  <div class="tabs">
+    <div class="tab on" onclick="showTab('terms',this)">📋 Terms</div>
+    <div class="tab" onclick="showTab('privacy',this)">🔒 Privacy</div>
+    <div class="tab" onclick="showTab('safety',this)">🛡️ Safety</div>
   </div>
-  <div class="highlight">
-    <p>❌ <strong>You CANNOT:</strong></p>
+
+  <!-- TERMS OF SERVICE -->
+  <div class="pane on" id="pane-terms">
+    <div class="section">
+      <div class="hero-badge">📋 Terms of Service</div>
+      <h1>Using Annomuss</h1>
+      <div class="subtitle">These terms govern your use of Annomuss. By using the platform, you agree to them.</div>
+      <div class="updated">Last updated: March 2026 · Effective immediately</div>
+
+      <h2>Who can use Annomuss</h2>
+      <p>You must be at least <strong>13 years old</strong> to use Annomuss. By using this platform, you confirm you meet this age requirement. If you are under 18, you must have permission from a parent or guardian.</p>
+
+      <h2>What Annomuss is</h2>
+      <p>Annomuss is an anonymous social platform where users share confessions, vents, unsent letters, and connect through random chat. We are committed to keeping the platform safe, honest, and supportive.</p>
+      <div class="highlight"><strong>Anonymous, not invisible.</strong> While your posts are anonymous, Annomuss maintains internal logs for safety and legal compliance. True anonymity cannot be guaranteed if illegal activity is reported to authorities.</div>
+
+      <h2>What you agree to</h2>
+      <ul>
+        <li>You will not post content that is illegal, threatening, harassing, or promotes violence</li>
+        <li>You will not use Annomuss to bully, stalk, or harm any individual</li>
+        <li>You will not post sexual content involving minors under any circumstances</li>
+        <li>You will not attempt to hack, scrape, or disrupt the platform</li>
+        <li>You will not impersonate other users or create fake identities</li>
+        <li>You will not use bots or automated tools to interact with the platform</li>
+        <li>You will not share private information of others without their consent</li>
+      </ul>
+
+      <h2>Content ownership</h2>
+      <p>You own what you post. By posting on Annomuss, you grant us a non-exclusive, worldwide licence to display and distribute your content on the platform. You can delete your content at any time.</p>
+      <p>Posts that remain after account deletion stay on the platform anonymously. They cannot be linked back to your identity once your account is deleted.</p>
+
+      <h2>Moderation and bans</h2>
+      <p>We reserve the right to remove any content that violates these terms, or to ban accounts that repeatedly break rules. Decisions are made in good faith to keep the community safe.</p>
+      <div class="danger-box">⚠️ If we receive a valid legal request from law enforcement, we may be required by law to share information. We will comply with Indian law including the IT Act 2000 and DPDP Act 2023.</div>
+
+      <h2>Disclaimers</h2>
+      <p>Annomuss is provided "as is". We do not guarantee uninterrupted service. We are not responsible for content posted by users. Use the platform at your own risk.</p>
+      <p>Annomuss is not a crisis service. If you or someone you know is in danger, please contact emergency services immediately.</p>
+
+      <h2>Changes to these terms</h2>
+      <p>We may update these terms from time to time. Continued use of Annomuss after changes means you accept the new terms. We will try to notify you of significant changes.</p>
+
+      <h2>Contact</h2>
+      <p>Questions about these terms? Email us at <a href="mailto:support@annomuss.in" style="color:var(--v3)">support@annomuss.in</a></p>
+    </div>
   </div>
-  <ul>
-    <li>Post content that harasses, threatens, or targets specific individuals</li>
-    <li>Share sexually explicit content involving minors (zero tolerance — immediate permanent ban + reporting to authorities)</li>
-    <li>Post content inciting violence, self-harm, or encouraging others to harm themselves</li>
-    <li>Spam, advertise, or use the platform for commercial purposes without permission</li>
-    <li>Attempt to identify or dox other anonymous users</li>
-    <li>Use automated bots or scripts to interact with the platform</li>
-    <li>Share others' private information without consent</li>
-    <li>Impersonate other users or create misleading content</li>
-    <li>Attempt to hack, exploit, or compromise platform security</li>
-  </ul>
 
-  <h2>4. Content Ownership</h2>
-  <ul>
-    <li>You own the content you post. By posting, you grant Annomuss a license to display it on the platform.</li>
-    <li>Confessions and anonymous posts remain anonymous — we will not reveal the author except when legally compelled.</li>
-    <li>You may delete your posts at any time. Deleted content is removed from public view immediately.</li>
-    <li>Stories auto-delete after 24 hours — this cannot be reversed.</li>
-  </ul>
+  <!-- PRIVACY POLICY -->
+  <div class="pane" id="pane-privacy">
+    <div class="section">
+      <div class="hero-badge">🔒 Privacy Policy</div>
+      <h1>Your Data on Annomuss</h1>
+      <div class="subtitle">We take your privacy seriously. This explains what we collect, why, and your rights under the DPDP Act 2023.</div>
+      <div class="updated">Last updated: March 2026 · DPDP Act 2023 compliant</div>
 
-  <h2>5. Community Guidelines</h2>
-  <p>Annomuss is a place for genuine emotional expression. We take moderation seriously:</p>
-  <ul>
-    <li><strong>3 reports</strong> — account restricted (posting limited)</li>
-    <li><strong>5 reports</strong> — shadow banned (posts hidden from others)</li>
-    <li><strong>10 reports</strong> — account permanently suspended</li>
-    <li>Severe violations (CSAM, credible violence threats) — immediate ban + law enforcement notification</li>
-  </ul>
-  <p>We reserve the right to remove any content or suspend any account that violates these terms, at our sole discretion.</p>
+      <h2>What we collect</h2>
+      <div class="card">
+        <div class="card-title">📧 Account data</div>
+        <div class="card-body">Your email address (used only for OTP login), your anonymous name (randomly assigned), and your chosen avatar emoji.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">📝 Content data</div>
+        <div class="card-body">Posts, confessions, vents, unsent letters, and comments you create. These are stored anonymously — not linked to your real identity in any public-facing way.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">📍 Location data</div>
+        <div class="card-body">Your city/state (if you allow location access) — used only for emotion pulse map and local matching. We never store your precise GPS coordinates.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚡ Usage data</div>
+        <div class="card-body">XP earned, mood logs, streak data, and basic activity (posts, chats) — used to power your profile stats and badges. Never sold or shared.</div>
+      </div>
 
-  <h2>6. Mental Health Disclaimer</h2>
-  <p>Annomuss is not a mental health service or crisis line. We are a social platform for anonymous expression. If you or someone you know is in crisis:</p>
-  <ul>
-    <li>🇮🇳 iCall: 9152987821</li>
-    <li>🌍 Crisis Text Line: Text HOME to 741741</li>
-    <li>🇬🇧 Samaritans: 116 123</li>
-    <li>🌐 Befrienders Worldwide: befrienders.org</li>
-  </ul>
+      <h2>What we do NOT collect</h2>
+      <ul>
+        <li>Your real name, phone number, or physical address</li>
+        <li>Payment information (we don't charge you anything)</li>
+        <li>Your contacts, photos outside of posts, or device sensors</li>
+        <li>Your browsing history outside of Annomuss</li>
+      </ul>
 
-  <h2>7. Random Chat</h2>
-  <ul>
-    <li>Random chat connections are anonymous and temporary (5 minutes).</li>
-    <li>Recording or screenshotting private chats to share publicly is prohibited.</li>
-    <li>Use the Report button for any uncomfortable interactions — we take this seriously.</li>
-    <li>Users reported during random chat receive a 30-minute cooldown after 2+ reports in 24 hours.</li>
-  </ul>
+      <h2>How we use your data</h2>
+      <ul>
+        <li>To provide and improve the platform</li>
+        <li>To match you in random chat by emotion and location</li>
+        <li>To show you relevant content in the feed</li>
+        <li>To detect crisis content and surface helplines</li>
+        <li>To send you OTP verification emails (nothing else)</li>
+      </ul>
 
-  <h2>8. Privacy</h2>
-  <p>Our Privacy Policy (linked below) describes how we handle your data. In summary: we collect minimal data, never sell it, and never show ads.</p>
+      <div class="highlight"><strong>We do not sell your data.</strong> We do not have ads. We do not share your data with third parties for marketing purposes. Your data exists only to make Annomuss work for you.</div>
 
-  <h2>9. Availability</h2>
-  <p>We aim for high availability but cannot guarantee uninterrupted service. We may perform maintenance, updates, or suspend service without notice. We are not liable for any loss of access.</p>
+      <h2>Data retention</h2>
+      <p>Your account data is kept until you delete your account. Posts and vents remain anonymous on the platform after deletion (they cannot be linked back to you). OTP codes expire in 10 minutes. Mood data is kept for 90 days then auto-deleted.</p>
 
-  <h2>10. Limitation of Liability</h2>
-  <p>Annomuss is provided "as is." We are not liable for content posted by users, actions taken between users, or any indirect, consequential, or incidental damages arising from use of the platform.</p>
+      <h2>Your rights (DPDP Act 2023)</h2>
+      <ul>
+        <li><strong>Right to access</strong> — you can request a copy of your data at any time</li>
+        <li><strong>Right to correction</strong> — you can update your profile settings at any time</li>
+        <li><strong>Right to erasure</strong> — you can delete your account from Settings → Security → Delete Account</li>
+        <li><strong>Right to withdraw consent</strong> — you can opt out of location access in your device settings</li>
+        <li><strong>Right to grievance redressal</strong> — email support@annomuss.in within 72 hours for a response</li>
+      </ul>
 
-  <h2>11. Changes to Terms</h2>
-  <p>We may update these terms as the platform grows. We will notify users of material changes via the app. Continued use after notification constitutes acceptance of updated terms.</p>
+      <h2>Cookies and storage</h2>
+      <p>We use localStorage (browser storage) to keep you logged in and save your preferences. We do not use third-party tracking cookies. No cookie consent banner needed — we keep it clean.</p>
 
-  <h2>12. Governing Law</h2>
-  <p>These terms are governed by the laws of India. Disputes will be resolved in the jurisdiction of the platform operator's registered location.</p>
+      <h2>Third-party services</h2>
+      <ul>
+        <li><strong>Cloudinary</strong> — stores images and videos you upload (their privacy policy applies)</li>
+        <li><strong>Resend</strong> — sends your OTP emails (they only see your email address)</li>
+        <li><strong>MongoDB Atlas</strong> — hosts our database securely on AWS servers</li>
+        <li><strong>Render.com</strong> — hosts our backend server</li>
+        <li><strong>Vercel</strong> — hosts our frontend</li>
+      </ul>
 
-  <div class="contact">
-    <p style="font-family:var(--fD);font-weight:800;color:var(--tx);margin-bottom:8px">Questions?</p>
-    <p>Contact us at <a href="mailto:legal@annomuss.app">legal@annomuss.app</a></p>
-    <p style="margin-top:8px"><a href="privacy.html">Privacy Policy →</a></p>
+      <h2>Children's privacy</h2>
+      <p>Annomuss is not directed at children under 13. If you believe a child under 13 is using our platform, please contact us and we will remove their account promptly.</p>
+
+      <h2>Contact & Grievance Officer</h2>
+      <p>For privacy concerns or data requests, contact our Grievance Officer at <a href="mailto:privacy@annomuss.in" style="color:var(--v3)">privacy@annomuss.in</a>. We will respond within 72 hours as required by the DPDP Act 2023.</p>
+    </div>
+  </div>
+
+  <!-- SAFETY -->
+  <div class="pane" id="pane-safety">
+    <div class="section">
+      <div class="hero-badge">🛡️ Community Safety</div>
+      <h1>Keeping Annomuss Safe</h1>
+      <div class="subtitle">We care deeply about the mental health and safety of everyone on Annomuss. Here's how we protect our community.</div>
+
+      <h2>Crisis detection</h2>
+      <p>Annomuss uses AI to detect signs of distress in posts and vents. If our system detects a potential crisis, we surface mental health resources and helpline numbers immediately. This feature exists because we believe one conversation can save a life.</p>
+
+      <div class="crisis-box">
+        <div style="font-family:var(--fD);font-weight:700;font-size:.95rem;margin-bottom:10px;color:var(--tl)">💙 If you're in crisis right now</div>
+        <p style="font-size:.87rem;color:#a0f5e4;margin-bottom:10px">You are not alone. Please reach out to one of these services:</p>
+        <a href="tel:9152987821" style="display:block;padding:10px;background:rgba(0,201,167,.08);border-radius:9px;margin-bottom:6px;font-size:.85rem;text-decoration:none">📞 iCall India — 9152987821</a>
+        <a href="tel:18602662345" style="display:block;padding:10px;background:rgba(0,201,167,.08);border-radius:9px;font-size:.85rem;text-decoration:none">📞 Vandrevala Foundation — 1860-2662-345</a>
+      </div>
+
+      <h2>How to report</h2>
+      <p>Every post has a ⋯ menu with a "Report" option. Reports go directly to our moderation team. We review every report within 24 hours and take action where needed.</p>
+
+      <h2>Content moderation</h2>
+      <ul>
+        <li>All posts go through AI safety screening before being published</li>
+        <li>Content flagged with high confidence is automatically hidden pending review</li>
+        <li>Users who repeatedly violate community guidelines are banned</li>
+        <li>Admin dashboard allows our team to review and act on reports</li>
+      </ul>
+
+      <h2>Anonymous, not consequence-free</h2>
+      <p>Being anonymous doesn't mean you can harm others. Harassment, threats, and abuse are taken seriously. We cooperate with law enforcement when required by law. Anonymity protects your identity, not your behaviour.</p>
+
+      <h2>Blocking and muting</h2>
+      <p>You can block any user from the Social → Discover page. Blocked users cannot see your profile, send you messages, or appear in your feed.</p>
+
+      <h2>Community guidelines in short</h2>
+      <ul>
+        <li>✅ Share honestly. Be vulnerable. Express yourself.</li>
+        <li>✅ Support others. Leave kind reactions. Send compliments.</li>
+        <li>❌ Don't harass, bully, or target anyone.</li>
+        <li>❌ Don't share anyone's personal information.</li>
+        <li>❌ Don't post explicit or violent content.</li>
+        <li>❌ Don't use this platform to harm yourself or others.</li>
+      </ul>
+
+      <h2>Contact safety team</h2>
+      <p>For urgent safety concerns, email <a href="mailto:safety@annomuss.in" style="color:var(--v3)">safety@annomuss.in</a>. We take every message seriously.</p>
+
+      <div style="height:20px"></div>
+    </div>
   </div>
 </div>
+
+<script>
+function showTab(id, el){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('pane-'+id).classList.add('on');
+  el.classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
 </body>
 </html>

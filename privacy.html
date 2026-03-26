@@ -1,3 +1,4 @@
+<script src="/api.js"></script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,6 +29,31 @@ strong{color:var(--tx);font-weight:600}
 .contact a{color:var(--v2);text-decoration:none;font-weight:600}
 </style>
 </head>
+
+<script>
+// Global authenticated fetch — replaces all raw fetch() calls
+window.apiFetch = async (url, options = {}) => {
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = '/index.html'; return null; }
+
+  const res = await fetch(`http://localhost:3000${url}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...options.headers
+    }
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem('token');
+    window.location.href = '/index.html';
+    return null;
+  }
+  return res;
+};
+</script>
+
 <body>
 <div class="wrap">
   <a class="back" href="index.html">← Back</a>

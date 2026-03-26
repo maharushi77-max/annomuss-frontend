@@ -372,17 +372,17 @@ async function apiFetch(path,opts={}){
 // ── Load ──────────────────────────────────────
 async function load(){
   const tk=getToken();if(!tk){location.href='/index.html';return;}
+  // Show cached instantly
+  const cached=localStorage.getItem('user');
+  if(cached){try{user=JSON.parse(cached);renderAll();q('loading').style.display='none';q('cnt').style.display='block';}catch(_){}}
+  // Refresh in background
   try{
     const r=await fetch(`${API}/api/users/me`,{headers:{Authorization:`Bearer ${tk}`}});
-    if(!r.ok){q('sm').classList.add('on');return;}
-    user=await r.json();
-  }catch(e){
-    const c=localStorage.getItem('user');
-    if(c)user=JSON.parse(c);else{location.href='/index.html';return;}
-  }
-  renderAll();
-  q('loading').style.display='none';
-  q('cnt').style.display='block';
+    if(!r.ok){if(r.status===401)q('sm').classList.add('on');return;}
+    user=await r.json();localStorage.setItem('user',JSON.stringify(user));
+    renderAll();
+  }catch(e){if(!user){location.href='/index.html';return;}}
+  if(!cached){q('loading').style.display='none';q('cnt').style.display='block';}
 }
 
 function renderAll(){

@@ -321,7 +321,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const API='https://annomuss-backend-icgp.onrender.com';
 let user=null, isDirty=false;
 const ch={avatarEmoji:null,allowDMs:null,showOnline:null,profileVisibility:null};
@@ -362,17 +362,34 @@ function togLocal(key){
 async function load(){
   const tk=getToken();
   if(!tk){location.href='/index.html';return;}
+
+  // Show cached user instantly — no loading spinner wait
+  const cached=localStorage.getItem('user');
+  if(cached){
+    try{
+      user=JSON.parse(cached);
+      applyUI();
+      q('loading').style.display='none';
+      q('cnt').style.display='block';
+    }catch(_){}
+  }
+
+  // Verify token + refresh in background
   try{
     const r=await fetch(`${API}/api/users/me`,{headers:{Authorization:`Bearer ${tk}`}});
-    if(!r.ok){q('sm').classList.add('on');return;}
+    if(!r.ok){if(r.status===401)q('sm').classList.add('on');return;}
     user=await r.json();
+    localStorage.setItem('user',JSON.stringify(user));
+    applyUI(); // re-apply with fresh data silently
   }catch(e){
-    const c=localStorage.getItem('user');
-    if(c)user=JSON.parse(c);else{location.href='/index.html';return;}
+    if(!user){location.href='/index.html';return;}
   }
-  applyUI();
-  q('loading').style.display='none';
-  q('cnt').style.display='block';
+
+  // If no cache existed, show now
+  if(!cached){
+    q('loading').style.display='none';
+    q('cnt').style.display='block';
+  }
 }
 
 function applyUI(){
@@ -451,11 +468,4 @@ function logout(){if(!confirm('Log out of Annomuss?'))return;localStorage.remove
 function logoutAll(){if(!confirm('Log out from all devices?'))return;localStorage.clear();toast('Logged out everywhere 🔒');setTimeout(()=>location.href='/index.html',1200);}
 
 async function confirmDelete(){
-  const btn=q('del-btn');btn.disabled=true;btn.textContent='Deleting...';
-  try{
-    const r=await apiFetch('/api/users/delete-account',{method:'DELETE'});
-    if(!r.ok){const d=await r.json();toast(d.message||'Failed');btn.disabled=false;btn.textContent='Yes, delete my account';return;}
-    localStorage.clear();
-    toast('Account deleted. Goodbye 👋');
-    setTimeout(()=>location.href='/index.html',1500);
-  }catch(e){if(e.message!=='401'){toast('Network error ❌');btn.disabl
+  const btn=q('del-btn')

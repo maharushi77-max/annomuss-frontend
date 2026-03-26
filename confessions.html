@@ -347,15 +347,19 @@ async function apiFetch(path,opts={}){
 // ── Init ──────────────────────────────────────
 async function init(){
   const tk=getToken();if(!tk){location.href='/index.html';return;}
+  // Show cached user instantly — load posts right away
+  const cached=localStorage.getItem('user');
+  if(cached){try{user=JSON.parse(cached);}catch(_){}}
+  if(user)loadPosts(true); // start loading posts immediately from cache
+  // Verify + refresh in background
   try{
     const r=await fetch(`${API}/api/users/me`,{headers:{Authorization:`Bearer ${tk}`}});
-    if(!r.ok){q('sm').classList.add('on');return;}
-    user=await r.json();
+    if(!r.ok){if(r.status===401)q('sm').classList.add('on');return;}
+    user=await r.json();localStorage.setItem('user',JSON.stringify(user));
+    if(!cached)loadPosts(true); // first load if no cache
   }catch(e){
-    const c=localStorage.getItem('user');
-    if(c)user=JSON.parse(c);else{location.href='/index.html';return;}
+    if(!user){location.href='/index.html';return;}
   }
-  loadPosts(true);
 }
 
 // ── Filter ────────────────────────────────────

@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#030308"/>
 <meta name="description" content="Express yourself anonymously. Confess, vent, connect. No names. Just truth."/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Annomuss"/>
 <meta property="og:title" content="Annomuss 🎭"/>
 <meta property="og:description" content="Say what you can't say out loud. Anonymously."/>
 <meta property="og:image" content="https://annomuss.vercel.app/og-image.png"/>
 <link rel="manifest" href="/manifest.json"/>
-<link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><rect width=%22192%22 height=%22192%22 rx=%2240%22 fill=%22%230d0d1c%22/><text y=%22140%22 x=%2296%22 text-anchor=%22middle%22 font-size=%22120%22>🎭</text></svg>"/>
 <title>Annomuss 🎭</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>"/>
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
@@ -950,11 +950,23 @@ function detectEmo(txt){if(!txt||txt.length<5)return null;const l=txt.toLowerCas
 /* session */
 async function initSession(){
   token=getToken();if(!token){location.href='/index.html';return;}
+  // ── Instant: paint UI from cache immediately (feels instant) ──
+  const cached=localStorage.getItem('user');
+  if(cached){try{user=JSON.parse(cached);applyUser();}catch(_){}}
+  // ── Background: verify token + refresh user data ──
   try{
     const r=await fetch(`${API}/api/users/me`,{headers:{Authorization:`Bearer ${token}`}});
-    if(r.status===401){location.href='/index.html';return;}
-    if(r.ok){user=await r.json();localStorage.setItem('user',JSON.stringify(user));applyUser();}
-  }catch(e){const c=localStorage.getItem('user');if(c){user=JSON.parse(c);applyUser();}else{location.href='/index.html';}}
+    if(r.status===401){localStorage.removeItem('token');localStorage.removeItem('user');location.href='/index.html';return;}
+    if(r.ok){
+      const fresh=await r.json();
+      user=fresh;
+      localStorage.setItem('user',JSON.stringify(user));
+      applyUser(); // re-apply with fresh data
+    }
+  }catch(e){
+    // Already showing cached — just log
+    if(!user){location.href='/index.html';}
+  }
   // Get saved location
   const sl=localStorage.getItem('ann_loc');
   if(sl){try{userLoc={...userLoc,...JSON.parse(sl)};}catch(_){}}
@@ -1298,7 +1310,7 @@ async function submitVent(){
   const txt=q('vent-txt').value.trim();const emo=q('vent-emo').value||detectEmo(txt)||null;
   if(!txt)return toast('Write something 💭');if(txt.length>280)return toast('Max 280 chars');
   try{
-    const r=await api('/api/vents',{method:'POST',body:JSON.stringify({text:txt,emotion:emo})});
+    const r=await api('/api/vents',{method:'POST',body:JSON.stringify({text:txt,emotion:emo,city:userLoc.city||null})});
     const d=await r.json();
     if(r.status===429){return toast('⏳ Take a breath — try again in a moment.');}
     if(!r.ok)return toast(d.message||'Failed ❌');
@@ -1334,18 +1346,19 @@ async function loadVents(tab='latest'){
   const el=q(`vt-${tab}`);if(el)el.classList.add('on');
   const list=q('vent-list');list.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
   try{
-    let url=`/api/vents?tab=${tab}`;if(tab==='city'&&userLoc.city)url+=`&city=${encodeURIComponent(userLoc.city)}`;
+    let url=`/api/vents?tab=${tab}`;
+    if(tab==='city'&&userLoc.city)url+=`&city=${encodeURIComponent(userLoc.city)}`;
     const r=await api(url);const d=await r.json();const vs=Array.isArray(d)?d:(d.vents||[]);
-    if(!vs.length){list.innerHTML='<div class="empty"><div style="font-size:3rem">💭</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">No vents yet</div></div>';return;}
-    list.innerHTML=vs.map(v=>{const ec=EMO_C[v.emotion]||{};return`<div class="vc" id="vc-${v._id}">
+    if(!vs.length){list.innerHTML='<div class="empty"><div style="font-size:3rem">💭</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">No vents yet</div><div style="font-size:.82rem;color:var(--tx3)">'+(tab==='city'?'No vents from your city yet':'Be the first to vent something real')+'</div></div>';return;}
+    list.innerHTML=vs.map(v=>{const ec=EMO_C[v.emotion]||{};const isOwn=v.authorName===user?.anonymousName||v.authorId===user?._id;return`<div class="vc" id="vc-${v._id}">
       <div class="ph"><div class="pav">${v.authorEmoji||'🎭'}</div>
         <div style="flex:1;min-width:0"><div class="pn">${esc(v.authorName||'Anonymous')}${v.emotion?` <span class="epill" style="background:${ec.bg||'var(--vg)'};color:${ec.fg||'var(--v3)'}">${v.emotion}</span>`:''}</div>
         <div class="pt">${timeAgo(v.createdAt)}</div></div>
       </div>
       <div class="vb">${esc(v.text)}</div>
       <div style="display:flex;gap:6px;padding:4px 14px 14px;flex-wrap:wrap">
-        <button class="rb ${(v.hugs||[]).includes(user?.anonymousName)?'on':''}" onclick="hugVent('${v._id}',this)">🤗 <span id="hg-${v._id}">${(v.hugs||[]).length||''}</span></button>
-        ${v.authorName===user?.anonymousName?`<button class="rb" style="margin-left:auto;color:var(--cr)" onclick="delVent('${v._id}',this.closest('.vc'))">🗑️</button>`:''}
+        <button class="rb ${v.isHugged?'on':''}" onclick="hugVent('${v._id}',this)">🤗 <span id="hg-${v._id}">${v.hugCount||v.hugs?.length||''}</span></button>
+        ${isOwn?`<button class="rb" style="margin-left:auto;color:var(--cr)" onclick="delVent('${v._id}',this.closest('.vc'))">🗑️</button>`:''}
       </div>
     </div>`}).join('');
   }catch(e){list.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">Couldn\'t load vents</div></div>';}

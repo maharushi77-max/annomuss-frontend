@@ -1125,8 +1125,28 @@ async function api(path,opts={}){
   const t=getToken();
   const h={'Content-Type':'application/json',...(opts.headers||{})};
   if(t)h.Authorization=`Bearer ${t}`;
-  const r=await fetch(`${API}${path}`,{...opts,headers:h});
-  if(r.status===401){localStorage.removeItem('token');q('sess').classList.add('on');throw new Error('401');}
+  let r;
+  try{
+    r=await fetch(`${API}${path}`,{...opts,headers:h});
+  }catch(e){
+    // Network error (Render cold start, offline) — never log out
+    throw e;
+  }
+  if(r.status===401){
+    // Only clear token if server says it's actually invalid/expired
+    // NOT on network errors or temporary server issues
+    try{
+      const body=await r.clone().json();
+      const msg=(body.message||'').toLowerCase();
+      if(msg.includes('invalid')||msg.includes('expired')||msg.includes('malformed')){
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        q('sess')?.classList.add('on');
+      }
+      // else: 401 for another reason (permissions etc) — keep user logged in
+    }catch(_){/* ignore parse error */}
+    throw new Error('401');
+  }
   return r;
 }
 
@@ -1136,24 +1156,44 @@ function detectEmo(txt){if(!txt||txt.length<5)return null;const l=txt.toLowerCas
 
 /* session */
 async function initSession(){
-  token=getToken();if(!token){location.href='/index.html';return;}
-  // ── Instant: paint UI from cache immediately (feels instant) ──
+  token=getToken();
+  if(!token){location.href='/index.html';return;}
+
+  // ── Instant: paint UI from cache immediately ──
   const cached=localStorage.getItem('user');
   if(cached){try{user=JSON.parse(cached);applyUser();}catch(_){}}
+
   // ── Background: verify token + refresh user data ──
   try{
     const r=await fetch(`${API}/api/users/me`,{headers:{Authorization:`Bearer ${token}`}});
-    if(r.status===401){localStorage.removeItem('token');localStorage.removeItem('user');location.href='/index.html';return;}
+    if(r.status===401){
+      // Only log out if token is genuinely invalid — not on server errors
+      const body=await r.json().catch(()=>({}));
+      const msg=(body.message||'').toLowerCase();
+      if(msg.includes('invalid')||msg.includes('expired')||msg.includes('malformed')){
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        location.href='/index.html';
+        return;
+      }
+      // 401 for other reason — stay logged in with cached data
+    }
     if(r.ok){
       const fresh=await r.json();
       user=fresh;
       localStorage.setItem('user',JSON.stringify(user));
-      applyUser(); // re-apply with fresh data
+      applyUser();
     }
+    // Non-200 but not 401 (500, 503 etc) — stay logged in with cache
   }catch(e){
-    // Already showing cached — just log
-    if(!user){location.href='/index.html';}
+    // Network error (offline, Render cold start) — NEVER log out
+    // User stays logged in with cached data
+    if(!user){
+      // No cache either — can't show anything, redirect
+      location.href='/index.html';
+    }
   }
+
   // Get saved location
   const sl=localStorage.getItem('ann_loc');
   if(sl){try{userLoc={...userLoc,...JSON.parse(sl)};}catch(_){}}

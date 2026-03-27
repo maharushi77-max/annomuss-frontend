@@ -189,8 +189,50 @@ fetch(API+'/health',{method:'GET'}).catch(()=>{});
 
 /* Particles */
 (()=>{const c=q('canvas'),ctx=c.getContext('2d');const rs=()=>{c.width=innerWidth;c.height=innerHeight};rs();window.addEventListener('resize',rs);const pts=Array.from({length:45},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+.4,dx:(Math.random()-.5)*.22,dy:(Math.random()-.5)*.22,a:Math.random()*.25+.06,col:['rgba(123,94,167,','rgba(0,201,167,','rgba(255,77,109,'][Math.floor(Math.random()*3)]}));const draw=()=>{ctx.clearRect(0,0,c.width,c.height);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.col+p.a+')';ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>c.width)p.dx*=-1;if(p.y<0||p.y>c.height)p.dy*=-1;});requestAnimationFrame(draw);};draw();})();
-/* Auto-login */
-(async()=>{const tk=localStorage.getItem('token');if(tk){try{const r=await fetch(API+'/api/users/me',{headers:{Authorization:'Bearer '+tk}});if(r.ok){const u=await r.json();localStorage.setItem('user',JSON.stringify(u));location.href='dashboard.html';return;}}catch(_){}localStorage.removeItem('token');}setTimeout(()=>{const el=q('live-num');const t=Math.floor(Math.random()*280+60);let c=0;const iv=setInterval(()=>{c=Math.min(c+Math.ceil(t/25),t);el.textContent=c;if(c>=t)clearInterval(iv);},35);},400);})();
+/* Auto-login — if token exists go straight to dashboard */
+(async()=>{
+  const tk=localStorage.getItem('token');
+  if(tk){
+    try{
+      const r=await fetch(API+'/api/users/me',{headers:{Authorization:'Bearer '+tk}});
+      if(r.ok){
+        const u=await r.json();
+        localStorage.setItem('user',JSON.stringify(u));
+        location.href='dashboard.html';
+        return;
+      }
+      if(r.status===401){
+        // Only clear token if explicitly invalid
+        const body=await r.json().catch(()=>({}));
+        const msg=(body.message||'').toLowerCase();
+        if(msg.includes('invalid')||msg.includes('expired')||msg.includes('malformed')){
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        } else {
+          // Server returned 401 for another reason — still go to dashboard
+          location.href='dashboard.html';
+          return;
+        }
+      }
+      // 5xx server error — still go to dashboard with cached data
+      if(r.status>=500){location.href='dashboard.html';return;}
+    }catch(_){
+      // Network error (offline/cold start) — go to dashboard anyway
+      // Dashboard will use cached user data
+      if(localStorage.getItem('user')){
+        location.href='dashboard.html';
+        return;
+      }
+    }
+  }
+  // No token — show login form with live user count animation
+  setTimeout(()=>{
+    const el=q('live-num');
+    const t=Math.floor(Math.random()*280+60);
+    let c=0;
+    const iv=setInterval(()=>{c=Math.min(c+Math.ceil(t/25),t);el.textContent=c;if(c>=t)clearInterval(iv);},35);
+  },400);
+})();
 /* OTP boxes */
 const boxes=[...document.querySelectorAll('.otp-box')];
 boxes.forEach((b,i)=>{b.addEventListener('input',()=>{b.value=b.value.replace(/\D/g,'').slice(-1);b.classList.toggle('filled',!!b.value);if(b.value&&i<5)boxes[i+1].focus();if(boxes.every(x=>x.value))setTimeout(doVerify,80);});b.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!b.value&&i>0)boxes[i-1].focus();if(e.key==='Enter')doVerify();});b.addEventListener('paste',e=>{e.preventDefault();const p=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);[...p].forEach((ch,j)=>{if(boxes[j]){boxes[j].value=ch;boxes[j].classList.add('filled');}});if(boxes[Math.min(p.length,5)])boxes[Math.min(p.length,5)].focus();if(p.length===6)setTimeout(doVerify,80);});});

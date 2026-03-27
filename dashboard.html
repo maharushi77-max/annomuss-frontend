@@ -671,9 +671,39 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <div style="position:absolute;top:20px;left:0;right:0;z-index:10;padding:0 16px;display:flex;align-items:center;gap:10px">
     <div id="sv-av" style="width:34px;height:34px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:.9rem">🎭</div>
     <div id="sv-name" style="font-family:var(--fD);font-weight:700;font-size:.875rem;color:#fff;flex:1">Anonymous</div>
+    <button id="sv-menu-btn" onclick="openStoryMenu()" style="color:rgba(255,255,255,.7);font-size:1.1rem;padding:4px 8px;border:none;background:none;cursor:pointer;display:none">⋯</button>
     <button onclick="closeSV()" style="color:#fff;font-size:1.2rem;padding:4px;border:none;background:none;cursor:pointer">✕</button>
   </div>
   <div id="sv-content" style="flex:1;display:flex;align-items:center;justify-content:center;position:relative"></div>
+</div>
+
+<!-- POST ACTION SHEET (⋯ menu) -->
+<div id="post-action-sheet" style="position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:flex-end" onclick="if(event.target===this)closePostActions()">
+  <div style="width:100%;background:var(--bg1);border-radius:22px 22px 0 0;padding:14px 18px calc(28px + var(--safe));animation:shUp .25s cubic-bezier(.32,1,.4,1)">
+    <div style="width:36px;height:4px;background:var(--bd3);border-radius:2px;margin:0 auto 14px"></div>
+    <div id="pas-author" style="display:flex;align-items:center;gap:10px;padding:10px 0 14px;border-bottom:1px solid var(--bd);margin-bottom:8px">
+      <div id="pas-av" style="font-size:1.4rem">🎭</div>
+      <div>
+        <div id="pas-name" style="font-family:var(--fD);font-weight:700;font-size:.88rem"></div>
+        <div style="font-size:.72rem;color:var(--tx3)">Post author</div>
+      </div>
+    </div>
+    <div id="pas-items"></div>
+  </div>
+</div>
+
+<!-- GIFT SHEET — targeted to post author -->
+<div id="gift-sheet" style="position:fixed;inset:0;z-index:510;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);display:none;align-items:flex-end" onclick="if(event.target===this)closeGift()">
+  <div style="width:100%;background:var(--bg1);border-radius:22px 22px 0 0;padding:16px 18px calc(32px + var(--safe));animation:shUp .25s cubic-bezier(.32,1,.4,1)">
+    <div style="width:36px;height:4px;background:var(--bd3);border-radius:2px;margin:0 auto 14px"></div>
+    <div style="font-family:var(--fD);font-weight:700;font-size:1rem;margin-bottom:4px">🎁 Send a gift</div>
+    <div id="gift-to-label" style="font-size:.8rem;color:var(--tx3);margin-bottom:16px">To: Anonymous</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px" id="gift-grid"></div>
+    <div id="gift-msg-wrap" style="display:none;margin-bottom:14px">
+      <input id="gift-msg" maxlength="60" placeholder="Add a secret note... (optional)" style="width:100%;background:var(--bg2);border:1.5px solid var(--bd2);border-radius:12px;padding:10px 14px;font-size:.85rem;color:var(--tx);box-sizing:border-box"/>
+    </div>
+    <button id="gift-send-btn" onclick="sendGift()" disabled style="width:100%;padding:13px;background:linear-gradient(135deg,var(--pk),var(--go));color:#fff;border:none;border-radius:14px;font-family:var(--fD);font-weight:700;font-size:.88rem;cursor:pointer;opacity:.5">Send gift secretly 🎁</button>
+  </div>
 </div>
 
 <!-- IMAGE LIGHTBOX -->
@@ -1297,7 +1327,7 @@ function renderPost(p){
     <div class="ph"><div class="pav">${esc(av)}</div>
       <div style="flex:1;min-width:0"><div class="pn">${esc(author)}</div>
       <div style="display:flex;align-items:center;gap:4px;margin-top:2px;flex-wrap:wrap"><span class="pt">${timeAgo(p.createdAt)}</span>${epill}${stbdg}${mnbdg}${ubdg}</div></div>
-      <button style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:.9rem" onclick="ctxMenu(event,'${p._id}',${isOwn})">⋯</button>
+      <button style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:.9rem" onclick="ctxMenu(event,'${p._id}',${isOwn},'${esc(author)}','${esc(av)}','${p.authorId||p._authorId||''}')">⋯</button>
     </div>
     ${cap}${media}${reacts}
     <div class="pa">
@@ -1358,27 +1388,200 @@ async function doLike(id,btn){
   }
 }
 function sharePost(id){const url=`${location.origin}/dashboard.html#post-${id}`;if(navigator.share)navigator.share({url});else{navigator.clipboard?.writeText(url);toast('🔗 Link copied!');}}
-function ctxMenu(e,id,isOwn){
+/* ═══════════════════════════════════════════════
+   POST ACTION SHEET — ⋯ button
+═══════════════════════════════════════════════ */
+let _pasPostId=null, _pasIsOwn=false, _pasAuthor={name:'',emoji:'',id:null};
+
+function ctxMenu(e, id, isOwn, authorName, authorEmoji, authorId){
   e.stopPropagation();
-  const actions=isOwn
-    ?[{t:'🗑️ Delete',a:()=>{
-        if(!confirm('Delete this post?'))return;
-        api(`/api/posts/${id}`,{method:'DELETE'}).then(r=>{
-          if(!r.ok){toast('Delete failed ❌');return;}
-          const c=document.querySelector(`.card[data-id="${id}"]`);
-          if(c){c.style.opacity='0';c.style.transform='scale(.96)';c.style.transition='all .25s';setTimeout(()=>c.remove(),280);}
-          toast('🗑️ Deleted');
-          // Update post count immediately
-          const sp=q('s-posts');if(sp)sp.textContent=Math.max(0,parseInt(sp.textContent||0)-1);
-          if(user&&user.postCount)user.postCount=Math.max(0,user.postCount-1);
-        }).catch(()=>toast('Delete failed ❌'));
-      }}]
-    :[{t:'⚠️ Report',a:()=>{
-        api(`/api/posts/${id}/report`,{method:'POST',body:JSON.stringify({reason:'reported'})})
-          .then(()=>toast('⚠️ Reported — thank you'));
-      }}];
-  if(!actions.length)return;actions[0].a();
+  _pasPostId=id; _pasIsOwn=isOwn;
+  _pasAuthor={name:authorName||'Anonymous', emoji:authorEmoji||'🎭', id:authorId||null};
+
+  // Update sheet header
+  q('pas-av').textContent=_pasAuthor.emoji;
+  q('pas-name').textContent=_pasAuthor.name;
+
+  // Build action items
+  const items=q('pas-items');
+  items.innerHTML='';
+
+  const addItem=(icon, label, color, fn)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:14px;padding:14px 4px;border-bottom:.5px solid var(--bd);cursor:pointer';
+    row.innerHTML=`<span style="font-size:1.3rem;width:26px;text-align:center">${icon}</span><span style="font-size:.9rem;font-weight:500;color:${color||'var(--tx)'}">${label}</span>`;
+    row.onclick=()=>{closePostActions();setTimeout(fn,120);};
+    items.appendChild(row);
+  };
+
+  if(isOwn){
+    addItem('🗑️','Delete post','var(--cr)',()=>{
+      if(!confirm('Delete this post?'))return;
+      api(`/api/posts/${id}`,{method:'DELETE'}).then(r=>{
+        if(!r.ok){toast('Delete failed ❌');return;}
+        const c=document.querySelector(`.card[data-id="${id}"]`);
+        if(c){c.style.opacity='0';c.style.transition='all .25s';setTimeout(()=>c.remove(),280);}
+        toast('🗑️ Post deleted');
+        const sp=q('s-posts');if(sp)sp.textContent=Math.max(0,parseInt(sp.textContent||0)-1);
+        clearDraft();
+      }).catch(()=>toast('Delete failed ❌'));
+    });
+    addItem('🔗','Copy link','',()=>{
+      const url=`${location.origin}/dashboard.html#post-${id}`;
+      navigator.clipboard?.writeText(url).then(()=>toast('🔗 Link copied!'));
+    });
+  } else {
+    addItem('🎁','Send a gift secretly','var(--pk)',()=>openGift(id,_pasAuthor));
+    addItem('🔗','Copy link','',()=>{
+      const url=`${location.origin}/dashboard.html#post-${id}`;
+      navigator.clipboard?.writeText(url).then(()=>toast('🔗 Link copied!'));
+    });
+    addItem('⚠️','Report post','var(--go)',()=>{
+      api(`/api/posts/${id}/report`,{method:'POST',body:JSON.stringify({reason:'inappropriate'})})
+        .then(()=>toast('⚠️ Reported — we\'ll review within 24h'));
+    });
+    if(_pasAuthor.id){
+      addItem('🚫','Block this user','var(--cr)',()=>{
+        if(!confirm(`Block ${_pasAuthor.name}? Their posts won't appear in your feed.`))return;
+        api(`/api/users/block/${_pasAuthor.id}`,{method:'POST'})
+          .then(()=>{
+            toast('🚫 User blocked');
+            // Remove all their cards from feed
+            document.querySelectorAll(`.card`).forEach(c=>{
+              if(c.querySelector('.pn')?.textContent?.trim()===_pasAuthor.name)c.remove();
+            });
+          }).catch(()=>toast('Could not block — try again'));
+      });
+    }
+  }
+
+  q('post-action-sheet').style.display='flex';
 }
+
+function closePostActions(){q('post-action-sheet').style.display='none';}
+
+/* ═══════════════════════════════════════════════
+   STORY MENU — delete own story
+═══════════════════════════════════════════════ */
+function openStoryMenu(){
+  const g=storyGroups[svGroupIdx];
+  const it=g?.items[svItemIdx];
+  if(!it)return;
+  const isOwn=g.nm===user?.anonymousName||it.authorName===user?.anonymousName;
+
+  // Build a simple bottom sheet
+  const sheet=document.createElement('div');
+  sheet.style.cssText='position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:flex-end';
+  sheet.onclick=e=>{if(e.target===sheet)sheet.remove();};
+  const inner=isOwn
+    ?`<div style="padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;border-bottom:.5px solid var(--bd)" onclick="deleteStory('${it._id}')"><span style="font-size:1.3rem">🗑️</span><span style="color:var(--cr);font-size:.9rem;font-weight:600">Delete this story</span></div>`
+    :`<div style="padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;border-bottom:.5px solid var(--bd)" onclick="reportStory('${it._id}')"><span style="font-size:1.3rem">⚠️</span><span style="font-size:.9rem;font-weight:600">Report story</span></div>`;
+
+  sheet.innerHTML=`<div style="width:100%;background:var(--bg1);border-radius:22px 22px 0 0;padding:14px 18px calc(28px + var(--safe))">
+    <div style="width:36px;height:4px;background:var(--bd3);border-radius:2px;margin:0 auto 14px"></div>
+    ${inner}
+    <div style="padding:14px 18px;cursor:pointer;text-align:center;color:var(--tx3);font-size:.88rem" onclick="this.closest('[style*=fixed]').remove()">Cancel</div>
+  </div>`;
+  document.body.appendChild(sheet);
+}
+
+function deleteStory(id){
+  document.querySelector('[style*="z-index:700"]')?.remove();
+  if(!confirm('Delete this story?'))return;
+  api(`/api/posts/${id}`,{method:'DELETE'}).then(r=>{
+    if(!r.ok){toast('Delete failed ❌');return;}
+    toast('🗑️ Story deleted');
+    closeSV();
+    loadStories(); // refresh strip
+  }).catch(()=>toast('Delete failed ❌'));
+}
+
+function reportStory(id){
+  document.querySelector('[style*="z-index:700"]')?.remove();
+  api(`/api/posts/${id}/report`,{method:'POST',body:JSON.stringify({reason:'story_report'})})
+    .then(()=>toast('⚠️ Reported — thank you'));
+}
+
+/* ═══════════════════════════════════════════════
+   GIFT SYSTEM — targeted to post author only
+═══════════════════════════════════════════════ */
+const GIFTS=[
+  {e:'🌟',l:'Star',m:'You shine bright'},
+  {e:'💜',l:'Heart',m:'Sending you love'},
+  {e:'🔥',l:'Fire',m:'You\'re on fire!'},
+  {e:'🌙',l:'Moon',m:'Beautiful soul'},
+  {e:'✨',l:'Sparkle',m:'You\'re magic'},
+  {e:'🫂',l:'Hug',m:'Here\'s a hug'},
+  {e:'🌸',l:'Bloom',m:'You\'re blooming'},
+  {e:'💫',l:'Energy',m:'Your energy is everything'},
+];
+let _giftPostId=null, _giftTarget=null, _giftSelected=null;
+
+function openGift(postId, author){
+  _giftPostId=postId; _giftTarget=author; _giftSelected=null;
+  q('gift-to-label').textContent=`To: ${author.emoji} ${author.name}`;
+  const grid=q('gift-grid');
+  grid.innerHTML=GIFTS.map((g,i)=>`
+    <div onclick="selectGift(${i})" id="gift-${i}" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:14px;border:1.5px solid var(--bd);cursor:pointer;transition:all .15s">
+      <div style="font-size:1.8rem">${g.e}</div>
+      <div style="font-size:.65rem;color:var(--tx3);font-family:var(--fD);font-weight:600">${g.l}</div>
+    </div>`).join('');
+  q('gift-msg-wrap').style.display='none';
+  q('gift-msg').value='';
+  q('gift-send-btn').disabled=true;
+  q('gift-send-btn').style.opacity='.5';
+  q('gift-sheet').style.display='flex';
+}
+
+function selectGift(i){
+  _giftSelected=GIFTS[i];
+  document.querySelectorAll('[id^="gift-"]').forEach((el,idx)=>{
+    el.style.borderColor=idx===i?'var(--pk)':'var(--bd)';
+    el.style.background=idx===i?'rgba(255,133,161,.1)':'';
+  });
+  q('gift-msg-wrap').style.display='block';
+  q('gift-msg').placeholder=`Add a note... (default: "${_giftSelected.m}")`;
+  const btn=q('gift-send-btn');
+  btn.disabled=false;btn.style.opacity='1';
+  btn.textContent=`Send ${_giftSelected.e} secretly 🎁`;
+}
+
+async function sendGift(){
+  if(!_giftSelected||!_giftPostId)return;
+  const btn=q('gift-send-btn');
+  btn.disabled=true;btn.textContent='Sending...';
+  const msg=q('gift-msg').value.trim()||_giftSelected.m;
+  const text=`${_giftSelected.e} ${msg}`;
+  try{
+    // Send as a compliment to the post author specifically
+    await api('/api/posts/'+_giftPostId+'/gift',{
+      method:'POST',
+      body:JSON.stringify({emoji:_giftSelected.e, message:text, targetId:_giftTarget?.id})
+    });
+    closeGift();
+    toast(`${_giftSelected.e} Gift sent secretly to ${_giftTarget?.name}!`);
+    awardXP(3,'Sent a gift');
+  }catch(e){
+    // Fallback — send as compliment via existing system
+    try{
+      await api('/api/users/compliment',{
+        method:'POST',
+        body:JSON.stringify({
+          toName:_giftTarget?.name,
+          message:text,
+          type:'gift'
+        })
+      });
+      closeGift();
+      toast(`${_giftSelected.e} Gift sent to ${_giftTarget?.name}!`);
+    }catch(_){
+      toast('Could not send gift right now');
+      btn.disabled=false;btn.style.opacity='1';btn.textContent=`Send ${_giftSelected.e} secretly 🎁`;
+    }
+  }
+}
+
+function closeGift(){q('gift-sheet').style.display='none';_giftPostId=null;_giftTarget=null;_giftSelected=null;}
 
 /* ═══════════ STORIES — FIXED ═══════════ */
 async function loadStories(){
@@ -1399,6 +1602,8 @@ function showSVItem(){
   const g=storyGroups[svGroupIdx];if(!g){closeSV();return;}
   const it=g.items[svItemIdx];if(!it){closeSV();return;}
   q('sv-av').textContent=g.av;q('sv-name').textContent=g.nm;
+  // Show ⋯ menu button always (delete for own, report for others)
+  q('sv-menu-btn').style.display='block';
   const prog=q('sv-progress');prog.innerHTML='';
   g.items.forEach((_,i)=>{const bar=document.createElement('div');bar.style.cssText=`flex:1;height:2.5px;background:${i<svItemIdx?'#fff':'rgba(255,255,255,.25)'};border-radius:2px;overflow:hidden`;if(i===svItemIdx){const fill=document.createElement('div');fill.style.cssText='height:100%;background:#fff;width:0;transition:width linear';bar.appendChild(fill);}prog.appendChild(bar);});
   const cont=q('sv-content');
@@ -2869,6 +3074,8 @@ async function main(){
 // ── BACK BUTTON — closes modals in order (Android) ──
 window.addEventListener('popstate',()=>{
   // Close in priority order — topmost first
+  if(q('gift-sheet')?.style.display==='flex'){closeGift();history.pushState(null,'',location.href);return;}
+  if(q('post-action-sheet')?.style.display==='flex'){closePostActions();history.pushState(null,'',location.href);return;}
   if(q('lightbox')?.classList.contains('on')){closeLightbox();history.pushState(null,'',location.href);return;}
   if(q('search-overlay')?.classList.contains('on')){closeSearch();history.pushState(null,'',location.href);return;}
   if(q('share-sheet')?.classList.contains('on')){closeShare();history.pushState(null,'',location.href);return;}

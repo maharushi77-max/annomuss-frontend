@@ -417,6 +417,46 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 .comp-chip.sel{background:rgba(255,133,161,.2);border-color:var(--pk);transform:scale(1.05)}
 .comp-target{font-size:.85rem;color:var(--tx2);margin-bottom:12px}
 
+/* ══ POLLS ══ */
+.poll-wrap{padding:4px 14px 12px}
+.poll-opt{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;border:1.5px solid var(--bd2);margin-bottom:8px;cursor:pointer;position:relative;overflow:hidden;transition:border-color .15s}
+.poll-opt:active{transform:scale(.98)}
+.poll-opt.voted{border-color:var(--v);background:var(--vg)}
+.poll-opt.winner{border-color:var(--go)}
+.poll-bar{position:absolute;left:0;top:0;bottom:0;background:rgba(123,94,167,.08);transition:width .4s ease;z-index:0}
+.poll-opt.winner .poll-bar{background:rgba(0,201,167,.08)}
+.poll-text{position:relative;z-index:1;font-size:.85rem;font-weight:500;flex:1}
+.poll-pct{position:relative;z-index:1;font-size:.75rem;color:var(--tx3);font-family:var(--fM);min-width:36px;text-align:right}
+.poll-meta{font-size:.7rem;color:var(--tx3);padding:0 14px 10px;font-family:var(--fM)}
+
+/* ══ VOICE NOTES ══ */
+.voice-player{margin:4px 14px 12px;background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.vp-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--v),#6040C4);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;flex-shrink:0;border:none}
+.vp-wave{flex:1;height:32px;display:flex;align-items:center;gap:2px}
+.vp-bar{width:3px;border-radius:2px;background:var(--v3);opacity:.4;transition:opacity .15s}
+.vp-bar.active{opacity:1}
+.vp-dur{font-size:.72rem;color:var(--tx3);font-family:var(--fM);flex-shrink:0}
+.voice-record{margin:10px 0;padding:12px 14px;background:var(--bg2);border:1.5px dashed var(--bd2);border-radius:14px;cursor:pointer;text-align:center;transition:border-color .15s}
+.voice-record:active{border-color:var(--cr)}
+.voice-record.recording{border-color:var(--cr);background:rgba(255,77,109,.06);animation:pulse-rec 1s ease-in-out infinite}
+@keyframes pulse-rec{0%,100%{border-color:var(--cr)}50%{border-color:rgba(255,77,109,.3)}}
+
+/* ══ SAVE BUTTON ══ */
+.pak.saved{color:var(--v3)}
+
+/* ══ EXPLORE PAGE ══ */
+.explore-section{padding:0 14px;margin-bottom:20px}
+.explore-title{font-family:var(--fD);font-weight:700;font-size:.82rem;color:var(--tx3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.exp-card{background:var(--bg1);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:8px;cursor:pointer;transition:transform .12s}
+.exp-card:active{transform:scale(.98)}
+
+/* ══ PUSH NOTIFICATION BANNER ══ */
+.push-banner{margin:0 14px 12px;padding:14px 16px;background:linear-gradient(135deg,rgba(123,94,167,.12),rgba(0,201,167,.06));border:1px solid rgba(123,94,167,.25);border-radius:16px;display:none;align-items:center;gap:12px}
+.push-banner.show{display:flex;animation:cdIn .3s ease}
+
+/* ══ VOICE COMPOSE ══ */
+.rec-timer{font-family:var(--fM);font-size:1.1rem;font-weight:700;color:var(--cr);text-align:center;margin:6px 0}
+
 /* ══ DAILY PROMPT ══ */
 .daily-prompt{margin:0 14px 12px;padding:16px;background:linear-gradient(135deg,rgba(196,168,255,.1),rgba(255,133,161,.06));border:1px solid rgba(196,168,255,.22);border-radius:18px;cursor:pointer;transition:transform .15s,border-color .2s;position:relative;overflow:hidden}
 .daily-prompt:active{transform:scale(.98)}
@@ -618,9 +658,13 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div class="tc" onclick="selType('story',this)">📸 Story</div>
       <div class="tc" onclick="selType('confession',this)">🤫 Confess</div>
       <div class="tc" onclick="selType('unsent',this)">💌 Unsent</div>
+      <div class="tc" onclick="selType('poll',this)">📊 Poll</div>
+      <div class="tc" onclick="selType('voice',this)">🎙️ Voice</div>
     </div>
     <div class="notice blue" id="story-notice">📸 Stories auto-delete in 24 hours and appear in the top strip.</div>
     <div class="notice pink" id="unsent-notice">💌 Write what you wish you could say. Posts anonymously — no one knows it's you.</div>
+    <div class="notice" id="poll-notice" style="display:none;background:rgba(123,94,167,.08);border-color:rgba(123,94,167,.2);color:var(--v3)">📊 Everyone votes anonymously. Results shown after voting.</div>
+    <div class="notice" id="voice-notice" style="display:none;background:rgba(255,77,109,.06);border-color:rgba(255,77,109,.18);color:var(--pk)">🎙️ Your voice is anonymously distorted. No one knows it's you.</div>
     <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-family:var(--fD)">How are you feeling?</div>
     <div class="emo-hint" id="emo-hint">✨ <span id="emo-hint-txt">We sensed your mood</span> — tap to confirm</div>
     <div class="emo-grid">
@@ -636,12 +680,47 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;font-family:var(--fD)" id="cap-lbl">What's on your mind?</div>
     <textarea class="fld" id="ctxt" rows="5" maxlength="1000" placeholder="Say something real..." oninput="onCompose(this)"></textarea>
     <div class="char-c" id="char-c">0 / 1000</div>
-    <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;font-family:var(--fD)">Add Photo / Video</div>
-    <div class="media-area" onclick="document.getElementById('file-in').click()">
+
+    <!-- POLL OPTIONS — shown when type=poll -->
+    <div id="poll-fields" style="display:none;margin-top:10px">
+      <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-family:var(--fD)">Poll options (2–4)</div>
+      <input class="fld" id="poll-opt-1" maxlength="80" placeholder="Option 1" style="margin-bottom:8px"/>
+      <input class="fld" id="poll-opt-2" maxlength="80" placeholder="Option 2" style="margin-bottom:8px"/>
+      <div id="poll-extra-opts"></div>
+      <button onclick="addPollOption()" style="font-size:.78rem;color:var(--v3);padding:6px 0;font-family:var(--fD);font-weight:700;background:none;border:none;cursor:pointer">+ Add option</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+        <span style="font-size:.75rem;color:var(--tx3)">Ends in:</span>
+        <select id="poll-duration" style="background:var(--bg2);border:1px solid var(--bd2);border-radius:8px;padding:5px 10px;font-size:.78rem;color:var(--tx)">
+          <option value="24">24 hours</option>
+          <option value="48">48 hours</option>
+          <option value="72">3 days</option>
+          <option value="168">1 week</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- VOICE RECORDER — shown when type=voice -->
+    <div id="voice-fields" style="display:none;margin-top:10px">
+      <div id="voice-record-btn" class="voice-record" onclick="toggleRecording()">
+        <div id="voice-rec-icon" style="font-size:2rem;margin-bottom:6px">🎙️</div>
+        <div id="voice-rec-label" style="font-family:var(--fD);font-weight:700;font-size:.88rem;color:var(--tx2)">Tap to record</div>
+        <div style="font-size:.72rem;color:var(--tx3);margin-top:3px">Max 60 seconds · voice anonymised</div>
+      </div>
+      <div class="rec-timer" id="rec-timer" style="display:none">0:00</div>
+      <div id="voice-preview" style="display:none" class="voice-player">
+        <button class="vp-btn" onclick="playVoicePreview()">▶</button>
+        <div class="vp-wave" id="vp-wave"></div>
+        <div class="vp-dur" id="vp-dur">0:00</div>
+        <button onclick="clearRecording()" style="color:var(--tx3);font-size:.8rem;padding:4px;background:none;border:none;cursor:pointer">✕</button>
+      </div>
+    </div>
+
+    <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;font-family:var(--fD)" id="media-lbl">Add Photo / Video</div>
+    <div class="media-area" id="media-area" onclick="document.getElementById('file-in').click()">
       <div style="font-size:2rem;margin-bottom:4px">📷</div>
       <div style="font-size:.82rem;color:var(--tx2);font-family:var(--fD);font-weight:600">Tap to add photo or video</div>
       <div style="font-size:.72rem;color:var(--tx3);margin-top:3px">JPG, PNG, GIF, MP4 · Max 50MB</div>
-      <input type="file" id="file-in" accept="image/*,video/*" onchange="handleUpload(this)" style="display:none"/>
+      <input type="file" id="file-in" accept="image/*,video/*,audio/*" onchange="handleUpload(this)" style="display:none"/>
     </div>
     <div class="media-preview" id="mprev">
       <img id="mprev-img" src="" alt=""/>
@@ -766,6 +845,17 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     </div>
     <button class="ico-btn" onclick="openSearch()" style="margin-right:6px">🔍</button>
     <button class="ico-btn" onclick="goPage('social')" style="position:relative">🔔<span id="notif-badge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--cr);border:1.5px solid var(--bg)"></span></button>
+  </div>
+
+  <!-- PUSH NOTIFICATION BANNER -->
+  <div class="push-banner" id="push-banner">
+    <div style="font-size:1.5rem;flex-shrink:0">🔔</div>
+    <div style="flex:1">
+      <div style="font-family:var(--fD);font-weight:700;font-size:.85rem">Get notified when people react</div>
+      <div style="font-size:.73rem;color:var(--tx2);margin-top:2px">Never miss a reaction to your posts</div>
+    </div>
+    <button onclick="requestPushPermission()" style="padding:7px 14px;background:var(--v);color:#fff;border:none;border-radius:100px;font-family:var(--fD);font-size:.73rem;font-weight:700;cursor:pointer;flex-shrink:0">Enable</button>
+    <button onclick="dismissPushBanner()" style="color:var(--tx3);font-size:.85rem;padding:4px;background:none;border:none;cursor:pointer;flex-shrink:0">✕</button>
   </div>
 
   <!-- STREAK REMINDER — shows if streak at risk -->
@@ -1106,13 +1196,24 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   </div>
 </div>
 
+<!-- EXPLORE PAGE -->
+<div class="page" id="pg-explore">
+  <div class="tb">
+    <div class="tb-title">🔍 Explore</div>
+    <button class="ico-btn" onclick="openSearch()">🔎</button>
+  </div>
+  <div id="explore-content" style="overflow-y:auto;flex:1;padding-top:8px">
+    <div style="padding:24px;text-align:center"><div class="spin"></div></div>
+  </div>
+</div>
+
 </div><!-- /pages -->
 
 <nav id="nav">
   <button class="nb on" id="nb-feed" onclick="goPage('feed')"><span class="nb-i">🏠</span><span>Feed</span></button>
-  <button class="nb" id="nb-connect" onclick="goPage('connect')"><span class="nb-i">⚡</span><span>Connect</span></button>
+  <button class="nb" id="nb-explore" onclick="goPage('explore')"><span class="nb-i">🔍</span><span>Explore</span></button>
   <button class="nb" onclick="openCompose('post')"><div class="nb-fab">✏️</div></button>
-  <button class="nb" id="nb-vent" onclick="goPage('vent')"><span class="nb-i">💭</span><span>Vent</span></button>
+  <button class="nb" id="nb-connect" onclick="goPage('connect')"><span class="nb-i">⚡</span><span>Connect</span></button>
   <button class="nb" id="nb-profile" onclick="goPage('profile')"><span class="nb-i">🎭</span><span>Me</span></button>
 </nav>
 </div>
@@ -1259,6 +1360,7 @@ function goPage(n){
   if(n==='vent')loadVents('latest');
   if(n==='social'){socTab('inbox',null);const badge=q('notif-badge');if(badge)badge.style.display='none';}
   if(n==='profile'){applyUser();profileTab('posts',q('pt-posts'));}
+  if(n==='explore')loadExplore();
   // scroll page back to top when switching
   if(pg)pg.scrollTop=0;
 }
@@ -1322,21 +1424,58 @@ function renderPost(p){
   const stbdg=p.type==='story'?'<span class="epill stbadge">📸 Story</span>':'';
   const mnbdg=isMid()&&p.type==='post'?'<span class="epill mnbadge">🌙 Midnight</span>':'';
   const ubdg=p.type==='unsent'?'<span class="epill" style="background:rgba(255,133,161,.1);color:var(--pk)">💌 Unsent</span>':'';
+  const isSaved=(p.saves||[]).some(id=>id===user?._id?.toString()||id===user?.anonymousName);
   const reacts='<div class="reacts">'+REACTS.map(t=>{const cnt=Array.isArray(p.reactions?.[t.k])?p.reactions[t.k].length:(p.reactions?.[t.k]||0);const on=(p.reactions?.[t.k]||[]).some(id=>id===me||id===user?._id?.toString());return`<button class="rb ${on?'on':''}" onclick="doReact('${p._id}','${t.k}',this)">${t.e} <span id="rc-${t.k}-${p._id}">${cnt||''}</span></button>`;}).join('')+'</div>';
+
+  // Poll rendering
+  let pollHtml='';
+  if(p.type==='poll'&&p.poll?.options?.length){
+    const totalVotes=p.poll.options.reduce((s,o)=>(s+((o.votes||[]).length||o.voteCount||0)),0);
+    const myVote=p.poll.options.find(o=>(o.votes||[]).some(v=>v===user?._id?.toString()));
+    const ended=p.poll.endsAt&&new Date()>new Date(p.poll.endsAt);
+    pollHtml='<div class="poll-wrap">'+p.poll.options.map((o,i)=>{
+      const cnt=(o.votes||[]).length||o.voteCount||0;
+      const pct=totalVotes>0?Math.round(cnt/totalVotes*100):0;
+      const isMyVote=myVote?._id?.toString()===o._id?.toString();
+      const isWinner=ended&&pct===Math.max(...p.poll.options.map(x=>totalVotes>0?Math.round(((x.votes||[]).length||0)/totalVotes*100):0));
+      const show=!!myVote||ended;
+      return`<div class="poll-opt ${isMyVote?'voted':''} ${isWinner?'winner':''}" onclick="${(!myVote&&!ended)?`doPollVote('${p._id}','${o._id}',this)`:''}">
+        ${show?`<div class="poll-bar" style="width:${pct}%"></div>`:''}
+        <span class="poll-text">${esc(o.text)}</span>
+        ${show?`<span class="poll-pct">${pct}%</span>`:''}
+        ${isMyVote?'<span style="font-size:.7rem">✓</span>':''}
+      </div>`;
+    }).join('')+'</div>'+`<div class="poll-meta">${totalVotes} vote${totalVotes!==1?'s':''} · ${ended?'Ended':'Tap to vote'}</div>`;
+  }
+
+  // Voice note rendering
+  let voiceHtml='';
+  if(p.mediaType==='audio'&&p.mediaUrl){
+    const dur=p.voiceDuration?`${Math.floor(p.voiceDuration/60)}:${String(p.voiceDuration%60).padStart(2,'0')}`:'';
+    voiceHtml=`<div class="voice-player" style="margin:4px 14px 12px">
+      <button class="vp-btn" onclick="playAudio('${esc(p.mediaUrl)}',this)">▶</button>
+      <div class="vp-wave">${Array.from({length:20},(_,i)=>`<div class="vp-bar" style="height:${8+Math.sin(i*0.8)*8}px"></div>`).join('')}</div>
+      <div class="vp-dur">${dur}</div>
+    </div>`;
+  }
+
   return`<div class="card" data-id="${p._id}" style="${st}">
     <div class="ph"><div class="pav">${esc(av)}</div>
       <div style="flex:1;min-width:0"><div class="pn">${esc(author)}</div>
       <div style="display:flex;align-items:center;gap:4px;margin-top:2px;flex-wrap:wrap"><span class="pt">${timeAgo(p.createdAt)}</span>${epill}${stbdg}${mnbdg}${ubdg}</div></div>
-      <button style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:.9rem" onclick="ctxMenu(event,'${p._id}',${isOwn},'${esc(author)}','${esc(av)}','${p.authorId||p._authorId||''}')">⋯</button>
+      <button style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:middle;color:var(--tx3);font-size:.9rem" onclick="ctxMenu(event,'${p._id}',${isOwn},'${esc(author)}','${esc(av)}','${p.authorId||p._authorId||''}')">⋯</button>
     </div>
-    ${cap}${media}${reacts}
+    ${cap}${media}${pollHtml}${voiceHtml}${reacts}
     <div class="pa">
       <div class="pak ${liked?'liked':''}" onclick="doLike('${p._id}',this)" id="lb-${p._id}">
         <span>${liked?'❤️':'🤍'}</span><span id="lc-${p._id}">${(p.likes||[]).length}</span>
       </div>
       <div class="pak" onclick="openPModal('${p._id}')">💬 <span>${p.commentCount||0}</span></div>
+      <div class="pak ${isSaved?'saved':''}" onclick="doSave('${p._id}',this)" id="sv-${p._id}" title="Save post">
+        <span>${isSaved?'🔖':'🔖'}</span>
+      </div>
       <div style="flex:1"></div>
-      <div class="pak" onclick="openShareSheet('${p._id}','${esc(p.caption||'').substring(0,60)}')">🔗</div>
+      <div class="pak" onclick="openShareSheet('${p._id}','${esc((p.caption||'').substring(0,60))}')">🔗</div>
     </div>
   </div>`;
 }
@@ -1676,7 +1815,17 @@ function openCompose(type='post'){
   const h=new Date().getHours();let hint=null;
   if(h>=0&&h<=3)hint='lonely';else if(h>=22)hint='lonely';
   if(hint){q('emo-hint-txt').textContent=`You might be feeling ${hint}`;q('emo-hint').style.display='flex';}else q('emo-hint').style.display='none';
-  // Load draft if it exists (only for regular posts)
+  // Show/hide poll and voice UI
+  const isPoll=type==='poll', isVoice=type==='voice';
+  if(q('poll-fields'))q('poll-fields').style.display=isPoll?'block':'none';
+  if(q('poll-notice'))q('poll-notice').style.display=isPoll?'block':'none';
+  if(q('voice-fields'))q('voice-fields').style.display=isVoice?'block':'none';
+  if(q('voice-notice'))q('voice-notice').style.display=isVoice?'block':'none';
+  if(q('media-area'))q('media-area').style.display=isVoice?'none':'block';
+  if(q('media-lbl'))q('media-lbl').style.display=isVoice?'none':'block';
+  if(isPoll){pollOptCount=2;if(q('poll-extra-opts'))q('poll-extra-opts').innerHTML='';}
+  if(isVoice)clearRecording();
+  // Load draft if regular post
   if(type==='post')setTimeout(loadDraft,150);
   setTimeout(()=>q('ctxt').focus(),100);
 }
@@ -2722,7 +2871,303 @@ function doPostSearch(raw){
 }
 
 /* ═══════════════════════════════════════════════
-   PROFILE TABS — Posts / Menu
+   PUSH NOTIFICATIONS — web push via VAPID
+═══════════════════════════════════════════════ */
+async function initPushNotifications(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
+  if(localStorage.getItem('ann_push_dismissed'))return;
+  if(Notification.permission==='granted'){await subscribePush();return;}
+  if(Notification.permission==='default'){
+    // Show banner after 30s if user hasn't been asked
+    setTimeout(()=>q('push-banner')?.classList.add('show'), 30000);
+  }
+}
+
+async function requestPushPermission(){
+  dismissPushBanner();
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm==='granted'){
+      await subscribePush();
+      toast('🔔 Notifications enabled! You\'ll know when people react.');
+      awardXP(10,'Enabled notifications');
+    }
+  }catch(e){console.warn('Push permission error:',e);}
+}
+
+function dismissPushBanner(){
+  q('push-banner')?.classList.remove('show');
+  localStorage.setItem('ann_push_dismissed','1');
+}
+
+async function subscribePush(){
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    const VAPID_PUBLIC_KEY=process.env?.VAPID_PUBLIC_KEY||
+      'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjZkbYGI3B8A6oLEBGRaxAOhKsPxA';
+    const sub=await reg.pushManager.subscribe({
+      userVisibleOnly:true,
+      applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    // Send subscription to backend
+    await api('/api/users/push-subscribe',{
+      method:'POST',
+      body:JSON.stringify({subscription:sub})
+    });
+    console.log('✅ Push subscription active');
+  }catch(e){console.warn('Push subscribe error:',e.message);}
+}
+
+function urlBase64ToUint8Array(base64String){
+  const padding='='.repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=window.atob(base64);
+  const arr=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+  return arr;
+}
+
+/* ═══════════════════════════════════════════════
+   INFINITE SCROLL — auto-load, no button
+═══════════════════════════════════════════════ */
+function initInfiniteScroll(){
+  const sentinel=document.createElement('div');
+  sentinel.id='feed-sentinel';
+  sentinel.style.height='1px';
+  q('feed-list')?.parentNode?.appendChild(sentinel);
+
+  const obs=new IntersectionObserver((entries)=>{
+    if(entries[0].isIntersecting&&!feedDone&&!feedLoading){
+      loadFeed(false); // load next page
+    }
+  },{rootMargin:'200px'});
+
+  obs.observe(sentinel);
+  q('load-more')&&(q('load-more').style.display='none'); // hide old button
+}
+
+/* ═══════════════════════════════════════════════
+   SAVE / BOOKMARK
+═══════════════════════════════════════════════ */
+async function doSave(id,el){
+  try{
+    const r=await api(`/api/posts/${id}/save`,{method:'POST'});
+    const d=await r.json();
+    const saved=d.saved;
+    el.classList.toggle('saved',saved);
+    toast(saved?'🔖 Saved to your collection':'Removed from saved');
+  }catch(e){toast('Could not save right now');}
+}
+
+/* ═══════════════════════════════════════════════
+   POLL VOTING
+═══════════════════════════════════════════════ */
+async function doPollVote(postId,optionId,el){
+  try{
+    const r=await api(`/api/posts/${postId}/poll-vote`,{method:'POST',body:JSON.stringify({optionId})});
+    const d=await r.json();
+    // Re-render the poll in-place
+    const card=document.querySelector(`.card[data-id="${postId}"]`);
+    if(card){
+      const wrap=card.querySelector('.poll-wrap');
+      if(wrap&&d.results){
+        const totalVotes=d.totalVotes||0;
+        wrap.innerHTML=d.results.map(o=>{
+          const pct=totalVotes>0?Math.round(o.votes/totalVotes*100):0;
+          return`<div class="poll-opt ${o.votedByMe?'voted':''}">
+            <div class="poll-bar" style="width:${pct}%"></div>
+            <span class="poll-text">${esc(o.text)}</span>
+            <span class="poll-pct">${pct}%</span>
+            ${o.votedByMe?'<span style="font-size:.7rem">✓</span>':''}
+          </div>`;
+        }).join('');
+        const meta=card.querySelector('.poll-meta');
+        if(meta)meta.textContent=`${totalVotes} vote${totalVotes!==1?'s':''} · Thanks for voting!`;
+      }
+    }
+    toast('🗳️ Vote recorded!');
+  }catch(e){toast('Vote failed — try again');}
+}
+
+/* ═══════════════════════════════════════════════
+   VOICE NOTES — record + play
+═══════════════════════════════════════════════ */
+let mediaRecorder=null,audioChunks=[],recInterval=null,recSecs=0,audioBlob=null,voiceAudioEl=null;
+
+async function toggleRecording(){
+  if(mediaRecorder&&mediaRecorder.state==='recording'){
+    stopRecording();
+  } else {
+    startRecording();
+  }
+}
+
+async function startRecording(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioChunks=[];recSecs=0;
+    mediaRecorder=new MediaRecorder(stream,{mimeType:'audio/webm'});
+    mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+    mediaRecorder.onstop=()=>{
+      audioBlob=new Blob(audioChunks,{type:'audio/webm'});
+      showVoicePreview();
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    mediaRecorder.start();
+
+    // Update UI
+    q('voice-rec-icon').textContent='⏹️';
+    q('voice-rec-label').textContent='Recording... tap to stop';
+    q('voice-record-btn').classList.add('recording');
+    q('rec-timer').style.display='block';
+
+    recInterval=setInterval(()=>{
+      recSecs++;
+      const m=Math.floor(recSecs/60),s=recSecs%60;
+      q('rec-timer').textContent=`${m}:${String(s).padStart(2,'0')}`;
+      if(recSecs>=60)stopRecording(); // max 60s
+    },1000);
+  }catch(e){
+    toast('Microphone access denied. Please allow mic in browser settings.');
+  }
+}
+
+function stopRecording(){
+  clearInterval(recInterval);
+  if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop();
+  q('voice-rec-icon').textContent='🎙️';
+  q('voice-rec-label').textContent='Tap to record again';
+  q('voice-record-btn').classList.remove('recording');
+}
+
+function showVoicePreview(){
+  q('voice-preview').style.display='flex';
+  // Build waveform bars (random-ish based on chunks)
+  const wave=q('vp-wave');
+  wave.innerHTML=Array.from({length:24},(_,i)=>
+    `<div class="vp-bar active" style="height:${8+Math.sin(i*0.9)*10+Math.random()*6}px"></div>`
+  ).join('');
+  const m=Math.floor(recSecs/60),s=recSecs%60;
+  q('vp-dur').textContent=`${m}:${String(s).padStart(2,'0')}`;
+}
+
+function playVoicePreview(){
+  if(!audioBlob)return;
+  if(voiceAudioEl){voiceAudioEl.pause();voiceAudioEl=null;return;}
+  voiceAudioEl=new Audio(URL.createObjectURL(audioBlob));
+  voiceAudioEl.play();
+  voiceAudioEl.onended=()=>voiceAudioEl=null;
+}
+
+function playAudio(url,btn){
+  if(btn._audio){btn._audio.pause();btn._audio=null;btn.textContent='▶';return;}
+  btn._audio=new Audio(url);
+  btn._audio.play();
+  btn.textContent='⏸';
+  btn._audio.onended=()=>{btn.textContent='▶';btn._audio=null;};
+}
+
+function clearRecording(){
+  audioBlob=null;recSecs=0;
+  q('voice-preview').style.display='none';
+  q('rec-timer').style.display='none';
+  q('rec-timer').textContent='0:00';
+  q('voice-rec-icon').textContent='🎙️';
+  q('voice-rec-label').textContent='Tap to record';
+}
+
+/* Poll compose helpers */
+let pollOptCount=2;
+function addPollOption(){
+  if(pollOptCount>=4){toast('Maximum 4 options');return;}
+  pollOptCount++;
+  const extra=q('poll-extra-opts');
+  const inp=document.createElement('input');
+  inp.className='fld';inp.id=`poll-opt-${pollOptCount}`;
+  inp.maxLength=80;inp.placeholder=`Option ${pollOptCount}`;
+  inp.style.marginBottom='8px';
+  extra.appendChild(inp);
+}
+
+/* ═══════════════════════════════════════════════
+   EXPLORE PAGE
+═══════════════════════════════════════════════ */
+async function loadExplore(){
+  const el=q('explore-content');
+  if(!el)return;
+  el.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
+  try{
+    const r=await api('/api/posts/explore');
+    const d=await r.json();
+    let html='';
+
+    if(d.trending?.length){
+      html+=`<div class="explore-section"><div class="explore-title">🔥 Trending Today</div>`;
+      html+=d.trending.map(p=>`<div class="exp-card" onclick="openPModal('${p._id}')">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:1.1rem">${p.authorEmoji||'🎭'}</span>
+          <span style="font-size:.75rem;color:var(--tx3);font-family:var(--fD)">${p.emotion||''}</span>
+          <span style="margin-left:auto;font-size:.7rem;color:var(--tx3)">❤️${(p.likes||[]).length}</span>
+        </div>
+        <div style="font-size:.88rem;color:var(--tx);line-height:1.5">${esc((p.caption||'').substring(0,120))}</div>
+      </div>`).join('');
+      html+='</div>';
+    }
+
+    if(d.polls?.length){
+      html+=`<div class="explore-section"><div class="explore-title">📊 Active Polls</div>`;
+      html+=d.polls.map(p=>{
+        const totalVotes=p.poll?.options?.reduce((s,o)=>s+((o.votes||[]).length||0),0)||0;
+        return`<div class="exp-card" onclick="openPModal('${p._id}')">
+          <div style="font-size:.88rem;font-weight:600;margin-bottom:8px">${esc(p.caption||'Vote now!')}</div>
+          ${(p.poll?.options||[]).slice(0,2).map(o=>`<div style="font-size:.78rem;color:var(--tx2);padding:4px 0">${esc(o.text)}</div>`).join('')}
+          <div style="font-size:.7rem;color:var(--tx3);margin-top:6px">${totalVotes} votes</div>
+        </div>`;
+      }).join('');
+      html+='</div>';
+    }
+
+    if(d.hotConfessions?.length){
+      html+=`<div class="explore-section"><div class="explore-title">🤫 Hot Confessions</div>`;
+      html+=d.hotConfessions.map(p=>`<div class="exp-card" onclick="openPModal('${p._id}')">
+        <div style="font-size:.88rem;font-style:italic;color:var(--tx);line-height:1.5">"${esc((p.caption||'').substring(0,120))}"</div>
+        <div style="font-size:.7rem;color:var(--tx3);margin-top:8px">❤️ ${(p.likes||[]).length} · 💬 ${p.commentCount||0}</div>
+      </div>`).join('');
+      html+='</div>';
+    }
+
+    if(!html)html='<div class="empty"><div style="font-size:3rem">🔍</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">Nothing trending yet</div><div style="font-size:.82rem;color:var(--tx3)">Be the first to post something</div></div>';
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML='<div class="empty"><div>Couldn\'t load explore — try again</div></div>';
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   ALGORITHM FEED — personalised for you
+═══════════════════════════════════════════════ */
+async function loadAlgorithmFeed(){
+  feedLoading=true;
+  showSkeletons(3);
+  try{
+    const r=await api(`/api/posts/algorithm?page=${feedPage}&limit=20`);
+    const d=await r.json();
+    const posts=Array.isArray(d)?d:(d.posts||[]);
+    const el=q('feed-list');
+    if(feedPage===1)el.innerHTML='';
+    if(!posts.length&&feedPage===1){showOnboardingCards();feedLoading=false;return;}
+    posts.forEach((p,i)=>{
+      const div=document.createElement('div');div.innerHTML=renderPost(p);
+      const c=div.firstElementChild;if(c){c.style.animationDelay=`${i*.04}s`;el.appendChild(c);}
+    });
+    feedPage++;feedLoading=false;
+    feedDone=posts.length<20;
+    setTimeout(addComplimentBtns,100);
+  }catch(e){feedLoading=false;}
+}
+
+/* ═══════════════════════════════════════════════
+   COMPOSE — poll + voice type handlers
 ═══════════════════════════════════════════════ */
 function profileTab(tab, el){
   document.querySelectorAll('.ptab').forEach(t=>{t.classList.remove('on');t.style.color='var(--tx3)';t.style.borderBottomColor='transparent';});
@@ -3024,8 +3469,12 @@ async function main(){
   await initSession();
   checkMidnightMode();
   loadFeed();loadStories();initSocket();getLocation();
-  showDailyPrompt(); // show today's question on feed
-  checkReferral();   // save invite code if present in URL
+  showDailyPrompt();
+  checkReferral();
+  // Init infinite scroll (replaces Load More button)
+  setTimeout(initInfiniteScroll, 500);
+  // Init push notifications after 5s (not immediately)
+  setTimeout(initPushNotifications, 5000);
   // Check if confessions.html asked us to open compose
   const pendingCompose=sessionStorage.getItem('openCompose');
   if(pendingCompose){sessionStorage.removeItem('openCompose');setTimeout(()=>openCompose(pendingCompose),800);}

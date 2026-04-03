@@ -1367,36 +1367,54 @@ function goPage(n){
 
 /* ═══════════ FEED ═══════════ */
 async function loadFeed(reset=true){
-  if(feedLoading)return;if(reset){feedPage=1;feedDone=false;}
+  if(feedLoading)return;
+  if(reset){feedPage=1;feedDone=false;}
   feedLoading=true;
   const el=q('feed-list');
-  if(reset) showSkeletons(3); // skeleton instead of spinner
+  if(reset)showSkeletons(3);
   try{
-    // Trending tab uses different endpoint
     let url;
     if(feedTab==='trending'){
       url=`/api/posts/trending?limit=20`;
     } else {
-      url=`/api/posts?page=${feedPage}&limit=15${feedEmo?`&emotion=${feedEmo}`:''}`;
+      // Use algorithm feed for personalised Latest tab
+      url=`/api/posts/algorithm?page=${feedPage}&limit=20`;
     }
     const r=await api(url);
-    const data=await r.json();const posts=Array.isArray(data)?data:(data.posts||[]);
-    feedLoading=false;if(reset)el.innerHTML='';
+    const data=await r.json();
+    const posts=Array.isArray(data)?data:(data.posts||[]);
+    feedLoading=false;
+    if(reset)el.innerHTML='';
     if(!posts.length&&reset){
-      // First-time user → onboarding; returning user → empty state
       const hasPosted=user?.postCount>0||localStorage.getItem('ann_has_posted');
-      if(!hasPosted){showOnboardingCards();}
-      else{el.innerHTML=`<div class="empty"><div style="font-size:3rem">${feedTab==='trending'?'🔥':'🌱'}</div><div style="font-family:var(--fD);font-weight:700;font-size:1rem">${feedTab==='trending'?'No trending posts yet':'Nothing here yet'}</div><div style="font-size:.82rem;color:var(--tx3);max-width:200px;line-height:1.65">${feedTab==='trending'?'Check back later — posts that get reactions appear here':'Be the first to share something real'}</div><button class="btn btn-v btn-sm" style="margin-top:14px" onclick="openCompose('post')">Create post ✨</button></div>`;}
+      if(!hasPosted)showOnboardingCards();
+      else el.innerHTML=`<div class="empty"><div style="font-size:3rem">${feedTab==='trending'?'🔥':'🌱'}</div><div style="font-family:var(--fD);font-weight:700;font-size:1rem">Nothing here yet</div><button class="btn btn-v btn-sm" style="margin-top:14px" onclick="openCompose('post')">Create post ✨</button></div>`;
       return;
     }
-    posts.forEach((p,i)=>{const d=document.createElement('div');d.innerHTML=renderPost(p);const c=d.firstElementChild;if(c){c.style.animationDelay=`${i*.04}s`;el.appendChild(c);}});
+    posts.forEach((p,i)=>{
+      const d=document.createElement('div');d.innerHTML=renderPost(p);
+      const c=d.firstElementChild;
+      if(c){c.style.animationDelay=`${i*.04}s`;el.appendChild(c);}
+    });
     feedDone=posts.length<15||feedTab==='trending';
-    q('load-more').style.display=feedDone?'none':'block';
+    q('load-more').style.display='none'; // infinite scroll handles this
     feedPage++;
     setTimeout(addComplimentBtns,100);
   }catch(e){
     feedLoading=false;
-    if(reset)el.innerHTML=`<div class="empty"><div style="font-size:3rem">⚡</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">Couldn't load feed</div><button class="btn btn-g btn-sm" style="margin-top:12px" onclick="loadFeed()">Retry</button></div>`;
+    // Fallback to basic feed if algorithm fails
+    if(reset&&feedTab==='latest'){
+      try{
+        const r=await api(`/api/posts?page=1&limit=15`);
+        const d=await r.json();
+        const posts=Array.isArray(d)?d:(d.posts||[]);
+        el.innerHTML='';
+        posts.forEach((p,i)=>{const dv=document.createElement('div');dv.innerHTML=renderPost(p);const c=dv.firstElementChild;if(c){c.style.animationDelay=`${i*.04}s`;el.appendChild(c);}});
+        feedDone=posts.length<15;feedPage=2;
+      }catch(_){
+        el.innerHTML=`<div class="empty"><div style="font-size:3rem">⚡</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">Couldn't load feed</div><button class="btn btn-g btn-sm" style="margin-top:12px" onclick="loadFeed()">Retry</button></div>`;
+      }
+    }
   }
 }
 function loadMore(){if(!feedDone)loadFeed(false);}
@@ -1805,8 +1823,10 @@ function openCompose(type='post'){
   q('story-notice').style.display='none';q('unsent-notice').style.display='none';
   document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));
   document.querySelectorAll('.eb').forEach(b=>b.classList.remove('on'));
-  const typeMap={post:0,story:1,confession:2,unsent:3};
-  const chips=document.querySelectorAll('.tc');chips[typeMap[type]||0]?.classList.add('on');
+  const typeMap={post:0,story:1,confession:2,unsent:3,poll:4,voice:5};
+  const chips=document.querySelectorAll('.tc');chips[typeMap[type]??0]?.classList.add('on');
+  // Trigger full selType to show/hide all fields correctly
+  selType(type, chips[typeMap[type]??0]);
   if(type==='story')q('story-notice').style.display='block';
   if(type==='unsent')q('unsent-notice').style.display='block';
   const phs={post:'Say something real...',story:'What\'s happening right now?',confession:'Your deepest truth... (no one will know)',unsent:'What do you wish you could say?'};
@@ -1815,16 +1835,7 @@ function openCompose(type='post'){
   const h=new Date().getHours();let hint=null;
   if(h>=0&&h<=3)hint='lonely';else if(h>=22)hint='lonely';
   if(hint){q('emo-hint-txt').textContent=`You might be feeling ${hint}`;q('emo-hint').style.display='flex';}else q('emo-hint').style.display='none';
-  // Show/hide poll and voice UI
-  const isPoll=type==='poll', isVoice=type==='voice';
-  if(q('poll-fields'))q('poll-fields').style.display=isPoll?'block':'none';
-  if(q('poll-notice'))q('poll-notice').style.display=isPoll?'block':'none';
-  if(q('voice-fields'))q('voice-fields').style.display=isVoice?'block':'none';
-  if(q('voice-notice'))q('voice-notice').style.display=isVoice?'block':'none';
-  if(q('media-area'))q('media-area').style.display=isVoice?'none':'block';
-  if(q('media-lbl'))q('media-lbl').style.display=isVoice?'none':'block';
-  if(isPoll){pollOptCount=2;if(q('poll-extra-opts'))q('poll-extra-opts').innerHTML='';}
-  if(isVoice)clearRecording();
+  // selType already handles poll-fields, voice-fields, notices, media visibility
   // Load draft if regular post
   if(type==='post')setTimeout(loadDraft,150);
   setTimeout(()=>q('ctxt').focus(),100);
@@ -1833,9 +1844,28 @@ function closeCompose(){
   saveDraft(); // save before closing
   q('compose').classList.remove('on');
 }
-function selType(t,el){compType=t;document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));el?.classList.add('on');
-  q('story-notice').style.display=t==='story'?'block':'none';q('unsent-notice').style.display=t==='unsent'?'block':'none';
-  const phs={post:'Say something real...',story:'What\'s happening right now?',confession:'Your deepest truth...',unsent:'What do you wish you could say?'};
+function selType(t,el){
+  compType=t;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));
+  el?.classList.add('on');
+  // Show/hide type-specific notices
+  q('story-notice').style.display  = t==='story'   ?'block':'none';
+  q('unsent-notice').style.display = t==='unsent'  ?'block':'none';
+  q('poll-notice').style.display   = t==='poll'    ?'block':'none';
+  q('voice-notice').style.display  = t==='voice'   ?'block':'none';
+  // Show/hide poll fields
+  q('poll-fields').style.display   = t==='poll'    ?'block':'none';
+  // Show/hide voice fields
+  q('voice-fields').style.display  = t==='voice'   ?'block':'none';
+  // Hide media area for voice (already has recorder)
+  if(q('media-area'))q('media-area').style.display = t==='voice'?'none':'block';
+  if(q('media-lbl'))q('media-lbl').style.display   = t==='voice'?'none':'block';
+  // Reset poll if switching away
+  if(t!=='poll'){pollOptCount=2;if(q('poll-extra-opts'))q('poll-extra-opts').innerHTML='';}
+  // Reset voice if switching away
+  if(t!=='voice')clearRecording();
+  // Update placeholder
+  const phs={post:'Say something real...',story:'What\'s happening right now?',confession:'Your deepest truth... (no one will know)',unsent:'What do you wish you could say?',poll:'Ask your question...',voice:'Add a caption (optional)'};
   q('ctxt').placeholder=phs[t]||phs.post;
 }
 function selEmo(emo,el){
@@ -1879,40 +1909,87 @@ function removeMedia(){mediaUrl=null;mediaType=null;q('mprev').style.display='no
 
 async function submitPost(){
   const cap=q('ctxt').value.trim();
-  if(!cap&&!mediaUrl){toast('Write something first ✏️');return;}
+
+  // Validate by type
+  if(compType==='poll'){
+    const opt1=q('poll-opt-1')?.value?.trim();
+    const opt2=q('poll-opt-2')?.value?.trim();
+    if(!q('ctxt').value.trim()){toast('Write your poll question ✏️');return;}
+    if(!opt1||!opt2){toast('Add at least 2 poll options');return;}
+  } else if(compType==='voice'){
+    if(!audioBlob&&!mediaUrl){toast('Record a voice note first 🎙️');return;}
+  } else {
+    if(!cap&&!mediaUrl){toast('Write something first ✏️');return;}
+  }
+
   if(!compEmo&&cap){const d=detectEmo(cap);if(d)compEmo=d;}
   const btn=q('post-btn');btn.disabled=true;btn.textContent='Posting...';
+
   try{
-    const body={type:compType,caption:cap,emotion:compEmo||undefined,mediaUrl:mediaUrl||undefined,mediaType:mediaType||undefined};
+    let finalMediaUrl=mediaUrl;
+    let finalMediaType=mediaType;
+
+    // Upload voice blob if recorded
+    if(compType==='voice'&&audioBlob&&!mediaUrl){
+      btn.textContent='Uploading voice...';
+      const fd=new FormData();
+      const ext=audioBlob.type.includes('mp4')?'mp4':'webm';
+      fd.append('file',new File([audioBlob],`voice.${ext}`,{type:audioBlob.type}));
+      const tk=getToken();
+      const up=await fetch(`${API}/api/upload`,{method:'POST',headers:{Authorization:`Bearer ${tk}`},body:fd});
+      if(!up.ok){toast('Voice upload failed — try again');btn.disabled=false;btn.textContent='Post';return;}
+      const upd=await up.json();
+      finalMediaUrl=upd.url||upd.fileUrl;
+      finalMediaType='audio';
+      btn.textContent='Posting...';
+    }
+
+    // Build poll data
+    let pollData=null;
+    if(compType==='poll'){
+      const opts=[q('poll-opt-1'),q('poll-opt-2'),q('poll-opt-3'),q('poll-opt-4')]
+        .filter(el=>el&&el.value.trim()).map(el=>el.value.trim());
+      pollData={options:opts,duration:parseInt(q('poll-duration')?.value||'24')};
+    }
+
+    const body={
+      type:       compType,
+      caption:    cap,
+      emotion:    compEmo||undefined,
+      mediaUrl:   finalMediaUrl||undefined,
+      mediaType:  finalMediaType||undefined,
+      voiceDuration: compType==='voice'?recSecs:undefined,
+      poll:       pollData||undefined,
+    };
     if(compType==='story')body.expiresAt=new Date(Date.now()+24*60*60*1000).toISOString();
+
     const r=await api('/api/posts',{method:'POST',body:JSON.stringify(body)});
     const d=await r.json();
-    if(r.status===429){toast('⏳ Slow down a bit! Try again in a moment.');return;}
+    if(r.status===429){toast('⏳ Slow down a bit!');return;}
     if(!r.ok){toast(d.message||'Failed to post ❌');return;}
-    closeCompose();
-    clearDraft(); // clear saved draft on successful post
+
+    closeCompose();clearDraft();
     if(compType==='story'){
-      toast('📸 Story posted!');
-      loadStories(); // stories strip always needs reload
+      toast('📸 Story posted!');loadStories();
+    } else if(compType==='poll'){
+      toast('📊 Poll posted!');loadFeed();
+    } else if(compType==='voice'){
+      toast('🎙️ Voice note posted!');loadFeed();
     } else {
       toast('✨ Posted!');
-      // Optimistically insert at top of feed — instant, no full reload
       const el=q('feed-list');
       if(el&&d._id){
-        // Give the post the current user's info since backend may not return full object
-        const enriched={...d,authorName:user?.anonymousName,authorEmoji:user?.avatarEmoji||'🎭',likes:[],reactions:{},commentCount:0};
+        const enriched={...d,authorName:user?.anonymousName,authorEmoji:user?.avatarEmoji||'🎭',likes:[],saves:[],reactions:{},commentCount:0};
         const div=document.createElement('div');div.innerHTML=renderPost(enriched);
         const card=div.firstElementChild;
         if(card){card.style.animationDelay='0s';el.insertBefore(card,el.firstChild);addComplimentBtns();}
-      } else {
-        loadFeed(); // fallback if no id returned
-      }
-      // Update post count on profile immediately
+      } else loadFeed();
       const sp=q('s-posts');if(sp)sp.textContent=parseInt(sp.textContent||0)+1;
       if(user)user.postCount=(user.postCount||0)+1;
+      localStorage.setItem('ann_has_posted','1');
     }
     if(d.crisis?.isCrisis)setTimeout(()=>q('crisis').classList.add('on'),1500);
-    awardXP(compType==='unsent'?20:compType==='confession'?15:10,'Created a post');
+    awardXP(compType==='unsent'?20:compType==='confession'?15:compType==='poll'?12:10,'Created a post');
   }catch(e){toast('Network error — please try again ❌');}
   finally{btn.disabled=false;btn.textContent='Post';}
 }
@@ -2903,19 +2980,28 @@ function dismissPushBanner(){
 async function subscribePush(){
   try{
     const reg=await navigator.serviceWorker.ready;
-    const VAPID_PUBLIC_KEY=process.env?.VAPID_PUBLIC_KEY||
-      'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjZkbYGI3B8A6oLEBGRaxAOhKsPxA';
+    // VAPID public key — replace with your actual key from:
+    // node -e "const webpush=require('web-push');const k=webpush.generateVAPIDKeys();console.log(k)"
+    // Or use Firebase Cloud Messaging instead (simpler)
+    const VAPID_PUBLIC_KEY='BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjZkbYGI3B8A6oLEBGRaxAOhKsPxA';
     const sub=await reg.pushManager.subscribe({
       userVisibleOnly:true,
       applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    }).catch(e=>{
+      // VAPID key mismatch or unsupported — save FCM token approach instead
+      console.warn('VAPID push failed, trying FCM approach:', e.message);
+      return null;
     });
-    // Send subscription to backend
+    if(!sub){return;}
     await api('/api/users/push-subscribe',{
       method:'POST',
       body:JSON.stringify({subscription:sub})
     });
+    toast('🔔 Notifications enabled!');
     console.log('✅ Push subscription active');
-  }catch(e){console.warn('Push subscribe error:',e.message);}
+  }catch(e){
+    console.warn('Push subscribe error:',e.message);
+  }
 }
 
 function urlBase64ToUint8Array(base64String){
@@ -3004,18 +3090,26 @@ async function toggleRecording(){
 
 async function startRecording(){
   try{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
     audioChunks=[];recSecs=0;
-    mediaRecorder=new MediaRecorder(stream,{mimeType:'audio/webm'});
-    mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+
+    // Pick best supported format (Safari uses audio/mp4, Chrome uses audio/webm)
+    const mimeType=MediaRecorder.isTypeSupported('audio/webm')
+      ?'audio/webm'
+      :MediaRecorder.isTypeSupported('audio/mp4')
+        ?'audio/mp4'
+        :''; // let browser pick
+
+    mediaRecorder=new MediaRecorder(stream, mimeType?{mimeType}:{});
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data);};
     mediaRecorder.onstop=()=>{
-      audioBlob=new Blob(audioChunks,{type:'audio/webm'});
+      const type=mediaRecorder.mimeType||'audio/webm';
+      audioBlob=new Blob(audioChunks,{type});
       showVoicePreview();
       stream.getTracks().forEach(t=>t.stop());
     };
-    mediaRecorder.start();
+    mediaRecorder.start(100); // collect data every 100ms
 
-    // Update UI
     q('voice-rec-icon').textContent='⏹️';
     q('voice-rec-label').textContent='Recording... tap to stop';
     q('voice-record-btn').classList.add('recording');
@@ -3024,11 +3118,15 @@ async function startRecording(){
     recInterval=setInterval(()=>{
       recSecs++;
       const m=Math.floor(recSecs/60),s=recSecs%60;
-      q('rec-timer').textContent=`${m}:${String(s).padStart(2,'0')}`;
-      if(recSecs>=60)stopRecording(); // max 60s
+      if(q('rec-timer'))q('rec-timer').textContent=`${m}:${String(s).padStart(2,'0')}`;
+      if(recSecs>=60)stopRecording();
     },1000);
   }catch(e){
-    toast('Microphone access denied. Please allow mic in browser settings.');
+    if(e.name==='NotAllowedError'){
+      toast('🎙️ Microphone access denied. Please allow mic in your browser settings.');
+    } else {
+      toast('Could not start recording: '+e.message);
+    }
   }
 }
 
@@ -3468,57 +3566,75 @@ function sharePost(id){
 async function main(){
   await initSession();
   checkMidnightMode();
-  loadFeed();loadStories();initSocket();getLocation();
+
+  // ── Parallel startup — load everything at once instead of sequentially ──
+  Promise.all([
+    loadFeed(),
+    loadStories(),
+    getLocation(),
+  ]).catch(()=>{});
+
+  initSocket();
   showDailyPrompt();
   checkReferral();
+
   // Init infinite scroll (replaces Load More button)
-  setTimeout(initInfiniteScroll, 500);
-  // Init push notifications after 5s (not immediately)
+  setTimeout(initInfiniteScroll, 800);
+
+  // Init push notifications after 5s (not on first load)
   setTimeout(initPushNotifications, 5000);
-  // Check if confessions.html asked us to open compose
-  const pendingCompose=sessionStorage.getItem('openCompose');
-  if(pendingCompose){sessionStorage.removeItem('openCompose');setTimeout(()=>openCompose(pendingCompose),800);}
-  // Load emotion pulse after location
-  setTimeout(()=>{if(userLoc.city)loadEmotionPulse();},2000);
-  // Show mood checkin after 2s only if not done AND not skipped today
+
+  // Mood checkin — only if not done today
   setTimeout(()=>{
     const td=new Date().toDateString();
     const skipped=localStorage.getItem('ann_mood_skip_'+td);
     const logged=localStorage.getItem('ann_mood_'+td);
-    if(!logged&&!skipped)q('mood-ci').classList.add('on');
-  },2000);
-  // Check streak at risk (shows after 6pm if mood not logged)
-  setTimeout(checkStreakReminder,3500);
-  // Silently check inbox for unread badge on load
+    if(!logged&&!skipped)q('mood-ci')?.classList.add('on');
+  },2500);
+
+  // Streak reminder after 6pm
+  setTimeout(checkStreakReminder, 3500);
+
+  // Check unread messages for badge
   setTimeout(async()=>{
-    try{const r=await api('/api/messages/inbox');const d=await r.json();const cs=Array.isArray(d)?d:(d.conversations||[]);
+    try{
+      const r=await api('/api/messages/inbox');
+      const d=await r.json();
+      const cs=Array.isArray(d)?d:(d.conversations||[]);
       const unread=cs.filter(c=>c.unread).length;
-      const badge=q('notif-badge');if(badge)badge.style.display=unread>0?'block':'none';
+      const badge=q('notif-badge');
+      if(badge)badge.style.display=unread>0?'block':'none';
     }catch(_){}
-  },1500);
-  // Pull-to-refresh on feed page
+  },2000);
+
+  // Pull-to-refresh
   let ptr_startY=0;
   const ptrEl=q('pg-feed');
   if(ptrEl){
-    ptrEl.addEventListener('touchstart',e=>{if(ptrEl.scrollTop===0)ptr_startY=e.touches[0].clientY;},{ passive:true });
+    ptrEl.addEventListener('touchstart',e=>{if(ptrEl.scrollTop===0)ptr_startY=e.touches[0].clientY;},{passive:true});
     ptrEl.addEventListener('touchend',e=>{
       if(ptr_startY>0){
         const dy=e.changedTouches[0].clientY-ptr_startY;
-        if(dy>65){toast('🔄 Refreshing...');loadFeed();loadStories();}
+        if(dy>70){toast('🔄 Refreshing...');loadFeed();loadStories();}
         ptr_startY=0;
       }
-    },{ passive:true });
+    },{passive:true});
   }
-  // Handle deep links
+
+  // Deep link handler
   if(location.hash.startsWith('#post-'))setTimeout(()=>openPModal(location.hash.replace('#post-','')),800);
+
+  // Service worker
   if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
-  // Check midnight mode every minute
-  setInterval(checkMidnightMode,60000);
-  // Load pulse when location becomes available
+
+  // Midnight mode check every minute
+  setInterval(checkMidnightMode, 60000);
+
+  // Location + emotion pulse (deferred — not critical path)
   setTimeout(async()=>{
-    if(!userLoc.city){await getLocation();setTimeout(()=>{if(userLoc.city)loadEmotionPulse();},1500);}
-    else loadEmotionPulse();
-  },3000);
+    if(!userLoc.city){await getLocation();}
+    if(userLoc.city)loadEmotionPulse().catch(()=>{});
+  },4000);
 }
 // ── BACK BUTTON — closes modals in order (Android) ──
 window.addEventListener('popstate',()=>{

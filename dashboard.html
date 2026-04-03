@@ -1248,7 +1248,59 @@ const REACTS=[{k:'heard',e:'💙',l:'Heard'},{k:'same',e:'🤝',l:'Same'},{k:'st
 /* helpers */
 const q=id=>document.getElementById(id);
 function toast(m,d=2500){const w=q('toasts');const el=document.createElement('div');el.className='toast';el.textContent=m;w.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(-8px) scale(.9)';el.style.transition='.2s';setTimeout(()=>el.remove(),220);},d);}
-function timeAgo(d){if(!d)return'';const s=(Date.now()-new Date(d))/1000;if(s<60)return'just now';if(s<3600)return`${Math.floor(s/60)}m`;if(s<86400)return`${Math.floor(s/3600)}h`;return`${Math.floor(s/86400)}d`;}
+function timeAgo(d){
+  if(!d)return'';
+  const s=(Date.now()-new Date(d))/1000;
+  if(s<60)return'just now';
+  if(s<3600)return`${Math.floor(s/60)}m ago`;
+  if(s<86400)return`${Math.floor(s/3600)}h ago`;
+  if(s<604800)return`${Math.floor(s/86400)}d ago`;
+  return new Date(d).toLocaleDateString([],{month:'short',day:'numeric'});
+}
+
+// Psychology-driven relatability label — time of day + emotion matching
+function getRelatabilityLabel(post){
+  const h=new Date().getHours();
+  const emo=post.emotion||'';
+  const minsAgo=Math.floor((Date.now()-new Date(post.createdAt).getTime())/60000);
+  const likes=(post.likes||[]).length;
+  const reactions=(post.reactions||[]).length;
+  const total=likes+reactions;
+
+  // 3am thoughts (most emotionally vulnerable time)
+  if(h>=0&&h<5){
+    if(['lonely','sad','anxious'].includes(emo))return{t:'3am thoughts',c:'rgba(155,127,212,.8)'};
+    if(minsAgo<20)return{t:'Can\'t sleep either?',c:'rgba(155,127,212,.65)'};
+    return{t:'Night owl',c:'rgba(92,232,255,.5)'};
+  }
+  // Morning
+  if(h>=5&&h<9){
+    if(['anxious','sad'].includes(emo))return{t:'Morning anxiety',c:'rgba(244,162,97,.7)'};
+    if(['happy','excited','grateful'].includes(emo))return{t:'Morning energy ☀️',c:'rgba(0,201,167,.7)'};
+  }
+  // Workday
+  if(h>=9&&h<17){
+    if(['lonely','bored'].includes(emo))return{t:'Feeling this right now',c:'rgba(92,232,255,.65)'};
+    if(['inspired'].includes(emo))return{t:'Midday inspiration',c:'rgba(0,201,167,.7)'};
+  }
+  // Evening
+  if(h>=17&&h<21){
+    if(['grateful','happy'].includes(emo))return{t:'Evening glow',c:'rgba(244,162,97,.75)'};
+    if(['lonely','sad'].includes(emo))return{t:'End of day feels',c:'rgba(155,127,212,.7)'};
+  }
+  // Late night
+  if(h>=21&&h<24){
+    if(['lonely','sad','anxious'].includes(emo))return{t:'Late night thoughts',c:'rgba(155,127,212,.8)'};
+    if(['grateful','inspired'].includes(emo))return{t:'Night reflection 🌙',c:'rgba(123,94,167,.8)'};
+  }
+
+  // Viral signals — override time labels
+  if(total>30)return{t:'Everyone feels this',c:'rgba(255,77,109,.8)'};
+  if(total>15)return{t:'People are resonating',c:'rgba(244,162,97,.75)'};
+  if(minsAgo<3)return{t:'Just posted ✨',c:'rgba(0,201,167,.7)'};
+
+  return null;
+}
 function esc(t){return(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 const getToken=()=>localStorage.getItem('token');
 
@@ -1424,26 +1476,44 @@ function renderPost(p){
   const me=user?.anonymousName||'';
   const liked=(p.likes||[]).some(id=>id===me||id===user?._id?.toString());
   const ec=EMO_C[p.emotion]||{};
-  const isOwn=p.authorName===me||p.anonymousName===me;
+  const isOwn=p.authorName===me||p.anonymousName===me||p.authorId===user?._id?.toString();
   const author=p.authorName||p.anonymousName||'Anonymous';
   const av=p.authorEmoji||p.avatarEmoji||'🎭';
   const isConf=p.type==='confession'||p.type==='unsent';
   const isMid=()=>{const h=new Date(p.createdAt).getHours();return h>=23||h<=3;};
   const st=ec.c?`--emo-color:${ec.c};--emo-bg:${ec.bg};--emo-fg:${ec.fg}`:'';
+
+  // Media
   let media='';
-  if(p.mediaUrl){
+  if(p.mediaUrl&&p.mediaType!=='audio'){
     media=p.mediaType==='video'
       ?`<div class="pm"><video src="${esc(p.mediaUrl)}" controls playsinline preload="metadata"></video></div>`
       :`<div class="pm"><img src="${esc(p.mediaUrl)}" alt="" loading="lazy" style="cursor:zoom-in" onclick="openLightbox('${esc(p.mediaUrl)}')"/></div>`;
   }
-  // Caption — hashtags now open search/filter
+
+  // Caption with hashtag links
   const cap=p.caption?`<div class="pb ${isConf?'conf':''}">${esc(p.caption).replace(/#(\w+)/g,`<span class="tag" onclick="searchHashtag('$1')">#$1</span>`)}</div>`:'';
+
+  // Pills / badges
   const epill=p.emotion?`<span class="epill" style="background:${ec.bg||'var(--vg)'};color:${ec.fg||'var(--v3)'}"> ${p.emotion}</span>`:'';
   const stbdg=p.type==='story'?'<span class="epill stbadge">📸 Story</span>':'';
   const mnbdg=isMid()&&p.type==='post'?'<span class="epill mnbadge">🌙 Midnight</span>':'';
   const ubdg=p.type==='unsent'?'<span class="epill" style="background:rgba(255,133,161,.1);color:var(--pk)">💌 Unsent</span>':'';
-  const isSaved=(p.saves||[]).some(id=>id===user?._id?.toString()||id===user?.anonymousName);
-  const reacts='<div class="reacts">'+REACTS.map(t=>{const cnt=Array.isArray(p.reactions?.[t.k])?p.reactions[t.k].length:(p.reactions?.[t.k]||0);const on=(p.reactions?.[t.k]||[]).some(id=>id===me||id===user?._id?.toString());return`<button class="rb ${on?'on':''}" onclick="doReact('${p._id}','${t.k}',this)">${t.e} <span id="rc-${t.k}-${p._id}">${cnt||''}</span></button>`;}).join('')+'</div>';
+  const pbdg=p.type==='poll'?'<span class="epill" style="background:rgba(123,94,167,.1);color:var(--v3)">📊 Poll</span>':'';
+  const vbdg=p.type==='voice'?'<span class="epill" style="background:rgba(255,77,109,.08);color:var(--pk)">🎙️ Voice</span>':'';
+
+  // Psychology-driven relatability label
+  const rel=getRelatabilityLabel(p);
+  const relLabel=rel?`<span style="font-size:.62rem;padding:2px 7px;border-radius:100px;background:${rel.c};color:#fff;font-family:var(--fD);font-weight:700;letter-spacing:.04em">${rel.t}</span>`:'';
+
+  const isSaved=(p.saves||[]).some(id=>id===user?._id?.toString()||id===user?.anonymousName)||p.isSaved;
+
+  // Reactions
+  const reacts='<div class="reacts">'+REACTS.map(t=>{
+    const cnt=Array.isArray(p.reactions?.[t.k])?p.reactions[t.k].length:(p.reactions?.[t.k]||0);
+    const on=(p.reactions?.[t.k]||[]).some(id=>id===me||id===user?._id?.toString());
+    return`<button class="rb ${on?'on':''}" onclick="doReact('${p._id}','${t.k}',this)">${t.e} <span id="rc-${t.k}-${p._id}">${cnt||''}</span></button>`;
+  }).join('')+'</div>';
 
   // Poll rendering
   let pollHtml='';
@@ -1478,19 +1548,26 @@ function renderPost(p){
   }
 
   return`<div class="card" data-id="${p._id}" style="${st}">
-    <div class="ph"><div class="pav">${esc(av)}</div>
-      <div style="flex:1;min-width:0"><div class="pn">${esc(author)}</div>
-      <div style="display:flex;align-items:center;gap:4px;margin-top:2px;flex-wrap:wrap"><span class="pt">${timeAgo(p.createdAt)}</span>${epill}${stbdg}${mnbdg}${ubdg}</div></div>
-      <button style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:middle;color:var(--tx3);font-size:.9rem" onclick="ctxMenu(event,'${p._id}',${isOwn},'${esc(author)}','${esc(av)}','${p.authorId||p._authorId||''}')">⋯</button>
+    <div class="ph">
+      <div class="pav">${esc(av)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="pn">${esc(author)}</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:2px;flex-wrap:wrap">
+          <span class="pt">${timeAgo(p.createdAt)}</span>
+          ${epill}${stbdg}${mnbdg}${ubdg}${pbdg}${vbdg}
+          ${relLabel}
+        </div>
+      </div>
+      <button style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:.9rem" onclick="ctxMenu(event,'${p._id}',${isOwn},'${esc(author)}','${esc(av)}','${p.authorId||p._authorId||''}')">⋯</button>
     </div>
     ${cap}${media}${pollHtml}${voiceHtml}${reacts}
     <div class="pa">
       <div class="pak ${liked?'liked':''}" onclick="doLike('${p._id}',this)" id="lb-${p._id}">
-        <span>${liked?'❤️':'🤍'}</span><span id="lc-${p._id}">${(p.likes||[]).length}</span>
+        <span>${liked?'❤️':'🤍'}</span><span id="lc-${p._id}">${(p.likes||[]).length||''}</span>
       </div>
-      <div class="pak" onclick="openPModal('${p._id}')">💬 <span>${p.commentCount||0}</span></div>
-      <div class="pak ${isSaved?'saved':''}" onclick="doSave('${p._id}',this)" id="sv-${p._id}" title="Save post">
-        <span>${isSaved?'🔖':'🔖'}</span>
+      <div class="pak" onclick="openPModal('${p._id}')">💬<span style="margin-left:3px">${p.commentCount||''}</span></div>
+      <div class="pak ${isSaved?'saved':''}" onclick="doSave('${p._id}',this)" id="sv-${p._id}">
+        <span style="opacity:${isSaved?1:.5}">🔖</span>
       </div>
       <div style="flex:1"></div>
       <div class="pak" onclick="openShareSheet('${p._id}','${esc((p.caption||'').substring(0,60))}')">🔗</div>
@@ -1761,6 +1838,16 @@ function showSVItem(){
   q('sv-av').textContent=g.av;q('sv-name').textContent=g.nm;
   // Show ⋯ menu button always (delete for own, report for others)
   q('sv-menu-btn').style.display='block';
+
+  // Track view — call API (fire and forget)
+  if(it._id){
+    api(`/api/posts/${it._id}/view`,{method:'POST'}).catch(()=>{});
+    // Show view count for own stories
+    const isOwn=g.nm===user?.anonymousName||it.authorName===user?.anonymousName;
+    if(isOwn&&it.storyViews!==undefined){
+      q('sv-name').innerHTML=`${esc(g.nm)} <span style="font-size:.65rem;color:rgba(255,255,255,.5);font-family:var(--fM)">👁 ${(it.storyViews||0)+1}</span>`;
+    }
+  }
   const prog=q('sv-progress');prog.innerHTML='';
   g.items.forEach((_,i)=>{const bar=document.createElement('div');bar.style.cssText=`flex:1;height:2.5px;background:${i<svItemIdx?'#fff':'rgba(255,255,255,.25)'};border-radius:2px;overflow:hidden`;if(i===svItemIdx){const fill=document.createElement('div');fill.style.cssText='height:100%;background:#fff;width:0;transition:width linear';bar.appendChild(fill);}prog.appendChild(bar);});
   const cont=q('sv-content');
@@ -2983,7 +3070,7 @@ async function subscribePush(){
     // VAPID public key — replace with your actual key from:
     // node -e "const webpush=require('web-push');const k=webpush.generateVAPIDKeys();console.log(k)"
     // Or use Firebase Cloud Messaging instead (simpler)
-    const VAPID_PUBLIC_KEY='BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjZkbYGI3B8A6oLEBGRaxAOhKsPxA';
+    const VAPID_PUBLIC_KEY='BMDRvHUzPKKCfYTZAMWGHMFU-qzquvzCZdNYRF979mXO5hCTrj0DLtnBakxOMXAPnBLD0SUegfRk2pF0Z71stII';
     const sub=await reg.pushManager.subscribe({
       userVisibleOnly:true,
       applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)

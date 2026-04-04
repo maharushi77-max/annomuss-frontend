@@ -494,6 +494,48 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 .msg-reaction{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:var(--bg2);border:1px solid var(--bd2);border-radius:100px;font-size:.75rem;margin-top:4px;cursor:pointer}
 
 /* ══ DAILY PROMPT ══ */
+
+/* ══ POST SUCCESS SCREEN ══ */
+.post-success{position:fixed;inset:0;z-index:700;background:rgba(3,3,8,.96);display:none;align-items:center;justify-content:center;flex-direction:column;gap:0;padding:32px;text-align:center;animation:fadeIn .3s ease}
+.post-success.on{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.ps-emoji{font-size:4rem;margin-bottom:16px;animation:bounce .5s ease .1s both}
+@keyframes bounce{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.ps-title{font-family:var(--fD);font-weight:700;font-size:1.3rem;color:var(--tx);margin-bottom:8px;line-height:1.4}
+.ps-sub{font-size:.88rem;color:var(--tx2);margin-bottom:24px;line-height:1.7;max-width:280px}
+.ps-city{font-size:1rem;color:var(--v3);font-family:var(--fM);font-weight:700;padding:10px 20px;background:var(--vg);border-radius:100px;margin-bottom:24px}
+.ps-close{color:var(--tx3);font-size:.82rem;padding:8px;cursor:pointer;border:none;background:none;font-family:var(--fD)}
+
+/* ══ MOOD RESULT SCREEN ══ */
+.mood-result{position:fixed;inset:0;z-index:700;background:rgba(3,3,8,.97);display:none;align-items:center;justify-content:center;flex-direction:column;padding:32px;text-align:center}
+.mood-result.on{display:flex;animation:fadeIn .3s ease}
+.mr-emo{font-size:3.5rem;margin-bottom:12px}
+.mr-title{font-family:var(--fD);font-weight:700;font-size:1.2rem;color:var(--tx);margin-bottom:8px}
+.mr-stat{font-size:1rem;color:var(--v3);font-family:var(--fD);font-weight:700;margin-bottom:6px}
+.mr-city{font-size:.82rem;color:var(--tx3);margin-bottom:24px;line-height:1.6}
+.mr-msg{font-size:.9rem;color:var(--tx2);line-height:1.75;max-width:280px;margin-bottom:28px;font-style:italic}
+
+/* ══ STREAK CELEBRATION ══ */
+.streak-celebrate{position:fixed;inset:0;z-index:800;background:rgba(3,3,8,.95);display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:32px}
+.streak-celebrate.on{display:flex;animation:fadeIn .4s ease}
+.sc-fire{font-size:5rem;animation:fireAnim 1s ease infinite alternate;margin-bottom:16px}
+@keyframes fireAnim{from{transform:scale(1)}to{transform:scale(1.12)}}
+.sc-num{font-family:var(--fD);font-size:4rem;font-weight:700;background:linear-gradient(135deg,var(--go),var(--cr));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.sc-label{font-family:var(--fD);font-size:1.1rem;font-weight:700;color:var(--tx);margin-top:6px;margin-bottom:16px}
+.sc-msg{font-size:.88rem;color:var(--tx2);line-height:1.7;max-width:260px;margin-bottom:28px}
+.confetti-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:confettiFall linear forwards}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+/* ══ DEAR DIARY ══ */
+.diary-notice{display:none;background:rgba(92,232,255,.06);border:1px solid rgba(92,232,255,.18);border-radius:10px;padding:10px 14px;font-size:.78rem;color:rgba(92,232,255,.8);margin-bottom:10px;line-height:1.6}
+
+/* ══ REACTION MOMENT ══ */
+.reaction-moment{position:fixed;inset:0;z-index:750;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:32px;background:rgba(3,3,8,.92);backdrop-filter:blur(20px)}
+.reaction-moment.on{display:flex;animation:fadeIn .3s ease}
+.rm-wave{font-size:4rem;margin-bottom:16px;animation:pulse 1s ease infinite}
+.rm-title{font-family:var(--fD);font-weight:700;font-size:1.15rem;color:var(--tx);margin-bottom:8px;line-height:1.5}
+.rm-sub{font-size:.84rem;color:var(--tx2);line-height:1.7;max-width:260px}
 .daily-prompt{margin:0 14px 12px;padding:16px;background:linear-gradient(135deg,rgba(196,168,255,.1),rgba(255,133,161,.06));border:1px solid rgba(196,168,255,.22);border-radius:18px;cursor:pointer;transition:transform .15s,border-color .2s;position:relative;overflow:hidden}
 .daily-prompt:active{transform:scale(.98)}
 .daily-prompt::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(123,94,167,.04),transparent);pointer-events:none}
@@ -694,6 +736,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div class="tc" onclick="selType('story',this)">📸 Story</div>
       <div class="tc" onclick="selType('confession',this)">🤫 Confess</div>
       <div class="tc" onclick="selType('unsent',this)">💌 Unsent</div>
+      <div class="tc" onclick="selType('diary',this)">📖 Diary</div>
       <div class="tc" onclick="selType('poll',this)">📊 Poll</div>
       <div class="tc" onclick="selType('voice',this)">🎙️ Voice</div>
     </div>
@@ -701,6 +744,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div class="notice pink" id="unsent-notice">💌 Write what you wish you could say. Posts anonymously — no one knows it's you.</div>
     <div class="notice" id="poll-notice" style="display:none;background:rgba(123,94,167,.08);border-color:rgba(123,94,167,.2);color:var(--v3)">📊 Everyone votes anonymously. Results shown after voting.</div>
     <div class="notice" id="voice-notice" style="display:none;background:rgba(255,77,109,.06);border-color:rgba(255,77,109,.18);color:var(--pk)">🎙️ Your voice is anonymously distorted. No one knows it's you.</div>
+    <div class="diary-notice" id="diary-notice">📖 Dear Diary is completely private. Only you can see this. Never shown to anyone. Ever.</div>
     <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-family:var(--fD)">How are you feeling?</div>
     <div class="emo-hint" id="emo-hint">✨ <span id="emo-hint-txt">We sensed your mood</span> — tap to confirm</div>
     <div class="emo-grid">
@@ -713,7 +757,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div class="eb" onclick="selEmo('angry',this)">😤 Angry</div>
       <div class="eb" onclick="selEmo('inspired',this)">✨ Inspired</div>
     </div>
-    <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;font-family:var(--fD)" id="cap-lbl">What's on your mind?</div>
+    <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;font-family:var(--fD)" id="cap-lbl">What do you want to say?</div>
     <textarea class="fld" id="ctxt" rows="5" maxlength="1000" placeholder="Say something real..." oninput="onCompose(this)"></textarea>
     <div class="char-c" id="char-c">0 / 1000</div>
 
@@ -919,9 +963,9 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 
   <!-- DAILY PROMPT -->
   <div class="daily-prompt" id="daily-prompt" onclick="openCompose('post');setTimeout(()=>{const t=q('ctxt');if(t){t.placeholder=currentPrompt;t.focus();}},300)" style="display:none">
-    <div class="dp-label">📅 Today's question</div>
+    <div class="dp-label" id="dp-label">✍️ Today's question</div>
     <div class="dp-q" id="dp-text">Loading...</div>
-    <div class="dp-cta">✍️ Answer anonymously</div>
+    <div class="dp-cta">Answer anonymously — no one knows it's you</div>
   </div>
 
   <!-- FEED TABS -->
@@ -1103,7 +1147,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 <div class="page" id="pg-vent">
   <div class="tb"><div class="tb-title">💭 Vent Board</div><span style="font-size:.74rem;color:var(--tx3);font-family:var(--fD)">Say it. Let it go.</span></div>
   <div class="vent-comp">
-    <textarea id="vent-txt" maxlength="280" placeholder="What's on your mind? Be real. All anonymous." oninput="ventCh(this)"></textarea>
+    <textarea id="vent-txt" maxlength="280" placeholder="Kya chal raha hai? Let it out. All anonymous — no one knows it's you." oninput="ventCh(this)"></textarea>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px">
       <span id="vc-chars" style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">0/280</span>
       <select id="vent-emo" style="background:var(--bg2);border:1px solid var(--bd);color:var(--tx2);border-radius:8px;padding:5px 9px;font-size:.77rem;flex:1;min-width:120px;font-family:var(--fB)">
@@ -1280,6 +1324,46 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <div id="explore-content" style="overflow-y:auto;flex:1;padding-top:8px">
     <div style="padding:24px;text-align:center"><div class="spin"></div></div>
   </div>
+</div>
+
+<!-- POST SUCCESS SCREEN -->
+<div class="post-success" id="post-success">
+  <div class="confetti-wrap" id="ps-confetti"></div>
+  <div class="ps-emoji" id="ps-emoji">✨</div>
+  <div class="ps-title" id="ps-title">Your words are out there</div>
+  <div class="ps-sub" id="ps-sub">Anonymous. Real. Heard.</div>
+  <div class="ps-city" id="ps-city" style="display:none"></div>
+  <button class="btn btn-v" style="padding:13px 36px" onclick="closePostSuccess()">See the feed →</button>
+  <button class="ps-close" onclick="closePostSuccess()">Skip</button>
+</div>
+
+<!-- MOOD RESULT SCREEN -->
+<div class="mood-result" id="mood-result">
+  <div class="mr-emo" id="mr-emo">🌊</div>
+  <div class="mr-title" id="mr-title">You're feeling something real</div>
+  <div class="mr-stat" id="mr-stat"></div>
+  <div class="mr-city" id="mr-city"></div>
+  <div class="mr-msg" id="mr-msg">You are not alone in this.</div>
+  <button class="btn btn-v" style="padding:13px 36px;margin-bottom:12px" onclick="closeMoodResult()">See how others feel →</button>
+  <button class="ps-close" onclick="closeMoodResult()">Close</button>
+</div>
+
+<!-- STREAK CELEBRATION -->
+<div class="streak-celebrate" id="streak-celebrate">
+  <div class="confetti-wrap" id="sc-confetti"></div>
+  <div class="sc-fire">🔥</div>
+  <div class="sc-num" id="sc-num">7</div>
+  <div class="sc-label" id="sc-label">Day Streak!</div>
+  <div class="sc-msg" id="sc-msg">You've shown up for yourself 7 days in a row. That takes courage.</div>
+  <button class="btn btn-v" style="padding:13px 36px" onclick="closeStreakCelebrate()">Keep going 💪</button>
+</div>
+
+<!-- REACTION MOMENT -->
+<div class="reaction-moment" id="reaction-moment">
+  <div class="rm-wave" id="rm-wave">💙</div>
+  <div class="rm-title" id="rm-title">Someone felt heard by your post</div>
+  <div class="rm-sub" id="rm-sub">A stranger, somewhere, read your words — and felt less alone because of them.</div>
+  <button class="btn btn-v" style="padding:13px 36px;margin-top:24px" onclick="closeReactionMoment()">That means a lot</button>
 </div>
 
 </div><!-- /pages -->
@@ -1515,7 +1599,7 @@ async function loadFeed(reset=true){
     if(!posts.length&&reset){
       const hasPosted=user?.postCount>0||localStorage.getItem('ann_has_posted');
       if(!hasPosted)showOnboardingCards();
-      else el.innerHTML=`<div class="empty"><div style="font-size:3rem">${feedTab==='trending'?'🔥':'🌱'}</div><div style="font-family:var(--fD);font-weight:700;font-size:1rem">Nothing here yet</div><button class="btn btn-v btn-sm" style="margin-top:14px" onclick="openCompose('post')">Create post ✨</button></div>`;
+      else el.innerHTML=`<div class="empty"><div style="font-size:3rem">${feedTab==='trending'?'🔥':'🌱'}</div><div style="font-family:var(--fD);font-weight:700;font-size:1rem;margin-bottom:6px">${feedTab==='trending'?'Nothing trending yet':'Quiet in here'}</div><div style="font-size:.82rem;color:var(--tx3);margin-bottom:16px;line-height:1.6">${feedTab==='trending'?'Be the first to post something that resonates':'You\'re one of the first here. Say something real.'}</div><button class="btn btn-v btn-sm" onclick="openCompose('post')">✍️ Post anonymously</button></div>`;
       return;
     }
     posts.forEach((p,i)=>{
@@ -1644,8 +1728,8 @@ function renderPost(p){
     </div>
     ${cap}${media}${pollHtml}${voiceHtml}${reacts}
     <div class="pa">
-      <div class="pak ${liked?'liked':''}" onclick="doLike('${p._id}',this)" id="lb-${p._id}">
-        <span>${liked?'❤️':'🤍'}</span><span id="lc-${p._id}">${(p.likes||[]).length||''}</span>
+      <div class="pak ${liked?'liked':''}" onclick="doLike('${p._id}',this)" id="lb-${p._id}" title="${liked?'You felt this':'Feel this'}">
+        <span>${liked?'💙':'🤍'}</span><span id="lc-${p._id}" style="font-size:.72rem">${(p.likes||[]).length>0?(p.likes||[]).length:''}</span>
       </div>
       <div class="pak" onclick="openPModal('${p._id}')">💬<span style="margin-left:3px">${p.commentCount||''}</span></div>
       <div class="pak ${isSaved?'saved':''}" onclick="doSave('${p._id}',this)" id="sv-${p._id}">
@@ -1684,22 +1768,23 @@ async function doLike(id,btn){
   const was=btn.classList.contains('liked');
   // Optimistic update
   btn.classList.toggle('liked',!was);
-  ico.textContent=was?'🤍':'❤️';
+  ico.textContent=was?'🤍':'💙';
+  lc.textContent=was?Math.max(0,cnt-1)||'':cnt+1||'';
   lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?-1:1));
   try{
     const r=await api(`/api/posts/${id}/like`,{method:'POST'});
     const d=await r.json();
     if(!r.ok){// revert
-      btn.classList.toggle('liked',was);ico.textContent=was?'❤️':'🤍';
+      btn.classList.toggle('liked',was);ico.textContent=was?'💙':'🤍';
       lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?1:-1));return;
     }
     // Sync with server
     const count=typeof d.likeCount==='number'?d.likeCount:(typeof d.likes==='number'?d.likes:null);
     if(count!==null)lc.textContent=count;
-    if(d.liked!==undefined){btn.classList.toggle('liked',!!d.liked);ico.textContent=d.liked?'❤️':'🤍';}
+    if(d.liked!==undefined){btn.classList.toggle('liked',!!d.liked);ico.textContent=d.liked?'💙':'🤍';}
   }catch(e){
     // revert on network error
-    btn.classList.toggle('liked',was);ico.textContent=was?'❤️':'🤍';
+    btn.classList.toggle('liked',was);ico.textContent=was?'💙':'🤍';
     lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?1:-1));
   }
 }
@@ -1708,6 +1793,332 @@ function sharePost(id){const url=`${location.origin}/dashboard.html#post-${id}`;
    POST ACTION SHEET — ⋯ button
 ═══════════════════════════════════════════════ */
 let _pasPostId=null, _pasIsOwn=false, _pasAuthor={name:'',emoji:'',id:null};
+
+/* ═══════════════════════════════════════════════
+   POST SUCCESS SCREEN — emotional connection moment
+═══════════════════════════════════════════════ */
+const EMO_EMOJIS={happy:'😊',sad:'💙',anxious:'💜',lonely:'💙',grateful:'🌸',
+  inspired:'✨',hopeful:'🌱',excited:'🎉',confused:'🌀',angry:'🔥',proud:'🌟',neutral:'🎭'};
+
+const POST_SUCCESS_MSGS={
+  post:[
+    'Your words are out there now.',
+    'Somebody needed to read exactly this.',
+    'You said something real. That takes courage.',
+    'Anonymous. Honest. Heard.',
+  ],
+  confession:[
+    'That took guts. We see you.',
+    'You said the thing you never say. That matters.',
+    'Your secret is safe. And so are you.',
+    'Lighter now? You should be.',
+  ],
+  unsent:[
+    'The words finally exist somewhere.',
+    'You said it. Even if they never read it.',
+    'Some things need to be said, even to no one.',
+    'It\'s out of your chest now.',
+  ],
+  poll:[
+    'India is listening.',
+    'Let\'s see what 1.4 billion people think.',
+    'Honest answers only, from honest people.',
+  ],
+  voice:[
+    'Your voice, protected. Your words, real.',
+    'Someone out there needed to hear a human voice tonight.',
+  ],
+  diary:[
+    'Just for you. Safe here.',
+    'Your diary grows with you.',
+    'No one will ever read this but you.',
+  ],
+};
+
+async function showPostSuccess(type, caption, post){
+  const screen=q('post-success');
+  if(!screen)return;
+
+  // Pick message
+  const msgs=POST_SUCCESS_MSGS[type]||POST_SUCCESS_MSGS.post;
+  const msg=msgs[Math.floor(Math.random()*msgs.length)];
+
+  // Detect emotion from caption for emoji
+  const emo=post?.emotion||detectEmo(caption||'')||'neutral';
+  const emoji=EMO_EMOJIS[emo]||'✨';
+
+  q('ps-emoji').textContent=emoji;
+  q('ps-title').textContent=msg;
+
+  // For diary — different sub message
+  if(type==='diary'){
+    q('ps-sub').textContent='This stays between you and Annomuss. Forever.';
+    q('ps-city').style.display='none';
+    screen.classList.add('on');
+    launchConfetti('ps-confetti');
+    setTimeout(closePostSuccess, 4000);
+    return;
+  }
+
+  q('ps-sub').textContent='Your post reaches people feeling the same thing first.';
+
+  // Fetch city emotion count
+  try{
+    const pulse=await api('/api/moods/pulse');
+    const data=await pulse.json();
+    const cityData=data.find(c=>c.city===userLoc.city);
+    const cityEmoCount=cityData?.emotions?.find?.(e=>e.emotion===emo)?.count||
+      cityData?.breakdown?.find?.(e=>e.emotion===emo)?.count||0;
+    const totalIndia=data.reduce((s,c)=>{
+      return s+(c.breakdown||[]).find?.(e=>e.emotion===emo)?.count||0;
+    },0);
+
+    const cityEl=q('ps-city');
+    if(cityEl){
+      if(cityEmoCount>0&&userLoc.city){
+        cityEl.textContent=`🌍 ${cityEmoCount} people in ${userLoc.city} feel ${emo} today`;
+        cityEl.style.display='block';
+      } else if(totalIndia>0){
+        cityEl.textContent=`🌍 ${totalIndia} people across India feel ${emo} right now`;
+        cityEl.style.display='block';
+      } else {
+        cityEl.style.display='none';
+      }
+    }
+  }catch(_){q('ps-city').style.display='none';}
+
+  screen.classList.add('on');
+  launchConfetti('ps-confetti');
+  // Auto-close after 5s
+  setTimeout(closePostSuccess, 5000);
+}
+
+function closePostSuccess(){
+  q('post-success')?.classList.remove('on');
+}
+
+/* ═══════════════════════════════════════════════
+   MOOD RESULT SCREEN — "you are not alone"
+═══════════════════════════════════════════════ */
+const MOOD_MESSAGES={
+  happy:    ['Carry it with you. Share it with the feed. ✨','Good days are real too. Log them.',],
+  sad:      ['Feeling sad is not weakness. It\'s honesty.','You are allowed to not be okay.',],
+  anxious:  ['Anxiety is exhausting. You\'re not alone in this.','Breathe. You\'re safe here.',],
+  lonely:   ['Loneliness is not a flaw. It\'s a signal.','You showed up for yourself today. That matters.',],
+  grateful: ['Gratitude is rare. You noticed something good.','This feeling is worth holding onto.',],
+  inspired: ['Inspiration is fragile. Write it down before it fades.','Go do the thing.',],
+  hopeful:  ['Hope is an act of courage in hard times.','Something better is possible. You believe it.',],
+  angry:    ['Anger means something mattered to you.','It\'s okay to feel this. You\'re safe here.',],
+  confused: ['Confusion is just the space before clarity.','You don\'t have to figure it all out today.',],
+  proud:    ['Own it. You earned this feeling.','Let yourself feel good about this.',],
+  neutral:  ['Neutral days are still days. Still real.','You showed up. That\'s enough.',],
+};
+
+async function showMoodResult(emotion){
+  const screen=q('mood-result');
+  if(!screen)return;
+
+  const msgs=MOOD_MESSAGES[emotion]||MOOD_MESSAGES.neutral;
+  const msg=msgs[Math.floor(Math.random()*msgs.length)];
+  const emoji=EMO_EMOJIS[emotion]||'🌊';
+
+  q('mr-emo').textContent=emoji;
+  q('mr-title').textContent=`You're feeling ${emotion}`;
+  q('mr-msg').textContent=msg;
+  q('mr-stat').textContent='';
+  q('mr-city').textContent='';
+
+  screen.classList.add('on');
+
+  // Fetch how many others feel same
+  try{
+    const r=await api('/api/moods/pulse');
+    const data=await r.json();
+    const all=data.reduce((s,c)=>s+((c.breakdown||[]).find(e=>e.emotion===emotion)?.count||0),0);
+    const cityData=data.find(c=>c.city===userLoc.city);
+    const cityCount=(cityData?.breakdown||[]).find(e=>e.emotion===emotion)?.count||0;
+
+    if(all>0){
+      q('mr-stat').textContent=`${all.toLocaleString('en-IN')} people in India feel ${emotion} today`;
+    }
+    if(cityCount>0&&userLoc.city){
+      q('mr-city').textContent=`Including ${cityCount} people in ${userLoc.city}`;
+    }
+  }catch(_){}
+}
+
+function closeMoodResult(){
+  q('mood-result')?.classList.remove('on');
+}
+
+/* ═══════════════════════════════════════════════
+   STREAK CELEBRATION — milestone moments
+═══════════════════════════════════════════════ */
+const STREAK_MSGS={
+  3:  'Three days straight. The habit is forming.',
+  7:  'One full week. You showed up for yourself every single day.',
+  14: 'Two weeks! This is who you are now.',
+  21: '21 days — this is no longer a habit. It\'s you.',
+  30: 'One month. You\'ve built something real.',
+  60: 'Two months. You\'re different from who you were.',
+  100:'100 days. Whatever you\'re carrying, you\'ve been showing up anyway.',
+};
+
+function checkStreakCelebration(streakCount){
+  const milestones=[3,7,14,21,30,60,100];
+  if(!milestones.includes(streakCount))return;
+  const lastCelebrated=parseInt(localStorage.getItem('ann_streak_celebrated')||'0');
+  if(lastCelebrated>=streakCount)return;
+  localStorage.setItem('ann_streak_celebrated',streakCount);
+  showStreakCelebration(streakCount);
+}
+
+function showStreakCelebration(n){
+  const screen=q('streak-celebrate');
+  if(!screen)return;
+  q('sc-num').textContent=n;
+  q('sc-label').textContent=n===1?'Day Streak!':'Day Streak! 🔥';
+  q('sc-msg').textContent=STREAK_MSGS[n]||`You've checked in ${n} days in a row. That takes real commitment.`;
+  screen.classList.add('on');
+  launchConfetti('sc-confetti');
+}
+
+function closeStreakCelebrate(){
+  q('streak-celebrate')?.classList.remove('on');
+}
+
+/* ═══════════════════════════════════════════════
+   REACTION MOMENT — fullscreen when someone reacts
+═══════════════════════════════════════════════ */
+const REACTION_MOMENTS={
+  heard:    {e:'💙', t:'Someone felt heard by your words',     s:'They weren\'t alone anymore because of what you wrote.'},
+  same:     {e:'🤝', t:'Someone said "same" to your post',     s:'You put into words what they couldn\'t. That\'s rare.'},
+  strength: {e:'🔥', t:'Your post gave someone strength',       s:'Someone needed exactly this today. And you gave it to them.'},
+  hug:      {e:'🫂', t:'Someone sent you a hug',               s:'A stranger, across a city, is rooting for you.'},
+  love:     {e:'🌊', t:'Someone loved your post',               s:'This one hit differently for them. Your words stayed.'},
+};
+
+let reactionMomentTimer=null;
+function showReactionMoment(type){
+  const cfg=REACTION_MOMENTS[type];
+  if(!cfg)return;
+  // Don't interrupt if user is composing
+  if(q('compose')?.classList.contains('on'))return;
+
+  const screen=q('reaction-moment');
+  if(!screen)return;
+  q('rm-wave').textContent=cfg.e;
+  q('rm-title').textContent=cfg.t;
+  q('rm-sub').textContent=cfg.s;
+  screen.classList.add('on');
+  // Auto close after 6s
+  clearTimeout(reactionMomentTimer);
+  reactionMomentTimer=setTimeout(closeReactionMoment, 6000);
+}
+
+function closeReactionMoment(){
+  clearTimeout(reactionMomentTimer);
+  q('reaction-moment')?.classList.remove('on');
+}
+
+/* ═══════════════════════════════════════════════
+   CONFETTI — celebration animation
+═══════════════════════════════════════════════ */
+function launchConfetti(containerId){
+  const container=q(containerId);
+  if(!container)return;
+  container.innerHTML='';
+  const colors=['#FF4D6D','#7B5EA7','#F4A261','#00C9A7','#C4A8FF','#52B788','#FF85A1'];
+  for(let i=0;i<60;i++){
+    const piece=document.createElement('div');
+    piece.className='confetti-piece';
+    piece.style.cssText=`
+      left:${Math.random()*100}%;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${1.5+Math.random()*2}s;
+      animation-delay:${Math.random()*0.8}s;
+      width:${4+Math.random()*8}px;
+      height:${4+Math.random()*8}px;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+    `;
+    container.appendChild(piece);
+  }
+  setTimeout(()=>container.innerHTML='', 4000);
+}
+
+/* ═══════════════════════════════════════════════
+   INDIAN DAILY PROMPTS — 50 deep, honest, resonant
+═══════════════════════════════════════════════ */
+const DAILY_PROMPTS_INDIA=[
+  // Family & pressure (the #1 Indian experience)
+  'What are you pretending to be okay with, for your family\'s sake?',
+  'Write the text you want to send your parents but never will.',
+  'What\'s the one expectation you wish you could return?',
+  'What would you study / do / be if nobody was watching?',
+  'What does success mean to you — not to your family, to you?',
+  'What\'s the thing nobody in your house knows you\'re going through?',
+  'What conversation are you afraid to have at home?',
+  'What part of yourself did you hide to fit into your family?',
+
+  // Academic & career (uniquely Indian scale)
+  'What\'s something about your college / career path you\'ve never admitted?',
+  'What do you wish someone had told you before your results came out?',
+  'What are you studying that\'s slowly breaking you?',
+  'Write a letter to yourself on result day — whichever result day hurt most.',
+  'What\'s the gap between who you\'re supposed to be and who you are?',
+
+  // Love & relationships (hidden in India)
+  'Write the message you typed and deleted.',
+  'What\'s something about a person you love that you\'ve never said out loud?',
+  'What would you say to the person who doesn\'t know you exist?',
+  'What ended that you\'re still mourning, quietly?',
+  'Who do you miss but can\'t say you miss?',
+
+  // 3am thoughts
+  'What thought comes at 3am that you push away by morning?',
+  'What are you carrying into sleep tonight?',
+  'What would you say if everyone you know was asleep and nobody could judge you?',
+  'What\'s the thing you\'re most afraid to feel?',
+  'Describe your day in the words you didn\'t use when someone asked "how was your day?"',
+
+  // Self & identity
+  'Who were you before the world told you who to be?',
+  'What makes you feel most like yourself?',
+  'What\'s a part of you that you\'ve never shown anyone?',
+  'What do you secretly believe about yourself that you wish wasn\'t true?',
+  'What would you forgive yourself for, if you could?',
+
+  // Hope & honesty
+  'What small thing gave you hope today — even if everything else was hard?',
+  'What\'s something good that happened that you haven\'t told anyone?',
+  'What are you quietly proud of that nobody knows about?',
+  'What do you want to still be true about you 5 years from now?',
+  'What\'s something that\'s getting better, even slowly?',
+
+  // Connection
+  'What do you wish someone would say to you right now?',
+  'What\'s a kindness a stranger showed you that you still remember?',
+  'What would you tell the version of you from one year ago?',
+  'What do you want to be remembered for, when it\'s all over?',
+];
+
+/* ═══════════════════════════════════════════════
+   DIARY — private local journal
+═══════════════════════════════════════════════ */
+function loadDiaryInProfile(){
+  const diaries=JSON.parse(localStorage.getItem('ann_diary')||'[]');
+  const el=document.getElementById('diary-entries');
+  if(!el)return;
+  if(!diaries.length){
+    el.innerHTML='<div class="empty"><div style="font-size:2.5rem">📖</div><div style="font-family:var(--fD);font-weight:700;margin-top:8px">Your diary is empty</div><div style="font-size:.82rem;color:var(--tx3);margin-top:4px">Write your first entry — only you will ever see it</div></div>';
+    return;
+  }
+  el.innerHTML=diaries.map(d=>`
+    <div style="padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;margin-bottom:10px;cursor:pointer" onclick="expandDiary('${d.id}')">
+      <div style="font-size:.7rem;color:var(--tx3);font-family:var(--fM);margin-bottom:6px">${new Date(d.ts).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
+      <div style="font-size:.87rem;color:var(--tx2);line-height:1.6">${esc((d.text||'').substring(0,120))}${(d.text||'').length>120?'...':''}</div>
+    </div>`).join('');
+}
 
 // ── removePostCard — instantly removes post from ALL views ────
 function removePostCard(id){
@@ -2015,9 +2426,8 @@ function openCompose(type='post'){
   q('story-notice').style.display='none';q('unsent-notice').style.display='none';
   document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));
   document.querySelectorAll('.eb').forEach(b=>b.classList.remove('on'));
-  const typeMap={post:0,story:1,confession:2,unsent:3,poll:4,voice:5};
+  const typeMap={post:0,story:1,confession:2,unsent:3,diary:4,poll:5,voice:6};
   const chips=document.querySelectorAll('.tc');chips[typeMap[type]??0]?.classList.add('on');
-  // Trigger full selType to show/hide all fields correctly
   selType(type, chips[typeMap[type]??0]);
   if(type==='story')q('story-notice').style.display='block';
   if(type==='unsent')q('unsent-notice').style.display='block';
@@ -2040,25 +2450,49 @@ function selType(t,el){
   compType=t;
   document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));
   el?.classList.add('on');
-  // Show/hide type-specific notices
-  q('story-notice').style.display  = t==='story'   ?'block':'none';
-  q('unsent-notice').style.display = t==='unsent'  ?'block':'none';
-  q('poll-notice').style.display   = t==='poll'    ?'block':'none';
-  q('voice-notice').style.display  = t==='voice'   ?'block':'none';
-  // Show/hide poll fields
-  q('poll-fields').style.display   = t==='poll'    ?'block':'none';
-  // Show/hide voice fields
-  q('voice-fields').style.display  = t==='voice'   ?'block':'none';
-  // Hide media area for voice (already has recorder)
-  if(q('media-area'))q('media-area').style.display = t==='voice'?'none':'block';
-  if(q('media-lbl'))q('media-lbl').style.display   = t==='voice'?'none':'block';
-  // Reset poll if switching away
-  if(t!=='poll'){pollOptCount=2;if(q('poll-extra-opts'))q('poll-extra-opts').innerHTML='';}
-  // Reset voice if switching away
-  if(t!=='voice')clearRecording();
-  // Update placeholder
-  const phs={post:'Say something real...',story:'What\'s happening right now?',confession:'Your deepest truth... (no one will know)',unsent:'What do you wish you could say?',poll:'Ask your question...',voice:'Add a caption (optional)'};
+  // Notices
+  const notices=['story-notice','unsent-notice','poll-notice','voice-notice','diary-notice'];
+  notices.forEach(n=>{ const el=q(n); if(el) el.style.display='none'; });
+  if(t==='story')   q('story-notice').style.display='block';
+  if(t==='unsent')  q('unsent-notice').style.display='block';
+  if(t==='poll')    q('poll-notice').style.display='block';
+  if(t==='voice')   q('voice-notice').style.display='block';
+  if(t==='diary')   q('diary-notice').style.display='block';
+  // Fields
+  if(q('poll-fields'))  q('poll-fields').style.display  = t==='poll'  ?'block':'none';
+  if(q('voice-fields')) q('voice-fields').style.display = t==='voice' ?'block':'none';
+  if(q('media-area'))   q('media-area').style.display   = t==='voice' ?'none':'block';
+  if(q('media-lbl'))    q('media-lbl').style.display    = t==='voice' ?'none':'block';
+  if(t!=='poll')  { pollOptCount=2; if(q('poll-extra-opts'))q('poll-extra-opts').innerHTML=''; }
+  if(t!=='voice') clearRecording();
+  // Indian-specific placeholders — feel like a friend asking
+  const h=new Date().getHours();
+  const timeHint=h>=0&&h<5?'It\'s late. What\'s really keeping you up?':
+    h>=5&&h<9?'New day. What are you carrying into it?':
+    h>=22?'The day is ending. How did it actually go?':'';
+  const phs={
+    post:     timeHint || 'Kya chal raha hai? What\'s on your mind — no filter.',
+    story:    'What\'s happening right now, in this moment?',
+    confession:'Something you\'ve never said out loud. No one will know it\'s you.',
+    unsent:   'Write what you wish you could say but can\'t...',
+    diary:    'Dear Diary, today I felt... (only you can see this)',
+    poll:     'Ask India something only Indians can answer honestly...',
+    voice:    'Say it out loud. Your voice is protected. (caption optional)',
+  };
   q('ctxt').placeholder=phs[t]||phs.post;
+  // Label
+  const labels={
+    post:'What do you want to say?',
+    story:'This moment',
+    confession:'Your secret is safe here',
+    unsent:'The words you\'ve never sent',
+    diary:'Just for you',
+    poll:'Ask India',
+    voice:'Say it',
+  };
+  const lbl=q('cap-lbl');
+  if(lbl)lbl.textContent=labels[t]||labels.post;
+  if(t==='post')setTimeout(loadDraft,150);
 }
 function selEmo(emo,el){
   compEmo=compEmo===emo?'':emo;
@@ -2162,22 +2596,20 @@ async function submitPost(){
 
     closeCompose();clearDraft();
     if(compType==='story'){
-      toast('📸 Story posted!');loadStories();
-    } else if(compType==='poll'){
-      toast('📊 Poll posted!');loadFeed();
-    } else if(compType==='voice'){
-      toast('🎙️ Voice note posted!');loadFeed();
+      toast('📸 Story is live for 24 hours!');loadStories();
+    } else if(compType==='diary'){
+      // Diary is private — save to localStorage only
+      const diaries=JSON.parse(localStorage.getItem('ann_diary')||'[]');
+      diaries.unshift({text:cap,ts:Date.now(),id:'d'+Date.now()});
+      localStorage.setItem('ann_diary',JSON.stringify(diaries.slice(0,100)));
+      showPostSuccess('diary', cap, null);
     } else {
-      toast('✨ Posted!');
+      // Optimistic insert first
       const el=q('feed-list');
       if(el&&d._id){
-        const enriched={...d,
-          authorName:user?.anonymousName,
-          authorEmoji:user?.avatarEmoji||'🎭',
-          authorId: String(user?._id||user?.id||''),
-          isOwn: true,   // ← always own when just posted
-          likes:[],saves:[],reactions:{},commentCount:0
-        };
+        const enriched={...d,authorName:user?.anonymousName,authorEmoji:user?.avatarEmoji||'🎭',
+          authorId:String(user?._id||user?.id||''),isOwn:true,
+          likes:[],saves:[],reactions:{},commentCount:0};
         const div=document.createElement('div');div.innerHTML=renderPost(enriched);
         const card=div.firstElementChild;
         if(card){card.style.animationDelay='0s';el.insertBefore(card,el.firstChild);addComplimentBtns();}
@@ -2185,6 +2617,8 @@ async function submitPost(){
       const sp=q('s-posts');if(sp)sp.textContent=parseInt(sp.textContent||0)+1;
       if(user)user.postCount=(user.postCount||0)+1;
       localStorage.setItem('ann_has_posted','1');
+      // Show the emotional success screen
+      showPostSuccess(compType, cap, d);
     }
     if(d.crisis?.isCrisis)setTimeout(()=>q('crisis').classList.add('on'),1500);
     awardXP(compType==='unsent'?20:compType==='confession'?15:compType==='poll'?12:10,'Created a post');
@@ -2282,15 +2716,30 @@ async function delVent(id,card){
 function ciSel(m,el){ciMood=m;document.querySelectorAll('.ci-tile').forEach(t=>t.classList.remove('sel'));el.classList.add('sel');q('ci-btn').disabled=false;}
 async function ciSubmit(){
   if(!ciMood)return;
-  localStorage.setItem('ann_mood_'+new Date().toDateString(),ciMood);
+  const today=new Date().toDateString();
+  localStorage.setItem('ann_mood_'+today,ciMood);
   q('mood-ci').classList.remove('on');
-  try{await api('/api/moods',{method:'POST',body:JSON.stringify({emotion:ciMood,city:userLoc.city,state:userLoc.state,country:userLoc.country})});}catch(_){}
-  const msgs={happy:'😊 Sending good vibes!',sad:'💙 You\'re not alone.',anxious:'💜 You\'re safe here.',lonely:'💙 You belong here.',inspired:'✨ Go create!'};
-  toast(msgs[ciMood]||'✨ Mood logged!');
+  // Save to backend
+  try{
+    await api('/api/moods',{method:'POST',body:JSON.stringify({
+      emotion:ciMood,city:userLoc.city,state:userLoc.state,country:userLoc.country
+    })});
+  }catch(_){}
   applyUser();
   awardXP(5,'Logged mood');
-  // Refresh pulse banner with new mood data
-  setTimeout(()=>{if(userLoc.city)loadEmotionPulse();},500);
+  // Show mood result screen (the "you are not alone" moment)
+  showMoodResult(ciMood);
+  // Check streak milestones
+  try{
+    const r=await api('/api/moods/streak');
+    if(r.ok){
+      const d=await r.json();
+      const streak=d.streak||0;
+      if(streak>0)setTimeout(()=>checkStreakCelebration(streak),800);
+    }
+  }catch(_){}
+  // Refresh pulse banner
+  setTimeout(()=>{if(userLoc.city)loadEmotionPulse();},1000);
 }
 function ciSkip(){
   q('mood-ci').classList.remove('on');
@@ -2704,10 +3153,13 @@ function initSocket(){
 
   // Real-time reaction on your post
   socket.on('post-reaction',(d)=>{
-    const REACT_LABELS={heard:'💙 Someone felt heard by your post',same:'🤝 Someone said "same" to your post',strong:'🔥 Your post gave someone strength',love:'🌊 Someone loved your post',helped:'✨ Your post helped someone'};
-    const msg=REACT_LABELS[d.type]||'❤️ Someone reacted to your post';
-    toast(msg,3500);
-    addNotification('reaction',msg,d.postId);
+    // Show fullscreen reaction moment instead of just toast
+    showReactionMoment(d.type);
+    addNotification('reaction',
+      ({heard:'💙 Someone felt heard by your post',same:'🤝 Someone said "same"',
+        strength:'🔥 Your post gave someone strength',love:'🌊 Someone loved your post',
+        helped:'✨ Your post helped someone'})[d.type]||'❤️ Someone reacted to your post',
+      d.postId);
     const badge=q('notif-badge');if(badge)badge.style.display='block';
   });
 
@@ -3000,30 +3452,27 @@ function addComplimentBtns(){
 /* ═══════════════════════════════════════════════
    DAILY PROMPT — drives posting habit
 ═══════════════════════════════════════════════ */
-const DAILY_PROMPTS=[
-  "What's something you've never told anyone?",
-  "What's weighing on your heart right now?",
-  "What's something you wish someone would say to you today?",
-  "What's a feeling you've been carrying around lately?",
-  "What's the last thing that genuinely made you smile?",
-  "What's something you pretend to be okay with?",
-  "What would you say to someone who needs to hear they matter?",
-  "What's a memory that still hurts to think about?",
-  "What's one thing you want to let go of?",
-  "What's something you're secretly proud of?",
-  "What's a truth you've been afraid to admit, even to yourself?",
-  "What's something you wish people understood about you?",
-  "If you could send one anonymous message to someone from your past, what would it say?",
-  "What emotion have you been avoiding?",
-  "What's something you've been putting off saying?",
-];
+const DAILY_PROMPTS=DAILY_PROMPTS_INDIA; // India-first prompts defined above
 let currentPrompt='';
 
 function showDailyPrompt(){
+  const h=new Date().getHours();
   const dayOfYear=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);
-  currentPrompt=DAILY_PROMPTS[dayOfYear%DAILY_PROMPTS.length];
-  const el=q('dp-text');if(el)el.textContent=currentPrompt;
-  const dp=q('daily-prompt');if(dp)dp.style.display='block';
+  // Rotate through Indian prompts
+  currentPrompt=DAILY_PROMPTS_INDIA[dayOfYear%DAILY_PROMPTS_INDIA.length];
+  // Time-aware override label (not the prompt itself)
+  const timeLabel=h>=0&&h<5  ? '🌙 3am thoughts —'
+    : h>=5&&h<9               ? '🌅 Morning —'
+    : h>=9&&h<12              ? '☀️ Today\'s prompt —'
+    : h>=12&&h<17             ? '🌤 Afternoon —'
+    : h>=17&&h<21             ? '🌆 Evening —'
+    :                           '🌙 Late night —';
+  const el=q('dp-text');
+  if(el)el.textContent=currentPrompt;
+  const lbl=q('dp-label');
+  if(lbl)lbl.textContent=timeLabel;
+  const dp=q('daily-prompt');
+  if(dp)dp.style.display='block';
 }
 
 /* ═══════════════════════════════════════════════
@@ -3063,27 +3512,53 @@ function showSkeletons(count=3){
 ═══════════════════════════════════════════════ */
 function showOnboardingCards(){
   const el=q('feed-list');
+  const h=new Date().getHours();
+  const greeting=h>=0&&h<5?'Can\'t sleep?':h>=5&&h<12?'Good morning':'Welcome';
   el.innerHTML=`<div class="onboard-cards">
-    <div style="text-align:center;padding:20px 0 4px">
-      <div style="font-size:2.5rem;margin-bottom:8px">🎭</div>
-      <div style="font-family:var(--fD);font-weight:700;font-size:1.1rem;margin-bottom:4px">Welcome to Annomuss</div>
-      <div style="font-size:.83rem;color:var(--tx3);line-height:1.6">No names. Just real. Start here:</div>
+    <div style="text-align:center;padding:24px 0 8px">
+      <div style="font-size:3rem;margin-bottom:12px">🎭</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:1.15rem;margin-bottom:6px;color:var(--tx)">${greeting}. No names here.</div>
+      <div style="font-size:.85rem;color:var(--tx2);line-height:1.7;max-width:280px;margin:0 auto">
+        This is not Instagram. No followers. No likes. No showing off.<br>
+        Just real people — saying what they actually feel.
+      </div>
     </div>
-    <div class="ob-card" style="background:rgba(255,77,109,.05);border-color:rgba(255,77,109,.15)" onclick="openCompose('confession')">
-      <div class="ob-ico" style="background:rgba(255,77,109,.1)">🤫</div>
-      <div><div class="ob-title" style="color:var(--cr)">Write your first confession</div><div class="ob-sub">Something you've never been able to say. No one will know it's you.</div></div>
+
+    <div class="ob-card" style="background:rgba(255,77,109,.05);border-color:rgba(255,77,109,.18)" onclick="openCompose('confession')">
+      <div class="ob-ico" style="background:rgba(255,77,109,.12)">🤫</div>
+      <div>
+        <div class="ob-title" style="color:var(--cr)">Say the thing you've never said</div>
+        <div class="ob-sub">Confession. Anonymous. No one will ever know it's you. Not even us.</div>
+      </div>
     </div>
-    <div class="ob-card" style="background:rgba(123,94,167,.05);border-color:rgba(123,94,167,.15)" onclick="goPage('connect')">
-      <div class="ob-ico" style="background:var(--vg)">⚡</div>
-      <div><div class="ob-title" style="color:var(--v3)">Try random chat</div><div class="ob-sub">Matched by emotion. 5 minutes. Anonymous. Genuinely real.</div></div>
+
+    <div class="ob-card" style="background:rgba(196,168,255,.05);border-color:rgba(196,168,255,.18)" onclick="openCompose('unsent')">
+      <div class="ob-ico" style="background:rgba(196,168,255,.12)">💌</div>
+      <div>
+        <div class="ob-title" style="color:var(--v3)">Write what you can't send</div>
+        <div class="ob-sub">To your parents. Your ex. The version of you from last year. Or anyone.</div>
+      </div>
     </div>
-    <div class="ob-card" style="background:rgba(0,201,167,.04);border-color:rgba(0,201,167,.14)" onclick="q('mood-ci').classList.add('on')">
-      <div class="ob-ico" style="background:rgba(0,201,167,.1)">🌊</div>
-      <div><div class="ob-title" style="color:var(--tl)">Log how you're feeling</div><div class="ob-sub">Your mood shapes your feed and chat matches.</div></div>
+
+    <div class="ob-card" style="background:rgba(0,201,167,.04);border-color:rgba(0,201,167,.16)" onclick="q('mood-ci').classList.add('on')">
+      <div class="ob-ico" style="background:rgba(0,201,167,.12)">🌊</div>
+      <div>
+        <div class="ob-title" style="color:var(--tl)">How are you actually feeling?</div>
+        <div class="ob-sub">Log your mood. See how many people in your city feel the same right now.</div>
+      </div>
     </div>
-    <div class="ob-card" style="background:rgba(196,168,255,.04);border-color:rgba(196,168,255,.14)" onclick="openUnsent()">
-      <div class="ob-ico" style="background:rgba(196,168,255,.1)">💌</div>
-      <div><div class="ob-title" style="color:var(--v3)">Write an unsent letter</div><div class="ob-sub">To a person, a feeling, a version of yourself.</div></div>
+
+    <div class="ob-card" style="background:rgba(244,162,97,.04);border-color:rgba(244,162,97,.16)" onclick="openCompose('diary')">
+      <div class="ob-ico" style="background:rgba(244,162,97,.12)">📖</div>
+      <div>
+        <div class="ob-title" style="color:var(--go)">Write just for yourself</div>
+        <div class="ob-sub">Dear Diary — private, local, only yours. Nobody else sees it. Ever.</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:16px 0 8px;font-size:.78rem;color:var(--tx3);line-height:1.7">
+      🔒 Completely anonymous &nbsp;·&nbsp; 🌍 Real people around you &nbsp;·&nbsp; 💙 No judgement<br>
+      <span style="color:var(--tx3)">Scroll down to see what others are expressing right now →</span>
     </div>
   </div>`;
 }

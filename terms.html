@@ -13,7 +13,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--fB);min-height:
 .app{max-width:640px;margin:0 auto;padding:0 0 60px}
 .hdr{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--bd);padding:14px 18px;display:flex;align-items:center;gap:12px;z-index:10}
 .bk{width:36px;height:36px;border-radius:50%;background:var(--bg2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;color:var(--tx2)}
-.title{font-family:var(--fD);font-weight:700;font-size:1rem}
+.title{font-family:var(--fD);font-size:1rem;font-weight:700}
 .tabs{display:flex;border-bottom:1px solid var(--bd);padding:0 18px}
 .tab{padding:12px 0;margin-right:24px;font-size:.82rem;font-weight:600;color:var(--tx3);cursor:pointer;border-bottom:2px solid transparent;font-family:var(--fD)}
 .tab.on{color:var(--v3);border-color:var(--v)}
@@ -25,18 +25,17 @@ p{font-size:.875rem;color:var(--tx2);line-height:1.8;margin-bottom:12px}
 ul{padding-left:18px;margin-bottom:12px}
 li{font-size:.875rem;color:var(--tx2);line-height:1.8;margin-bottom:4px}
 .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:100px;font-size:.72rem;font-weight:700;margin-bottom:16px}
-.v-badge{background:var(--vg,rgba(123,94,167,.1));color:var(--v3);border:1px solid rgba(123,94,167,.2)}
+.v-badge{background:rgba(123,94,167,.1);color:var(--v3);border:1px solid rgba(123,94,167,.2)}
 .card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:16px 18px;margin-bottom:14px}
 .card-title{font-family:var(--fD);font-weight:700;font-size:.88rem;margin-bottom:6px}
 .em{color:var(--tx3);font-size:.8rem}
-a{color:var(--v3);text-decoration:none}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="hdr">
-    <button class="bk" onclick="history.back()">←</button>
-    <div class="title">Terms & Privacy</div>
+    <button class="bk" onclick="history.back()">&#8592;</button>
+    <div class="title">Terms &amp; Privacy</div>
   </div>
 
   <div class="tabs">
@@ -45,91 +44,95 @@ a{color:var(--v3);text-decoration:none}
     <div class="tab" onclick="showTab('safety',this)">Safety</div>
   </div>
 
-  <!-- TERMS -->
+  <!-- TERMS OF USE -->
   <div class="panel on" id="tab-terms">
-    <div class="badge v-badge">📋 Last updated: 2025</div>
+    <div class="badge v-badge">&#128203; Last updated: 2025</div>
 
     <h2>Welcome to Annomuss</h2>
     <p>By using Annomuss (annomuss.in), you agree to these terms. Annomuss is an anonymous social platform where you can express yourself freely and safely.</p>
 
     <h2>Who can use Annomuss</h2>
     <ul>
-      <li>You must be 13 years or older to use Annomuss</li>
+      <li>You must be 13 years or older</li>
       <li>You need a valid email address to create an account</li>
       <li>One account per person</li>
     </ul>
 
     <h2>What you can do</h2>
     <ul>
-      <li>✅ Share honestly. Be vulnerable. Express yourself.</li>
-      <li>✅ Support others. Leave kind reactions. Send compliments.</li>
-      <li>✅ Use random chat to connect with people anonymously.</li>
-      <li>✅ Post confessions, vents, unsent letters, and stories.</li>
+      <li>&#9989; Share honestly. Be vulnerable. Express yourself.</li>
+      <li>&#9989; Support others. Leave kind reactions. Send compliments.</li>
+      <li>&#9989; Use random chat to connect with people anonymously.</li>
+      <li>&#9989; Post confessions, vents, unsent letters, stories, and polls.</li>
     </ul>
 
     <h2>What you cannot do</h2>
     <ul>
-      <li>❌ Harass, bully, or target any person</li>
-      <li>❌ Share anyone's personal information (doxxing)</li>
-      <li>❌ Post explicit, violent, or harmful content</li>
-      <li>❌ Use this platform to harm yourself or others</li>
-      <li>❌ Create multiple accounts or fake identities</li>
-      <li>❌ Spam, scam, or use bots</li>
+      <li>&#10060; Harass, bully, or target any person</li>
+      <li>&#10060; Share anyone's personal information (doxxing)</li>
+      <li>&#10060; Post explicit, violent, or harmful content</li>
+      <li>&#10060; Use this platform to harm yourself or others</li>
+      <li>&#10060; Create multiple accounts or fake identities</li>
+      <li>&#10060; Spam, scam, or use bots of any kind</li>
     </ul>
 
     <h2>Your content</h2>
-    <p>You own what you post. By posting, you give Annomuss permission to display it on the platform. Posts are anonymous — we don't attach your name or email to public content.</p>
+    <p>You own what you post. By posting, you give Annomuss permission to display it on the platform. Posts are anonymous — we never attach your name or email to public content.</p>
 
     <h2>Account removal</h2>
-    <p>We may remove your account if you violate these terms. You can delete your account anytime in Settings → Security & Privacy → Delete Account.</p>
+    <p>We may remove your account if you violate these terms. You can delete your account anytime from Settings.</p>
 
     <h2>Changes to terms</h2>
-    <p>We may update these terms. Continued use of Annomuss means you accept the updated terms.</p>
+    <p>We may update these terms. Continued use means you accept the updated terms.</p>
 
     <div class="card">
       <div class="card-title">Contact us</div>
-      <p class="em" style="margin:0">support@annomuss.in</p>
+      <p class="em">support [at] annomuss.in</p>
     </div>
   </div>
 
-  <!-- PRIVACY -->
+  <!-- PRIVACY POLICY -->
   <div class="panel" id="tab-privacy">
-    <div class="badge v-badge">🔒 Your privacy matters</div>
+    <div class="badge v-badge">&#128274; Your privacy matters</div>
 
     <h2>What we collect</h2>
     <ul>
-      <li><strong>Email address</strong> — for login via OTP only. Never shown publicly.</li>
-      <li><strong>Anonymous name</strong> — chosen by you. Shown on posts.</li>
-      <li><strong>Mood logs</strong> — emotion + city, stored for 90 days, used to personalise your feed.</li>
-      <li><strong>Posts and messages</strong> — your content stored securely.</li>
-      <li><strong>Location (city-level only)</strong> — used for emotion pulse feature. Never exact GPS.</li>
+      <li><strong>Email address</strong> &mdash; for login via OTP only. Never shown publicly.</li>
+      <li><strong>Anonymous name</strong> &mdash; chosen randomly. Shown on posts instead of your real name.</li>
+      <li><strong>Mood logs</strong> &mdash; emotion + city, stored for 90 days, used to personalise your feed.</li>
+      <li><strong>Posts and messages</strong> &mdash; your content stored securely on our servers.</li>
+      <li><strong>Location (city-level only)</strong> &mdash; used for emotion pulse. Never exact GPS.</li>
     </ul>
 
     <h2>What we do NOT collect</h2>
     <ul>
-      <li>❌ Your real name</li>
-      <li>❌ Phone number</li>
-      <li>❌ Exact GPS location</li>
-      <li>❌ Device contacts</li>
-      <li>❌ Browsing history</li>
+      <li>&#10060; Your real name</li>
+      <li>&#10060; Phone number</li>
+      <li>&#10060; Exact GPS location</li>
+      <li>&#10060; Device contacts</li>
+      <li>&#10060; Browsing history outside Annomuss</li>
     </ul>
 
     <h2>How we use your data</h2>
     <ul>
-      <li>To log you in securely via OTP</li>
+      <li>To log you in securely via OTP email</li>
       <li>To show you a personalised feed based on your emotions</li>
       <li>To send push notifications when someone reacts to your post</li>
-      <li>To detect and remove harmful content</li>
+      <li>To detect and remove harmful content automatically</li>
+      <li>To generate anonymous, aggregated emotional trend data for advertisers</li>
     </ul>
 
+    <h2>Advertising &amp; emotion data</h2>
+    <p>Annomuss uses aggregated, anonymous emotion data to serve relevant advertisements. We never sell individual user data. Advertisers see trends like "60% of users in Chennai feel anxious on Monday mornings" &mdash; never anything tied to a specific person.</p>
+
     <h2>Who we share data with</h2>
-    <p>We do not sell your data. We use the following services:</p>
+    <p>We do not sell your personal data. We use these services:</p>
     <ul>
-      <li><strong>MongoDB Atlas</strong> — database hosting</li>
-      <li><strong>Cloudinary</strong> — image and video storage</li>
-      <li><strong>Resend</strong> — OTP email delivery</li>
-      <li><strong>Render</strong> — backend hosting</li>
-      <li><strong>Vercel</strong> — frontend hosting</li>
+      <li><strong>MongoDB Atlas</strong> &mdash; database</li>
+      <li><strong>Cloudinary</strong> &mdash; image and video storage</li>
+      <li><strong>Resend</strong> &mdash; OTP email delivery</li>
+      <li><strong>Render</strong> &mdash; backend hosting</li>
+      <li><strong>Vercel</strong> &mdash; frontend hosting</li>
     </ul>
 
     <h2>Data retention</h2>
@@ -141,53 +144,65 @@ a{color:var(--v3);text-decoration:none}
     </ul>
 
     <h2>Your rights (DPDP Act 2023)</h2>
-    <p>Under India's Digital Personal Data Protection Act 2023, you have the right to access, correct, and delete your personal data. Email us at support@annomuss.in to exercise these rights.</p>
+    <p>Under India's Digital Personal Data Protection Act 2023, you have the right to access, correct, and delete your personal data. Contact us to exercise these rights.</p>
 
     <h2>Cookies</h2>
-    <p>We use localStorage (not cookies) to store your login token and preferences on your device. No third-party tracking cookies.</p>
+    <p>We use localStorage (not cookies) to store your login token and preferences. No third-party tracking cookies.</p>
+
+    <div class="card">
+      <div class="card-title">Data requests</div>
+      <p class="em">support [at] annomuss.in</p>
+    </div>
   </div>
 
   <!-- SAFETY -->
   <div class="panel" id="tab-safety">
-    <div class="badge v-badge">🛡️ Your safety is our priority</div>
+    <div class="badge v-badge">&#128737; Your safety is our priority</div>
 
     <h2>Anonymous but not unaccountable</h2>
-    <p>Annomuss is anonymous — but we take safety seriously. We have systems to detect harmful content and we act on reports quickly.</p>
+    <p>Annomuss is anonymous &mdash; but we take safety seriously. We have automatic systems to detect harmful content, and we act on reports quickly.</p>
 
     <h2>Crisis detection</h2>
-    <p>We automatically detect posts that may indicate someone is in crisis. If your post is flagged, you'll see a gentle message with support resources. You are not alone.</p>
+    <p>We automatically detect posts that may indicate someone is in crisis. If your post is flagged, you will see a gentle message with support resources. You are not alone.</p>
 
     <h2>How to report</h2>
     <ul>
-      <li>Tap ⋯ on any post → Report post</li>
-      <li>Tap ⋯ in any DM → Report user</li>
-      <li>Email: support@annomuss.in</li>
+      <li>Tap &#8943; on any post &rarr; Report post</li>
+      <li>Tap &#8943; in any DM &rarr; Report user</li>
+      <li>Email: support [at] annomuss.in</li>
     </ul>
 
     <h2>Blocking</h2>
-    <p>You can block any user. Blocked users cannot message you or appear in your feed. Go to ⋯ on any post or in messages to block.</p>
+    <p>You can block any user. Blocked users cannot message you or appear in your feed. Go to &#8943; on any post to block.</p>
+
+    <h2>Content moderation</h2>
+    <p>We use automated moderation to detect and hide harmful content. Our admin team reviews flagged posts within 24 hours. Repeated violations result in a permanent ban.</p>
 
     <h2>Mental health resources</h2>
     <div class="card">
-      <div class="card-title">iCall — India's Mental Health Helpline</div>
-      <p class="em">9152987821 · Mon–Sat 8am–10pm</p>
+      <div class="card-title">iCall &mdash; India's Mental Health Helpline</div>
+      <p class="em">9152987821 &nbsp;&middot;&nbsp; Mon&ndash;Sat 8am&ndash;10pm</p>
     </div>
     <div class="card">
       <div class="card-title">Vandrevala Foundation Helpline</div>
-      <p class="em">1860-2662-345 · 24/7</p>
+      <p class="em">1860-2662-345 &nbsp;&middot;&nbsp; 24/7 &nbsp;&middot;&nbsp; Free &amp; confidential</p>
     </div>
     <div class="card">
       <div class="card-title">iCall Online Chat</div>
-      <p class="em"><a href="https://icallhelpline.org" target="_blank">icallhelpline.org</a></p>
+      <p class="em">icallhelpline.org</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Snehi Helpline</div>
+      <p class="em">044-24640050 &nbsp;&middot;&nbsp; Mon&ndash;Sat 8am&ndash;10pm</p>
     </div>
 
     <h2>Contact safety team</h2>
-    <p>For urgent safety concerns, email us at <a href="mailto:support@annomuss.in">support@annomuss.in</a>. We respond within 24 hours.</p>
+    <p>For urgent safety concerns, contact us at support [at] annomuss.in &mdash; we respond within 24 hours. For emergencies, please contact your local emergency services.</p>
   </div>
 </div>
 
 <script>
-function showTab(id, el){
+function showTab(id,el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('tab-'+id).classList.add('on');

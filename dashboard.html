@@ -883,19 +883,6 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <button class="ico-btn" onclick="goPage('social')" style="position:relative">🔔<span id="notif-badge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--cr);border:1.5px solid var(--bg)"></span></button>
   </div>
 
-  <!-- WEEKLY CHALLENGE — shows on feed -->
-  <div class="challenge-card" id="challenge-card" style="display:none">
-    <div class="ch-label">🎯 This week's challenge</div>
-    <div class="ch-title" id="ch-title">Loading...</div>
-    <div class="ch-meta">
-      <span id="ch-count" style="color:var(--v3)">0 responses</span>
-      <span>·</span>
-      <span class="ch-timer" id="ch-timer">Ends in 6d</span>
-      <div style="flex:1"></div>
-      <button class="btn btn-sm btn-v" style="padding:6px 16px;font-size:.75rem" onclick="joinChallenge()">Join ✍️</button>
-    </div>
-  </div>
-
   <!-- PUSH NOTIFICATION BANNER -->
   <div class="push-banner" id="push-banner">
     <div style="font-size:1.5rem;flex-shrink:0">🔔</div>
@@ -1150,7 +1137,6 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div class="stab on" onclick="socTab('inbox',this)">📬 Inbox</div>
     <div class="stab" onclick="socTab('notifs',this)">🔔 Activity</div>
     <div class="stab" onclick="socTab('friends',this)">👥 Friends</div>
-    <div class="stab" onclick="socTab('discover',this)">🔍 Discover</div>
     <div class="stab" onclick="socTab('requests',this)" id="stab-requests" style="position:relative">
       🤝 Requests
       <span id="req-badge" style="display:none;position:absolute;top:6px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--cr)"></span>
@@ -1163,10 +1149,15 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <div id="soc-notifs" style="display:none">
     <div id="notifs-list"><div style="padding:32px;text-align:center"><div class="spin"></div></div></div>
   </div>
-  <div id="soc-friends" style="display:none"><div id="friends-list"></div></div>
-  <div id="soc-discover" style="display:none">
-    <div style="padding:12px 18px"><div style="display:flex;align-items:center;gap:8px;background:var(--bg2);border:1.5px solid var(--bd);border-radius:100px;padding:10px 16px"><span style="color:var(--tx3)">🔍</span><input id="search-inp" placeholder="Search users..." oninput="doSearch(this.value)" style="flex:1;font-size:.9rem;color:var(--tx)"/></div></div>
+  <div id="soc-friends" style="display:none">
+    <div style="padding:12px 18px 4px">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--bg2);border:1.5px solid var(--bd);border-radius:100px;padding:10px 16px">
+        <span style="color:var(--tx3)">🔍</span>
+        <input id="search-inp" placeholder="Search people by name..." oninput="doSearch(this.value)" style="flex:1;font-size:.88rem;color:var(--tx);background:none;border:none;outline:none"/>
+      </div>
+    </div>
     <div id="search-list"></div>
+    <div id="friends-list"></div>
   </div>
   <div id="soc-requests" style="display:none"><div id="requests-list"></div></div>
 </div>
@@ -1557,15 +1548,15 @@ function loadMore(){if(!feedDone)loadFeed(false);}
 function filterEmo(emo,el){feedEmo=emo;document.querySelectorAll('.ec').forEach(c=>c.classList.remove('on'));if(el)el.classList.add('on');loadFeed();}
 
 function renderPost(p){
-  const me=user?.anonymousName||'';
-  const liked=(p.likes||[]).some(id=>id===me||id===user?._id?.toString());
-  const ec=EMO_C[p.emotion]||{};
-  const myId = user?._id?.toString() || user?.id?.toString() || '';
-  const isOwn = !!myId && (
-    p.authorId?.toString?.() === myId ||
-    p.authorName === me ||
-    p.anonymousName === me
-  );
+  const me    = user?.anonymousName || '';
+  const myId  = String(user?._id || user?.id || '');
+  // Both sides are now strings — guaranteed comparison
+  const isOwn = !!(myId && (
+    String(p.authorId || '') === myId ||
+    (me && p.authorName === me)
+  ));
+  const liked = (p.likes||[]).some(id => String(id) === myId || id === me);
+  const ec    = EMO_C[p.emotion] || {};
   const author=p.authorName||p.anonymousName||'Anonymous';
   const av=p.authorEmoji||p.avatarEmoji||'🎭';
   const isConf=p.type==='confession'||p.type==='unsent';
@@ -2284,10 +2275,10 @@ function crisisChat(){crisisDismiss();goPage('connect');setTimeout(rcStart,500);
 let pendingReqCount = 0;
 
 function socTab(tab,el){
-  ['inbox','notifs','friends','discover','requests'].forEach(t=>{
-    const el2=q(`soc-${t}`); if(el2) el2.style.display='none';
+  ['inbox','notifs','friends','requests'].forEach(t=>{
+    const p=q(`soc-${t}`); if(p) p.style.display='none';
   });
-  const panel = q(`soc-${tab}`);
+  const panel=q(`soc-${tab}`);
   if(panel) panel.style.display='block';
   document.querySelectorAll('.stab').forEach(t=>t.classList.remove('on'));
   if(el) el.classList.add('on');
@@ -2298,9 +2289,8 @@ function socTab(tab,el){
   }
   if(tab==='inbox')    loadInbox();
   if(tab==='notifs')   loadNotifications();
-  if(tab==='friends')  loadFriends();
-  if(tab==='requests') loadRequests();
-  if(tab==='requests') { pendingReqCount=0; updateReqBadge(); }
+  if(tab==='friends')  { loadFriends(); q('search-inp')?.focus(); }
+  if(tab==='requests') { loadRequests(); pendingReqCount=0; updateReqBadge(); }
 }
 
 function updateReqBadge(){
@@ -3890,7 +3880,6 @@ async function main(){
   initSocket();
   showDailyPrompt();
   checkReferral();
-  loadWeeklyChallenge(); // show this week's challenge on feed
 
   // Init infinite scroll (replaces Load More button)
   setTimeout(initInfiniteScroll, 800);

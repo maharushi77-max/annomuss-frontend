@@ -1550,12 +1550,14 @@ function filterEmo(emo,el){feedEmo=emo;document.querySelectorAll('.ec').forEach(
 function renderPost(p){
   const me    = user?.anonymousName || '';
   const myId  = String(user?._id || user?.id || '');
-  // Both sides are now strings — guaranteed comparison
-  const isOwn = !!(myId && (
-    String(p.authorId || '') === myId ||
-    (me && p.authorName === me)
-  ));
-  const liked = (p.likes||[]).some(id => String(id) === myId || id === me);
+  // Use server-provided isOwn if available (most reliable)
+  // Fall back to client-side checks for optimistically inserted posts
+  const isOwn = !!(
+    p.isOwn === true ||                              // server said so ✓
+    (myId && String(p.authorId || '') === myId) ||   // id match ✓
+    (me && p.authorName === me)                      // name match ✓
+  );
+  const liked = p.isLiked || (p.likes||[]).some(id => String(id) === myId);
   const ec    = EMO_C[p.emotion] || {};
   const author=p.authorName||p.anonymousName||'Anonymous';
   const av=p.authorEmoji||p.avatarEmoji||'🎭';
@@ -2146,7 +2148,13 @@ async function submitPost(){
       toast('✨ Posted!');
       const el=q('feed-list');
       if(el&&d._id){
-        const enriched={...d,authorName:user?.anonymousName,authorEmoji:user?.avatarEmoji||'🎭',likes:[],saves:[],reactions:{},commentCount:0};
+        const enriched={...d,
+          authorName:user?.anonymousName,
+          authorEmoji:user?.avatarEmoji||'🎭',
+          authorId: String(user?._id||user?.id||''),
+          isOwn: true,   // ← always own when just posted
+          likes:[],saves:[],reactions:{},commentCount:0
+        };
         const div=document.createElement('div');div.innerHTML=renderPost(enriched);
         const card=div.firstElementChild;
         if(card){card.style.animationDelay='0s';el.insertBefore(card,el.firstChild);addComplimentBtns();}

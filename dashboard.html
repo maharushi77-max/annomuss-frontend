@@ -517,6 +517,23 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 #lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px}
 #lightbox-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;cursor:pointer;z-index:1}
 
+/* ══════════════════════════════════════════════
+   removePostCard — instant removal from ALL views
+═══════════════════════════════════════════════ */
+function removePostCard(id){
+  // Select every rendered instance (feed, profile, explore, modal)
+  document.querySelectorAll(`.card[data-id="${id}"]`).forEach(c=>{
+    c.style.height   = c.offsetHeight + 'px';
+    c.style.overflow = 'hidden';
+    requestAnimationFrame(()=>{
+      c.style.cssText += ';height:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;opacity:0;transition:all .18s ease';
+      setTimeout(()=>{ try{c.remove();}catch(_){} }, 200);
+    });
+  });
+  // Close post modal if it's showing this post
+  if(typeof currentPost !== 'undefined' && currentPost === id) closePModal();
+}
+
 /* ══ SHARE SHEET ══ */
 #share-sheet{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:flex-end}
 #share-sheet.on{display:flex}
@@ -1732,15 +1749,24 @@ function ctxMenu(e, id, isOwn, authorName, authorEmoji, authorId){
 
   if(isOwn){
     addItem('🗑️','Delete post','var(--cr)',()=>{
-      if(!confirm('Delete this post?'))return;
+      if(!confirm('Delete this post? This cannot be undone.'))return;
+      // Remove card instantly from UI (optimistic — fast UX)
+      removePostCard(id);
+      toast('🗑️ Deleting...');
       api(`/api/posts/${id}`,{method:'DELETE'}).then(r=>{
-        if(!r.ok){toast('Delete failed ❌');return;}
-        const c=document.querySelector(`.card[data-id="${id}"]`);
-        if(c){c.style.opacity='0';c.style.transition='all .25s';setTimeout(()=>c.remove(),280);}
+        if(!r.ok){
+          // Restore feed if failed
+          toast('Delete failed ❌ — refreshing...');
+          loadFeed();
+          return;
+        }
         toast('🗑️ Post deleted');
         const sp=q('s-posts');if(sp)sp.textContent=Math.max(0,parseInt(sp.textContent||0)-1);
-        clearDraft();
-      }).catch(()=>toast('Delete failed ❌'));
+        if(user)user.postCount=Math.max(0,(user.postCount||1)-1);
+      }).catch(()=>{
+        toast('Delete failed ❌ — check connection');
+        loadFeed();
+      });
     });
     addItem('🔗','Copy link','',()=>{
       const url=`${location.origin}/dashboard.html#post-${id}`;
@@ -1804,12 +1830,13 @@ function openStoryMenu(){
 function deleteStory(id){
   document.querySelector('[style*="z-index:700"]')?.remove();
   if(!confirm('Delete this story?'))return;
+  closeSV();
+  removePostCard(id); // instant removal
   api(`/api/posts/${id}`,{method:'DELETE'}).then(r=>{
-    if(!r.ok){toast('Delete failed ❌');return;}
+    if(!r.ok){toast('Delete failed ❌');loadStories();return;}
     toast('🗑️ Story deleted');
-    closeSV();
-    loadStories(); // refresh strip
-  }).catch(()=>toast('Delete failed ❌'));
+    loadStories();
+  }).catch(()=>{toast('Delete failed ❌');loadStories();});
 }
 
 function reportStory(id){

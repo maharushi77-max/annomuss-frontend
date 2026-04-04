@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Annomuss Emotion Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@600;700&family=Cabinet+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{--bg:#030308;--bg1:#08080f;--bg2:#0d0d1c;--bg3:#121228;--v:#7B5EA7;--v3:#C4A8FF;--cr:#FF4D6D;--tl:#00C9A7;--go:#F4A261;--lm:#52B788;--tx:#F5F3FF;--tx2:#9896B8;--tx3:#4E4C6A;--bd:rgba(255,255,255,.07);--fD:'Clash Display',sans-serif;--fB:'Cabinet Grotesk',sans-serif;--fM:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:var(--fB);min-height:100vh;padding-bottom:40px}
+.hdr{background:rgba(3,3,8,.95);border-bottom:1px solid var(--bd);padding:14px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50;backdrop-filter:blur(20px)}
+.logo{font-family:var(--fD);font-size:1.05rem;font-weight:700;background:linear-gradient(120deg,var(--v3),#FF85A1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.back{color:var(--tx3);font-size:.82rem;cursor:pointer;text-decoration:none;border:1px solid var(--bd);padding:6px 14px;border-radius:100px}
+.main{max-width:1200px;margin:0 auto;padding:28px 24px}
+.section-title{font-family:var(--fD);font-size:1.15rem;font-weight:700;margin-bottom:4px}
+.section-sub{font-size:.78rem;color:var(--tx3);margin-bottom:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:24px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:20px}
+.card-title{font-family:var(--fD);font-weight:700;font-size:.88rem;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.stat-big{font-family:var(--fD);font-size:2.2rem;font-weight:700;line-height:1}
+.stat-label{font-size:.7rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;font-weight:600}
+.stat-sub{font-size:.75rem;color:var(--tx3);margin-top:6px}
+.pulse-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:.5px solid var(--bd);font-size:.82rem}
+.pulse-item:last-child{border-bottom:none}
+.pulse-bar{height:5px;border-radius:100px;transition:width .8s ease;flex:1}
+.pulse-pct{font-family:var(--fM);font-size:.72rem;color:var(--tx3);min-width:30px;text-align:right}
+.conf-tag{font-size:.62rem;padding:2px 6px;border-radius:100px;font-weight:700;font-family:var(--fD)}
+.hi{background:rgba(82,183,136,.12);color:var(--lm)}
+.md{background:rgba(244,162,97,.12);color:var(--go)}
+.lo{background:rgba(255,77,109,.12);color:var(--cr)}
+.segment-card{padding:16px;border-radius:12px;border:1px solid var(--bd)}
+.seg-count{font-family:var(--fD);font-size:1.4rem;font-weight:700;margin:4px 0}
+.seg-label{font-size:.68rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
+.btn{padding:9px 20px;border-radius:100px;font-size:.78rem;font-weight:700;font-family:var(--fD);cursor:pointer;border:none}
+.btn-v{background:linear-gradient(135deg,#7B5EA7,#6040C4);color:#fff}
+.btn-g{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}
+.btn-go{background:linear-gradient(135deg,var(--go),#E08020);color:#fff}
+.trust-item{display:flex;gap:12px;padding:12px 0;border-bottom:.5px solid var(--bd);font-size:.82rem}
+.trust-item:last-child{border-bottom:none}
+.trust-ico{font-size:1.2rem;width:28px;text-align:center;flex-shrink:0}
+.trust-txt{font-size:.8rem;color:var(--tx2);line-height:1.6;flex:1}
+.trust-badge{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:100px;background:rgba(82,183,136,.1);color:var(--lm);flex-shrink:0}
+.score-ring{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto 12px;border:3px solid var(--lm)}
+.score-num{font-family:var(--fD);font-size:1.4rem;font-weight:700;color:var(--lm)}
+.score-lbl{font-size:.55rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--lm);animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(82,183,136,.4)}50%{box-shadow:0 0 0 5px rgba(82,183,136,0)}}
+.spinner{width:22px;height:22px;border:2px solid var(--bd);border-top-color:var(--v);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+canvas{max-height:220px}
+#login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:12px}
+.login-box{background:var(--bg2);border:1px solid var(--bd);border-radius:18px;padding:32px;text-align:center;width:320px}
+.input{background:var(--bg3);border:1.5px solid var(--bd);border-radius:10px;padding:11px 14px;font-size:.88rem;width:100%;color:var(--tx);font-family:var(--fB);outline:none;margin-bottom:10px}
+.input:focus{border-color:var(--v)}
+</style>
+</head>
+<body>
+
+<div id="login-overlay">
+  <div class="login-box">
+    <div style="font-size:2rem;margin-bottom:10px">🧠</div>
+    <div style="font-family:var(--fD);font-weight:700;font-size:1.1rem;margin-bottom:4px">Emotion Intelligence</div>
+    <div style="font-size:.78rem;color:var(--tx3);margin-bottom:20px">Admin access required</div>
+    <input class="input" type="password" id="pass" placeholder="Admin password" onkeydown="if(event.key==='Enter')login()"/>
+    <button class="btn btn-v" style="width:100%" onclick="login()">Enter →</button>
+    <div id="login-err" style="color:var(--cr);font-size:.75rem;margin-top:8px;display:none">Wrong password</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+
+<div class="hdr">
+  <div style="flex:1">
+    <div class="logo">🧠 annomuss · emotion intelligence</div>
+    <div style="font-size:.68rem;color:var(--tx3);font-family:var(--fM)" id="last-update">Loading...</div>
+  </div>
+  <a class="back" href="/admin">← Admin Panel</a>
+  <button class="btn btn-g" style="font-size:.72rem" onclick="loadAll()">🔄 Refresh</button>
+  <button class="btn btn-go" style="font-size:.72rem" onclick="dlExport()">⬇️ Export CSV</button>
+</div>
+
+<div class="main">
+
+  <!-- LIVE PULSE -->
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+    <div class="live-dot"></div>
+    <div class="section-title">Live Emotion Pulse</div>
+  </div>
+  <div class="section-sub">What Annomuss users are feeling RIGHT NOW — last 30 minutes · auto-refreshes every 2 minutes</div>
+
+  <div class="grid2" style="margin-bottom:24px">
+    <div class="card">
+      <div class="card-title">Emotion breakdown · last 30 min</div>
+      <div id="pulse-list"><div class="spinner" style="padding:30px"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Distribution</div>
+      <canvas id="pulse-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- HOURLY TREND -->
+  <div class="section-title" style="margin-bottom:4px">24-Hour Emotion Timeline</div>
+  <div class="section-sub">How platform emotion shifts across the day — invaluable for ad scheduling</div>
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-title">
+      Emotion intensity by hour
+      <span style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">score 0-100 = how strongly that emotion dominates</span>
+    </div>
+    <canvas id="hourly-chart" style="max-height:280px"></canvas>
+  </div>
+
+  <!-- AD SEGMENTS -->
+  <div class="section-title" style="margin-bottom:4px">Ad Targeting Segments</div>
+  <div class="section-sub">Users automatically grouped by dominant emotion pattern — last 7 days</div>
+  <div id="segments-grid" class="grid4" style="margin-bottom:24px">
+    <div style="grid-column:1/-1;padding:30px;text-align:center"><div class="spinner"></div></div>
+  </div>
+
+  <!-- AD TIMING TABLE -->
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-title">🎯 Best Ad Delivery Times by Segment</div>
+    <div id="ad-timing-table" style="font-size:.82rem"><div class="spinner" style="padding:20px"></div></div>
+  </div>
+
+  <!-- DATA QUALITY — INVESTOR SECTION -->
+  <div style="padding:16px 18px;background:rgba(244,162,97,.06);border:1.5px solid rgba(244,162,97,.2);border-radius:14px;margin-bottom:20px;font-size:.82rem">
+    <div style="font-family:var(--fD);font-weight:700;color:var(--go);margin-bottom:4px">📊 For Investors & Advertisers — Data Validity Report</div>
+    <div style="color:var(--tx2);line-height:1.7">This section answers: <em>"How do we know this emotion data is real and not fabricated?"</em></div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:24px">
+    <div class="card">
+      <div class="card-title">Data Quality Score</div>
+      <div class="score-ring" id="quality-ring">
+        <div class="score-num" id="quality-score">—</div>
+        <div class="score-lbl">/ 100</div>
+      </div>
+      <div id="quality-details" style="font-size:.78rem;color:var(--tx2);text-align:center">Loading...</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Signal Sources Breakdown</div>
+      <div id="signal-breakdown"><div class="spinner" style="padding:20px"></div></div>
+    </div>
+  </div>
+
+  <!-- WHY YOU CAN TRUST THIS -->
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-title">🔒 Why This Data Is Genuine — Answer for Investors & Advertisers</div>
+    <div class="trust-item">
+      <div class="trust-ico">1️⃣</div>
+      <div class="trust-txt"><strong>Users chose their emotions voluntarily.</strong> Every emotion tag was selected by the user when posting. No algorithm guessed — they said "I'm feeling anxious" by selecting it themselves.</div>
+      <div class="trust-badge">Self-declared</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-ico">2️⃣</div>
+      <div class="trust-txt"><strong>Multiple independent signals confirm each other.</strong> If a user tags "anxious" AND saves an "anxious" post AND reacts "heard" to another anxious post, that's 3 independent data points all pointing the same direction. Confidence score rises.</div>
+      <div class="trust-badge">Triangulated</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-ico">3️⃣</div>
+      <div class="trust-txt"><strong>Behavioral signals cross-validate text signals.</strong> We compare what users say (post emotion tag) with what they do (what posts they stop to like or save). When both match → high confidence. When they don't match → we flag the discrepancy.</div>
+      <div class="trust-badge">Cross-validated</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-ico">4️⃣</div>
+      <div class="trust-txt"><strong>This is the only platform where users came specifically to share emotions.</strong> Unlike Instagram or YouTube where users come for entertainment, Annomuss users open the app TO process how they feel. Their emotional expression is the entire purpose of their visit — not a side effect.</div>
+      <div class="trust-badge">Context-native</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-ico">5️⃣</div>
+      <div class="trust-txt"><strong>Anonymous = more honest.</strong> Research shows people are significantly more truthful in anonymous settings. Users express emotions they would never post on Instagram. This data captures their real internal state, not their social performance.</div>
+      <div class="trust-badge">Anonymity effect</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-ico">6️⃣</div>
+      <div class="trust-txt"><strong>Timestamps create a verifiable audit trail.</strong> Every signal has a timestamp, user ID, and source reference. Advertisers can audit which signals led to which segment classification at any time. No black box.</div>
+      <div class="trust-badge">Auditable</div>
+    </div>
+  </div>
+
+  <!-- INVESTOR PITCH BLOCK -->
+  <div class="card">
+    <div class="card-title">💼 What to Show Investors & Advertisers</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="padding:14px;background:var(--bg3);border-radius:10px;font-size:.8rem;line-height:1.7;color:var(--tx2)">
+        <div style="font-family:var(--fD);font-weight:700;color:var(--tx);margin-bottom:6px">For Advertisers</div>
+        Show them the <strong>Ad Timing Table</strong> above → explains exactly when Mental Wellness ads should run (typically 10pm-2am), when Lifestyle ads perform best (7pm-9pm), etc. This is precision targeting that Facebook can only approximate from clicks — Annomuss users tell you directly.
+      </div>
+      <div style="padding:14px;background:var(--bg3);border-radius:10px;font-size:.8rem;line-height:1.7;color:var(--tx2)">
+        <div style="font-family:var(--fD);font-weight:700;color:var(--tx);margin-bottom:6px">For Investors</div>
+        Show them the <strong>Data Quality Score</strong> and the signal count growing over time. As users keep using the app, each user generates 3-8 signals per session — the dataset compounds. Unlike social media behavioural data which is inferred, this data is intent-declared.
+      </div>
+    </div>
+    <div style="margin-top:14px;padding:12px 14px;background:rgba(123,94,167,.06);border:1px solid rgba(123,94,167,.15);border-radius:10px;font-size:.78rem;color:var(--tx2);line-height:1.7">
+      <strong style="color:var(--v3)">Key competitive advantage:</strong> The average social media platform knows what you clicked. Annomuss knows how you feel and why. Users have told us — through every post, reaction, story and vent — their precise emotional state at a precise moment in time. This creates a dataset that doesn't exist anywhere else.
+    </div>
+    <button class="btn btn-go" style="width:100%;margin-top:16px;padding:14px" onclick="dlExport()">⬇️ Download Full Emotion Intelligence Report (Excel CSV)</button>
+  </div>
+
+</div>
+</div>
+
+<script>
+const API = 'https://api.annomuss.in';
+let adminPass = '';
+let pulseChart = null, hourlyChart = null;
+
+const EMO_COLORS = {
+  anxious:'#FF4D6D',sad:'#9B7FD4',lonely:'#C4A8FF',happy:'#F4A261',
+  grateful:'#52B788',inspired:'#00C9A7',excited:'#FF85A1',hopeful:'#6BD8A3',
+  angry:'#FF6B6B',confused:'#A0A0FF',proud:'#FFD700',neutral:'#4E4C6A'
+};
+
+function af(path) {
+  return fetch(`${API}${path}`, { headers: { 'x-admin-password': adminPass } });
+}
+
+async function login() {
+  const pass = document.getElementById('pass').value.trim();
+  if (!pass) return;
+  adminPass = pass;
+  const r = await af('/api/admin/stats').catch(() => null);
+  if (r?.ok) {
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadAll();
+    setInterval(loadPulse, 120000); // refresh every 2 min
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+    adminPass = '';
+  }
+}
+
+async function loadAll() {
+  document.getElementById('last-update').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+  await Promise.all([loadPulse(), loadHourly(), loadSegments(), loadQuality()]);
+}
+
+async function loadPulse() {
+  try {
+    const r = await af('/api/emotion/pulse');
+    const data = await r.json();
+    renderPulse(data);
+  } catch(e) { document.getElementById('pulse-list').innerHTML = '<div style="color:var(--tx3);font-size:.8rem;padding:20px">No signals yet — data builds as users engage</div>'; }
+}
+
+function renderPulse(data) {
+  const el = document.getElementById('pulse-list');
+  if (!data?.length) {
+    el.innerHTML = '<div style="color:var(--tx3);font-size:.8rem;padding:10px">No signals in last 30 min</div>';
+    return;
+  }
+  const max = Math.max(...data.map(d => d.pct), 1);
+  el.innerHTML = data.slice(0,10).map(d => `
+    <div class="pulse-item">
+      <div style="width:70px;font-weight:600;font-size:.78rem">${d.emotion}</div>
+      <div class="pulse-bar" style="background:${EMO_COLORS[d.emotion]||'var(--v)'};opacity:.8;width:${Math.round(d.pct/max*100)}%"></div>
+      <div class="pulse-pct">${d.pct}%</div>
+      <div class="conf-tag ${d.confidence>=70?'hi':d.confidence>=40?'md':'lo'}">${d.confidence}%</div>
+    </div>`).join('');
+
+  // Chart
+  const labels = data.slice(0,8).map(d => d.emotion);
+  const values = data.slice(0,8).map(d => d.pct);
+  const colors = labels.map(l => EMO_COLORS[l]||'#7B5EA7');
+  if (pulseChart) pulseChart.destroy();
+  const ctx = document.getElementById('pulse-chart').getContext('2d');
+  pulseChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }] },
+    options: { plugins: { legend: { position: 'bottom', labels: { color: '#9896B8', font: { size: 11 } } } } },
+  });
+}
+
+async function loadHourly() {
+  try {
+    const r = await af('/api/emotion/hourly-breakdown');
+    const data = await r.json();
+    renderHourly(data);
+  } catch(e) { console.warn('Hourly load failed:', e); }
+}
+
+function renderHourly(data) {
+  const labels = data.map(d => d.label);
+  const emotions = ['anxious','happy','lonely','sad','grateful','inspired'];
+  const datasets = emotions.map(emo => ({
+    label: emo,
+    data: data.map(d => d.emotions[emo] || 0),
+    borderColor: EMO_COLORS[emo] || '#7B5EA7',
+    backgroundColor: (EMO_COLORS[emo] || '#7B5EA7') + '18',
+    fill: true,
+    tension: 0.4,
+    borderWidth: 2,
+    pointRadius: 2,
+  }));
+
+  if (hourlyChart) hourlyChart.destroy();
+  const ctx = document.getElementById('hourly-chart').getContext('2d');
+  hourlyChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom', labels: { color: '#9896B8', font: { size: 10 } } } },
+      scales: {
+        x: { ticks: { color: '#4E4C6A', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { ticks: { color: '#4E4C6A', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' }, max: 100 },
+      },
+    },
+  });
+}
+
+async function loadSegments() {
+  try {
+    const r = await af('/api/emotion/segments');
+    const data = await r.json();
+    renderSegments(data);
+  } catch(e) { document.getElementById('segments-grid').innerHTML = '<div style="grid-column:1/-1;color:var(--tx3);text-align:center;padding:20px">No segment data yet</div>'; }
+}
+
+function renderSegments(data) {
+  const seg = document.getElementById('segments-grid');
+  const adTable = document.getElementById('ad-timing-table');
+
+  const SEGMENT_CONFIG = {
+    'Mental Wellness':          { ico:'💙', color:'rgba(155,127,212,.2)', pitch:'Meditation apps, therapy platforms, mental health services', bestAd:'Supportive, non-judgmental tone. Never salesy.' },
+    'Lifestyle & Shopping':     { ico:'✨', color:'rgba(244,162,97,.15)', pitch:'Fashion, food delivery, experiences, travel', bestAd:'Visual, aspirational, product-discovery style.' },
+    'Growth & Learning':        { ico:'🔥', color:'rgba(0,201,167,.15)', pitch:'Online courses, productivity apps, career platforms', bestAd:'Achievement-focused, progress-driven messaging.' },
+    'Stress Relief & Entertainment': { ico:'🎮', color:'rgba(255,77,109,.12)', pitch:'Games, streaming, food delivery, comfort brands', bestAd:'Light, fun, escapism-oriented. Avoid heavy topics.' },
+    'General':                  { ico:'🎭', color:'var(--bg3)', pitch:'Broad audience — general brand awareness', bestAd:'Wide-appeal messaging.' },
+  };
+
+  if (!data?.length) { seg.innerHTML = '<div style="grid-column:1/-1;color:var(--tx3);text-align:center;padding:20px">No segment data yet — builds as users engage</div>'; return; }
+
+  seg.innerHTML = data.map(s => {
+    const cfg = SEGMENT_CONFIG[s.segment] || SEGMENT_CONFIG['General'];
+    return `<div class="segment-card" style="background:${cfg.color}">
+      <div style="font-size:1.4rem;margin-bottom:6px">${cfg.ico}</div>
+      <div class="seg-count">${s.uniqueUsers}</div>
+      <div class="seg-label">users</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;margin-top:8px">${s.segment}</div>
+      <div style="font-size:.68rem;color:var(--tx3);margin-top:4px">Peak: ${s.peakHour}</div>
+      <div style="font-size:.66rem;color:var(--tx3);margin-top:2px">Confidence: ${s.avgConfidence}%</div>
+    </div>`;
+  }).join('');
+
+  adTable.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:.78rem">
+    <thead><tr>
+      <th style="text-align:left;padding:8px;border-bottom:1px solid var(--bd);color:var(--tx3)">Segment</th>
+      <th style="text-align:left;padding:8px;border-bottom:1px solid var(--bd);color:var(--tx3)">Users</th>
+      <th style="text-align:left;padding:8px;border-bottom:1px solid var(--bd);color:var(--tx3)">Peak Time</th>
+      <th style="text-align:left;padding:8px;border-bottom:1px solid var(--bd);color:var(--tx3)">Ad Category</th>
+      <th style="text-align:left;padding:8px;border-bottom:1px solid var(--bd);color:var(--tx3)">Creative Direction</th>
+    </tr></thead>
+    <tbody>${data.map(s => {
+      const cfg = SEGMENT_CONFIG[s.segment] || SEGMENT_CONFIG['General'];
+      return `<tr>
+        <td style="padding:9px 8px;border-bottom:.5px solid var(--bd);font-weight:600">${cfg.ico} ${s.segment}</td>
+        <td style="padding:9px 8px;border-bottom:.5px solid var(--bd);font-family:var(--fM)">${s.uniqueUsers}</td>
+        <td style="padding:9px 8px;border-bottom:.5px solid var(--bd);color:var(--v3);font-family:var(--fM)">${s.peakHour}</td>
+        <td style="padding:9px 8px;border-bottom:.5px solid var(--bd);color:var(--tx2)">${cfg.pitch}</td>
+        <td style="padding:9px 8px;border-bottom:.5px solid var(--bd);color:var(--tx3);font-style:italic">${cfg.bestAd}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+async function loadQuality() {
+  try {
+    const r = await af('/api/emotion/quality');
+    const d = await r.json();
+    document.getElementById('quality-score').textContent = d.dataQualityScore || 0;
+    const ring = document.getElementById('quality-ring');
+    const score = d.dataQualityScore || 0;
+    const color = score >= 70 ? 'var(--lm)' : score >= 40 ? 'var(--go)' : 'var(--cr)';
+    ring.style.borderColor = color;
+    document.getElementById('quality-score').style.color = color;
+    document.getElementById('quality-details').innerHTML = `
+      <div>${d.totalSignals?.toLocaleString() || 0} total signals</div>
+      <div>${d.uniqueUsers?.toLocaleString() || 0} unique users</div>
+      <div>${d.highConfidencePct || 0}% high confidence</div>
+      <div>avg ${d.avgSignalsPerUser || 0} signals/user</div>`;
+
+    const sb = document.getElementById('signal-breakdown');
+    if (d.signalBreakdown?.length) {
+      sb.innerHTML = d.signalBreakdown.map(s => `
+        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--bd);font-size:.76rem">
+          <span style="color:var(--tx2)">${s._id}</span>
+          <span style="font-family:var(--fM);color:var(--tx3)">${s.count} · ${Math.round(s.avgConfidence*100)}% conf</span>
+        </div>`).join('');
+    } else {
+      sb.innerHTML = '<div style="color:var(--tx3);font-size:.78rem;padding:10px">No signals yet — data builds as users engage</div>';
+    }
+  } catch(e) { console.warn('Quality load failed:', e); }
+}
+
+async function dlExport() {
+  const r = await af('/api/emotion/export?days=30');
+  const blob = await r.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `annomuss_emotion_intelligence_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+document.getElementById('pass').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+</script>
+</body>
+</html>

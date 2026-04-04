@@ -35,14 +35,17 @@
     }
   ],
   "rewrites": [
-    { "source": "/dashboard", "destination": "/dashboard.html" },
-    { "source": "/login",     "destination": "/index.html" },
-    { "source": "/terms",     "destination": "/terms.html" },
-    { "source": "/privacy",   "destination": "/terms.html" },
-    { "source": "/safety",    "destination": "/terms.html" },
-    { "source": "/settings",  "destination": "/security.html" },
-    { "source": "/badges",    "destination": "/badges.html" },
-    { "source": "/messages",  "destination": "/messages.html" }
+    { "source": "/dashboard",            "destination": "/dashboard.html" },
+    { "source": "/login",                "destination": "/index.html" },
+    { "source": "/terms",                "destination": "/terms.html" },
+    { "source": "/privacy",              "destination": "/terms.html" },
+    { "source": "/safety",               "destination": "/terms.html" },
+    { "source": "/settings",             "destination": "/security.html" },
+    { "source": "/badges",               "destination": "/badges.html" },
+    { "source": "/messages",             "destination": "/messages.html" },
+    { "source": "/admin",                "destination": "/admin.html" },
+    { "source": "/emotion-intelligence", "destination": "/emotion-intelligence.html" },
+    { "source": "/confessions",          "destination": "/confessions.html" }
   ],
   "redirects": [
     { "source": "/home", "destination": "/dashboard.html", "permanent": true },

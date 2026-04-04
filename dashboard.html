@@ -1560,7 +1560,12 @@ function renderPost(p){
   const me=user?.anonymousName||'';
   const liked=(p.likes||[]).some(id=>id===me||id===user?._id?.toString());
   const ec=EMO_C[p.emotion]||{};
-  const isOwn=p.authorName===me||p.anonymousName===me||p.authorId===user?._id?.toString();
+  const myId = user?._id?.toString() || user?.id?.toString() || '';
+  const isOwn = !!myId && (
+    p.authorId?.toString?.() === myId ||
+    p.authorName === me ||
+    p.anonymousName === me
+  );
   const author=p.authorName||p.anonymousName||'Anonymous';
   const av=p.authorEmoji||p.avatarEmoji||'🎭';
   const isConf=p.type==='confession'||p.type==='unsent';

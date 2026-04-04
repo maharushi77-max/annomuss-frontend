@@ -457,6 +457,42 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 /* ══ VOICE COMPOSE ══ */
 .rec-timer{font-family:var(--fM);font-size:1.1rem;font-weight:700;color:var(--cr);text-align:center;margin:6px 0}
 
+/* ══ WEEKLY CHALLENGE ══ */
+.challenge-card{margin:0 14px 14px;padding:18px;background:linear-gradient(135deg,rgba(255,77,109,.1),rgba(123,94,167,.08));border:1.5px solid rgba(255,77,109,.25);border-radius:20px;position:relative;overflow:hidden}
+.challenge-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,77,109,.04),transparent);pointer-events:none}
+.ch-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cr);font-family:var(--fD);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.ch-title{font-family:var(--fD);font-weight:700;font-size:1rem;color:var(--tx);line-height:1.45;margin-bottom:12px}
+.ch-meta{display:flex;align-items:center;gap:10px;font-size:.75rem;color:var(--tx3)}
+.ch-timer{font-family:var(--fM);font-weight:700;color:var(--cr)}
+
+/* ══ PREMIUM ══ */
+.premium-sheet{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);backdrop-filter:blur(16px);display:none;align-items:flex-end}
+.premium-sheet.on{display:flex}
+.premium-inner{width:100%;background:var(--bg1);border-radius:24px 24px 0 0;padding:20px 20px calc(36px + var(--safe));max-height:92vh;overflow-y:auto;animation:shUp .3s cubic-bezier(.32,1,.4,1)}
+.premium-hero{text-align:center;padding:10px 0 20px;border-bottom:1px solid var(--bd);margin-bottom:18px}
+.perk{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:.5px solid var(--bd)}
+.perk:last-child{border-bottom:none}
+.perk-ico{font-size:1.2rem;width:28px;text-align:center;flex-shrink:0}
+.perk-title{font-size:.88rem;font-weight:600;color:var(--tx)}
+.perk-sub{font-size:.75rem;color:var(--tx3);margin-top:2px}
+.btn-premium{width:100%;padding:15px;background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;font-family:var(--fD);font-weight:700;font-size:.95rem;border:none;border-radius:16px;cursor:pointer;margin-top:18px;letter-spacing:.02em}
+.btn-premium:active{transform:scale(.98)}
+
+/* ══ NOTIFICATION HISTORY ══ */
+.notif-item{display:flex;gap:12px;padding:13px 18px;border-bottom:.5px solid var(--bd);cursor:pointer;transition:background .12s}
+.notif-item:active{background:var(--bg2)}
+.notif-item.unread{background:rgba(123,94,167,.05)}
+.notif-ico{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;background:var(--bg2)}
+.notif-text{flex:1;min-width:0}
+.notif-msg{font-size:.84rem;color:var(--tx);line-height:1.5}
+.notif-time{font-size:.7rem;color:var(--tx3);margin-top:3px;font-family:var(--fM)}
+
+/* ══ DM REACTIONS ══ */
+.bubble-wrap:hover .react-trigger{opacity:1}
+.react-trigger{opacity:0;position:absolute;bottom:-8px;right:4px;background:var(--bg2);border:1px solid var(--bd2);border-radius:100px;padding:2px 8px;font-size:.75rem;cursor:pointer;transition:opacity .15s;z-index:5}
+.bubble-wrap.me .react-trigger{right:auto;left:4px}
+.msg-reaction{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:var(--bg2);border:1px solid var(--bd2);border-radius:100px;font-size:.75rem;margin-top:4px;cursor:pointer}
+
 /* ══ DAILY PROMPT ══ */
 .daily-prompt{margin:0 14px 12px;padding:16px;background:linear-gradient(135deg,rgba(196,168,255,.1),rgba(255,133,161,.06));border:1px solid rgba(196,168,255,.22);border-radius:18px;cursor:pointer;transition:transform .15s,border-color .2s;position:relative;overflow:hidden}
 .daily-prompt:active{transform:scale(.98)}
@@ -847,6 +883,19 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <button class="ico-btn" onclick="goPage('social')" style="position:relative">🔔<span id="notif-badge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--cr);border:1.5px solid var(--bg)"></span></button>
   </div>
 
+  <!-- WEEKLY CHALLENGE — shows on feed -->
+  <div class="challenge-card" id="challenge-card" style="display:none">
+    <div class="ch-label">🎯 This week's challenge</div>
+    <div class="ch-title" id="ch-title">Loading...</div>
+    <div class="ch-meta">
+      <span id="ch-count" style="color:var(--v3)">0 responses</span>
+      <span>·</span>
+      <span class="ch-timer" id="ch-timer">Ends in 6d</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-sm btn-v" style="padding:6px 16px;font-size:.75rem" onclick="joinChallenge()">Join ✍️</button>
+    </div>
+  </div>
+
   <!-- PUSH NOTIFICATION BANNER -->
   <div class="push-banner" id="push-banner">
     <div style="font-size:1.5rem;flex-shrink:0">🔔</div>
@@ -1093,9 +1142,13 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 
 <!-- SOCIAL -->
 <div class="page" id="pg-social">
-  <div class="tb"><div class="tb-title">Social</div></div>
+  <div class="tb">
+    <div class="tb-title">Social</div>
+    <button class="ico-btn" onclick="openPremium()" title="Go Premium">⭐</button>
+  </div>
   <div class="social-tabs">
     <div class="stab on" onclick="socTab('inbox',this)">📬 Inbox</div>
+    <div class="stab" onclick="socTab('notifs',this)">🔔 Activity</div>
     <div class="stab" onclick="socTab('friends',this)">👥 Friends</div>
     <div class="stab" onclick="socTab('discover',this)">🔍 Discover</div>
     <div class="stab" onclick="socTab('requests',this)" id="stab-requests" style="position:relative">
@@ -1107,12 +1160,37 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div style="padding:14px 18px 6px"><button class="btn btn-full btn-v btn-sm" onclick="goPage('connect')">⚡ Start Random Chat</button></div>
     <div id="inbox-list"></div>
   </div>
+  <div id="soc-notifs" style="display:none">
+    <div id="notifs-list"><div style="padding:32px;text-align:center"><div class="spin"></div></div></div>
+  </div>
   <div id="soc-friends" style="display:none"><div id="friends-list"></div></div>
   <div id="soc-discover" style="display:none">
     <div style="padding:12px 18px"><div style="display:flex;align-items:center;gap:8px;background:var(--bg2);border:1.5px solid var(--bd);border-radius:100px;padding:10px 16px"><span style="color:var(--tx3)">🔍</span><input id="search-inp" placeholder="Search users..." oninput="doSearch(this.value)" style="flex:1;font-size:.9rem;color:var(--tx)"/></div></div>
     <div id="search-list"></div>
   </div>
   <div id="soc-requests" style="display:none"><div id="requests-list"></div></div>
+</div>
+
+<!-- PREMIUM SHEET -->
+<div class="premium-sheet" id="premium-sheet" onclick="if(event.target===this)closePremium()">
+  <div class="premium-inner">
+    <div style="width:36px;height:4px;background:var(--bd3);border-radius:2px;margin:0 auto 16px"></div>
+    <div class="premium-hero">
+      <div style="font-size:3rem;margin-bottom:10px">⭐</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:1.3rem;margin-bottom:4px">Annomuss Premium</div>
+      <div style="font-size:.82rem;color:var(--tx3)">Express more. Feel more. Stay anonymous.</div>
+      <div style="margin-top:12px;font-family:var(--fD);font-size:1.6rem;font-weight:700;color:#FFD700">₹99<span style="font-size:.9rem;font-weight:500;color:var(--tx3)">/month</span></div>
+    </div>
+    <div class="perk"><div class="perk-ico">🔔</div><div><div class="perk-title">See who reacted to your posts</div><div class="perk-sub">Know who felt heard, who related, who loved it</div></div></div>
+    <div class="perk"><div class="perk-ico">⚡</div><div><div class="perk-title">Extended random chat — 15 minutes</div><div class="perk-sub">Free users get 5 min. Premium gets 3x longer</div></div></div>
+    <div class="perk"><div class="perk-ico">🎭</div><div><div class="perk-title">Exclusive avatar frames</div><div class="perk-sub">Stand out with premium emoji frames</div></div></div>
+    <div class="perk"><div class="perk-ico">📊</div><div><div class="perk-title">Post to specific mood rooms</div><div class="perk-sub">Target your post to exactly who needs to hear it</div></div></div>
+    <div class="perk"><div class="perk-ico">🚫</div><div><div class="perk-title">No rate limits</div><div class="perk-sub">Post, react, and chat without restrictions</div></div></div>
+    <div class="perk"><div class="perk-ico">💛</div><div><div class="perk-title">Support Annomuss</div><div class="perk-sub">Keep this space free, safe, and anonymous for everyone</div></div></div>
+    <button class="btn-premium" onclick="startPremiumCheckout()">✨ Get Premium — ₹99/month</button>
+    <div style="text-align:center;margin-top:12px;font-size:.75rem;color:var(--tx3)">Cancel anytime · Secure payment via Razorpay</div>
+    <button onclick="closePremium()" style="width:100%;margin-top:10px;padding:12px;background:none;border:none;color:var(--tx3);font-size:.85rem;cursor:pointer">Maybe later</button>
+  </div>
 </div>
 
 <!-- PROFILE -->
@@ -1152,12 +1230,18 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <!-- Profile tabs -->
   <div style="display:flex;border-bottom:1px solid var(--bd);margin-top:14px;padding:0 18px">
     <div class="ptab on" id="pt-posts" onclick="profileTab('posts',this)" style="flex:1;padding:10px 0;text-align:center;font-size:.73rem;font-weight:700;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fD);letter-spacing:.03em">📢 Posts</div>
+    <div class="ptab" id="pt-saved" onclick="profileTab('saved',this)" style="flex:1;padding:10px 0;text-align:center;font-size:.73rem;font-weight:700;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fD);letter-spacing:.03em">🔖 Saved</div>
     <div class="ptab" id="pt-menu" onclick="profileTab('menu',this)" style="flex:1;padding:10px 0;text-align:center;font-size:.73rem;font-weight:700;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fD);letter-spacing:.03em">☰ Menu</div>
   </div>
 
   <!-- Posts tab -->
   <div id="profile-posts">
     <div id="profile-feed" style="padding-top:8px"></div>
+  </div>
+
+  <!-- Saved tab -->
+  <div id="profile-saved" style="display:none">
+    <div id="saved-feed" style="padding-top:8px"></div>
   </div>
 
   <!-- Menu tab -->
@@ -2195,7 +2279,7 @@ function crisisChat(){crisisDismiss();goPage('connect');setTimeout(rcStart,500);
 let pendingReqCount = 0;
 
 function socTab(tab,el){
-  ['inbox','friends','discover','requests'].forEach(t=>{
+  ['inbox','notifs','friends','discover','requests'].forEach(t=>{
     const el2=q(`soc-${t}`); if(el2) el2.style.display='none';
   });
   const panel = q(`soc-${tab}`);
@@ -2203,12 +2287,12 @@ function socTab(tab,el){
   document.querySelectorAll('.stab').forEach(t=>t.classList.remove('on'));
   if(el) el.classList.add('on');
   else {
-    // Find and activate the correct tab button by text match
     document.querySelectorAll('.stab').forEach(t=>{
       if(t.id===`stab-${tab}`||(t.textContent||'').toLowerCase().includes(tab))t.classList.add('on');
     });
   }
   if(tab==='inbox')    loadInbox();
+  if(tab==='notifs')   loadNotifications();
   if(tab==='friends')  loadFriends();
   if(tab==='requests') loadRequests();
   if(tab==='requests') { pendingReqCount=0; updateReqBadge(); }
@@ -2481,7 +2565,7 @@ function initSocket(){
   // Create new socket
   socket=io(API,{auth:{token:getToken()},transports:['websocket','polling'],reconnection:true,reconnectionDelay:1000,reconnectionAttempts:10});
 
-  socket.on('connect',()=>{socket.emit('register');console.log('✅ Socket connected');});
+  socket.on('connect',()=>{socket.emit('register');});
   socket.on('disconnect',()=>{if(rcState==='active')rcAddMsg('⚠️ Connection lost...','sys');});
 
   socket.on('online-count',(n)=>{
@@ -2596,10 +2680,16 @@ function initSocket(){
   socket.on('post-reaction',(d)=>{
     const REACT_LABELS={heard:'💙 Someone felt heard by your post',same:'🤝 Someone said "same" to your post',strong:'🔥 Your post gave someone strength',love:'🌊 Someone loved your post',helped:'✨ Your post helped someone'};
     const msg=REACT_LABELS[d.type]||'❤️ Someone reacted to your post';
-    toast(msg, 3500);
+    toast(msg,3500);
+    addNotification('reaction',msg,d.postId);
+    const badge=q('notif-badge');if(badge)badge.style.display='block';
   });
 
-  socket.on('compliment-received',(d)=>{showGratitudeNotif(d.message||'A stranger thinks you\'re amazing ✨');});
+  socket.on('compliment-received',(d)=>{
+    const msg=d.message||'A stranger thinks you\'re amazing ✨';
+    showGratitudeNotif(msg);
+    addNotification('gift',msg,null);
+  });
 }
 
 /* ═══════════ LOCATION ═══════════ */
@@ -3070,7 +3160,7 @@ async function subscribePush(){
     // VAPID public key — replace with your actual key from:
     // node -e "const webpush=require('web-push');const k=webpush.generateVAPIDKeys();console.log(k)"
     // Or use Firebase Cloud Messaging instead (simpler)
-    const VAPID_PUBLIC_KEY='BMDRvHUzPKKCfYTZAMWGHMFU-qzquvzCZdNYRF979mXO5hCTrj0DLtnBakxOMXAPnBLD0SUegfRk2pF0Z71stII';
+    const VAPID_PUBLIC_KEY='BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjZkbYGI3B8A6oLEBGRaxAOhKsPxA';
     const sub=await reg.pushManager.subscribe({
       userVisibleOnly:true,
       applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
@@ -3085,7 +3175,7 @@ async function subscribePush(){
       body:JSON.stringify({subscription:sub})
     });
     toast('🔔 Notifications enabled!');
-    console.log('✅ Push subscription active');
+    
   }catch(e){
     console.warn('Push subscribe error:',e.message);
   }
@@ -3352,14 +3442,123 @@ async function loadAlgorithmFeed(){
 }
 
 /* ═══════════════════════════════════════════════
+   WEEKLY ANONYMOUS CHALLENGES
+═══════════════════════════════════════════════ */
+const WEEKLY_CHALLENGES=[
+  "Share the last text you sent but never got a reply to.",
+  "What's something you've never told anyone but wish you could?",
+  "Write a letter to the version of you from 1 year ago.",
+  "What's the most honest thing someone has ever said to you?",
+  "Describe your current feeling in exactly 6 words.",
+  "What's something you pretend doesn't bother you?",
+  "Share one thing you're proud of that no one knows about.",
+  "What would you say to someone feeling exactly like you do right now?",
+  "What's a belief you held that you've completely changed?",
+  "Write the caption of the photo you'll never post.",
+  "What's something you've been carrying alone for too long?",
+  "If you could send one anonymous message to your city tonight, what would it say?",
+];
+let currentChallenge=null;
+
+function loadWeeklyChallenge(){
+  const weekNum=Math.floor(Date.now()/(7*24*60*60*1000));
+  currentChallenge=WEEKLY_CHALLENGES[weekNum%WEEKLY_CHALLENGES.length];
+  const card=q('challenge-card'),title=q('ch-title');
+  if(!card||!title)return;
+  title.textContent=currentChallenge;
+  const now=new Date();
+  const daysLeft=(8-now.getDay())%7||7;
+  const next=new Date(now);next.setDate(now.getDate()+daysLeft);next.setHours(0,0,0,0);
+  const hLeft=Math.ceil((next-now)/3600000);
+  const timer=q('ch-timer');
+  if(timer)timer.textContent=hLeft>24?`${Math.floor(hLeft/24)}d left`:`${hLeft}h left`;
+  api('/api/posts/search?hashtag=WeeklyChallenge&limit=1').then(r=>r.json()).then(d=>{
+    const cnt=q('ch-count');if(cnt)cnt.textContent=`${d.total||0} joined`;
+  }).catch(()=>{});
+  card.style.display='block';
+}
+
+function joinChallenge(){
+  openCompose('post');
+  setTimeout(()=>{
+    const txt=q('ctxt');
+    if(txt){txt.value='#WeeklyChallenge\n\n';txt.placeholder=currentChallenge;txt.focus();txt.setSelectionRange(txt.value.length,txt.value.length);onCompose(txt);}
+  },350);
+  toast('✍️ Answer this week\'s challenge!');
+}
+
+/* ═══════════════════════════════════════════════
+   PREMIUM
+═══════════════════════════════════════════════ */
+function openPremium(){q('premium-sheet')?.classList.add('on');}
+function closePremium(){q('premium-sheet')?.classList.remove('on');}
+
+async function startPremiumCheckout(){
+  const RAZORPAY_KEY='rzp_live_XXXXXXXXXXXXXXXX'; // ← Replace with your key
+  if(RAZORPAY_KEY.includes('XXXX')){
+    toast('💳 Premium payment coming soon!');closePremium();return;
+  }
+  const opts={
+    key:RAZORPAY_KEY,amount:9900,currency:'INR',name:'Annomuss',
+    description:'Premium - 1 Month',image:'/icon.svg',
+    prefill:{email:user?.email||''},
+    theme:{color:'#7B5EA7'},
+    handler:async(res)=>{
+      try{
+        await api('/api/users/premium/activate',{method:'POST',body:JSON.stringify(res)});
+        if(user)user.isPremium=true;closePremium();
+        toast('⭐ Welcome to Annomuss Premium!');awardXP(50,'Premium member');
+      }catch(_){toast('Activated! Refreshing...');setTimeout(()=>location.reload(),1500);}
+    },
+    modal:{ondismiss:()=>{}},
+  };
+  if(typeof Razorpay==='undefined'){
+    const s=document.createElement('script');s.src='https://checkout.razorpay.com/v1/checkout.js';
+    s.onload=()=>new Razorpay(opts).open();document.head.appendChild(s);
+  }else new Razorpay(opts).open();
+}
+
+/* ═══════════════════════════════════════════════
+   NOTIFICATION HISTORY
+═══════════════════════════════════════════════ */
+let notifStore=[];
+function addNotification(type,msg,postId){
+  const n={type,msg,postId,time:Date.now(),read:false};
+  notifStore.unshift(n);if(notifStore.length>50)notifStore=notifStore.slice(0,50);
+  try{localStorage.setItem('ann_notifs',JSON.stringify(notifStore.slice(0,20)));}catch(_){}
+}
+function loadNotifications(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('ann_notifs')||'[]');
+    const ids=new Set(notifStore.map(n=>n.time));
+    for(const n of saved)if(!ids.has(n.time))notifStore.push(n);
+    notifStore.sort((a,b)=>b.time-a.time);
+  }catch(_){}
+  const el=q('notifs-list');if(!el)return;
+  if(!notifStore.length){
+    el.innerHTML=`<div class="empty"><div style="font-size:3rem">🔔</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem;margin-top:8px">No activity yet</div><div style="font-size:.82rem;color:var(--tx3)">Reactions to your posts appear here</div></div>`;
+    return;
+  }
+  const icons={reaction:'💙',like:'❤️',comment:'💬',gift:'🎁',friend:'👋',challenge:'🎯'};
+  el.innerHTML=notifStore.map(n=>`<div class="notif-item ${n.read?'':'unread'}" onclick="${n.postId?`openPModal('${n.postId}')`:''}">
+    <div class="notif-ico">${icons[n.type]||'🔔'}</div>
+    <div class="notif-text"><div class="notif-msg">${esc(n.msg)}</div><div class="notif-time">${timeAgo(n.time)}</div></div>
+  </div>`).join('');
+  notifStore.forEach(n=>n.read=true);
+  try{localStorage.setItem('ann_notifs',JSON.stringify(notifStore.slice(0,20)));}catch(_){}
+}
+
+/* ═══════════════════════════════════════════════
    COMPOSE — poll + voice type handlers
 ═══════════════════════════════════════════════ */
 function profileTab(tab, el){
   document.querySelectorAll('.ptab').forEach(t=>{t.classList.remove('on');t.style.color='var(--tx3)';t.style.borderBottomColor='transparent';});
   if(el){el.classList.add('on');el.style.color='var(--v3)';el.style.borderBottomColor='var(--v)';}
   q('profile-posts').style.display = tab==='posts'?'block':'none';
+  q('profile-saved').style.display = tab==='saved'?'block':'none';
   q('profile-menu').style.display  = tab==='menu' ?'block':'none';
   if(tab==='posts') loadProfilePosts();
+  if(tab==='saved') loadSavedPosts();
 }
 
 async function loadProfilePosts(){
@@ -3379,6 +3578,28 @@ async function loadProfilePosts(){
     });
     setTimeout(addComplimentBtns,100);
   }catch(e){feed.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">Couldn\'t load posts</div></div>';}
+}
+
+async function loadSavedPosts(){
+  const feed=q('saved-feed');
+  if(!feed)return;
+  feed.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
+  try{
+    const r=await api('/api/posts/saved');
+    const d=await r.json();const posts=Array.isArray(d)?d:(d.posts||[]);
+    if(!posts.length){
+      feed.innerHTML=`<div class="empty"><div style="font-size:3rem">🔖</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem;margin-top:8px">No saved posts yet</div><div style="font-size:.82rem;color:var(--tx3)">Tap 🔖 on any post to save it here</div></div>`;
+      return;
+    }
+    feed.innerHTML='';
+    posts.forEach((p,i)=>{
+      const d2=document.createElement('div');d2.innerHTML=renderPost(p);
+      const c=d2.firstElementChild;if(c){c.style.animationDelay=`${i*.04}s`;feed.appendChild(c);}
+    });
+    setTimeout(addComplimentBtns,100);
+  }catch(e){
+    feed.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">Couldn\'t load saved posts</div></div>';
+  }
 }
 
 // Auto-load profile posts when profile tab is opened
@@ -3664,6 +3885,7 @@ async function main(){
   initSocket();
   showDailyPrompt();
   checkReferral();
+  loadWeeklyChallenge(); // show this week's challenge on feed
 
   // Init infinite scroll (replaces Load More button)
   setTimeout(initInfiniteScroll, 800);
@@ -3726,6 +3948,7 @@ async function main(){
 // ── BACK BUTTON — closes modals in order (Android) ──
 window.addEventListener('popstate',()=>{
   // Close in priority order — topmost first
+  if(q('premium-sheet')?.classList.contains('on')){closePremium();history.pushState(null,'',location.href);return;}
   if(q('gift-sheet')?.style.display==='flex'){closeGift();history.pushState(null,'',location.href);return;}
   if(q('post-action-sheet')?.style.display==='flex'){closePostActions();history.pushState(null,'',location.href);return;}
   if(q('lightbox')?.classList.contains('on')){closeLightbox();history.pushState(null,'',location.href);return;}

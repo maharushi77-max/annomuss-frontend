@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════
-   ANNOMUSS SERVICE WORKER v5
-   Caches all pages, fonts, icon
+   ANNOMUSS SERVICE WORKER v6
+   Force-refresh cache after major updates
 ═══════════════════════════════════════════ */
 
-const CACHE_NAME  = "annomuss-v5";
+const CACHE_NAME  = "annomuss-v6";
 const OFFLINE_URL = "/offline.html";
 
 const PRECACHE = [

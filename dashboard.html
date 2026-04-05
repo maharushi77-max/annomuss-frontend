@@ -1769,8 +1769,7 @@ async function doLike(id,btn){
   // Optimistic update
   btn.classList.toggle('liked',!was);
   ico.textContent=was?'🤍':'💙';
-  lc.textContent=was?Math.max(0,cnt-1)||'':cnt+1||'';
-  lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?-1:1));
+  lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?-1:1))||'';
   try{
     const r=await api(`/api/posts/${id}/like`,{method:'POST'});
     const d=await r.json();
@@ -2589,6 +2588,17 @@ async function submitPost(){
     };
     if(compType==='story')body.expiresAt=new Date(Date.now()+24*60*60*1000).toISOString();
 
+    // ── DIARY: private, never sent to server ──
+    if(compType==='diary'){
+      closeCompose();clearDraft();
+      const diaries=JSON.parse(localStorage.getItem('ann_diary')||'[]');
+      diaries.unshift({text:cap,emotion:compEmo||'neutral',ts:Date.now(),id:'d'+Date.now()});
+      localStorage.setItem('ann_diary',JSON.stringify(diaries.slice(0,200)));
+      showPostSuccess('diary', cap, null);
+      btn.disabled=false;btn.textContent='Post';
+      return;
+    }
+
     const r=await api('/api/posts',{method:'POST',body:JSON.stringify(body)});
     const d=await r.json();
     if(r.status===429){toast('⏳ Slow down a bit!');return;}
@@ -2597,12 +2607,6 @@ async function submitPost(){
     closeCompose();clearDraft();
     if(compType==='story'){
       toast('📸 Story is live for 24 hours!');loadStories();
-    } else if(compType==='diary'){
-      // Diary is private — save to localStorage only
-      const diaries=JSON.parse(localStorage.getItem('ann_diary')||'[]');
-      diaries.unshift({text:cap,ts:Date.now(),id:'d'+Date.now()});
-      localStorage.setItem('ann_diary',JSON.stringify(diaries.slice(0,100)));
-      showPostSuccess('diary', cap, null);
     } else {
       // Optimistic insert first
       const el=q('feed-list');

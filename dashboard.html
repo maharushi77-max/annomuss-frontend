@@ -495,6 +495,116 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 
 /* ══ DAILY PROMPT ══ */
 
+/* ══ SKELETON SCREENS ══ */
+.skel{background:var(--bg2);border-radius:12px;overflow:hidden;position:relative}
+.skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.04) 50%,transparent 100%);animation:shimmer 1.4s infinite;transform:translateX(-100%)}
+@keyframes shimmer{to{transform:translateX(100%)}}
+.skel-card{background:var(--bg2);border-radius:16px;padding:16px;margin:0 14px 10px;border:1px solid var(--bd)}
+.skel-line{height:12px;border-radius:6px;background:var(--bg3);margin-bottom:8px}
+.skel-circle{width:36px;height:36px;border-radius:50%;background:var(--bg3);flex-shrink:0}
+
+/* ══ MICRO-ANIMATIONS ══ */
+@keyframes heartPop{0%{transform:scale(1)}30%{transform:scale(1.4)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+@keyframes ripple{0%{transform:scale(0);opacity:.5}100%{transform:scale(2.5);opacity:0}}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}
+@keyframes gentleBounce{0%,100%{transform:scale(1)}40%{transform:scale(1.08)}70%{transform:scale(.96)}}
+.card-enter{animation:cardIn .3s cubic-bezier(.34,1.56,.64,1) both}
+.like-pop{animation:heartPop .35s cubic-bezier(.34,1.56,.64,1)}
+.float-emoji{position:fixed;pointer-events:none;font-size:1.5rem;z-index:999;animation:floatUp 1s ease both}
+.pak{position:relative;overflow:hidden}
+.pak .ripple-el{position:absolute;border-radius:50%;background:rgba(255,255,255,.15);animation:ripple .5s ease both;pointer-events:none}
+
+/* ══ 3AM ROOM ══ */
+.am3-overlay{position:fixed;inset:0;z-index:650;display:none;flex-direction:column;background:#010108;overflow-y:auto}
+.am3-overlay.on{display:flex;animation:fadeIn .5s ease}
+.am3-stars{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.am3-star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--dur,3s) ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.9}}
+.am3-content{position:relative;z-index:1;flex:1;padding:60px 24px 32px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.am3-moon{font-size:3.5rem;margin-bottom:16px;animation:gentleBounce 4s ease-in-out infinite}
+.am3-title{font-family:var(--fD);font-size:1.4rem;font-weight:700;color:rgba(196,168,255,.95);margin-bottom:8px}
+.am3-sub{font-size:.85rem;color:rgba(152,150,184,.7);line-height:1.7;max-width:280px;margin-bottom:28px}
+.am3-prompt-card{background:rgba(123,94,167,.08);border:1px solid rgba(123,94,167,.2);border-radius:18px;padding:20px 22px;margin-bottom:20px;width:100%;max-width:340px;cursor:pointer;transition:border-color .2s}
+.am3-prompt-card:active{transform:scale(.98)}
+.am3-prompt-card p{font-size:.9rem;color:rgba(196,168,255,.85);line-height:1.75;font-style:italic}
+.am3-locked{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:60px 32px;text-align:center}
+.am3-lock-icon{font-size:4rem;margin-bottom:20px}
+.am3-lock-title{font-family:var(--fD);font-size:1.2rem;color:rgba(196,168,255,.7);margin-bottom:10px}
+.am3-lock-sub{font-size:.83rem;color:rgba(152,150,184,.5);line-height:1.75;max-width:260px}
+.am3-timer{font-size:1.5rem;font-family:var(--fM);color:rgba(196,168,255,.9);margin-top:14px}
+
+/* ══ TIME CAPSULE ══ */
+.capsule-page{position:fixed;inset:0;z-index:650;display:none;flex-direction:column;background:var(--bg);overflow-y:auto}
+.capsule-page.on{display:flex;animation:fadeIn .3s ease}
+.capsule-header{padding:20px 18px 10px;display:flex;align-items:center;gap:10px}
+.capsule-list{padding:0 16px 20px}
+.capsule-card{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color .2s}
+.capsule-card:hover{border-color:var(--vb)}
+.capsule-card.locked{opacity:.7}
+.capsule-meta{font-size:.72rem;color:var(--tx3);font-family:var(--fM);margin-bottom:8px}
+.capsule-preview{font-size:.88rem;color:var(--tx2);line-height:1.6}
+.capsule-unlock-date{font-size:.78rem;font-weight:700;color:var(--v3);margin-top:8px}
+.capsule-compose{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:16px;margin:0 16px 14px}
+.capsule-lock-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;font-size:.7rem;font-weight:700;font-family:var(--fD)}
+.capsule-lock-badge.locked{background:rgba(244,162,97,.12);color:var(--go)}
+.capsule-lock-badge.open{background:rgba(0,201,167,.1);color:var(--tl)}
+
+/* ══ SILENT ROOM ══ */
+.silent-room{position:fixed;inset:0;z-index:650;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(3,3,8,.97);backdrop-filter:blur(20px);text-align:center;padding:40px}
+.silent-room.on{display:flex;animation:fadeIn .4s ease}
+.sr-count{font-family:var(--fD);font-size:3.5rem;font-weight:700;color:var(--tx);line-height:1;margin-bottom:4px}
+.sr-count-unit{font-size:.8rem;color:var(--tx3);margin-bottom:28px}
+.sr-breathe{width:80px;height:80px;border-radius:50%;border:1.5px solid rgba(196,168,255,.3);margin:0 auto 28px;animation:breatheCircle 4s ease-in-out infinite}
+@keyframes breatheCircle{0%,100%{transform:scale(.85);border-color:rgba(196,168,255,.2)}50%{transform:scale(1.1);border-color:rgba(196,168,255,.6)}}
+.sr-text{font-size:1rem;color:var(--tx2);line-height:1.8;max-width:260px;margin-bottom:6px}
+.sr-sub{font-size:.78rem;color:var(--tx3);margin-bottom:32px}
+.sr-dots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;max-width:280px;margin-bottom:28px}
+.sr-dot{width:6px;height:6px;border-radius:50%;background:rgba(196,168,255,.3);animation:dotPulse var(--d,2s) ease-in-out infinite}
+@keyframes dotPulse{0%,100%{opacity:.2}50%{opacity:.8}}
+
+/* ══ WHISPER CHAIN ══ */
+.whisper-overlay{position:fixed;inset:0;z-index:650;display:none;flex-direction:column;background:var(--bg);overflow-y:auto}
+.whisper-overlay.on{display:flex;animation:fadeIn .3s ease}
+.whisper-chain-visual{padding:16px}
+.whisper-line-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;animation:cardIn .3s ease both}
+.whisper-avatar{width:32px;height:32px;border-radius:50%;background:var(--vg);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.whisper-line-text{background:var(--bg2);border-radius:0 14px 14px 14px;padding:10px 14px;font-size:.88rem;color:var(--tx2);line-height:1.65;border:1px solid var(--bd);flex:1}
+.whisper-mine{flex-direction:row-reverse}
+.whisper-mine .whisper-line-text{border-radius:14px 0 14px 14px;background:var(--vg);border-color:var(--vb);color:var(--v3)}
+.whisper-waiting{background:rgba(196,168,255,.06);border:1px dashed rgba(196,168,255,.2);border-radius:14px;padding:14px;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.whisper-waiting-text{font-size:.83rem;color:var(--tx3);font-style:italic}
+
+/* ══ GRATITUDE BOMB BUTTON ══ */
+.pak.gratitude-pak{transition:transform .15s}
+.pak.gratitude-pak:active{transform:scale(.88)}
+.gratitude-sent{color:var(--go) !important}
+
+/* ══ PERMISSION TO FEEL CARD ══ */
+.ptf-card{background:linear-gradient(135deg,rgba(123,94,167,.15),rgba(0,201,167,.08));border:1px solid rgba(123,94,167,.25);border-radius:18px;padding:20px 22px;margin:0 14px 12px;cursor:pointer;position:relative;overflow:hidden}
+.ptf-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);font-family:var(--fM);margin-bottom:8px}
+.ptf-text{font-family:var(--fD);font-size:1.1rem;font-weight:700;color:var(--tx);line-height:1.5;margin-bottom:10px}
+.ptf-share{font-size:.75rem;color:var(--v3);font-family:var(--fM)}
+
+/* ══ MEMORY MIRROR ══ */
+.memory-mirror-card{background:rgba(196,168,255,.05);border:1px solid rgba(196,168,255,.15);border-radius:16px;padding:16px;margin:0 14px 12px;cursor:pointer}
+.mm-label{font-size:.7rem;color:var(--tx3);font-family:var(--fM);margin-bottom:8px}
+.mm-text{font-size:.9rem;color:var(--tx2);line-height:1.7;font-style:italic;margin-bottom:6px}
+.mm-cta{font-size:.75rem;color:var(--v3);font-family:var(--fD)}
+
+/* ══ COLLECTIVE RITUAL ══ */
+.ritual-overlay{position:fixed;inset:0;z-index:660;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(3,3,8,.96);text-align:center;padding:40px}
+.ritual-overlay.on{display:flex;animation:fadeIn .5s ease}
+.ritual-timer{font-family:var(--fD);font-size:3rem;font-weight:700;color:var(--purpleL);line-height:1;margin-bottom:8px}
+.ritual-phase{font-size:1.1rem;color:var(--tx2);margin-bottom:24px}
+.ritual-words{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:320px;margin-bottom:24px}
+.ritual-word-pill{padding:5px 12px;border-radius:100px;background:rgba(123,94,167,.15);border:1px solid rgba(123,94,167,.3);font-size:.82rem;color:var(--v3);animation:cardIn .3s ease both}
+
+/* ══ 3AM ROOM NAV BUTTON ══ */
+#nb-am3 .nb-i{position:relative}
+#nb-am3 .am3-live{position:absolute;top:-2px;right:-2px;width:7px;height:7px;border-radius:50%;background:var(--v3);border:1.5px solid var(--bg);display:none}
+.am3-active #nb-am3 .am3-live{display:block}
+
 /* ══ POST SUCCESS SCREEN ══ */
 .post-success{position:fixed;inset:0;z-index:700;background:rgba(3,3,8,.96);display:none;align-items:center;justify-content:center;flex-direction:column;gap:0;padding:32px;text-align:center;animation:fadeIn .3s ease}
 .post-success.on{display:flex}
@@ -1031,6 +1141,20 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     </div>
   </div>
 
+  <!-- PERMISSION TO FEEL CARD -->
+  <div class="ptf-card" id="ptf-card" onclick="sharePTF()" style="display:none">
+    <div class="ptf-label">✨ Today's permission</div>
+    <div class="ptf-text" id="ptf-text">Today it's okay to not have everything figured out.</div>
+    <div class="ptf-share">Tap to share this →</div>
+  </div>
+
+  <!-- MEMORY MIRROR CARD -->
+  <div class="memory-mirror-card" id="memory-mirror-card" style="display:none" onclick="openMemoryMirrorModal()">
+    <div class="mm-label">🪞 One year ago today, you wrote...</div>
+    <div class="mm-text" id="mm-text"></div>
+    <div class="mm-cta">See your emotional journey →</div>
+  </div>
+
   <!-- FEED -->
   <div id="feed-list"></div>
   <div id="load-more" style="padding:14px;text-align:center;display:none"><button class="btn btn-g" onclick="loadMore()">Load more</button></div>
@@ -1281,12 +1405,24 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 
   <!-- Menu tab -->
   <div id="profile-menu" style="display:none;margin:8px 18px 0">
+    <!-- Special Features Section -->
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);font-family:var(--fM);margin-bottom:8px;padding:0 2px">✨ Special Spaces</div>
+    <div class="pmi" style="background:rgba(196,168,255,.06);border:1px solid rgba(196,168,255,.15);border-radius:14px;margin-bottom:6px" onclick="open3amRoom()"><span style="font-size:1.1rem;width:22px">🌙</span><span style="flex:1;font-size:.88rem;font-weight:500;color:var(--v3)">3am Room</span><span style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">11pm–4am only</span></div>
+    <div class="pmi" style="background:rgba(0,201,167,.05);border:1px solid rgba(0,201,167,.15);border-radius:14px;margin-bottom:6px" onclick="openSilentRoom()"><span style="font-size:1.1rem;width:22px">🌊</span><span style="flex:1;font-size:.88rem;font-weight:500;color:var(--tl)">Silent Room</span><span style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">Be alone, together</span></div>
+    <div class="pmi" style="background:rgba(123,94,167,.06);border:1px solid rgba(123,94,167,.15);border-radius:14px;margin-bottom:6px" onclick="openWhisperChain()"><span style="font-size:1.1rem;width:22px">🌀</span><span style="flex:1;font-size:.88rem;font-weight:500;color:var(--v3)">Whisper Chain</span><span style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">5-line anonymous poem</span></div>
+    <div class="pmi" style="background:rgba(244,162,97,.05);border:1px solid rgba(244,162,97,.15);border-radius:14px;margin-bottom:12px" onclick="openCapsule()"><span style="font-size:1.1rem;width:22px">⏳</span><span style="flex:1;font-size:.88rem;font-weight:500;color:var(--go)">Time Capsule</span><span style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">Write to future you</span></div>
+    <!-- Weekly Ritual -->
+    <div class="pmi" style="background:rgba(82,183,136,.05);border:1px solid rgba(82,183,136,.15);border-radius:14px;margin-bottom:12px" onclick="openRitual()"><span style="font-size:1.1rem;width:22px">☁️</span><span style="flex:1;font-size:.88rem;font-weight:500;color:var(--lm)">Collective Breathing</span><span style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">Breathe with India</span></div>
+    <!-- Standard items -->
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);font-family:var(--fM);margin-bottom:8px;padding:0 2px">Your Space</div>
     <div class="pmi" onclick="location.href='/confessions.html'"><span style="font-size:1.1rem;width:22px">🤫</span><span style="flex:1;font-size:.88rem;font-weight:500">My Confessions</span><span style="color:var(--tx3)">›</span></div>
+    <div class="pmi" onclick="profileTab('posts',q('pt-posts'))"><span style="font-size:1.1rem;width:22px">📖</span><span style="flex:1;font-size:.88rem;font-weight:500">My Diary</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="location.href='/badges.html'"><span style="font-size:1.1rem;width:22px">🏅</span><span style="flex:1;font-size:.88rem;font-weight:500">Badges & Rewards</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="showLeaderboard()"><span style="font-size:1.1rem;width:22px">🏆</span><span style="flex:1;font-size:.88rem;font-weight:500">Weekly Leaderboard</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="shareInvite()"><span style="font-size:1.1rem;width:22px">🎁</span><span style="flex:1;font-size:.88rem;font-weight:500">Invite Friends — earn 50 XP</span><span style="color:var(--v3)">Share</span></div>
     <div class="pmi" onclick="location.href='/security.html'"><span style="font-size:1.1rem;width:22px">🔒</span><span style="flex:1;font-size:.88rem;font-weight:500">Security & Privacy</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="doLogout()" style="color:var(--cr)"><span style="font-size:1.1rem;width:22px">🚪</span><span style="flex:1;font-size:.88rem;font-weight:500">Log Out</span></div>
+    <div id="capsule-confetti-anchor" style="height:1px"></div>
   </div>
 </div>
 <!-- LEADERBOARD MODAL -->
@@ -1320,6 +1456,33 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <div class="tb">
     <div class="tb-title">🔍 Explore</div>
     <button class="ico-btn" onclick="openSearch()">🔎</button>
+  </div>
+  <!-- Special Spaces Row -->
+  <div style="padding:12px 14px 0;display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+    <div onclick="open3amRoom()" style="flex:0 0 auto;padding:11px 14px;background:rgba(196,168,255,.07);border:1px solid rgba(196,168,255,.18);border-radius:13px;cursor:pointer;min-width:110px;text-align:center">
+      <div style="font-size:1.4rem;margin-bottom:4px">🌙</div>
+      <div style="font-size:.72rem;font-weight:700;color:var(--v3);font-family:var(--fD)">3am Room</div>
+    </div>
+    <div onclick="openSilentRoom()" style="flex:0 0 auto;padding:11px 14px;background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.16);border-radius:13px;cursor:pointer;min-width:110px;text-align:center">
+      <div style="font-size:1.4rem;margin-bottom:4px">🌊</div>
+      <div style="font-size:.72rem;font-weight:700;color:var(--tl);font-family:var(--fD)">Silent Room</div>
+    </div>
+    <div onclick="openWhisperChain()" style="flex:0 0 auto;padding:11px 14px;background:rgba(123,94,167,.07);border:1px solid rgba(123,94,167,.18);border-radius:13px;cursor:pointer;min-width:110px;text-align:center">
+      <div style="font-size:1.4rem;margin-bottom:4px">🌀</div>
+      <div style="font-size:.72rem;font-weight:700;color:var(--v3);font-family:var(--fD)">Whisper</div>
+    </div>
+    <div onclick="openCapsule()" style="flex:0 0 auto;padding:11px 14px;background:rgba(244,162,97,.06);border:1px solid rgba(244,162,97,.18);border-radius:13px;cursor:pointer;min-width:110px;text-align:center">
+      <div style="font-size:1.4rem;margin-bottom:4px">⏳</div>
+      <div style="font-size:.72rem;font-weight:700;color:var(--go);font-family:var(--fD)">Time Capsule</div>
+    </div>
+    <div onclick="openRitual()" style="flex:0 0 auto;padding:11px 14px;background:rgba(82,183,136,.06);border:1px solid rgba(82,183,136,.16);border-radius:13px;cursor:pointer;min-width:110px;text-align:center">
+      <div style="font-size:1.4rem;margin-bottom:4px">☁️</div>
+      <div style="font-size:.72rem;font-weight:700;color:var(--lm);font-family:var(--fD)">Breathe</div>
+    </div>
+    <div onclick="goPage('connect')" style="flex:0 0 auto;padding:11px 14px;background:rgba(92,232,255,.06);border:1px solid rgba(92,232,255,.16);border-radius:13px;cursor:pointer;min-width:110px;text-align:center">
+      <div style="font-size:1.4rem;margin-bottom:4px">⚡</div>
+      <div style="font-size:.72rem;font-weight:700;color:rgba(92,232,255,.9);font-family:var(--fD)">Random Chat</div>
+    </div>
   </div>
   <div id="explore-content" style="overflow-y:auto;flex:1;padding-top:8px">
     <div style="padding:24px;text-align:center"><div class="spin"></div></div>
@@ -1366,13 +1529,116 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <button class="btn btn-v" style="padding:13px 36px;margin-top:24px" onclick="closeReactionMoment()">That means a lot</button>
 </div>
 
+<!-- ═══ 3AM ROOM OVERLAY ═══ -->
+<div class="am3-overlay" id="am3-overlay">
+  <div class="am3-stars" id="am3-stars"></div>
+  <div class="tb" style="position:relative;z-index:2;background:transparent;border-bottom:1px solid rgba(123,94,167,.15)">
+    <div class="tb-title" style="color:rgba(196,168,255,.9)">🌙 3am Room</div>
+    <button class="ico-btn" onclick="close3amRoom()" style="color:rgba(196,168,255,.6)">✕</button>
+  </div>
+  <!-- Locked state (shown during day) -->
+  <div class="am3-locked" id="am3-locked">
+    <div class="am3-lock-icon">🔒</div>
+    <div class="am3-lock-title">This room only opens at night</div>
+    <div class="am3-lock-sub">The 3am Room exists between 11pm and 4am. Come back when the house is quiet and you have something real to say.</div>
+    <div class="am3-timer" id="am3-countdown"></div>
+    <button class="btn btn-g btn-sm" style="margin-top:24px" onclick="close3amRoom()">Come back tonight</button>
+  </div>
+  <!-- Open state (11pm–4am) -->
+  <div class="am3-content" id="am3-open" style="display:none">
+    <div class="am3-moon">🌙</div>
+    <div class="am3-title">You made it to the 3am Room</div>
+    <div class="am3-sub">This is the only place where 3am thoughts belong. No judgment. No performance. Just what you're actually carrying tonight.</div>
+    <!-- Tonight's prompt -->
+    <div class="am3-prompt-card" onclick="openCompose('confession');close3amRoom();setTimeout(()=>{const t=q('ctxt');if(t){t.placeholder=am3CurrentPrompt;t.focus();}},300)">
+      <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(196,168,255,.5);margin-bottom:8px;font-family:var(--fM)">Tonight's question</div>
+      <p id="am3-prompt-text">What thought have you been pushing away since yesterday?</p>
+    </div>
+    <!-- Post count tonight -->
+    <div style="font-size:.78rem;color:rgba(152,150,184,.5);margin-bottom:24px" id="am3-count-tonight">Loading what others are saying tonight...</div>
+    <!-- Feed of tonight's posts -->
+    <div id="am3-feed" style="width:100%;max-width:400px"></div>
+    <button class="btn btn-v" style="padding:12px 28px;margin-top:4px" onclick="openCompose('confession');close3amRoom()">✍️ Say something real</button>
+    <button class="ps-close" style="margin-top:12px" onclick="close3amRoom()">Leave quietly</button>
+  </div>
+</div>
+
+<!-- ═══ TIME CAPSULE OVERLAY ═══ -->
+<div class="capsule-page" id="capsule-page">
+  <div class="capsule-header">
+    <button class="ico-btn" onclick="closeCapsule()">←</button>
+    <div class="tb-title">⏳ Time Capsule</div>
+  </div>
+  <!-- Write new capsule -->
+  <div class="capsule-compose">
+    <div style="font-size:.8rem;color:var(--tx3);margin-bottom:10px;font-family:var(--fM)">Write to your future self. Sealed. Private. Delivered when it's time.</div>
+    <textarea id="capsule-text" maxlength="800" rows="4" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:12px;color:var(--tx);font-size:.88rem;resize:none;line-height:1.6" placeholder="Dear future me... Right now I feel..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:120px">
+        <select id="capsule-duration" style="width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;color:var(--tx);font-size:.83rem">
+          <option value="30">Unlock in 30 days</option>
+          <option value="90">Unlock in 3 months</option>
+          <option value="180">Unlock in 6 months</option>
+          <option value="365" selected>Unlock in 1 year</option>
+        </select>
+      </div>
+      <button class="btn btn-v btn-sm" style="flex-shrink:0" onclick="saveCapsule()">Seal it ⏳</button>
+    </div>
+  </div>
+  <!-- Capsule list -->
+  <div class="capsule-list" id="capsule-list">
+    <div style="text-align:center;padding:20px;color:var(--tx3);font-size:.83rem">Your capsules will appear here</div>
+  </div>
+</div>
+
+<!-- ═══ SILENT ROOM OVERLAY ═══ -->
+<div class="silent-room" id="silent-room">
+  <div class="sr-breathe" id="sr-breathe"></div>
+  <div class="sr-count" id="sr-count">...</div>
+  <div class="sr-count-unit">people are being silent with you</div>
+  <div class="sr-dots" id="sr-dots"></div>
+  <div class="sr-text">No one is talking. No one needs to.</div>
+  <div class="sr-sub">Sometimes being heard just means being here.</div>
+  <button class="btn btn-g btn-sm" onclick="closeSilentRoom()">Leave quietly</button>
+</div>
+
+<!-- ═══ WHISPER CHAIN OVERLAY ═══ -->
+<div class="whisper-overlay" id="whisper-overlay">
+  <div class="tb">
+    <button class="ico-btn" onclick="closeWhisperChain()">←</button>
+    <div class="tb-title">🌀 Whisper Chain</div>
+    <button class="btn btn-v btn-sm" onclick="startNewChain()">+ Start</button>
+  </div>
+  <div style="padding:12px 16px 0;font-size:.8rem;color:var(--tx3);line-height:1.7">
+    Write one line. It passes to strangers. Each adds a line. A 5-line poem is born.
+  </div>
+  <div id="whisper-list" style="flex:1;overflow-y:auto;padding:12px 16px 80px">
+    <div style="text-align:center;padding:40px 20px;color:var(--tx3);font-size:.85rem">Loading chains...</div>
+  </div>
+</div>
+
+<!-- ═══ COLLECTIVE RITUAL OVERLAY ═══ -->
+<div class="ritual-overlay" id="ritual-overlay">
+  <div style="font-size:2.5rem;margin-bottom:16px">🌊</div>
+  <div style="font-family:var(--fD);font-weight:700;font-size:1.3rem;color:var(--tx);margin-bottom:8px">Collective Breathing</div>
+  <div style="font-size:.85rem;color:var(--tx2);margin-bottom:24px;line-height:1.7;max-width:260px" id="ritual-instruction">Take a breath with everyone who is here right now.</div>
+  <div class="ritual-timer" id="ritual-timer"></div>
+  <div class="ritual-phase" id="ritual-phase">Breathe in...</div>
+  <div id="ritual-input-area" style="display:none;width:100%;max-width:320px;margin-bottom:16px">
+    <input id="ritual-word-input" maxlength="30" placeholder="One word you're releasing..." style="width:100%;background:rgba(123,94,167,.1);border:1px solid rgba(123,94,167,.3);border-radius:100px;padding:12px 18px;color:var(--tx);font-size:.9rem;text-align:center">
+    <button class="btn btn-v btn-full" style="margin-top:10px;padding:12px" onclick="submitRitualWord()">Release it 🌊</button>
+  </div>
+  <div class="ritual-words" id="ritual-words"></div>
+  <button class="ps-close" onclick="closeRitual()">Leave</button>
+</div>
+
 </div><!-- /pages -->
 
 <nav id="nav">
   <button class="nb on" id="nb-feed" onclick="goPage('feed')"><span class="nb-i">🏠</span><span>Feed</span></button>
   <button class="nb" id="nb-explore" onclick="goPage('explore')"><span class="nb-i">🔍</span><span>Explore</span></button>
   <button class="nb" onclick="openCompose('post')"><div class="nb-fab">✏️</div></button>
-  <button class="nb" id="nb-connect" onclick="goPage('connect')"><span class="nb-i">⚡</span><span>Connect</span></button>
+  <button class="nb" id="nb-am3" onclick="open3amRoom()"><span class="nb-i">🌙<span class="am3-live"></span></span><span>3am</span></button>
   <button class="nb" id="nb-profile" onclick="goPage('profile')"><span class="nb-i">🎭</span><span>Me</span></button>
 </nav>
 </div>
@@ -1735,6 +2001,7 @@ function renderPost(p){
       <div class="pak ${isSaved?'saved':''}" onclick="doSave('${p._id}',this)" id="sv-${p._id}">
         <span style="opacity:${isSaved?1:.5}">🔖</span>
       </div>
+      ${!isOwn?`<div class="pak gratitude-pak" onclick="sendGratitudeBomb('${p._id}',this)" id="gb-${p._id}" title="Send anonymous gratitude">🌟</div>`:''}
       <div style="flex:1"></div>
       <div class="pak" onclick="openShareSheet('${p._id}','${esc((p.caption||'').substring(0,60))}')">🔗</div>
     </div>
@@ -1995,6 +2262,7 @@ const REACTION_MOMENTS={
   strength: {e:'🔥', t:'Your post gave someone strength',       s:'Someone needed exactly this today. And you gave it to them.'},
   hug:      {e:'🫂', t:'Someone sent you a hug',               s:'A stranger, across a city, is rooting for you.'},
   love:     {e:'🌊', t:'Someone loved your post',               s:'This one hit differently for them. Your words stayed.'},
+  gratitude:{e:'💛', t:'Someone sent you a gratitude bomb',    s:'Your words mattered to a stranger today. They wanted you to know.'},
 };
 
 let reactionMomentTimer=null;
@@ -3172,6 +3440,18 @@ function initSocket(){
     showGratitudeNotif(msg);
     addNotification('gift',msg,null);
   });
+
+  // Gratitude bomb received — fullscreen reaction moment
+  socket.on('gratitude-bomb-received',(d)=>{
+    showReactionMoment('gratitude');
+    haptic('celebration');
+  });
+
+  // Silent room live count
+  socket.on('silent-room-count',(d)=>{
+    const cnt=q('sr-count');
+    if(cnt&&d.count)cnt.textContent=d.count.toLocaleString('en-IN');
+  });
 }
 
 /* ═══════════ LOCATION ═══════════ */
@@ -3497,6 +3777,497 @@ function switchFeedTab(tab,el){
 /* ═══════════════════════════════════════════════
    SKELETON LOADERS
 ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   HAPTIC FEEDBACK — makes the app feel alive
+═══════════════════════════════════════════════════ */
+function haptic(type='light'){
+  try{
+    if(!navigator.vibrate)return;
+    if(type==='light')navigator.vibrate(10);
+    else if(type==='medium')navigator.vibrate(25);
+    else if(type==='success')navigator.vibrate([10,50,10]);
+    else if(type==='celebration')navigator.vibrate([10,30,10,30,60]);
+  }catch(_){}
+}
+
+/* ═══════════════════════════════════════════════════
+   MICRO-ANIMATIONS — ripple + float emoji
+═══════════════════════════════════════════════════ */
+function addRipple(btn,e){
+  const r=document.createElement('span');
+  r.className='ripple-el';
+  const rect=btn.getBoundingClientRect();
+  const size=Math.max(rect.width,rect.height)*1.5;
+  r.style.cssText=`width:${size}px;height:${size}px;top:${(e?.clientY??rect.top)-rect.top-size/2}px;left:${(e?.clientX??rect.left)-rect.left-size/2}px`;
+  btn.appendChild(r);
+  setTimeout(()=>r.remove(),500);
+}
+function floatEmoji(emoji,x,y){
+  const el=document.createElement('div');
+  el.className='float-emoji';
+  el.textContent=emoji;
+  el.style.cssText=`left:${x}px;top:${y}px`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1000);
+}
+// Wire haptic + ripple to all .pak buttons
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.pak');
+  if(btn){haptic('light');addRipple(btn,e);}
+  const nb=e.target.closest('.nb');
+  if(nb&&!nb.querySelector('.nb-fab'))haptic('light');
+});
+
+/* ═══════════════════════════════════════════════════
+   PERMISSION TO FEEL — daily AI validation card
+═══════════════════════════════════════════════════ */
+const PTF_MESSAGES=[
+  "Today it's okay to be exhausted.",
+  "Today it's okay to not have everything figured out.",
+  "Today it's okay to feel two things at once.",
+  "Today it's okay to miss someone who hurt you.",
+  "Today it's okay to be proud of something small.",
+  "Today it's okay to need more rest.",
+  "Today it's okay to not explain yourself.",
+  "Today it's okay to feel lonely even when you're not alone.",
+  "Today it's okay to be scared of the future.",
+  "Today it's okay to be okay — not everything has to be deep.",
+  "Today it's okay to still be healing from something old.",
+  "Today it's okay to want more for yourself.",
+  "Today it's okay to feel angry without knowing why.",
+  "Today it's okay to be a work in progress.",
+  "Today it's okay to ask for help.",
+  "Today it's okay to set the thing down for a minute.",
+  "Today it's okay to feel proud of simply showing up.",
+  "Today it's okay to be uncertain — certainty isn't always honesty.",
+  "Today it's okay to cry without a reason.",
+  "Today it's okay to want silence.",
+  "Today it's okay to outgrow people you once loved.",
+  "Today it's okay to feel joy, even when things are hard.",
+  "Today it's okay to miss who you used to be.",
+  "Today it's okay to disagree with everyone in the room.",
+  "Today it's okay to be soft.",
+  "Today it's okay to not be 'fine'.",
+  "Today it's okay to take up space.",
+  "Today it's okay to start over.",
+  "Today it's okay to not be productive.",
+  "Today it's okay to feel something that doesn't have a name.",
+];
+
+function showPermissionToFeel(){
+  const el=q('ptf-card');
+  if(!el)return;
+  const day=Math.floor(Date.now()/86400000);
+  const msg=PTF_MESSAGES[day%PTF_MESSAGES.length];
+  const ptfEl=q('ptf-text');
+  if(ptfEl)ptfEl.textContent=msg;
+  el.style.display='block';
+}
+
+function sharePTF(){
+  const msg=q('ptf-text')?.textContent||'Today it\'s okay.';
+  const text=`${msg}\n\n— annomuss.in`;
+  if(navigator.share){
+    navigator.share({text,title:'annomuss — permission to feel'}).catch(()=>{});
+  } else {
+    navigator.clipboard?.writeText(text);
+    toast('✨ Copied to clipboard!');
+  }
+  haptic('medium');
+  floatEmoji('✨',window.innerWidth/2,window.innerHeight/2);
+}
+
+/* ═══════════════════════════════════════════════════
+   MEMORY MIRROR — what you wrote one year ago
+═══════════════════════════════════════════════════ */
+function checkMemoryMirror(){
+  try{
+    const today=new Date();
+    const yearAgo=new Date(today);yearAgo.setFullYear(today.getFullYear()-1);
+    const key=yearAgo.toDateString();
+    // Check diary entries from a year ago
+    const diaries=JSON.parse(localStorage.getItem('ann_diary')||'[]');
+    const yearAgoEntry=diaries.find(d=>{
+      const entryDate=new Date(d.ts);
+      return entryDate.toDateString()===key;
+    });
+    if(yearAgoEntry&&yearAgoEntry.text){
+      const el=q('memory-mirror-card');
+      const txt=q('mm-text');
+      if(el&&txt){
+        txt.textContent='"'+(yearAgoEntry.text||'').substring(0,120)+(yearAgoEntry.text.length>120?'...':`"`);
+        el.style.display='block';
+      }
+    }
+  }catch(_){}
+}
+
+function openMemoryMirrorModal(){
+  // Show all diary entries in a timeline view inside profile
+  goPage('profile');
+  setTimeout(()=>profileTab('menu',q('pt-menu')),200);
+  haptic('medium');
+  toast('🪞 Your emotional timeline');
+}
+
+/* ═══════════════════════════════════════════════════
+   GRATITUDE BOMB — anonymous one-tap kindness
+═══════════════════════════════════════════════════ */
+const GB_MESSAGES=[
+  'Today, something you wrote mattered to someone.',
+  'A stranger just said your words made them feel less alone.',
+  'Someone read your post and felt understood for the first time today.',
+  'Your honesty gave someone else permission to feel what they feel.',
+  'Something you wrote touched a person you\'ll never meet.',
+  'Someone out there is grateful you said what you said.',
+];
+async function sendGratitudeBomb(postId,btn){
+  if(!postId||!btn)return;
+  if(btn.classList.contains('gratitude-sent'))return;
+  btn.classList.add('gratitude-sent');
+  btn.querySelector?.(null);
+  btn.textContent='💛';
+  haptic('success');
+  floatEmoji('💛',btn.getBoundingClientRect().left,btn.getBoundingClientRect().top);
+  toast('💛 Gratitude sent anonymously');
+  // Emit via socket
+  if(socket?.connected){
+    const msg=GB_MESSAGES[Math.floor(Math.random()*GB_MESSAGES.length)];
+    socket.emit('gratitude-bomb',{postId,message:msg});
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   3AM ROOM — time-locked emotional space
+═══════════════════════════════════════════════════ */
+const AM3_PROMPTS=[
+  'What thought have you been pushing away since yesterday?',
+  'What are you actually feeling right now, underneath everything?',
+  'What did you pretend was okay today that wasn\'t?',
+  'What do you wish someone would say to you right now?',
+  'What are you carrying that nobody knows about?',
+  'What would you say if you knew nobody would judge you?',
+  'What\'s keeping you from sleeping?',
+  'What conversation do you wish you could have tonight?',
+  'What do you need to let go of but can\'t?',
+  'Who do you miss most right now?',
+];
+let am3CurrentPrompt='';
+
+function open3amRoom(){
+  const overlay=q('am3-overlay');
+  if(!overlay)return;
+  overlay.classList.add('on');
+  generate3amStars();
+  const h=new Date().getHours();
+  const isOpen=h>=23||h<=4;
+  if(isOpen){
+    q('am3-locked').style.display='none';
+    q('am3-open').style.display='flex';
+    const day=Math.floor(Date.now()/86400000);
+    am3CurrentPrompt=AM3_PROMPTS[day%AM3_PROMPTS.length];
+    const pt=q('am3-prompt-text');if(pt)pt.textContent=am3CurrentPrompt;
+    load3amFeed();
+    document.body.classList.add('am3-active');
+  } else {
+    q('am3-locked').style.display='flex';
+    q('am3-open').style.display='none';
+    update3amCountdown();
+    const timer=setInterval(()=>{
+      update3amCountdown();
+      const hh=new Date().getHours();
+      if(hh>=23||hh<=4)clearInterval(timer);
+    },60000);
+  }
+  haptic('medium');
+}
+function close3amRoom(){
+  q('am3-overlay')?.classList.remove('on');
+  document.body.classList.remove('am3-active');
+}
+function generate3amStars(){
+  const c=q('am3-stars');if(!c)return;c.innerHTML='';
+  for(let i=0;i<80;i++){
+    const s=document.createElement('div');
+    s.className='am3-star';
+    const size=Math.random()*2.5+0.5;
+    s.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;animation-delay:${Math.random()*3}s`;
+    c.appendChild(s);
+  }
+}
+function update3amCountdown(){
+  const el=q('am3-countdown');if(!el)return;
+  const now=new Date();
+  const target=new Date();
+  target.setHours(23,0,0,0);
+  if(now.getHours()>=23)target.setDate(target.getDate()+1);
+  const diff=target-now;
+  const h=Math.floor(diff/3600000);
+  const m=Math.floor((diff%3600000)/60000);
+  el.textContent=`Opens in ${h}h ${m}m`;
+}
+async function load3amFeed(){
+  const el=q('am3-feed');if(!el)return;
+  const cnt=q('am3-count-tonight');
+  try{
+    const r=await api('/api/posts/midnight?limit=5');
+    const d=await r.json();
+    const posts=Array.isArray(d)?d:(d.posts||[]);
+    if(cnt)cnt.textContent=posts.length>0?`${posts.length} people have spoken tonight`:'Be the first to speak tonight';
+    if(!posts.length){el.innerHTML='<div style="color:rgba(196,168,255,.4);font-size:.82rem;padding:8px">Just you and the stars so far.</div>';return;}
+    el.innerHTML=posts.slice(0,4).map(p=>`
+      <div style="background:rgba(123,94,167,.07);border:1px solid rgba(123,94,167,.15);border-radius:14px;padding:14px;margin-bottom:8px;width:100%;max-width:360px;cursor:pointer" onclick="openPModal('${p._id}')">
+        <div style="font-size:.78rem;color:rgba(196,168,255,.5);margin-bottom:6px">${p.authorEmoji||'🎭'} ${p.authorName||'Anonymous'}</div>
+        <div style="font-size:.9rem;color:rgba(196,168,255,.8);line-height:1.65">${esc((p.caption||'').substring(0,100))}${p.caption?.length>100?'...':''}</div>
+      </div>`).join('');
+  }catch(_){if(cnt)cnt.textContent='Something real is happening tonight';}
+}
+
+/* ═══════════════════════════════════════════════════
+   TIME CAPSULE — write to your future self
+═══════════════════════════════════════════════════ */
+function openCapsule(){
+  q('capsule-page')?.classList.add('on');
+  loadCapsules();
+  haptic('medium');
+}
+function closeCapsule(){
+  q('capsule-page')?.classList.remove('on');
+}
+function saveCapsule(){
+  const text=q('capsule-text')?.value?.trim();
+  if(!text||text.length<10){toast('Write at least a few sentences...');return;}
+  const days=parseInt(q('capsule-duration')?.value||365);
+  const unlockDate=Date.now()+days*86400000;
+  const capsules=JSON.parse(localStorage.getItem('ann_capsules')||'[]');
+  capsules.unshift({id:'c'+Date.now(),text,unlockDate,createdAt:Date.now(),days});
+  localStorage.setItem('ann_capsules',JSON.stringify(capsules.slice(0,20)));
+  if(q('capsule-text'))q('capsule-text').value='';
+  loadCapsules();
+  haptic('celebration');
+  launchConfetti('capsule-confetti-anchor');
+  toast('⏳ Capsule sealed. See you in '+days+' days.');
+}
+function loadCapsules(){
+  const el=q('capsule-list');if(!el)return;
+  const capsules=JSON.parse(localStorage.getItem('ann_capsules')||'[]');
+  if(!capsules.length){
+    el.innerHTML='<div style="text-align:center;padding:32px 20px;color:var(--tx3);font-size:.83rem;line-height:1.75">No capsules yet.<br>Write your first letter to future you.</div>';
+    return;
+  }
+  const now=Date.now();
+  el.innerHTML=capsules.map(c=>{
+    const isOpen=now>=c.unlockDate;
+    const unlockStr=isOpen?'Ready to open!':
+      `Opens ${new Date(c.unlockDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}`;
+    const preview=isOpen?(c.text||'').substring(0,120):'🔒 Sealed until unlocked';
+    return `<div class="capsule-card ${isOpen?'':'locked'}" onclick="${isOpen?`openCapsuleReading('${c.id}')`:'toast(\"Not yet — come back on \"+new Date('+c.unlockDate+').toLocaleDateString(\"en-IN\"))'}">
+      <div class="capsule-meta">${new Date(c.createdAt).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+      <div class="capsule-preview">${esc(preview)}${isOpen&&c.text?.length>120?'...':''}</div>
+      <div class="capsule-unlock-date">${isOpen?'💌 Tap to read':'⏳ '+unlockStr}</div>
+    </div>`;
+  }).join('');
+}
+function openCapsuleReading(id){
+  const capsules=JSON.parse(localStorage.getItem('ann_capsules')||'[]');
+  const c=capsules.find(x=>x.id===id);if(!c)return;
+  // Show in a modal-style full screen
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:800;background:var(--bg);display:flex;flex-direction:column;overflow-y:auto;animation:fadeIn .3s ease';
+  overlay.innerHTML=`
+    <div style="padding:20px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)">
+      <button onclick="this.closest('[style]').remove()" style="background:none;border:none;color:var(--tx3);font-size:1.2rem;cursor:pointer;padding:4px">←</button>
+      <div style="font-family:var(--fD);font-weight:700;color:var(--tx)">💌 A letter from past you</div>
+    </div>
+    <div style="padding:24px 20px">
+      <div style="font-size:.78rem;color:var(--tx3);margin-bottom:8px;font-family:var(--fM)">Written on ${new Date(c.createdAt).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+      <div style="font-size:.95rem;color:var(--tx2);line-height:1.85;white-space:pre-wrap;font-style:italic">"${esc(c.text)}"</div>
+      <div style="margin-top:28px;padding:16px;background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.15);border-radius:14px">
+        <div style="font-size:.8rem;color:var(--tl);margin-bottom:4px;font-family:var(--fD)">Look how far you've come.</div>
+        <div style="font-size:.82rem;color:var(--tx3);line-height:1.7">You wrote this ${c.days} days ago. That person was doing their best. This person is too.</div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  haptic('celebration');
+}
+
+/* ═══════════════════════════════════════════════════
+   SILENT ROOM — togetherness without words
+═══════════════════════════════════════════════════ */
+let silentRoomTimer=null;
+function openSilentRoom(){
+  const overlay=q('silent-room');if(!overlay)return;
+  overlay.classList.add('on');
+  haptic('medium');
+  // Fake a realistic number (live count would come from server)
+  const baseCount=180+Math.floor(Math.random()*400);
+  const cnt=q('sr-count');if(cnt)cnt.textContent=baseCount.toLocaleString('en-IN');
+  generateSilentDots();
+  // Slowly increment count
+  silentRoomTimer=setInterval(()=>{
+    if(cnt){
+      const cur=parseInt(cnt.textContent.replace(/,/g,''))||baseCount;
+      const delta=Math.floor(Math.random()*5)-1;
+      cnt.textContent=Math.max(10,cur+delta).toLocaleString('en-IN');
+    }
+  },8000);
+  // Notify server we're here
+  socket?.emit?.('join-silent-room');
+}
+function closeSilentRoom(){
+  q('silent-room')?.classList.remove('on');
+  clearInterval(silentRoomTimer);
+  socket?.emit?.('leave-silent-room');
+}
+function generateSilentDots(){
+  const c=q('sr-dots');if(!c)return;c.innerHTML='';
+  for(let i=0;i<24;i++){
+    const d=document.createElement('div');
+    d.className='sr-dot';
+    d.style.cssText=`--d:${2+Math.random()*4}s;animation-delay:${Math.random()*3}s;opacity:${.1+Math.random()*.5}`;
+    c.appendChild(d);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   WHISPER CHAIN — collaborative anonymous storytelling
+═══════════════════════════════════════════════════ */
+function openWhisperChain(){
+  q('whisper-overlay')?.classList.add('on');
+  loadWhisperChains();
+  haptic('medium');
+}
+function closeWhisperChain(){q('whisper-overlay')?.classList.remove('on');}
+
+async function loadWhisperChains(){
+  const el=q('whisper-list');if(!el)return;
+  // Use localStorage for whisper chains (can be server-synced later)
+  const chains=JSON.parse(localStorage.getItem('ann_whisper_chains')||'[]');
+  // Add some seed chains if none
+  if(!chains.length){
+    const seeds=[
+      {id:'seed1',lines:[{text:'I thought growing up would feel different.',author:'🌙',mine:false},{text:'Like there\'d be a moment where everything made sense.',author:'🎭',mine:false}],complete:false,waiting:true},
+      {id:'seed2',lines:[{text:'The hardest part isn\'t the thing itself.',author:'🌊',mine:false},{text:'It\'s pretending it doesn\'t exist.',author:'⭐',mine:false},{text:'And then someone sees through you.',author:'🎭',mine:false}],complete:false,waiting:true},
+    ];
+    renderWhisperChains([...seeds,...chains]);
+    return;
+  }
+  renderWhisperChains(chains);
+}
+
+function renderWhisperChains(chains){
+  const el=q('whisper-list');if(!el)return;
+  if(!chains.length){
+    el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--tx3);font-size:.85rem;line-height:1.8">No chains yet.<br>Start a new one — write one honest line.</div>';
+    return;
+  }
+  el.innerHTML=chains.map(c=>`
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:18px;padding:16px;margin-bottom:12px">
+      <div style="font-size:.7rem;color:var(--tx3);font-family:var(--fM);margin-bottom:12px">🌀 ${c.lines.length}/5 lines</div>
+      ${c.lines.map((l,i)=>`
+        <div class="whisper-line-item ${l.mine?'whisper-mine':''}" style="animation-delay:${i*.1}s">
+          <div class="whisper-avatar">${l.author}</div>
+          <div class="whisper-line-text">${esc(l.text)}</div>
+        </div>`).join('')}
+      ${c.waiting&&c.lines.length<5?`
+        <div class="whisper-waiting">
+          <div style="font-size:1.2rem">✍️</div>
+          <div class="whisper-waiting-text">Waiting for the next person...</div>
+        </div>
+        <button class="btn btn-v btn-sm btn-full" style="margin-top:4px" onclick="addWhisperLine('${c.id}')">Add your line +</button>
+      `:''}
+      ${c.lines.length>=5?`<div style="text-align:center;padding-top:8px;font-size:.8rem;color:var(--tl)">✨ Chain complete</div>`:''}
+    </div>`).join('');
+}
+
+function startNewChain(){
+  const text=prompt('Write the first line of your whisper chain:');
+  if(!text?.trim())return;
+  const chains=JSON.parse(localStorage.getItem('ann_whisper_chains')||'[]');
+  chains.unshift({id:'w'+Date.now(),lines:[{text:text.trim(),author:user?.avatarEmoji||'🎭',mine:true}],complete:false,waiting:true,createdAt:Date.now()});
+  localStorage.setItem('ann_whisper_chains',JSON.stringify(chains.slice(0,20)));
+  loadWhisperChains();
+  haptic('success');
+  toast('🌀 Chain started! Passing to strangers...');
+}
+
+function addWhisperLine(chainId){
+  const text=prompt('Add your line to the chain:');
+  if(!text?.trim())return;
+  const chains=JSON.parse(localStorage.getItem('ann_whisper_chains')||'[]');
+  const idx=chains.findIndex(c=>c.id===chainId);
+  if(idx>=0&&chains[idx].lines.length<5){
+    chains[idx].lines.push({text:text.trim(),author:user?.avatarEmoji||'🎭',mine:true});
+    if(chains[idx].lines.length>=5)chains[idx].complete=true;
+    localStorage.setItem('ann_whisper_chains',JSON.stringify(chains));
+    loadWhisperChains();
+    haptic('success');
+    toast(chains[idx].complete?'✨ Chain complete! Beautiful.':'🌀 Line added!');
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   COLLECTIVE RITUAL — Sunday 9pm breathing
+═══════════════════════════════════════════════════ */
+let ritualInterval=null;
+let ritualPhase=0;
+const RITUAL_PHASES=['Breathe in...','Hold...','Breathe out...','Release...'];
+const RITUAL_DURATIONS=[4000,2000,6000,3000];
+
+function openRitual(){
+  const overlay=q('ritual-overlay');if(!overlay)return;
+  overlay.classList.add('on');
+  haptic('medium');
+  runRitualBreath();
+  loadRitualWords();
+}
+function closeRitual(){
+  q('ritual-overlay')?.classList.remove('on');
+  clearTimeout(ritualInterval);
+  ritualPhase=0;
+}
+function runRitualBreath(){
+  const phase=q('ritual-phase');
+  if(!phase)return;
+  const p=ritualPhase%RITUAL_PHASES.length;
+  phase.textContent=RITUAL_PHASES[p];
+  ritualInterval=setTimeout(()=>{
+    ritualPhase++;
+    runRitualBreath();
+  },RITUAL_DURATIONS[p]);
+}
+function loadRitualWords(){
+  // Show previous release words from localStorage
+  const words=JSON.parse(localStorage.getItem('ann_ritual_words')||'[]');
+  const el=q('ritual-words');if(!el)return;
+  const displayWords=[...words,...['tired','hope','fear','love','enough','okay','lost','found','breathe','here']].slice(0,20);
+  el.innerHTML=displayWords.map((w,i)=>`<div class="ritual-word-pill" style="animation-delay:${i*.05}s">${esc(w)}</div>`).join('');
+  q('ritual-input-area').style.display='block';
+}
+function submitRitualWord(){
+  const inp=q('ritual-word-input');
+  const word=inp?.value?.trim();
+  if(!word)return;
+  const words=JSON.parse(localStorage.getItem('ann_ritual_words')||'[]');
+  words.unshift(word);
+  localStorage.setItem('ann_ritual_words',JSON.stringify(words.slice(0,50)));
+  // Add to display
+  const el=q('ritual-words');
+  if(el){
+    const pill=document.createElement('div');
+    pill.className='ritual-word-pill';
+    pill.textContent=word;
+    el.insertBefore(pill,el.firstChild);
+  }
+  inp.value='';
+  haptic('success');
+  floatEmoji('🌊',window.innerWidth/2,window.innerHeight*0.5);
+  toast('🌊 Released');
+}
+
+/* ═══════════════════════════════════════════════════
+   PROFILE MENU — add all special features
+═══════════════════════════════════════════════════ */
 function showSkeletons(count=3){
   const el=q('feed-list');
   el.innerHTML=Array.from({length:count},()=>`
@@ -4391,6 +5162,28 @@ async function main(){
   showDailyPrompt();
   checkReferral();
 
+  // ── NEW EXTRAORDINARY FEATURES ──
+  // Permission to Feel — show after 1s so feed loads first
+  setTimeout(showPermissionToFeel, 1200);
+
+  // Memory Mirror — check if we have diary entries from a year ago
+  setTimeout(checkMemoryMirror, 1500);
+
+  // 3am Room — show live indicator if it's open right now
+  const h=new Date().getHours();
+  if(h>=23||h<=4){
+    document.body.classList.add('am3-active');
+    // Pulse the 3am nav button
+    const nb3=q('nb-am3');
+    if(nb3)nb3.style.animation='gentleBounce 2s ease-in-out infinite';
+  }
+
+  // Sunday 9pm collective ritual notification
+  checkRitualTime();
+
+  // Animate all post cards when they enter viewport
+  initCardAnimations();
+
   // Init infinite scroll (replaces Load More button)
   setTimeout(initInfiniteScroll, 800);
 
@@ -4485,11 +5278,60 @@ function loadDraft(){
 }
 function clearDraft(){localStorage.removeItem('ann_draft');}
 
+/* ═══════════════════════════════════════════════════
+   RITUAL TIME CHECK — Sunday 9pm notification
+═══════════════════════════════════════════════════ */
+function checkRitualTime(){
+  const now=new Date();
+  const isSunday=now.getDay()===0;
+  const h=now.getHours();
+  const m=now.getMinutes();
+  const isRitualTime=isSunday&&h===21&&m<30;
+  if(isRitualTime){
+    setTimeout(()=>{
+      toast('🌊 Collective Breathing starts now — Sunday 9pm');
+      setTimeout(openRitual,2000);
+    },3000);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   CARD ENTRANCE ANIMATIONS — IntersectionObserver
+═══════════════════════════════════════════════════ */
+function initCardAnimations(){
+  if(!window.IntersectionObserver)return;
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('card-enter');
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:.15,rootMargin:'0px 0px -30px 0px'});
+  // Observe existing and future cards
+  const observeCards=()=>{
+    document.querySelectorAll('.pc:not(.card-enter),.exp-card:not(.card-enter)').forEach(c=>obs.observe(c));
+  };
+  observeCards();
+  // Re-observe when new posts added
+  const feedEl=q('feed-list');
+  if(feedEl)new MutationObserver(observeCards).observe(feedEl,{childList:true});
+}
+
+/* ═══════════════════════════════════════════════════
+   SOCKET — wire gratitude bomb receive
+═══════════════════════════════════════════════════ */
+// This patches into the existing socket init
+const _origInitSocket=typeof initSocket==='function'?initSocket:null;
+
 // ── CLICK OUTSIDE to close modals ──
 document.addEventListener('click',(e)=>{
   if(!e.target.closest('.pmodal-inner')&&q('pmodal')?.classList.contains('on')&&e.target===q('pmodal'))closePModal();
   if(e.target===q('leaderboard-modal'))q('leaderboard-modal').style.display='none';
   if(e.target===q('mood-rooms-modal'))q('mood-rooms-modal').style.display='none';
+  // Close overlays on bg tap
+  if(e.target===q('silent-room'))closeSilentRoom();
+  if(e.target===q('ritual-overlay'))closeRitual();
 });
 
 // ── BOOT — must be last ──

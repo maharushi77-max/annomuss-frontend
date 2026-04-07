@@ -1959,12 +1959,13 @@ function renderPost(p){
       const isMyVote=myVote?._id?.toString()===o._id?.toString();
       const isWinner=ended&&pct===Math.max(...p.poll.options.map(x=>totalVotes>0?Math.round(((x.votes||[]).length||0)/totalVotes*100):0));
       const show=!!myVote||ended;
-      return`<div class="poll-opt ${isMyVote?'voted':''} ${isWinner?'winner':''}" onclick="${(!myVote&&!ended)?`doPollVote('${p._id}','${o._id}',this)`:''}">
-        ${show?`<div class="poll-bar" style="width:${pct}%"></div>`:''}
-        <span class="poll-text">${esc(o.text)}</span>
-        ${show?`<span class="poll-pct">${pct}%</span>`:''}
-        ${isMyVote?'<span style="font-size:.7rem">✓</span>':''}
-      </div>`;
+      const voteClick=(!myVote&&!ended)?'doPollVote(\''+p._id+'\',\''+o._id+'\',this)':'';
+      return'<div class="poll-opt '+(isMyVote?'voted':'')+' '+(isWinner?'winner':'')+'" onclick="'+voteClick+'">'+
+        (show?'<div class="poll-bar" style="width:'+pct+'%"></div>':'')+
+        '<span class="poll-text">'+esc(o.text)+'</span>'+
+        (show?'<span class="poll-pct">'+pct+'%</span>':'')+
+        (isMyVote?'<span style="font-size:.7rem">&#10003;</span>':'')+
+        '</div>';
     }).join('')+'</div>'+`<div class="poll-meta">${totalVotes} vote${totalVotes!==1?'s':''} · ${ended?'Ended':'Tap to vote'}</div>`;
   }
 
@@ -3934,26 +3935,70 @@ function saveCapsule(){
 function loadCapsules(){
   const el=q('capsule-list');if(!el)return;
   const capsules=JSON.parse(localStorage.getItem('ann_capsules')||'[]');
-  if(!capsules.length){el.innerHTML='<div style="text-align:center;padding:32px 20px;color:var(--tx3);font-size:.83rem;line-height:1.75">No capsules yet.<br>Write your first letter to future you.</div>';return;}
+  if(!capsules.length){
+    el.innerHTML='<div style="text-align:center;padding:32px 20px;color:var(--tx3);font-size:.83rem;line-height:1.75">No capsules yet.<br>Write your first letter to future you.</div>';
+    return;
+  }
   const now=Date.now();
-  el.innerHTML=capsules.map((c,i)=>{
+  let html='';
+  capsules.forEach((c,i)=>{
     const isOpen=now>=c.unlockDate;
     const daysLeft=Math.ceil((c.unlockDate-now)/86400000);
-    const unlockStr=isOpen?'💌 Tap to open!':daysLeft===1?'⏳ Opens tomorrow!':daysLeft<=7?`⏳ Opens in ${daysLeft} days`:`⏳ ${new Date(c.unlockDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}`;
-    return `<div class="capsule-card ${isOpen?'':'locked'}" style="animation:cardIn .3s ease ${i*.05}s both" onclick="${isOpen?`openCapsuleReading('${c.id}')`:`toast('Sealed until ${new Date(c.unlockDate).toLocaleDateString(\"en-IN\")}')`}">
-      <div class="capsule-meta">${new Date(c.createdAt).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
-      <div class="capsule-preview" style="${isOpen?'':'color:var(--tx3);font-style:italic'}">${isOpen?esc(c.text.substring(0,120))+(c.text.length>120?'...':''):'🔒 Sealed — come back when it\'s time'}</div>
-      <div class="capsule-unlock-date">${unlockStr}</div>
-    </div>`;
-  }).join('');
+    let unlockStr;
+    if(isOpen) unlockStr='💌 Tap to open!';
+    else if(daysLeft===1) unlockStr='⏳ Opens tomorrow!';
+    else if(daysLeft<=7) unlockStr='⏳ Opens in '+daysLeft+' days';
+    else unlockStr='⏳ '+new Date(c.unlockDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+
+    const onclick=isOpen
+      ? 'openCapsuleReading(\''+c.id+'\')'
+      : 'toast(\'Sealed until '+new Date(c.unlockDate).toLocaleDateString('en-IN')+'\')';
+    const preview=isOpen
+      ? esc((c.text||'').substring(0,120))+(c.text.length>120?'...':'')
+      : '🔒 Sealed — come back when it\'s time';
+    const previewStyle=isOpen?'':'color:var(--tx3);font-style:italic';
+    const dateStr=new Date(c.createdAt).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+    html+='<div class="capsule-card '+(isOpen?'':'locked')+'" style="animation:cardIn .3s ease '+(i*.05)+'s both" onclick="'+onclick+'">';
+    html+='<div class="capsule-meta">'+dateStr+'</div>';
+    html+='<div class="capsule-preview" style="'+previewStyle+'">'+preview+'</div>';
+    html+='<div class="capsule-unlock-date">'+unlockStr+'</div>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
 }
 function openCapsuleReading(id){
-  const c=JSON.parse(localStorage.getItem('ann_capsules')||'[]').find(x=>x.id===id);if(!c)return;
+  const c=JSON.parse(localStorage.getItem('ann_capsules')||'[]').find(x=>x.id===id);
+  if(!c)return;
   const daysAgo=Math.round((Date.now()-c.createdAt)/86400000);
   const overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;inset:0;z-index:800;background:var(--bg);display:flex;flex-direction:column;overflow-y:auto;animation:fadeIn .3s ease';
-  overlay.innerHTML=`<div style="padding:20px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)"><button onclick="this.closest('div').parentNode.remove()" style="background:none;border:none;color:var(--tx3);font-size:1.2rem;cursor:pointer;padding:4px">←</button><div style="font-family:var(--fD);font-weight:700;color:var(--tx)">💌 Letter from past you</div></div><div style="padding:28px 22px"><div style="font-size:.78rem;color:var(--tx3);margin-bottom:6px;font-family:var(--fM)">Written ${daysAgo} days ago · ${new Date(c.createdAt).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div><div style="font-size:1rem;color:var(--tx2);line-height:1.9;white-space:pre-wrap;font-style:italic;margin-bottom:28px">\u201c${esc(c.text)}\u201d</div><div style="background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.15);border-radius:16px;padding:18px 20px"><div style="font-size:.85rem;color:var(--tl);font-family:var(--fD);font-weight:700;margin-bottom:6px">Look how far you\u2019ve come. \uD83C\uDF31</div><div style="font-size:.83rem;color:var(--tx3);line-height:1.75">You wrote this ${daysAgo} days ago. That person was doing their best. This person is too.</div></div><button class="btn btn-v btn-full" style="margin-top:20px;padding:14px" onclick="openCompose('diary')">Write to yourself again \u2192</button></div>`;
-  document.body.appendChild(overlay);haptic('celebration');launchConfetti('sc-confetti');
+
+  const dateStr=new Date(c.createdAt).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  overlay.innerHTML=
+    '<div style="padding:20px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)">'+
+      '<button onclick="this.closest(\'div\').parentNode.remove()" style="background:none;border:none;color:var(--tx3);font-size:1.2rem;cursor:pointer;padding:4px">&#8592;</button>'+
+      '<div style="font-family:var(--fD);font-weight:700;color:var(--tx)">&#128140; Letter from past you</div>'+
+    '</div>'+
+    '<div style="padding:28px 22px">'+
+      '<div style="font-size:.78rem;color:var(--tx3);margin-bottom:6px;font-family:var(--fM)">Written '+daysAgo+' days ago &middot; '+dateStr+'</div>'+
+      '<div id="capsule-reading-text" style="font-size:1rem;color:var(--tx2);line-height:1.9;white-space:pre-wrap;font-style:italic;margin-bottom:28px"></div>'+
+      '<div style="background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.15);border-radius:16px;padding:18px 20px">'+
+        '<div style="font-size:.85rem;color:var(--tl);font-family:var(--fD);font-weight:700;margin-bottom:6px">Look how far you\'ve come. &#127793;</div>'+
+        '<div style="font-size:.83rem;color:var(--tx3);line-height:1.75">You wrote this '+daysAgo+' days ago. That person was doing their best. This person is too.</div>'+
+      '</div>'+
+      '<button class="btn btn-v btn-full" style="margin-top:20px;padding:14px" onclick="openCompose(\'diary\')">Write to yourself again &#8594;</button>'+
+    '</div>';
+
+  document.body.appendChild(overlay);
+
+  // Set text safely (no HTML injection)
+  const textEl=overlay.querySelector('#capsule-reading-text');
+  if(textEl)textEl.textContent='\u201c'+(c.text||'')+'\u201d';
+
+  haptic('celebration');
+  launchConfetti('sc-confetti');
 }
 
 /* ═══════════════════════════════════════════════════
@@ -4670,10 +4715,13 @@ function loadNotifications(){
     return;
   }
   const icons={reaction:'💙',like:'❤️',comment:'💬',gift:'🎁',friend:'👋',challenge:'🎯'};
-  el.innerHTML=notifStore.map(n=>`<div class="notif-item ${n.read?'':'unread'}" onclick="${n.postId?`openPModal('${n.postId}')`:''}">
-    <div class="notif-ico">${icons[n.type]||'🔔'}</div>
-    <div class="notif-text"><div class="notif-msg">${esc(n.msg)}</div><div class="notif-time">${timeAgo(n.time)}</div></div>
-  </div>`).join('');
+  el.innerHTML=notifStore.map(n=>{
+    const onclick=n.postId?'openPModal(\''+n.postId+'\')':'';
+    return '<div class="notif-item '+(n.read?'':'unread')+'" onclick="'+onclick+'">'+
+      '<div class="notif-ico">'+(icons[n.type]||'🔔')+'</div>'+
+      '<div class="notif-text"><div class="notif-msg">'+esc(n.msg)+'</div><div class="notif-time">'+timeAgo(n.time)+'</div></div>'+
+      '</div>';
+  }).join('');
   notifStore.forEach(n=>n.read=true);
   try{localStorage.setItem('ann_notifs',JSON.stringify(notifStore.slice(0,20)));}catch(_){}
 }

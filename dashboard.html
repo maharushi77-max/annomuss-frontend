@@ -3780,6 +3780,9 @@ function switchFeedTab(tab,el){
 /* ═══════════════════════════════════════════════════
    HAPTIC FEEDBACK — makes the app feel alive
 ═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   HAPTIC FEEDBACK
+═══════════════════════════════════════════════════ */
 function haptic(type='light'){
   try{
     if(!navigator.vibrate)return;
@@ -3791,483 +3794,334 @@ function haptic(type='light'){
 }
 
 /* ═══════════════════════════════════════════════════
-   MICRO-ANIMATIONS — ripple + float emoji
+   MICRO-ANIMATIONS
 ═══════════════════════════════════════════════════ */
 function addRipple(btn,e){
-  const r=document.createElement('span');
-  r.className='ripple-el';
+  const r=document.createElement('span');r.className='ripple-el';
   const rect=btn.getBoundingClientRect();
   const size=Math.max(rect.width,rect.height)*1.5;
   r.style.cssText=`width:${size}px;height:${size}px;top:${(e?.clientY??rect.top)-rect.top-size/2}px;left:${(e?.clientX??rect.left)-rect.left-size/2}px`;
-  btn.appendChild(r);
-  setTimeout(()=>r.remove(),500);
+  btn.appendChild(r);setTimeout(()=>r.remove(),500);
 }
 function floatEmoji(emoji,x,y){
-  const el=document.createElement('div');
-  el.className='float-emoji';
-  el.textContent=emoji;
-  el.style.cssText=`left:${x}px;top:${y}px`;
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),1000);
+  const el=document.createElement('div');el.className='float-emoji';el.textContent=emoji;
+  el.style.cssText=`left:${x}px;top:${y}px`;document.body.appendChild(el);setTimeout(()=>el.remove(),1000);
 }
-// Wire haptic + ripple to all .pak buttons
 document.addEventListener('click',e=>{
-  const btn=e.target.closest('.pak');
-  if(btn){haptic('light');addRipple(btn,e);}
-  const nb=e.target.closest('.nb');
-  if(nb&&!nb.querySelector('.nb-fab'))haptic('light');
+  const btn=e.target.closest('.pak');if(btn){haptic('light');addRipple(btn,e);}
+  const nb=e.target.closest('.nb');if(nb&&!nb.querySelector('.nb-fab'))haptic('light');
 });
 
 /* ═══════════════════════════════════════════════════
-   PERMISSION TO FEEL — daily AI validation card
+   PERMISSION TO FEEL — daily card
 ═══════════════════════════════════════════════════ */
-const PTF_MESSAGES=[
-  "Today it's okay to be exhausted.",
-  "Today it's okay to not have everything figured out.",
-  "Today it's okay to feel two things at once.",
-  "Today it's okay to miss someone who hurt you.",
-  "Today it's okay to be proud of something small.",
-  "Today it's okay to need more rest.",
-  "Today it's okay to not explain yourself.",
-  "Today it's okay to feel lonely even when you're not alone.",
-  "Today it's okay to be scared of the future.",
-  "Today it's okay to be okay — not everything has to be deep.",
-  "Today it's okay to still be healing from something old.",
-  "Today it's okay to want more for yourself.",
-  "Today it's okay to feel angry without knowing why.",
-  "Today it's okay to be a work in progress.",
-  "Today it's okay to ask for help.",
-  "Today it's okay to set the thing down for a minute.",
-  "Today it's okay to feel proud of simply showing up.",
-  "Today it's okay to be uncertain — certainty isn't always honesty.",
-  "Today it's okay to cry without a reason.",
-  "Today it's okay to want silence.",
-  "Today it's okay to outgrow people you once loved.",
-  "Today it's okay to feel joy, even when things are hard.",
-  "Today it's okay to miss who you used to be.",
-  "Today it's okay to disagree with everyone in the room.",
-  "Today it's okay to be soft.",
-  "Today it's okay to not be 'fine'.",
-  "Today it's okay to take up space.",
-  "Today it's okay to start over.",
-  "Today it's okay to not be productive.",
-  "Today it's okay to feel something that doesn't have a name.",
-];
+const PTF_MESSAGES=["Today it's okay to be exhausted.","Today it's okay to not have everything figured out.","Today it's okay to feel two things at once.","Today it's okay to miss someone who hurt you.","Today it's okay to be proud of something small.","Today it's okay to need more rest.","Today it's okay to not explain yourself.","Today it's okay to feel lonely even when you're not alone.","Today it's okay to be scared of the future.","Today it's okay to be okay — not everything has to be deep.","Today it's okay to still be healing from something old.","Today it's okay to want more for yourself.","Today it's okay to feel angry without knowing why.","Today it's okay to be a work in progress.","Today it's okay to ask for help.","Today it's okay to set the thing down for a minute.","Today it's okay to feel proud of simply showing up.","Today it's okay to be uncertain — certainty isn't always honesty.","Today it's okay to cry without a reason.","Today it's okay to want silence.","Today it's okay to outgrow people you once loved.","Today it's okay to feel joy, even when things are hard.","Today it's okay to miss who you used to be.","Today it's okay to disagree with everyone in the room.","Today it's okay to be soft.","Today it's okay to not be 'fine'.","Today it's okay to take up space.","Today it's okay to start over.","Today it's okay to not be productive.","Today it's okay to feel something that doesn't have a name."];
 
 function showPermissionToFeel(){
-  const el=q('ptf-card');
-  if(!el)return;
-  const day=Math.floor(Date.now()/86400000);
-  const msg=PTF_MESSAGES[day%PTF_MESSAGES.length];
-  const ptfEl=q('ptf-text');
-  if(ptfEl)ptfEl.textContent=msg;
-  el.style.display='block';
+  const el=q('ptf-card');if(!el)return;
+  const msg=PTF_MESSAGES[Math.floor(Date.now()/86400000)%PTF_MESSAGES.length];
+  const ptfEl=q('ptf-text');if(ptfEl)ptfEl.textContent=msg;
+  el.style.display='block';el.style.animation='cardIn .4s cubic-bezier(.34,1.56,.64,1) both';
 }
-
 function sharePTF(){
   const msg=q('ptf-text')?.textContent||'Today it\'s okay.';
-  const text=`${msg}\n\n— annomuss.in`;
-  if(navigator.share){
-    navigator.share({text,title:'annomuss — permission to feel'}).catch(()=>{});
-  } else {
-    navigator.clipboard?.writeText(text);
-    toast('✨ Copied to clipboard!');
-  }
+  const text=`${msg}\n\nfrom annomuss.in`;
+  if(navigator.share)navigator.share({text,title:'annomuss — permission to feel'}).catch(()=>{});
+  else{navigator.clipboard?.writeText(text);toast('✨ Copied!');}
   haptic('medium');
-  floatEmoji('✨',window.innerWidth/2,window.innerHeight/2);
+  const rect=q('ptf-card')?.getBoundingClientRect();
+  if(rect)floatEmoji('✨',rect.left+rect.width/2,rect.top);
 }
 
 /* ═══════════════════════════════════════════════════
-   MEMORY MIRROR — what you wrote one year ago
+   MEMORY MIRROR — year ago diary entry
 ═══════════════════════════════════════════════════ */
 function checkMemoryMirror(){
   try{
-    const today=new Date();
-    const yearAgo=new Date(today);yearAgo.setFullYear(today.getFullYear()-1);
-    const key=yearAgo.toDateString();
-    // Check diary entries from a year ago
+    const yearAgo=new Date();yearAgo.setFullYear(yearAgo.getFullYear()-1);
     const diaries=JSON.parse(localStorage.getItem('ann_diary')||'[]');
-    const yearAgoEntry=diaries.find(d=>{
-      const entryDate=new Date(d.ts);
-      return entryDate.toDateString()===key;
-    });
-    if(yearAgoEntry&&yearAgoEntry.text){
-      const el=q('memory-mirror-card');
-      const txt=q('mm-text');
-      if(el&&txt){
-        txt.textContent='"'+(yearAgoEntry.text||'').substring(0,120)+(yearAgoEntry.text.length>120?'...':`"`);
-        el.style.display='block';
-      }
+    const entry=diaries.find(d=>new Date(d.ts).toDateString()===yearAgo.toDateString());
+    if(entry?.text){
+      const el=q('memory-mirror-card'),txt=q('mm-text');
+      if(el&&txt){txt.textContent='"'+entry.text.substring(0,120)+(entry.text.length>120?'...\u201d':'\u201d');el.style.display='block';el.style.animation='cardIn .4s ease .6s both';}
     }
   }catch(_){}
 }
-
-function openMemoryMirrorModal(){
-  // Show all diary entries in a timeline view inside profile
-  goPage('profile');
-  setTimeout(()=>profileTab('menu',q('pt-menu')),200);
-  haptic('medium');
-  toast('🪞 Your emotional timeline');
-}
+function openMemoryMirrorModal(){goPage('profile');setTimeout(()=>profileTab('menu',q('pt-menu')),200);haptic('medium');}
 
 /* ═══════════════════════════════════════════════════
-   GRATITUDE BOMB — anonymous one-tap kindness
+   GRATITUDE BOMB — real API + instant dopamine
 ═══════════════════════════════════════════════════ */
-const GB_MESSAGES=[
-  'Today, something you wrote mattered to someone.',
-  'A stranger just said your words made them feel less alone.',
-  'Someone read your post and felt understood for the first time today.',
-  'Your honesty gave someone else permission to feel what they feel.',
-  'Something you wrote touched a person you\'ll never meet.',
-  'Someone out there is grateful you said what you said.',
-];
-async function sendGratitudeBomb(postId,btn){
+const gbSent=new Set();
+async function sendGratitudeBomb(postId,btn,event){
   if(!postId||!btn)return;
-  if(btn.classList.contains('gratitude-sent'))return;
-  btn.classList.add('gratitude-sent');
-  btn.querySelector?.(null);
-  btn.textContent='💛';
+  if(gbSent.has(postId)){toast('💛 Already sent!');return;}
+  gbSent.add(postId);
+  // Instant optimistic
+  btn.textContent='💛';btn.classList.add('gratitude-sent');
   haptic('success');
-  floatEmoji('💛',btn.getBoundingClientRect().left,btn.getBoundingClientRect().top);
-  toast('💛 Gratitude sent anonymously');
-  // Emit via socket
-  if(socket?.connected){
-    const msg=GB_MESSAGES[Math.floor(Math.random()*GB_MESSAGES.length)];
-    socket.emit('gratitude-bomb',{postId,message:msg});
-  }
+  const rect=btn.getBoundingClientRect();
+  for(let i=0;i<5;i++)setTimeout(()=>floatEmoji(['💛','✨','🌟'][i%3],rect.left+Math.random()*40-20,rect.top-i*15),i*80);
+  toast('💛 Gratitude sent — they\'ll feel it');
+  try{await api(`/api/special/gratitude/${postId}`,{method:'POST'});}catch(_){}
 }
 
 /* ═══════════════════════════════════════════════════
-   3AM ROOM — time-locked emotional space
+   3AM ROOM — real API feed + time-locked
 ═══════════════════════════════════════════════════ */
-const AM3_PROMPTS=[
-  'What thought have you been pushing away since yesterday?',
-  'What are you actually feeling right now, underneath everything?',
-  'What did you pretend was okay today that wasn\'t?',
-  'What do you wish someone would say to you right now?',
-  'What are you carrying that nobody knows about?',
-  'What would you say if you knew nobody would judge you?',
-  'What\'s keeping you from sleeping?',
-  'What conversation do you wish you could have tonight?',
-  'What do you need to let go of but can\'t?',
-  'Who do you miss most right now?',
-];
+const AM3_PROMPTS=['What thought have you been pushing away since yesterday?','What are you actually feeling right now, underneath everything?','What did you pretend was okay today that wasn\'t?','What do you wish someone would say to you right now?','What are you carrying that nobody knows about?','What would you say if you knew nobody would judge you?','What\'s keeping you from sleeping?','What conversation do you wish you could have tonight?','What do you need to let go of but can\'t?','Who do you miss most right now?'];
 let am3CurrentPrompt='';
 
 function open3amRoom(){
-  const overlay=q('am3-overlay');
-  if(!overlay)return;
-  overlay.classList.add('on');
-  generate3amStars();
-  const h=new Date().getHours();
-  const isOpen=h>=23||h<=4;
+  const overlay=q('am3-overlay');if(!overlay)return;
+  overlay.classList.add('on');generate3amStars();haptic('medium');
+  const h=new Date().getHours(),isOpen=h>=23||h<=4;
+  q('am3-locked').style.display=isOpen?'none':'flex';
+  q('am3-open').style.display=isOpen?'flex':'none';
   if(isOpen){
-    q('am3-locked').style.display='none';
-    q('am3-open').style.display='flex';
-    const day=Math.floor(Date.now()/86400000);
-    am3CurrentPrompt=AM3_PROMPTS[day%AM3_PROMPTS.length];
+    am3CurrentPrompt=AM3_PROMPTS[Math.floor(Date.now()/86400000)%AM3_PROMPTS.length];
     const pt=q('am3-prompt-text');if(pt)pt.textContent=am3CurrentPrompt;
-    load3amFeed();
-    document.body.classList.add('am3-active');
-  } else {
-    q('am3-locked').style.display='flex';
-    q('am3-open').style.display='none';
-    update3amCountdown();
-    const timer=setInterval(()=>{
-      update3amCountdown();
-      const hh=new Date().getHours();
-      if(hh>=23||hh<=4)clearInterval(timer);
-    },60000);
-  }
-  haptic('medium');
+    load3amFeed();document.body.classList.add('am3-active');
+  } else {update3amCountdown();setInterval(update3amCountdown,60000);}
 }
-function close3amRoom(){
-  q('am3-overlay')?.classList.remove('on');
-  document.body.classList.remove('am3-active');
-}
+function close3amRoom(){q('am3-overlay')?.classList.remove('on');document.body.classList.remove('am3-active');}
 function generate3amStars(){
   const c=q('am3-stars');if(!c)return;c.innerHTML='';
-  for(let i=0;i<80;i++){
-    const s=document.createElement('div');
-    s.className='am3-star';
-    const size=Math.random()*2.5+0.5;
-    s.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;animation-delay:${Math.random()*3}s`;
-    c.appendChild(s);
-  }
+  for(let i=0;i<80;i++){const s=document.createElement('div');s.className='am3-star';const sz=Math.random()*2.5+0.5;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;animation-delay:${Math.random()*3}s`;c.appendChild(s);}
 }
 function update3amCountdown(){
   const el=q('am3-countdown');if(!el)return;
-  const now=new Date();
-  const target=new Date();
-  target.setHours(23,0,0,0);
+  const now=new Date(),target=new Date();target.setHours(23,0,0,0);
   if(now.getHours()>=23)target.setDate(target.getDate()+1);
-  const diff=target-now;
-  const h=Math.floor(diff/3600000);
-  const m=Math.floor((diff%3600000)/60000);
+  const diff=target-now,h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000);
   el.textContent=`Opens in ${h}h ${m}m`;
 }
 async function load3amFeed(){
-  const el=q('am3-feed');if(!el)return;
-  const cnt=q('am3-count-tonight');
+  const el=q('am3-feed'),cnt=q('am3-count-tonight');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:16px"><div class="spin"></div></div>';
   try{
-    const r=await api('/api/posts/midnight?limit=5');
-    const d=await r.json();
-    const posts=Array.isArray(d)?d:(d.posts||[]);
+    const r=await api('/api/special/3am');
+    if(r.status===403){const d=await r.json();if(el)el.innerHTML=`<div style="color:rgba(196,168,255,.4);font-size:.82rem;padding:8px">${d.message||'Room closed'}</div>`;return;}
+    const d=await r.json();const posts=d.posts||[];
     if(cnt)cnt.textContent=posts.length>0?`${posts.length} people have spoken tonight`:'Be the first to speak tonight';
     if(!posts.length){el.innerHTML='<div style="color:rgba(196,168,255,.4);font-size:.82rem;padding:8px">Just you and the stars so far.</div>';return;}
-    el.innerHTML=posts.slice(0,4).map(p=>`
-      <div style="background:rgba(123,94,167,.07);border:1px solid rgba(123,94,167,.15);border-radius:14px;padding:14px;margin-bottom:8px;width:100%;max-width:360px;cursor:pointer" onclick="openPModal('${p._id}')">
+    el.innerHTML=posts.slice(0,5).map((p,i)=>`
+      <div style="background:rgba(123,94,167,.07);border:1px solid rgba(123,94,167,.15);border-radius:14px;padding:14px;margin-bottom:8px;width:100%;max-width:360px;cursor:pointer;animation:cardIn .3s ease ${i*.07}s both" onclick="openPModal('${p._id}')">
         <div style="font-size:.78rem;color:rgba(196,168,255,.5);margin-bottom:6px">${p.authorEmoji||'🎭'} ${p.authorName||'Anonymous'}</div>
-        <div style="font-size:.9rem;color:rgba(196,168,255,.8);line-height:1.65">${esc((p.caption||'').substring(0,100))}${p.caption?.length>100?'...':''}</div>
+        <div style="font-size:.9rem;color:rgba(196,168,255,.8);line-height:1.65">${esc((p.caption||'').substring(0,120))}${(p.caption||'').length>120?'...':''}</div>
+        <div style="font-size:.72rem;color:rgba(196,168,255,.3);margin-top:6px">${timeAgo(p.createdAt)}</div>
       </div>`).join('');
   }catch(_){if(cnt)cnt.textContent='Something real is happening tonight';}
 }
 
 /* ═══════════════════════════════════════════════════
-   TIME CAPSULE — write to your future self
+   TIME CAPSULE — real localStorage + open reading
 ═══════════════════════════════════════════════════ */
-function openCapsule(){
-  q('capsule-page')?.classList.add('on');
-  loadCapsules();
-  haptic('medium');
-}
-function closeCapsule(){
-  q('capsule-page')?.classList.remove('on');
-}
+function openCapsule(){q('capsule-page')?.classList.add('on');loadCapsules();haptic('medium');}
+function closeCapsule(){q('capsule-page')?.classList.remove('on');}
 function saveCapsule(){
   const text=q('capsule-text')?.value?.trim();
   if(!text||text.length<10){toast('Write at least a few sentences...');return;}
   const days=parseInt(q('capsule-duration')?.value||365);
-  const unlockDate=Date.now()+days*86400000;
   const capsules=JSON.parse(localStorage.getItem('ann_capsules')||'[]');
-  capsules.unshift({id:'c'+Date.now(),text,unlockDate,createdAt:Date.now(),days});
+  capsules.unshift({id:'c'+Date.now(),text,unlockDate:Date.now()+days*86400000,createdAt:Date.now(),days});
   localStorage.setItem('ann_capsules',JSON.stringify(capsules.slice(0,20)));
   if(q('capsule-text'))q('capsule-text').value='';
-  loadCapsules();
-  haptic('celebration');
-  launchConfetti('capsule-confetti-anchor');
-  toast('⏳ Capsule sealed. See you in '+days+' days.');
+  loadCapsules();haptic('celebration');launchConfetti('sc-confetti');
+  awardXP(15,'Time capsule created');toast('⏳ Sealed. Future you will read this.');
 }
 function loadCapsules(){
   const el=q('capsule-list');if(!el)return;
   const capsules=JSON.parse(localStorage.getItem('ann_capsules')||'[]');
-  if(!capsules.length){
-    el.innerHTML='<div style="text-align:center;padding:32px 20px;color:var(--tx3);font-size:.83rem;line-height:1.75">No capsules yet.<br>Write your first letter to future you.</div>';
-    return;
-  }
+  if(!capsules.length){el.innerHTML='<div style="text-align:center;padding:32px 20px;color:var(--tx3);font-size:.83rem;line-height:1.75">No capsules yet.<br>Write your first letter to future you.</div>';return;}
   const now=Date.now();
-  el.innerHTML=capsules.map(c=>{
+  el.innerHTML=capsules.map((c,i)=>{
     const isOpen=now>=c.unlockDate;
-    const unlockStr=isOpen?'Ready to open!':
-      `Opens ${new Date(c.unlockDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}`;
-    const preview=isOpen?(c.text||'').substring(0,120):'🔒 Sealed until unlocked';
-    return `<div class="capsule-card ${isOpen?'':'locked'}" onclick="${isOpen?`openCapsuleReading('${c.id}')`:'toast(\"Not yet — come back on \"+new Date('+c.unlockDate+').toLocaleDateString(\"en-IN\"))'}">
+    const daysLeft=Math.ceil((c.unlockDate-now)/86400000);
+    const unlockStr=isOpen?'💌 Tap to open!':daysLeft===1?'⏳ Opens tomorrow!':daysLeft<=7?`⏳ Opens in ${daysLeft} days`:`⏳ ${new Date(c.unlockDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}`;
+    return `<div class="capsule-card ${isOpen?'':'locked'}" style="animation:cardIn .3s ease ${i*.05}s both" onclick="${isOpen?`openCapsuleReading('${c.id}')`:`toast('Sealed until ${new Date(c.unlockDate).toLocaleDateString(\"en-IN\")}')`}">
       <div class="capsule-meta">${new Date(c.createdAt).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
-      <div class="capsule-preview">${esc(preview)}${isOpen&&c.text?.length>120?'...':''}</div>
-      <div class="capsule-unlock-date">${isOpen?'💌 Tap to read':'⏳ '+unlockStr}</div>
+      <div class="capsule-preview" style="${isOpen?'':'color:var(--tx3);font-style:italic'}">${isOpen?esc(c.text.substring(0,120))+(c.text.length>120?'...':''):'🔒 Sealed — come back when it\'s time'}</div>
+      <div class="capsule-unlock-date">${unlockStr}</div>
     </div>`;
   }).join('');
 }
 function openCapsuleReading(id){
-  const capsules=JSON.parse(localStorage.getItem('ann_capsules')||'[]');
-  const c=capsules.find(x=>x.id===id);if(!c)return;
-  // Show in a modal-style full screen
+  const c=JSON.parse(localStorage.getItem('ann_capsules')||'[]').find(x=>x.id===id);if(!c)return;
+  const daysAgo=Math.round((Date.now()-c.createdAt)/86400000);
   const overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;inset:0;z-index:800;background:var(--bg);display:flex;flex-direction:column;overflow-y:auto;animation:fadeIn .3s ease';
-  overlay.innerHTML=`
-    <div style="padding:20px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)">
-      <button onclick="this.closest('[style]').remove()" style="background:none;border:none;color:var(--tx3);font-size:1.2rem;cursor:pointer;padding:4px">←</button>
-      <div style="font-family:var(--fD);font-weight:700;color:var(--tx)">💌 A letter from past you</div>
-    </div>
-    <div style="padding:24px 20px">
-      <div style="font-size:.78rem;color:var(--tx3);margin-bottom:8px;font-family:var(--fM)">Written on ${new Date(c.createdAt).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
-      <div style="font-size:.95rem;color:var(--tx2);line-height:1.85;white-space:pre-wrap;font-style:italic">"${esc(c.text)}"</div>
-      <div style="margin-top:28px;padding:16px;background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.15);border-radius:14px">
-        <div style="font-size:.8rem;color:var(--tl);margin-bottom:4px;font-family:var(--fD)">Look how far you've come.</div>
-        <div style="font-size:.82rem;color:var(--tx3);line-height:1.7">You wrote this ${c.days} days ago. That person was doing their best. This person is too.</div>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-  haptic('celebration');
+  overlay.innerHTML=`<div style="padding:20px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)"><button onclick="this.closest('div').parentNode.remove()" style="background:none;border:none;color:var(--tx3);font-size:1.2rem;cursor:pointer;padding:4px">←</button><div style="font-family:var(--fD);font-weight:700;color:var(--tx)">💌 Letter from past you</div></div><div style="padding:28px 22px"><div style="font-size:.78rem;color:var(--tx3);margin-bottom:6px;font-family:var(--fM)">Written ${daysAgo} days ago · ${new Date(c.createdAt).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div><div style="font-size:1rem;color:var(--tx2);line-height:1.9;white-space:pre-wrap;font-style:italic;margin-bottom:28px">\u201c${esc(c.text)}\u201d</div><div style="background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.15);border-radius:16px;padding:18px 20px"><div style="font-size:.85rem;color:var(--tl);font-family:var(--fD);font-weight:700;margin-bottom:6px">Look how far you\u2019ve come. \uD83C\uDF31</div><div style="font-size:.83rem;color:var(--tx3);line-height:1.75">You wrote this ${daysAgo} days ago. That person was doing their best. This person is too.</div></div><button class="btn btn-v btn-full" style="margin-top:20px;padding:14px" onclick="openCompose('diary')">Write to yourself again \u2192</button></div>`;
+  document.body.appendChild(overlay);haptic('celebration');launchConfetti('sc-confetti');
 }
 
 /* ═══════════════════════════════════════════════════
-   SILENT ROOM — togetherness without words
+   SILENT ROOM — real API + live socket count
 ═══════════════════════════════════════════════════ */
 let silentRoomTimer=null;
-function openSilentRoom(){
+async function openSilentRoom(){
   const overlay=q('silent-room');if(!overlay)return;
-  overlay.classList.add('on');
-  haptic('medium');
-  // Fake a realistic number (live count would come from server)
-  const baseCount=180+Math.floor(Math.random()*400);
-  const cnt=q('sr-count');if(cnt)cnt.textContent=baseCount.toLocaleString('en-IN');
-  generateSilentDots();
-  // Slowly increment count
-  silentRoomTimer=setInterval(()=>{
-    if(cnt){
-      const cur=parseInt(cnt.textContent.replace(/,/g,''))||baseCount;
-      const delta=Math.floor(Math.random()*5)-1;
-      cnt.textContent=Math.max(10,cur+delta).toLocaleString('en-IN');
-    }
-  },8000);
-  // Notify server we're here
-  socket?.emit?.('join-silent-room');
+  overlay.classList.add('on');haptic('medium');generateSilentDots();
+  socket?.emit('join-silent-room');
+  try{
+    const r=await api('/api/special/silent/join',{method:'POST'});
+    const d=await r.json();
+    const cnt=q('sr-count');if(cnt&&d.count)cnt.textContent=d.count.toLocaleString('en-IN');
+  }catch(_){
+    const cnt=q('sr-count');
+    if(cnt)cnt.textContent=(200+Math.floor(Math.random()*350)).toLocaleString('en-IN');
+    silentRoomTimer=setInterval(()=>{if(cnt){const cur=parseInt(cnt.textContent.replace(/,/g,''))||200;cnt.textContent=Math.max(10,cur+Math.floor(Math.random()*5)-2).toLocaleString('en-IN');}},9000);
+  }
 }
-function closeSilentRoom(){
-  q('silent-room')?.classList.remove('on');
-  clearInterval(silentRoomTimer);
-  socket?.emit?.('leave-silent-room');
+async function closeSilentRoom(){
+  q('silent-room')?.classList.remove('on');clearInterval(silentRoomTimer);
+  socket?.emit('leave-silent-room');
+  try{await api('/api/special/silent/leave',{method:'POST'});}catch(_){}
 }
 function generateSilentDots(){
   const c=q('sr-dots');if(!c)return;c.innerHTML='';
-  for(let i=0;i<24;i++){
-    const d=document.createElement('div');
-    d.className='sr-dot';
-    d.style.cssText=`--d:${2+Math.random()*4}s;animation-delay:${Math.random()*3}s;opacity:${.1+Math.random()*.5}`;
-    c.appendChild(d);
-  }
+  for(let i=0;i<28;i++){const d=document.createElement('div');d.className='sr-dot';d.style.cssText=`--d:${2+Math.random()*4}s;animation-delay:${Math.random()*3}s;opacity:${.1+Math.random()*.5}`;c.appendChild(d);}
 }
 
 /* ═══════════════════════════════════════════════════
-   WHISPER CHAIN — collaborative anonymous storytelling
+   WHISPER CHAIN — real API with fallback
 ═══════════════════════════════════════════════════ */
-function openWhisperChain(){
-  q('whisper-overlay')?.classList.add('on');
-  loadWhisperChains();
-  haptic('medium');
-}
+function openWhisperChain(){q('whisper-overlay')?.classList.add('on');loadWhisperChains();haptic('medium');}
 function closeWhisperChain(){q('whisper-overlay')?.classList.remove('on');}
-
 async function loadWhisperChains(){
   const el=q('whisper-list');if(!el)return;
-  // Use localStorage for whisper chains (can be server-synced later)
-  const chains=JSON.parse(localStorage.getItem('ann_whisper_chains')||'[]');
-  // Add some seed chains if none
-  if(!chains.length){
-    const seeds=[
-      {id:'seed1',lines:[{text:'I thought growing up would feel different.',author:'🌙',mine:false},{text:'Like there\'d be a moment where everything made sense.',author:'🎭',mine:false}],complete:false,waiting:true},
-      {id:'seed2',lines:[{text:'The hardest part isn\'t the thing itself.',author:'🌊',mine:false},{text:'It\'s pretending it doesn\'t exist.',author:'⭐',mine:false},{text:'And then someone sees through you.',author:'🎭',mine:false}],complete:false,waiting:true},
-    ];
-    renderWhisperChains([...seeds,...chains]);
-    return;
+  el.innerHTML='<div style="text-align:center;padding:40px"><div class="spin"></div></div>';
+  try{
+    const r=await api('/api/special/whisper');
+    if(!r.ok)throw new Error();
+    renderWhisperChains(await r.json());
+  }catch(_){
+    const saved=JSON.parse(localStorage.getItem('ann_whisper_chains')||'[]');
+    renderWhisperChains([
+      {_id:'s1',lines:[{text:'I thought growing up would feel different.',authorEmoji:'🌙',mine:false},{text:"Like there'd be a moment where everything made sense.",authorEmoji:'🎭',mine:false}],isComplete:false,canAddLine:true},
+      {_id:'s2',lines:[{text:"The hardest part isn't the thing itself.",authorEmoji:'🌊',mine:false},{text:"It's pretending it doesn't exist.",authorEmoji:'⭐',mine:false},{text:'And then someone sees through you.',authorEmoji:'🎭',mine:false}],isComplete:false,canAddLine:true},
+      ...saved
+    ]);
   }
-  renderWhisperChains(chains);
 }
-
 function renderWhisperChains(chains){
   const el=q('whisper-list');if(!el)return;
-  if(!chains.length){
-    el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--tx3);font-size:.85rem;line-height:1.8">No chains yet.<br>Start a new one — write one honest line.</div>';
-    return;
-  }
-  el.innerHTML=chains.map(c=>`
-    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:18px;padding:16px;margin-bottom:12px">
-      <div style="font-size:.7rem;color:var(--tx3);font-family:var(--fM);margin-bottom:12px">🌀 ${c.lines.length}/5 lines</div>
-      ${c.lines.map((l,i)=>`
-        <div class="whisper-line-item ${l.mine?'whisper-mine':''}" style="animation-delay:${i*.1}s">
-          <div class="whisper-avatar">${l.author}</div>
-          <div class="whisper-line-text">${esc(l.text)}</div>
-        </div>`).join('')}
-      ${c.waiting&&c.lines.length<5?`
-        <div class="whisper-waiting">
-          <div style="font-size:1.2rem">✍️</div>
-          <div class="whisper-waiting-text">Waiting for the next person...</div>
-        </div>
-        <button class="btn btn-v btn-sm btn-full" style="margin-top:4px" onclick="addWhisperLine('${c.id}')">Add your line +</button>
-      `:''}
-      ${c.lines.length>=5?`<div style="text-align:center;padding-top:8px;font-size:.8rem;color:var(--tl)">✨ Chain complete</div>`:''}
+  if(!chains.length){el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--tx3);font-size:.85rem;line-height:1.8">No chains yet.<br>Start one — write one honest line.</div>';return;}
+  el.innerHTML=chains.map((c,ci)=>`
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:18px;padding:16px;margin-bottom:12px;animation:cardIn .3s ease ${ci*.06}s both">
+      <div style="font-size:.7rem;color:var(--tx3);font-family:var(--fM);margin-bottom:12px">🌀 ${(c.lines||[]).length}/5 lines${c.isComplete?' · ✨ Complete':''}</div>
+      ${(c.lines||[]).map((l,i)=>`<div class="whisper-line-item ${l.mine?'whisper-mine':''}" style="animation-delay:${i*.08}s"><div class="whisper-avatar">${l.authorEmoji||l.author||'🎭'}</div><div class="whisper-line-text">${esc(l.text)}</div></div>`).join('')}
+      ${c.canAddLine&&!c.isComplete?`<div class="whisper-waiting"><div style="font-size:1.2rem">✍️</div><div class="whisper-waiting-text">Your line continues the poem...</div></div><button class="btn btn-v btn-sm btn-full" style="margin-top:8px" onclick="addWhisperLine('${c._id||c.id}')">Add your line</button>`:''}
+      ${c.isComplete?`<div style="text-align:center;padding-top:8px;font-size:.8rem;color:var(--tl)">✨ This poem is complete</div>`:''}
     </div>`).join('');
 }
-
-function startNewChain(){
-  const text=prompt('Write the first line of your whisper chain:');
-  if(!text?.trim())return;
-  const chains=JSON.parse(localStorage.getItem('ann_whisper_chains')||'[]');
-  chains.unshift({id:'w'+Date.now(),lines:[{text:text.trim(),author:user?.avatarEmoji||'🎭',mine:true}],complete:false,waiting:true,createdAt:Date.now()});
-  localStorage.setItem('ann_whisper_chains',JSON.stringify(chains.slice(0,20)));
-  loadWhisperChains();
-  haptic('success');
-  toast('🌀 Chain started! Passing to strangers...');
+async function startNewChain(){
+  const text=prompt('Write the opening line of your whisper chain.\nOne honest sentence — anonymous, will pass to strangers:');
+  if(!text?.trim()||text.length>200)return;
+  try{
+    const r=await api('/api/special/whisper',{method:'POST',body:JSON.stringify({text:text.trim()})});
+    if(r.ok){loadWhisperChains();haptic('success');awardXP(10,'Whisper chain started');toast('🌀 Chain started — passing to strangers');}
+    else throw new Error();
+  }catch(_){
+    const chains=JSON.parse(localStorage.getItem('ann_whisper_chains')||'[]');
+    chains.unshift({_id:'w'+Date.now(),id:'w'+Date.now(),lines:[{text:text.trim(),authorEmoji:user?.avatarEmoji||'🎭',mine:true}],isComplete:false,canAddLine:false});
+    localStorage.setItem('ann_whisper_chains',JSON.stringify(chains.slice(0,20)));
+    loadWhisperChains();haptic('success');toast('🌀 Chain started!');
+  }
 }
-
-function addWhisperLine(chainId){
-  const text=prompt('Add your line to the chain:');
-  if(!text?.trim())return;
-  const chains=JSON.parse(localStorage.getItem('ann_whisper_chains')||'[]');
-  const idx=chains.findIndex(c=>c.id===chainId);
-  if(idx>=0&&chains[idx].lines.length<5){
-    chains[idx].lines.push({text:text.trim(),author:user?.avatarEmoji||'🎭',mine:true});
-    if(chains[idx].lines.length>=5)chains[idx].complete=true;
-    localStorage.setItem('ann_whisper_chains',JSON.stringify(chains));
-    loadWhisperChains();
-    haptic('success');
-    toast(chains[idx].complete?'✨ Chain complete! Beautiful.':'🌀 Line added!');
+async function addWhisperLine(chainId){
+  const text=prompt('Add your line to the chain:\n(One sentence, completely anonymous)');
+  if(!text?.trim()||text.length>200)return;
+  try{
+    const r=await api(`/api/special/whisper/${chainId}/line`,{method:'POST',body:JSON.stringify({text:text.trim()})});
+    const d=await r.json();
+    if(r.ok){loadWhisperChains();haptic('success');awardXP(d.chain?.isComplete?20:10,'Whisper chain');toast(d.chain?.isComplete?'✨ Poem complete! Beautiful.':'🌀 Line added!');}
+    else toast(d.message||'Try again');
+  }catch(_){
+    const chains=JSON.parse(localStorage.getItem('ann_whisper_chains')||'[]');
+    const idx=chains.findIndex(c=>(c._id||c.id)===chainId);
+    if(idx>=0){if(!chains[idx].lines)chains[idx].lines=[];chains[idx].lines.push({text:text.trim(),authorEmoji:user?.avatarEmoji||'🎭',mine:true});if(chains[idx].lines.length>=5)chains[idx].isComplete=true;localStorage.setItem('ann_whisper_chains',JSON.stringify(chains));loadWhisperChains();haptic('success');toast(chains[idx].isComplete?'✨ Complete!':'🌀 Added!');}
   }
 }
 
 /* ═══════════════════════════════════════════════════
-   COLLECTIVE RITUAL — Sunday 9pm breathing
+   COLLECTIVE RITUAL — real API + socket broadcast
 ═══════════════════════════════════════════════════ */
-let ritualInterval=null;
-let ritualPhase=0;
-const RITUAL_PHASES=['Breathe in...','Hold...','Breathe out...','Release...'];
+let ritualInterval=null,ritualPhase=0;
+const RITUAL_PHASES=['Breathe in slowly...','Hold it gently...','Breathe out completely...','Release everything...'];
 const RITUAL_DURATIONS=[4000,2000,6000,3000];
-
-function openRitual(){
+async function openRitual(){
   const overlay=q('ritual-overlay');if(!overlay)return;
-  overlay.classList.add('on');
-  haptic('medium');
-  runRitualBreath();
-  loadRitualWords();
-}
-function closeRitual(){
-  q('ritual-overlay')?.classList.remove('on');
-  clearTimeout(ritualInterval);
-  ritualPhase=0;
-}
-function runRitualBreath(){
-  const phase=q('ritual-phase');
-  if(!phase)return;
-  const p=ritualPhase%RITUAL_PHASES.length;
-  phase.textContent=RITUAL_PHASES[p];
-  ritualInterval=setTimeout(()=>{
-    ritualPhase++;
-    runRitualBreath();
-  },RITUAL_DURATIONS[p]);
-}
-function loadRitualWords(){
-  // Show previous release words from localStorage
-  const words=JSON.parse(localStorage.getItem('ann_ritual_words')||'[]');
-  const el=q('ritual-words');if(!el)return;
-  const displayWords=[...words,...['tired','hope','fear','love','enough','okay','lost','found','breathe','here']].slice(0,20);
-  el.innerHTML=displayWords.map((w,i)=>`<div class="ritual-word-pill" style="animation-delay:${i*.05}s">${esc(w)}</div>`).join('');
+  overlay.classList.add('on');haptic('medium');runRitualBreath();
+  try{const r=await api('/api/special/ritual/words');const words=await r.json();displayRitualWords(Array.isArray(words)?words:[]);}
+  catch(_){displayRitualWords(['exhausted','hopeful','enough','love','peace','free','okay','tired','brave','home']);}
   q('ritual-input-area').style.display='block';
 }
-function submitRitualWord(){
-  const inp=q('ritual-word-input');
-  const word=inp?.value?.trim();
-  if(!word)return;
-  const words=JSON.parse(localStorage.getItem('ann_ritual_words')||'[]');
-  words.unshift(word);
-  localStorage.setItem('ann_ritual_words',JSON.stringify(words.slice(0,50)));
-  // Add to display
+function closeRitual(){q('ritual-overlay')?.classList.remove('on');clearTimeout(ritualInterval);ritualPhase=0;}
+function runRitualBreath(){
+  const phase=q('ritual-phase');if(!phase)return;
+  const p=ritualPhase%RITUAL_PHASES.length;phase.textContent=RITUAL_PHASES[p];
+  ritualInterval=setTimeout(()=>{ritualPhase++;runRitualBreath();},RITUAL_DURATIONS[p]);
+}
+function displayRitualWords(words){
+  const el=q('ritual-words');if(!el)return;
+  el.innerHTML=words.slice(0,25).map((w,i)=>`<div class="ritual-word-pill" style="animation-delay:${i*.04}s">${esc(w)}</div>`).join('');
+}
+async function submitRitualWord(){
+  const inp=q('ritual-word-input');const word=inp?.value?.trim();if(!word)return;inp.value='';
   const el=q('ritual-words');
-  if(el){
-    const pill=document.createElement('div');
-    pill.className='ritual-word-pill';
-    pill.textContent=word;
-    el.insertBefore(pill,el.firstChild);
-  }
-  inp.value='';
-  haptic('success');
-  floatEmoji('🌊',window.innerWidth/2,window.innerHeight*0.5);
-  toast('🌊 Released');
+  if(el){const pill=document.createElement('div');pill.className='ritual-word-pill';pill.textContent=word;el.insertBefore(pill,el.firstChild);}
+  haptic('success');floatEmoji('🌊',window.innerWidth/2,window.innerHeight*.45);
+  awardXP(5,'Collective ritual');toast('🌊 Released into the collective');
+  try{await api('/api/special/ritual/word',{method:'POST',body:JSON.stringify({word})});}catch(_){}
+  socket?.emit('ritual-word',{word});
 }
 
 /* ═══════════════════════════════════════════════════
-   PROFILE MENU — add all special features
+   RITUAL TIME + CARD ANIMATIONS
 ═══════════════════════════════════════════════════ */
+function checkRitualTime(){
+  const now=new Date();
+  if(now.getDay()===0&&now.getHours()===21&&now.getMinutes()<30)
+    setTimeout(()=>{toast('🌊 Collective Breathing starts now');setTimeout(openRitual,2500);},3000);
+}
+function initCardAnimations(){
+  if(!window.IntersectionObserver)return;
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('card-enter');obs.unobserve(e.target);}});
+  },{threshold:.1,rootMargin:'0px 0px -20px 0px'});
+  const observe=()=>document.querySelectorAll('.pc:not(.card-enter),.exp-card:not(.card-enter)').forEach(c=>obs.observe(c));
+  observe();
+  const feedEl=q('feed-list');
+  if(feedEl)new MutationObserver(observe).observe(feedEl,{childList:true});
+}
+
+/* ═══════════════════════════════════════════════════
+   SOCKET — new special feature handlers (patch into initSocket)
+═══════════════════════════════════════════════════ */
+function patchSpecialSocketEvents(){
+  if(!socket)return;
+  // Live silent room count update
+  socket.on('silent-room-count',(d)=>{
+    const cnt=q('sr-count');if(cnt&&d.count)cnt.textContent=d.count.toLocaleString('en-IN');
+  });
+  // Ritual word from others
+  socket.on('ritual-word',(d)=>{
+    const el=q('ritual-words');
+    if(el&&d.word){const pill=document.createElement('div');pill.className='ritual-word-pill';pill.style.animation='cardIn .3s ease both';pill.textContent=d.word;el.insertBefore(pill,el.firstChild);}
+  });
+  // Whisper chain complete
+  socket.on('whisper-complete',(d)=>{
+    if(q('whisper-overlay')?.classList.contains('on'))loadWhisperChains();
+    toast('✨ A whisper chain you\'re part of is complete!');haptic('celebration');
+  });
+  // Gratitude bomb received
+  socket.on('gratitude-bomb-received',(d)=>{
+    showReactionMoment('gratitude');haptic('celebration');
+  });
+}
+
 function showSkeletons(count=3){
   const el=q('feed-list');
   el.innerHTML=Array.from({length:count},()=>`
@@ -5162,6 +5016,9 @@ async function main(){
   showDailyPrompt();
   checkReferral();
 
+  // ── Wire special socket events ──
+  setTimeout(patchSpecialSocketEvents, 1000);
+
   // ── NEW EXTRAORDINARY FEATURES ──
   // Permission to Feel — show after 1s so feed loads first
   setTimeout(showPermissionToFeel, 1200);
@@ -5279,57 +5136,14 @@ function loadDraft(){
 function clearDraft(){localStorage.removeItem('ann_draft');}
 
 /* ═══════════════════════════════════════════════════
-   RITUAL TIME CHECK — Sunday 9pm notification
+   SOCKET — wire special events after socket connects
 ═══════════════════════════════════════════════════ */
-function checkRitualTime(){
-  const now=new Date();
-  const isSunday=now.getDay()===0;
-  const h=now.getHours();
-  const m=now.getMinutes();
-  const isRitualTime=isSunday&&h===21&&m<30;
-  if(isRitualTime){
-    setTimeout(()=>{
-      toast('🌊 Collective Breathing starts now — Sunday 9pm');
-      setTimeout(openRitual,2000);
-    },3000);
-  }
-}
-
-/* ═══════════════════════════════════════════════════
-   CARD ENTRANCE ANIMATIONS — IntersectionObserver
-═══════════════════════════════════════════════════ */
-function initCardAnimations(){
-  if(!window.IntersectionObserver)return;
-  const obs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.classList.add('card-enter');
-        obs.unobserve(e.target);
-      }
-    });
-  },{threshold:.15,rootMargin:'0px 0px -30px 0px'});
-  // Observe existing and future cards
-  const observeCards=()=>{
-    document.querySelectorAll('.pc:not(.card-enter),.exp-card:not(.card-enter)').forEach(c=>obs.observe(c));
-  };
-  observeCards();
-  // Re-observe when new posts added
-  const feedEl=q('feed-list');
-  if(feedEl)new MutationObserver(observeCards).observe(feedEl,{childList:true});
-}
-
-/* ═══════════════════════════════════════════════════
-   SOCKET — wire gratitude bomb receive
-═══════════════════════════════════════════════════ */
-// This patches into the existing socket init
-const _origInitSocket=typeof initSocket==='function'?initSocket:null;
 
 // ── CLICK OUTSIDE to close modals ──
 document.addEventListener('click',(e)=>{
   if(!e.target.closest('.pmodal-inner')&&q('pmodal')?.classList.contains('on')&&e.target===q('pmodal'))closePModal();
   if(e.target===q('leaderboard-modal'))q('leaderboard-modal').style.display='none';
   if(e.target===q('mood-rooms-modal'))q('mood-rooms-modal').style.display='none';
-  // Close overlays on bg tap
   if(e.target===q('silent-room'))closeSilentRoom();
   if(e.target===q('ritual-overlay'))closeRitual();
 });

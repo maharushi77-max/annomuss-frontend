@@ -1421,6 +1421,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div class="pmi" onclick="showLeaderboard()"><span style="font-size:1.1rem;width:22px">🏆</span><span style="flex:1;font-size:.88rem;font-weight:500">Weekly Leaderboard</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="shareInvite()"><span style="font-size:1.1rem;width:22px">🎁</span><span style="flex:1;font-size:.88rem;font-weight:500">Invite Friends — earn 50 XP</span><span style="color:var(--v3)">Share</span></div>
     <div class="pmi" onclick="location.href='/security.html'"><span style="font-size:1.1rem;width:22px">🔒</span><span style="flex:1;font-size:.88rem;font-weight:500">Security & Privacy</span><span style="color:var(--tx3)">›</span></div>
+    <div class="pmi" onclick="toggleSound()"><span style="font-size:1.1rem;width:22px" id="sound-ico">🔊</span><span style="flex:1;font-size:.88rem;font-weight:500" id="sound-lbl">Sounds on</span><span style="color:var(--tx3)">Toggle</span></div>
     <div class="pmi" onclick="doLogout()" style="color:var(--cr)"><span style="font-size:1.1rem;width:22px">🚪</span><span style="flex:1;font-size:.88rem;font-weight:500">Log Out</span></div>
     <div id="capsule-confetti-anchor" style="height:1px"></div>
   </div>
@@ -2037,6 +2038,7 @@ async function doLike(id,btn){
   // Optimistic update
   btn.classList.toggle('liked',!was);
   ico.textContent=was?'🤍':'💙';
+  if(!was)sound('like');
   lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?-1:1))||'';
   try{
     const r=await api(`/api/posts/${id}/like`,{method:'POST'});
@@ -2155,6 +2157,7 @@ async function showPostSuccess(type, caption, post){
   }catch(_){q('ps-city').style.display='none';}
 
   screen.classList.add('on');
+  sound('post');
   launchConfetti('ps-confetti');
   // Auto-close after 5s
   setTimeout(closePostSuccess, 5000);
@@ -2268,6 +2271,8 @@ const REACTION_MOMENTS={
 
 let reactionMomentTimer=null;
 function showReactionMoment(type){
+  const emoSound={heard:'heard',same:'same',strength:'strength',love:'like',gratitude:'gratitude'};
+  sound(emoSound[type]||'notif');
   const cfg=REACTION_MOMENTS[type];
   if(!cfg)return;
   // Don't interrupt if user is composing
@@ -3795,6 +3800,105 @@ function haptic(type='light'){
 }
 
 /* ═══════════════════════════════════════════════════
+   SOUND ENGINE — Web Audio API (no files needed)
+   Every sound is synthesized — instant, no loading
+═══════════════════════════════════════════════════ */
+let _audioCtx=null;
+let soundEnabled=localStorage.getItem('ann_sound')!=='off';
+
+function getAudioCtx(){
+  if(!_audioCtx){
+    try{_audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(_){return null;}
+  }
+  if(_audioCtx.state==='suspended')_audioCtx.resume().catch(()=>{});
+  return _audioCtx;
+}
+
+// Play a tone — freq, duration, type, volume, fadeOut
+function playTone(freq,dur=0.15,type='sine',vol=0.18,attack=0.01,decay=0.1){
+  if(!soundEnabled)return;
+  const ctx=getAudioCtx();if(!ctx)return;
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.type=type;osc.frequency.setValueAtTime(freq,ctx.currentTime);
+  gain.gain.setValueAtTime(0,ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(vol,ctx.currentTime+attack);
+  gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+  osc.start(ctx.currentTime);osc.stop(ctx.currentTime+dur+0.05);
+}
+
+function playChord(freqs,dur=0.3,vol=0.1){
+  freqs.forEach((f,i)=>setTimeout(()=>playTone(f,dur,'sine',vol),i*30));
+}
+
+// Named sounds
+const SOUNDS={
+  // Posting — warm, satisfying "sent" feeling
+  post:       ()=>{ playTone(523,0.08,'sine',0.12); setTimeout(()=>playTone(659,0.1,'sine',0.1),80); setTimeout(()=>playTone(784,0.2,'sine',0.08),160); },
+
+  // Like — light tap with tiny overtone  
+  like:       ()=>{ playTone(440,0.06,'sine',0.1); setTimeout(()=>playTone(554,0.08,'sine',0.07),50); },
+
+  // Reaction heard💙 — gentle chime, warm
+  heard:      ()=>{ playChord([392,494,622],0.4,0.08); },
+
+  // Reaction same🤝 — two matching tones
+  same:       ()=>{ playTone(330,0.1,'sine',0.1); setTimeout(()=>playTone(330,0.15,'sine',0.1),120); },
+
+  // Reaction strength🔥 — strong ascending  
+  strength:   ()=>{ playTone(262,0.08,'triangle',0.1); setTimeout(()=>playTone(330,0.08,'triangle',0.1),80); setTimeout(()=>playTone(392,0.15,'triangle',0.1),160); },
+
+  // Gratitude bomb💛 — sparkle cascade
+  gratitude:  ()=>{ [659,784,988,1047].forEach((f,i)=>setTimeout(()=>playTone(f,0.12,'sine',0.07),i*60)); },
+
+  // Streak celebration — triumphant arpeggio
+  streak:     ()=>{ [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,0.2,'sine',0.1),i*80)); },
+
+  // Notification — soft ping
+  notif:      ()=>{ playTone(880,0.05,'sine',0.08); setTimeout(()=>playTone(1108,0.1,'sine',0.06),50); },
+
+  // Error — low thump
+  error:      ()=>{ playTone(150,0.2,'square',0.08); },
+
+  // XP reward — ascending two-note
+  xp:         ()=>{ playTone(440,0.08,'sine',0.07); setTimeout(()=>playTone(550,0.12,'sine',0.06),90); },
+
+  // Open overlay — soft whoosh effect
+  open:       ()=>{ const ctx=getAudioCtx();if(!ctx||!soundEnabled)return; const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type='sine';osc.frequency.setValueAtTime(200,ctx.currentTime);osc.frequency.exponentialRampToValueAtTime(600,ctx.currentTime+0.15);gain.gain.setValueAtTime(0.08,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.2);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.25); },
+
+  // Breathing inhale — rising gentle tone (for Silent Room & Ritual)
+  breatheIn:  ()=>{ const ctx=getAudioCtx();if(!ctx||!soundEnabled)return; const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type='sine';osc.frequency.setValueAtTime(160,ctx.currentTime);osc.frequency.linearRampToValueAtTime(260,ctx.currentTime+3.5);gain.gain.setValueAtTime(0,ctx.currentTime);gain.gain.linearRampToValueAtTime(0.06,ctx.currentTime+1);gain.gain.linearRampToValueAtTime(0.06,ctx.currentTime+3);gain.gain.linearRampToValueAtTime(0,ctx.currentTime+3.8);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+4); },
+
+  // Breathing exhale — falling, releasing
+  breatheOut: ()=>{ const ctx=getAudioCtx();if(!ctx||!soundEnabled)return; const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type='sine';osc.frequency.setValueAtTime(220,ctx.currentTime);osc.frequency.linearRampToValueAtTime(120,ctx.currentTime+5.5);gain.gain.setValueAtTime(0,ctx.currentTime);gain.gain.linearRampToValueAtTime(0.05,ctx.currentTime+0.5);gain.gain.linearRampToValueAtTime(0.05,ctx.currentTime+5);gain.gain.linearRampToValueAtTime(0,ctx.currentTime+5.8);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+6); },
+
+  // Capsule unlock — magical reveal
+  capsule:    ()=>{ [523,659,784,988,1047].forEach((f,i)=>setTimeout(()=>playTone(f,0.25,'sine',0.09),i*100)); },
+
+  // Whisper chain complete — poetic chord
+  whisper:    ()=>{ playChord([392,494,587,740],0.6,0.07); },
+
+  // Ritual word release — deep bowl-like resonance
+  ritual:     ()=>{ playTone(220,1.2,'sine',0.06,0.1,0.8); setTimeout(()=>playTone(330,0.8,'sine',0.04,0.1,0.6),200); },
+
+  // 3am room open — mysterious low chord
+  am3:        ()=>{ playChord([110,138,165],0.8,0.05); },
+};
+
+function sound(name){
+  try{SOUNDS[name]?.();}catch(_){}
+}
+
+// Sound toggle (add to profile menu)
+function toggleSound(){
+  soundEnabled=!soundEnabled;
+  localStorage.setItem('ann_sound',soundEnabled?'on':'off');
+  toast(soundEnabled?'🔊 Sounds on':'🔇 Sounds off');
+  if(soundEnabled)sound('xp');
+}
+
+/* ═══════════════════════════════════════════════════
    MICRO-ANIMATIONS
 ═══════════════════════════════════════════════════ */
 function addRipple(btn,e){
@@ -3829,7 +3933,7 @@ function sharePTF(){
   const text=`${msg}\n\nfrom annomuss.in`;
   if(navigator.share)navigator.share({text,title:'annomuss — permission to feel'}).catch(()=>{});
   else{navigator.clipboard?.writeText(text);toast('✨ Copied!');}
-  haptic('medium');
+  haptic('medium');sound('xp');
   const rect=q('ptf-card')?.getBoundingClientRect();
   if(rect)floatEmoji('✨',rect.left+rect.width/2,rect.top);
 }
@@ -3860,7 +3964,7 @@ async function sendGratitudeBomb(postId,btn,event){
   gbSent.add(postId);
   // Instant optimistic
   btn.textContent='💛';btn.classList.add('gratitude-sent');
-  haptic('success');
+  haptic('success');sound('gratitude');
   const rect=btn.getBoundingClientRect();
   for(let i=0;i<5;i++)setTimeout(()=>floatEmoji(['💛','✨','🌟'][i%3],rect.left+Math.random()*40-20,rect.top-i*15),i*80);
   toast('💛 Gratitude sent — they\'ll feel it');
@@ -3875,7 +3979,7 @@ let am3CurrentPrompt='';
 
 function open3amRoom(){
   const overlay=q('am3-overlay');if(!overlay)return;
-  overlay.classList.add('on');generate3amStars();haptic('medium');
+  overlay.classList.add('on');generate3amStars();haptic('medium');sound('am3');
   const h=new Date().getHours(),isOpen=h>=23||h<=4;
   q('am3-locked').style.display=isOpen?'none':'flex';
   q('am3-open').style.display=isOpen?'flex':'none';
@@ -3929,7 +4033,7 @@ function saveCapsule(){
   capsules.unshift({id:'c'+Date.now(),text,unlockDate:Date.now()+days*86400000,createdAt:Date.now(),days});
   localStorage.setItem('ann_capsules',JSON.stringify(capsules.slice(0,20)));
   if(q('capsule-text'))q('capsule-text').value='';
-  loadCapsules();haptic('celebration');launchConfetti('sc-confetti');
+  loadCapsules();haptic('celebration');sound('capsule');launchConfetti('sc-confetti');
   awardXP(15,'Time capsule created');toast('⏳ Sealed. Future you will read this.');
 }
 function loadCapsules(){
@@ -4007,7 +4111,7 @@ function openCapsuleReading(id){
 let silentRoomTimer=null;
 async function openSilentRoom(){
   const overlay=q('silent-room');if(!overlay)return;
-  overlay.classList.add('on');haptic('medium');generateSilentDots();
+  overlay.classList.add('on');haptic('medium');sound('open');generateSilentDots();
   socket?.emit('join-silent-room');
   try{
     const r=await api('/api/special/silent/join',{method:'POST'});
@@ -4032,7 +4136,7 @@ function generateSilentDots(){
 /* ═══════════════════════════════════════════════════
    WHISPER CHAIN — real API with fallback
 ═══════════════════════════════════════════════════ */
-function openWhisperChain(){q('whisper-overlay')?.classList.add('on');loadWhisperChains();haptic('medium');}
+function openWhisperChain(){q('whisper-overlay')?.classList.add('on');loadWhisperChains();haptic('medium');sound('open');}
 function closeWhisperChain(){q('whisper-overlay')?.classList.remove('on');}
 async function loadWhisperChains(){
   const el=q('whisper-list');if(!el)return;
@@ -4081,7 +4185,7 @@ async function addWhisperLine(chainId){
   try{
     const r=await api(`/api/special/whisper/${chainId}/line`,{method:'POST',body:JSON.stringify({text:text.trim()})});
     const d=await r.json();
-    if(r.ok){loadWhisperChains();haptic('success');awardXP(d.chain?.isComplete?20:10,'Whisper chain');toast(d.chain?.isComplete?'✨ Poem complete! Beautiful.':'🌀 Line added!');}
+    if(r.ok){loadWhisperChains();haptic('success');awardXP(d.chain?.isComplete?20:10,'Whisper chain');if(d.chain?.isComplete)sound('whisper');toast(d.chain?.isComplete?'✨ Poem complete! Beautiful.':'🌀 Line added!');}
     else toast(d.message||'Try again');
   }catch(_){
     const chains=JSON.parse(localStorage.getItem('ann_whisper_chains')||'[]');
@@ -4098,7 +4202,7 @@ const RITUAL_PHASES=['Breathe in slowly...','Hold it gently...','Breathe out com
 const RITUAL_DURATIONS=[4000,2000,6000,3000];
 async function openRitual(){
   const overlay=q('ritual-overlay');if(!overlay)return;
-  overlay.classList.add('on');haptic('medium');runRitualBreath();
+  overlay.classList.add('on');haptic('medium');sound('open');runRitualBreath();
   try{const r=await api('/api/special/ritual/words');const words=await r.json();displayRitualWords(Array.isArray(words)?words:[]);}
   catch(_){displayRitualWords(['exhausted','hopeful','enough','love','peace','free','okay','tired','brave','home']);}
   q('ritual-input-area').style.display='block';
@@ -4107,6 +4211,8 @@ function closeRitual(){q('ritual-overlay')?.classList.remove('on');clearTimeout(
 function runRitualBreath(){
   const phase=q('ritual-phase');if(!phase)return;
   const p=ritualPhase%RITUAL_PHASES.length;phase.textContent=RITUAL_PHASES[p];
+  if(p===0)sound('breatheIn');
+  if(p===2)sound('breatheOut');
   ritualInterval=setTimeout(()=>{ritualPhase++;runRitualBreath();},RITUAL_DURATIONS[p]);
 }
 function displayRitualWords(words){
@@ -4117,7 +4223,7 @@ async function submitRitualWord(){
   const inp=q('ritual-word-input');const word=inp?.value?.trim();if(!word)return;inp.value='';
   const el=q('ritual-words');
   if(el){const pill=document.createElement('div');pill.className='ritual-word-pill';pill.textContent=word;el.insertBefore(pill,el.firstChild);}
-  haptic('success');floatEmoji('🌊',window.innerWidth/2,window.innerHeight*.45);
+  haptic('success');sound('ritual');floatEmoji('🌊',window.innerWidth/2,window.innerHeight*.45);
   awardXP(5,'Collective ritual');toast('🌊 Released into the collective');
   try{await api('/api/special/ritual/word',{method:'POST',body:JSON.stringify({word})});}catch(_){}
   socket?.emit('ritual-word',{word});

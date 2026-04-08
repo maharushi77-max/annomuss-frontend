@@ -1,695 +1,946 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Annomuss Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;600;700&family=Cabinet+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#030308;--bg1:#08080f;--bg2:#0d0d1c;--bg3:#121228;--v:#7B5EA7;--v2:#9B7FD4;--v3:#C4A8FF;--vg:rgba(123,94,167,.12);--cr:#FF4D6D;--tl:#00C9A7;--go:#F4A261;--lm:#52B788;--tx:#F5F3FF;--tx2:#9896B8;--tx3:#4E4C6A;--bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);--fD:'Clash Display',sans-serif;--fB:'Cabinet Grotesk',sans-serif;--fM:'JetBrains Mono',monospace}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--tx);font-family:var(--fB);min-height:100vh}
-#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;flex-direction:column}
-.login-card{background:var(--bg2);border:1px solid var(--bd2);border-radius:22px;padding:36px 32px;text-align:center;width:100%;max-width:360px}
-.login-logo{font-family:var(--fD);font-size:1.5rem;font-weight:700;background:linear-gradient(120deg,var(--v3),#FF85A1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
-.input{background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:12px 14px;font-size:.9rem;width:100%;color:var(--tx);font-family:var(--fB);outline:none;transition:border-color .2s;margin-bottom:12px}
-.input:focus{border-color:var(--v)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 24px;border-radius:100px;font-size:.82rem;font-weight:700;font-family:var(--fD);cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
-.btn:active{transform:scale(.96)}
-.btn-v{background:linear-gradient(135deg,#7B5EA7,#6040C4);color:#fff}
-.btn-g{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}
-.btn-cr{background:linear-gradient(135deg,#FF4D6D,#E0304E);color:#fff}
-.btn-tl{background:linear-gradient(135deg,var(--tl),#00A884);color:#fff}
-.btn-go{background:linear-gradient(135deg,var(--go),#E08020);color:#fff}
-.btn-sm{padding:6px 14px;font-size:.73rem}
-.btn-full{width:100%}
-#app-screen{display:none;flex-direction:column;min-height:100vh}
-.header{background:rgba(3,3,8,.95);backdrop-filter:blur(24px);border-bottom:1px solid var(--bd);padding:12px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
-.layout{display:flex;flex:1}
-.sidebar{width:210px;background:var(--bg1);border-right:1px solid var(--bd);padding:14px 10px;flex-shrink:0;position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;font-size:.82rem;color:var(--tx2);font-weight:500;transition:all .15s;margin-bottom:3px}
-.nav-item:hover{background:var(--bg2);color:var(--tx)}
-.nav-item.active{background:var(--vg);color:var(--v3);border-left:2.5px solid var(--v)}
-.nav-ico{font-size:.95rem;width:20px;text-align:center;flex-shrink:0}
-.nav-badge{background:var(--cr);color:#fff;border-radius:100px;font-size:.6rem;padding:1px 5px;font-weight:700;margin-left:auto}
-.main{flex:1;padding:22px;overflow-x:auto}
-.page-title{font-family:var(--fD);font-size:1.25rem;font-weight:700;margin-bottom:2px}
-.page-sub{font-size:.78rem;color:var(--tx3);margin-bottom:20px}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px}
-.stat-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:16px 14px}
-.stat-icon{font-size:1.3rem;margin-bottom:6px}
-.stat-value{font-family:var(--fD);font-size:1.7rem;font-weight:700;line-height:1}
-.stat-label{font-size:.68rem;color:var(--tx3);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-.stat-change{font-size:.7rem;margin-top:4px;font-family:var(--fM)}
-.up{color:var(--lm)}.down{color:var(--cr)}
-.card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:18px;margin-bottom:16px}
-.card-title{font-family:var(--fD);font-weight:700;font-size:.88rem;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-table{width:100%;border-collapse:collapse;font-size:.78rem}
-thead th{text-align:left;padding:8px 10px;font-size:.65rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--bd);font-family:var(--fD);white-space:nowrap}
-tbody td{padding:9px 10px;border-bottom:.5px solid var(--bd);color:var(--tx2);vertical-align:middle}
-tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--tx)}
-.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:100px;font-size:.62rem;font-weight:700;font-family:var(--fD)}
-.badge-v{background:var(--vg);color:var(--v3)}
-.badge-cr{background:rgba(255,77,109,.1);color:var(--cr)}
-.badge-lm{background:rgba(82,183,136,.1);color:var(--lm)}
-.badge-go{background:rgba(244,162,97,.1);color:var(--go)}
-.badge-g{background:var(--bg3);color:var(--tx2)}
-.tab-content{display:none}.tab-content.active{display:block}
-.empty{text-align:center;padding:48px;color:var(--tx3);font-size:.85rem}
-.crisis-row td{background:rgba(255,77,109,.04)!important}
+:root{
+  --bg:#09090f;--bg1:#0f0f1a;--bg2:#141424;--bg3:#1a1a2e;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);
+  --tx:#f0eeff;--tx2:#9896b8;--tx3:#4e4c6a;
+  --v:#7B5EA7;--v2:#6044a0;--vl:#c4a8ff;
+  --cr:#FF4D6D;--tl:#00C9A7;--go:#F4A261;--lm:#52B788;
+  --fD:'Trebuchet MS',sans-serif;--fM:'JetBrains Mono',monospace;
+  --r:12px;--r2:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-size:14px}
+input,select,textarea,button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;outline:none}
+button{cursor:pointer}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--bd);font-size:.82rem;vertical-align:middle}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);font-weight:600;background:var(--bg2)}
+tr:hover td{background:rgba(255,255,255,.02)}
+.crisis-row td{background:rgba(255,77,109,.04)!important;border-left:3px solid var(--cr)}
 .hidden-row td{opacity:.5}
-.spinner{width:22px;height:22px;border:2.5px solid var(--bd2);border-top-color:var(--v);border-radius:50%;animation:spin .65s linear infinite;margin:0 auto}
-@keyframes spin{to{transform:rotate(360deg)}}
-.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(6px)}
-.confirm-overlay.open{display:flex}
-.confirm-card{background:var(--bg2);border:1px solid var(--bd2);border-radius:18px;padding:28px;max-width:320px;width:calc(100% - 40px);text-align:center}
-.export-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px;margin-bottom:20px}
-.export-card{background:var(--bg2);border:1.5px solid var(--bd);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;text-decoration:none;display:block}
-.export-card:hover{border-color:var(--v);background:var(--vg);transform:translateY(-1px)}
-.export-card.gold{border-color:rgba(244,162,97,.3)}
-.export-card.gold:hover{border-color:var(--go);background:rgba(244,162,97,.06)}
-.export-ico{font-size:1.8rem;margin-bottom:7px}
-.export-title{font-family:var(--fD);font-weight:700;font-size:.85rem;color:var(--tx);margin-bottom:3px}
-.export-sub{font-size:.7rem;color:var(--tx3)}
-.filter-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.search-input{background:var(--bg3);border:1.5px solid var(--bd);border-radius:100px;padding:8px 16px;font-size:.82rem;color:var(--tx);font-family:var(--fB);outline:none;transition:border-color .2s;min-width:220px}
-.search-input:focus{border-color:var(--v)}
+/* Layout */
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:220px;flex-shrink:0;background:var(--bg1);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow-y:auto}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#topbar{padding:14px 20px;background:var(--bg1);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;flex-shrink:0}
+#content{flex:1;overflow-y:auto;padding:20px}
+/* Sidebar */
+.sidebar-logo{padding:20px 16px 14px;border-bottom:1px solid var(--bd)}
+.sidebar-logo-text{font-size:1.1rem;font-weight:700;color:var(--vl)}
+.sidebar-logo-sub{font-size:.7rem;color:var(--tx3);margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;border-radius:0;transition:background .15s;color:var(--tx2);font-size:.85rem}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--tx)}
+.nav-item.active{background:rgba(123,94,167,.15);color:var(--vl);border-right:2px solid var(--v)}
+.nav-ico{font-size:1rem;width:20px}
+.nav-badge{background:var(--cr);color:#fff;font-size:.62rem;padding:1px 6px;border-radius:100px;font-weight:700;margin-left:auto}
+.nav-section{padding:12px 16px 6px;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)}
+/* Top bar */
+.tb-title{font-weight:700;font-size:.95rem;color:var(--tx)}
+.tb-sub{font-size:.75rem;color:var(--tx3);margin-left:8px}
+.tb-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+/* Stat cards */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.purple::before{background:var(--v)}
+.stat-card.red::before{background:var(--cr)}
+.stat-card.teal::before{background:var(--tl)}
+.stat-card.orange::before{background:var(--go)}
+.stat-card.green::before{background:var(--lm)}
+.stat-val{font-size:1.6rem;font-weight:700;color:var(--tx);line-height:1;margin-bottom:4px}
+.stat-label{font-size:.72rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
+.stat-change{font-size:.7rem;margin-top:4px}
+.stat-change.up{color:var(--tl)}.stat-change.down{color:var(--cr)}.stat-change.neutral{color:var(--tx3)}
+/* Buttons */
+.btn{padding:7px 14px;border-radius:var(--r2);font-size:.8rem;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:var(--v);color:#fff}
+.btn-primary:hover{background:var(--v2)}
+.btn-danger{background:rgba(255,77,109,.15);color:var(--cr);border:1px solid rgba(255,77,109,.3)}
+.btn-danger:hover{background:rgba(255,77,109,.25)}
+.btn-ghost{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}
+.btn-ghost:hover{background:var(--bg2);color:var(--tx)}
+.btn-success{background:rgba(82,183,136,.15);color:var(--lm);border:1px solid rgba(82,183,136,.3)}
+.btn-sm{padding:5px 10px;font-size:.75rem}
+.btn-xs{padding:3px 8px;font-size:.7rem}
+/* Action buttons in table */
+.ab{padding:4px 10px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;white-space:nowrap}
+.ab-ban{background:rgba(255,77,109,.12);color:var(--cr)}.ab-ban:hover{background:rgba(255,77,109,.2)}
+.ab-unban{background:rgba(82,183,136,.12);color:var(--lm)}.ab-unban:hover{background:rgba(82,183,136,.2)}
+.ab-del{background:rgba(255,77,109,.2);color:var(--cr);border:1px solid rgba(255,77,109,.3)}.ab-del:hover{background:rgba(255,77,109,.35)}
+.ab-hide{background:rgba(123,94,167,.12);color:var(--vl)}.ab-hide:hover{background:rgba(123,94,167,.22)}
+.ab-show{background:rgba(0,201,167,.12);color:var(--tl)}.ab-show:hover{background:rgba(0,201,167,.22)}
+.ab-view{background:var(--bg3);color:var(--tx2)}.ab-view:hover{background:var(--bg2)}
 .actions{display:flex;gap:5px;flex-wrap:wrap}
-.ab{padding:4px 9px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;border:none;font-family:var(--fD);white-space:nowrap;transition:opacity .12s}
-.ab:active{opacity:.7}
-.ab-ban{background:rgba(255,77,109,.12);color:var(--cr)}
-.ab-unban{background:rgba(82,183,136,.12);color:var(--lm)}
-.ab-del{background:rgba(255,77,109,.2);color:var(--cr);border:1px solid rgba(255,77,109,.3)}
-.ab-hide{background:rgba(123,94,167,.12);color:var(--v3)}
-.ab-show{background:rgba(0,201,167,.12);color:var(--tl)}
-.ab-view{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}
-.emo-bar-wrap{margin-bottom:8px}
-.emo-bar-label{display:flex;justify-content:space-between;margin-bottom:4px;font-size:.75rem}
-.emo-bar-track{background:var(--bg3);border-radius:100px;height:6px;overflow:hidden}
-.emo-bar-fill{height:100%;border-radius:100px;transition:width 1s ease}
+/* Badges */
+.badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:.68rem;font-weight:600}
+.badge-cr{background:rgba(255,77,109,.15);color:var(--cr)}
+.badge-g{background:rgba(123,94,167,.15);color:var(--vl)}
+.badge-v{background:rgba(0,201,167,.1);color:var(--tl)}
+.badge-go{background:rgba(244,162,97,.1);color:var(--go)}
+.badge-lm{background:rgba(82,183,136,.1);color:var(--lm)}
+/* Search */
+.search-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-inp{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r2);padding:8px 14px;color:var(--tx);flex:1;min-width:200px}
+.search-inp:focus{border-color:var(--v)}
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap}
+.fpill{padding:5px 12px;border-radius:100px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--bd2);color:var(--tx2);transition:all .15s}
+.fpill:hover{border-color:var(--v);color:var(--vl)}
+.fpill.active{background:var(--v);color:#fff;border-color:var(--v)}
+/* Export cards */
+.export-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+.export-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.export-card:hover{border-color:var(--v);transform:translateY(-2px)}
+.export-card.gold{border-color:rgba(244,162,97,.4);background:rgba(244,162,97,.04)}
+.export-card .ec-ico{font-size:1.8rem;margin-bottom:8px}
+.export-card .ec-title{font-size:.9rem;font-weight:700;margin-bottom:4px}
+.export-card .ec-desc{font-size:.75rem;color:var(--tx3);line-height:1.5}
+.export-card .ec-badge{position:absolute;top:10px;right:10px;background:var(--go);color:#000;font-size:.62rem;padding:2px 7px;border-radius:100px;font-weight:700}
+/* Confirm modal */
+#confirm-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:999;display:none;align-items:center;justify-content:center;padding:20px}
+#confirm-modal.on{display:flex}
+#confirm-box{background:var(--bg1);border:1px solid var(--bd2);border-radius:16px;padding:28px;max-width:360px;width:100%;text-align:center}
+.confirm-ico{font-size:2.5rem;margin-bottom:12px}
+.confirm-title{font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.confirm-msg{font-size:.85rem;color:var(--tx3);line-height:1.6;margin-bottom:22px}
+.confirm-btns{display:flex;gap:10px}
+/* Toast */
+#toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast-item{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r2);padding:10px 16px;font-size:.83rem;color:var(--tx);animation:toastIn .2s ease;max-width:300px;pointer-events:all}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+/* Login */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-box{background:var(--bg1);border:1px solid var(--bd2);border-radius:20px;padding:32px 28px;width:100%;max-width:340px;text-align:center}
+.login-logo{font-size:2.5rem;margin-bottom:12px}
+.login-title{font-size:1.1rem;font-weight:700;margin-bottom:4px;color:var(--vl)}
+.login-sub{font-size:.8rem;color:var(--tx3);margin-bottom:22px}
+.login-inp{width:100%;background:var(--bg2);border:1px solid var(--bd2);border-radius:10px;padding:12px 16px;margin-bottom:12px;color:var(--tx);text-align:center;letter-spacing:2px}
+.login-inp:focus{border-color:var(--v)}
+.login-err{color:var(--cr);font-size:.78rem;margin-top:8px;display:none}
+/* Page section */
+.page-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.page-title{font-size:1rem;font-weight:700;color:var(--tx)}
+.page-sub{font-size:.78rem;color:var(--tx3)}
+/* Charts */
+.mini-chart{display:flex;align-items:flex-end;gap:3px;height:50px}
+.mini-bar{flex:1;border-radius:3px 3px 0 0;min-width:4px;transition:height .5s ease;opacity:.8}
+/* Empty */
+.empty{padding:40px;text-align:center;color:var(--tx3);font-size:.85rem;line-height:1.8}
+/* Spinner */
+.spin{width:24px;height:24px;border:2.5px solid var(--bd2);border-top-color:var(--v);border-radius:50%;animation:spin .7s linear infinite;margin:auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+/* Mood bars */
+.emo-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.emo-label{width:80px;font-size:.75rem;color:var(--tx2);text-transform:capitalize}
+.emo-track{flex:1;height:8px;background:var(--bg3);border-radius:100px;overflow:hidden}
+.emo-fill{height:100%;border-radius:100px;transition:width 1s ease}
+.emo-pct{width:36px;font-size:.72rem;color:var(--tx3);text-align:right;font-family:var(--fM)}
+/* Pulse dot */
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--tl);animation:pdot 2s ease-in-out infinite}
+@keyframes pdot{0%,100%{opacity:.4}50%{opacity:1}}
+/* Mobile responsive */
+@media(max-width:640px){
+  #sidebar{display:none}
+  #app{flex-direction:column}
+  .stats-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
 
-<!-- Login -->
+<!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-card">
-    <div class="login-logo">🎭 annomuss</div>
-    <div style="font-size:.8rem;color:var(--tx3);margin-bottom:24px">Admin Dashboard</div>
-    <input class="input" type="password" id="admin-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
-    <button class="btn btn-v btn-full" onclick="doLogin()">Login →</button>
-    <div id="login-err" style="color:var(--cr);font-size:.78rem;margin-top:10px;display:none">Wrong password</div>
+  <div class="login-box">
+    <div class="login-logo">🛡️</div>
+    <div class="login-title">Annomuss Admin</div>
+    <div class="login-sub">Enter your admin password</div>
+    <input class="login-inp" type="password" id="admin-pass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="btn btn-primary" style="width:100%;padding:11px;justify-content:center" onclick="doLogin()" id="login-btn">Enter →</button>
+    <div class="login-err" id="login-err">Wrong password. Try again.</div>
   </div>
 </div>
 
-<!-- Confirm -->
-<div class="confirm-overlay" id="confirm-overlay">
-  <div class="confirm-card">
-    <div style="font-size:2rem;margin-bottom:10px" id="c-ico">⚠️</div>
-    <div style="font-family:var(--fD);font-weight:700;font-size:.98rem;margin-bottom:6px" id="c-title">Confirm</div>
-    <div style="font-size:.8rem;color:var(--tx2);margin-bottom:18px" id="c-msg">Are you sure?</div>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-g" style="flex:1" onclick="closeConfirm()">Cancel</button>
-      <button class="btn btn-cr" style="flex:1" id="c-ok" onclick="execConfirm()">Confirm</button>
+<!-- CONFIRM MODAL -->
+<div id="confirm-modal">
+  <div id="confirm-box">
+    <div class="confirm-ico" id="c-ico">⚠️</div>
+    <div class="confirm-title" id="c-title">Are you sure?</div>
+    <div class="confirm-msg" id="c-msg"></div>
+    <div class="confirm-btns">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" style="flex:1;justify-content:center" id="c-ok" onclick="execConfirm()">Confirm</button>
     </div>
   </div>
 </div>
 
-<!-- App -->
-<div id="app-screen">
-  <div class="header">
-    <div style="flex:1">
-      <div style="font-family:var(--fD);font-size:1.05rem;font-weight:700;background:linear-gradient(120deg,var(--v3),#FF85A1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">🎭 annomuss admin</div>
-      <div style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)" id="hdr-sub">Loading...</div>
+<!-- TOAST -->
+<div id="toast-wrap"></div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-text">🎭 annomuss</div>
+      <div class="sidebar-logo-sub">Admin Dashboard</div>
     </div>
-    <button class="btn btn-g btn-sm" onclick="loadAll()">🔄 Refresh</button>
-    <button class="btn btn-g btn-sm" onclick="doLogout()">Logout</button>
+    <div class="nav-section">Analytics</div>
+    <div class="nav-item active" id="nav-overview" onclick="showTab('overview',this)"><span class="nav-ico">📊</span>Overview</div>
+    <div class="nav-item" id="nav-emotion" onclick="showTab('emotion',this)"><span class="nav-ico">🧠</span>Emotion Intel</div>
+    <div class="nav-section">Moderation</div>
+    <div class="nav-item" id="nav-users" onclick="showTab('users',this)"><span class="nav-ico">👥</span>Users</div>
+    <div class="nav-item" id="nav-posts" onclick="showTab('posts',this)"><span class="nav-ico">📢</span>Posts</div>
+    <div class="nav-item" id="nav-vents" onclick="showTab('vents',this)"><span class="nav-ico">💭</span>Vents</div>
+    <div class="nav-item" id="nav-reports" onclick="showTab('reports',this)"><span class="nav-ico">⚠️</span>Reports <span class="nav-badge" id="reports-badge" style="display:none">!</span></div>
+    <div class="nav-item" id="nav-crisis" onclick="showTab('crisis',this)"><span class="nav-ico">🆘</span>Crisis</div>
+    <div class="nav-section">Special Features</div>
+    <div class="nav-item" id="nav-whisper" onclick="showTab('whisper',this)"><span class="nav-ico">🌀</span>Whisper Chains</div>
+    <div class="nav-item" id="nav-gratitude" onclick="showTab('gratitude',this)"><span class="nav-ico">💛</span>Gratitude Bombs</div>
+    <div class="nav-section">Data</div>
+    <div class="nav-item" id="nav-moods" onclick="showTab('moods',this)"><span class="nav-ico">🌊</span>Mood Data</div>
+    <div class="nav-item" id="nav-export" onclick="showTab('export',this)"><span class="nav-ico">📥</span>Export & Ads</div>
+    <div style="margin-top:auto;padding:16px">
+      <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center" onclick="doLogout()">Logout</button>
+    </div>
   </div>
 
-  <div class="layout">
-    <div class="sidebar">
-      <div class="nav-item active" onclick="showTab('overview',this)"><span class="nav-ico">📊</span>Overview</div>
-      <div class="nav-item" onclick="showTab('users',this)"><span class="nav-ico">👥</span>Users</div>
-      <div class="nav-item" onclick="showTab('posts',this)"><span class="nav-ico">📢</span>Posts</div>
-      <div class="nav-item" onclick="showTab('vents',this)"><span class="nav-ico">💭</span>Vents</div>
-      <div class="nav-item" onclick="showTab('moods',this)"><span class="nav-ico">🌊</span>Moods</div>
-      <div class="nav-item" onclick="showTab('reports',this)"><span class="nav-ico">⚠️</span>Reports <span class="nav-badge" id="reports-badge" style="display:none">!</span></div>
-      <div class="nav-item" onclick="showTab('crisis',this)"><span class="nav-ico">🆘</span>Crisis</div>
-      <div class="nav-item" onclick="showTab('export',this)"><span class="nav-ico">📥</span>Export & Ads</div>
+  <!-- MAIN -->
+  <div id="main">
+    <div id="topbar">
+      <div>
+        <div class="tb-title" id="tb-title">Overview</div>
+        <div class="tb-sub" id="tb-sub">Live platform data</div>
+      </div>
+      <div class="tb-actions">
+        <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--tx3)">
+          <div class="pdot"></div>
+          <span id="online-num">— online</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="refreshCurrent()">↻ Refresh</button>
+      </div>
     </div>
+    <div id="content">
 
-    <div class="main">
-
-      <!-- OVERVIEW -->
-      <div class="tab-content active" id="tab-overview">
-        <div class="page-title">Platform Overview</div>
-        <div class="page-sub">Live stats · auto-refreshes every 60s</div>
-        <div class="stats-grid" id="stats-grid"><div style="grid-column:1/-1;padding:40px;text-align:center"><div class="spinner"></div></div></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-          <div class="card"><div class="card-title">🌊 Emotion Distribution (all time)</div><div id="emo-dist"></div></div>
-          <div class="card"><div class="card-title">📍 Top Cities</div><div id="city-dist"></div></div>
+      <!-- OVERVIEW TAB -->
+      <div id="tab-overview" class="tab-content active">
+        <div class="stats-grid" id="stats-grid">
+          <div class="empty" style="grid-column:1/-1"><div class="spin"></div></div>
         </div>
-        <div class="card"><div class="card-title">📈 Daily Signups (last 30 days)</div><div id="daily-signups" style="font-size:.8rem;color:var(--tx3)">Loading...</div></div>
-      </div>
-
-      <!-- USERS -->
-      <div class="tab-content" id="tab-users">
-        <div class="page-title">User Management</div>
-        <div class="filter-row">
-          <input class="search-input" placeholder="Search name or email..." oninput="searchUsers(this.value)" id="user-search"/>
-          <button class="btn btn-sm btn-g" onclick="loadUsers()">Reload</button>
-          <span style="font-size:.78rem;color:var(--tx3)" id="user-count"></span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Emotion Distribution (7d)</div>
+            <div id="emo-bars"></div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Top Cities</div>
+            <div id="city-list"></div>
+          </div>
         </div>
-        <div class="card" style="overflow-x:auto"><div id="users-table"><div class="spinner" style="padding:40px"></div></div></div>
-      </div>
-
-      <!-- POSTS -->
-      <div class="tab-content" id="tab-posts">
-        <div class="page-title">Post Management</div>
-        <div class="filter-row">
-          <button class="btn btn-sm btn-g" onclick="loadPosts(false,false)" id="filter-all">All Posts</button>
-          <button class="btn btn-sm btn-g" onclick="loadPosts(true,false)" id="filter-crisis">🆘 Crisis Only</button>
-          <button class="btn btn-sm btn-g" onclick="loadPosts(false,true)" id="filter-hidden">🚫 Hidden</button>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:20px">
+          <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">New Signups — Last 14 Days</div>
+          <div id="signup-chart" class="mini-chart"></div>
         </div>
-        <div class="card" style="overflow-x:auto"><div id="posts-table"><div class="spinner" style="padding:40px"></div></div></div>
-      </div>
-
-      <!-- VENTS -->
-      <div class="tab-content" id="tab-vents">
-        <div class="page-title">Vent Board</div>
-        <div class="page-sub">Anonymous vents — delete if harmful</div>
-        <div class="card" style="overflow-x:auto"><div id="vents-table"><div class="spinner" style="padding:40px"></div></div></div>
-      </div>
-
-      <!-- MOODS -->
-      <div class="tab-content" id="tab-moods">
-        <div class="page-title">Mood Analytics</div>
-        <div class="page-sub">City-level emotion data — gold for advertisers</div>
-        <div id="moods-content"><div class="spinner" style="padding:40px"></div></div>
-      </div>
-
-      <!-- REPORTS -->
-      <div class="tab-content" id="tab-reports">
-        <div class="page-title">Reports Queue</div>
-        <div class="page-sub">User-flagged content — act within 24h</div>
-        <div class="card" style="overflow-x:auto"><div id="reports-table"><div class="spinner" style="padding:40px"></div></div></div>
-        <div class="card" style="margin-top:0">
-          <div class="card-title">📢 High Report Count Posts</div>
-          <div id="flagged-table"><div class="spinner" style="padding:20px"></div></div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+          <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Recent Activity</div>
+          <div id="activity-feed"><div class="spin"></div></div>
         </div>
       </div>
 
-      <!-- CRISIS -->
-      <div class="tab-content" id="tab-crisis">
-        <div class="page-title">🆘 Crisis Posts</div>
-        <div class="page-sub">Flagged for self-harm or crisis content — review immediately</div>
-        <div class="card" style="overflow-x:auto"><div id="crisis-table"><div class="spinner" style="padding:40px"></div></div></div>
+      <!-- EMOTION INTELLIGENCE TAB -->
+      <div id="tab-emotion" class="tab-content" style="display:none">
+        <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="loadEmotionPulse()">Live Pulse</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadEmotionHourly()">Hourly Breakdown</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadAdMatrix()">Ad Matrix</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadDataQuality()">Data Quality</button>
+          <a href="https://api.annomuss.in/api/emotion/export" target="_blank" class="btn btn-ghost btn-sm">&#11015; Export CSV</a>
+        </div>
+        <div id="emotion-content"><div class="empty">Select a view above</div></div>
       </div>
 
-      <!-- EXPORT -->
-      <div class="tab-content" id="tab-export">
-        <div class="page-title">Export Data + Ad Targeting</div>
-        <div class="page-sub">Download Excel-compatible CSVs for analytics and advertising</div>
-
-        <div style="padding:12px 16px;background:rgba(244,162,97,.07);border:1px solid rgba(244,162,97,.2);border-radius:12px;margin-bottom:18px;font-size:.82rem;color:var(--go)">
-          💡 <strong>Ad Targeting:</strong> The "Ad Targeting Intelligence" export shows which emotions are felt in which cities at what time of day — use this to pitch advertisers and serve targeted ads.
+      <!-- USERS TAB -->
+      <div id="tab-users" class="tab-content" style="display:none">
+        <div class="search-bar">
+          <input class="search-inp" type="text" placeholder="Search by name or email..." id="user-search" oninput="searchUsers(this.value)"/>
+          <button class="btn btn-primary btn-sm" onclick="loadUsers()">Search</button>
+          <div class="filter-pills">
+            <span class="fpill active" onclick="filterUsers('all',this)">All</span>
+            <span class="fpill" onclick="filterUsers('banned',this)">Banned</span>
+            <span class="fpill" onclick="filterUsers('premium',this)">Premium</span>
+          </div>
         </div>
+        <div style="overflow-x:auto"><div id="users-table"><div class="spin"></div></div></div>
+      </div>
 
+      <!-- POSTS TAB -->
+      <div id="tab-posts" class="tab-content" style="display:none">
+        <div class="search-bar">
+          <input class="search-inp" type="text" placeholder="Search posts..." id="post-search" oninput="filterPostsLive(this.value)"/>
+          <div class="filter-pills">
+            <span class="fpill active" id="pf-all" onclick="loadPosts(false,false,false,this)">All</span>
+            <span class="fpill" id="pf-crisis" onclick="loadPosts(true,false,false,this)">&#128682; Crisis</span>
+            <span class="fpill" id="pf-hidden" onclick="loadPosts(false,true,false,this)">Hidden</span>
+            <span class="fpill" id="pf-reported" onclick="loadPosts(false,false,true,this)">Reported</span>
+          </div>
+        </div>
+        <div style="overflow-x:auto"><div id="posts-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- VENTS TAB -->
+      <div id="tab-vents" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title">Vents Board</div><div class="page-sub">Anonymous vents — delete if harmful</div></div>
+        <div style="overflow-x:auto"><div id="vents-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- REPORTS TAB -->
+      <div id="tab-reports" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title">Open Reports</div><div class="page-sub">User-submitted reports awaiting action</div></div>
+        <div style="overflow-x:auto"><div id="reports-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- CRISIS TAB -->
+      <div id="tab-crisis" class="tab-content" style="display:none">
+        <div class="page-head">
+          <div class="page-title" style="color:var(--cr)">&#128682; Crisis Posts</div>
+          <div class="page-sub">Posts flagged for self-harm content — review immediately</div>
+        </div>
+        <div style="overflow-x:auto"><div id="crisis-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- WHISPER CHAINS TAB -->
+      <div id="tab-whisper" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title">Whisper Chains</div><div class="page-sub">Anonymous collaborative poems</div></div>
+        <div id="whisper-content"><div class="spin"></div></div>
+      </div>
+
+      <!-- GRATITUDE BOMBS TAB -->
+      <div id="tab-gratitude" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title">Gratitude Bombs</div><div class="page-sub">Anonymous kindness sent between users</div></div>
+        <div id="gratitude-content"><div class="spin"></div></div>
+      </div>
+
+      <!-- MOODS TAB -->
+      <div id="tab-moods" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title">Mood Data</div><div class="page-sub">City-level emotion aggregation</div></div>
+        <div id="moods-content"><div class="spin"></div></div>
+      </div>
+
+      <!-- EXPORT TAB -->
+      <div id="tab-export" class="tab-content" style="display:none">
+        <div class="page-head">
+          <div class="page-title">Export & Advertiser Intelligence</div>
+          <div class="page-sub">Download CSV reports — UTF-8 BOM for Excel compatibility</div>
+        </div>
         <div class="export-grid">
           <div class="export-card" onclick="dlExport('users')">
-            <div class="export-ico">👥</div>
-            <div class="export-title">Users + Emotion Profile</div>
-            <div class="export-sub">Name, email, top emotions, city, ad segment</div>
+            <div class="ec-ico">👥</div>
+            <div class="ec-title">Users + Emotion Profile</div>
+            <div class="ec-desc">All users with top emotions, city, ad segment, premium status</div>
           </div>
           <div class="export-card" onclick="dlExport('moods')">
-            <div class="export-ico">🌊</div>
-            <div class="export-title">Mood Data</div>
-            <div class="export-sub">Every mood log with city, time, intensity</div>
+            <div class="ec-ico">🌊</div>
+            <div class="ec-title">Mood Data</div>
+            <div class="ec-desc">Every mood log with city, time of day, intensity, ad category</div>
           </div>
           <div class="export-card" onclick="dlExport('posts')">
-            <div class="export-ico">📢</div>
-            <div class="export-title">Posts Data</div>
-            <div class="export-sub">All posts, emotions, engagement, hashtags</div>
+            <div class="ec-ico">📢</div>
+            <div class="ec-title">Posts Data</div>
+            <div class="ec-desc">All posts with engagement metrics, flags, types</div>
           </div>
           <div class="export-card gold" onclick="dlExport('ad-targeting')">
-            <div class="export-ico">🎯</div>
-            <div class="export-title">Ad Targeting Intelligence ⭐</div>
-            <div class="export-sub">Emotion × City × Time of Day — pitch this to advertisers</div>
+            <div class="ec-badge">★ KEY</div>
+            <div class="ec-ico">🎯</div>
+            <div class="ec-title">Ad Targeting Intelligence</div>
+            <div class="ec-desc">Emotion × city × hour × day — the advertiser pitch document</div>
           </div>
           <div class="export-card" onclick="dlExport('analytics')">
-            <div class="export-ico">📊</div>
-            <div class="export-title">Full Analytics</div>
-            <div class="export-sub">DAU, signups, emotion dist, trending hashtags</div>
+            <div class="ec-ico">📊</div>
+            <div class="ec-title">Full Analytics</div>
+            <div class="ec-desc">DAU, signups, emotion distribution, top cities, trending hashtags</div>
+          </div>
+          <div class="export-card" onclick="dlEmotionExport()">
+            <div class="ec-ico">🧠</div>
+            <div class="ec-title">Emotion Intelligence</div>
+            <div class="ec-desc">Behavioral signals, snapshots, ad segments — full emotion data</div>
           </div>
         </div>
-
-        <div class="card">
-          <div class="card-title">📋 Export History</div>
-          <div id="export-history" style="font-size:.78rem;color:var(--tx3)">No exports yet</div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+          <div style="font-size:.82rem;font-weight:700;margin-bottom:8px">Export Log</div>
+          <div id="export-log" style="font-size:.78rem;color:var(--tx3);line-height:1.8">No exports yet this session.</div>
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
 
 <script>
 const API = 'https://api.annomuss.in';
 let adminPass = '';
-let confirmCb = null;
-let allUsers = [];
-const exportLog = [];
+let confirmCb  = null;
+let currentTab = 'overview';
+let allPostsCache = [];
+let exportLog = [];
 
-// ── LOGIN ──────────────────────────────────
-function doLogin() {
-  const pass = document.getElementById('admin-pass').value.trim();
-  if (!pass) return;
-  adminPass = pass;
-  af('/api/admin/stats').then(r => {
-    if (r.ok) {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app-screen').style.display = 'flex';
-      loadAll();
-      setInterval(loadOverview, 60000);
-    } else {
-      document.getElementById('login-err').style.display = 'block';
-      adminPass = '';
-    }
-  }).catch(() => {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'flex';
-    loadAll();
-  });
+// ── HELPERS ──────────────────────────────────────────────────
+function q(id){return document.getElementById(id);}
+function toast(msg, dur=3000){
+  const w=q('toast-wrap'),el=document.createElement('div');
+  el.className='toast-item';el.textContent=msg;w.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transition='.3s';setTimeout(()=>el.remove(),300);},dur);
 }
+function esc(t){return(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function timeAgo(d){
+  if(!d)return'';
+  const s=Math.floor((Date.now()-new Date(d))/1000);
+  if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+}
+function num(n){return(n||0).toLocaleString('en-IN');}
 
-function doLogout() { adminPass = ''; location.reload(); }
-
-function af(path, opts = {}) {
-  return fetch(`${API}${path}`, {
+// ── AUTH FETCH ────────────────────────────────────────────────
+async function af(path, opts={}){
+  return fetch(API+path,{
     ...opts,
-    headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPass, ...(opts.headers || {}) },
+    headers:{'Content-Type':'application/json','x-admin-password':adminPass,...(opts.headers||{})},
   });
 }
 
-function loadAll() { loadOverview(); }
+// ── LOGIN ─────────────────────────────────────────────────────
+async function doLogin(){
+  const pass=q('admin-pass').value.trim();
+  if(!pass)return;
+  const btn=q('login-btn');btn.textContent='Checking...';btn.disabled=true;
+  adminPass=pass;
+  try{
+    const r=await af('/api/admin/stats');
+    if(r.ok){
+      q('login-screen').style.display='none';
+      q('app').style.display='flex';
+      loadAll();
+      setInterval(()=>{if(currentTab==='overview')loadOverview();},60000);
+    } else {
+      q('login-err').style.display='block';
+      adminPass='';
+    }
+  }catch(e){
+    q('login-err').textContent='Connection error — check API URL';
+    q('login-err').style.display='block';
+    adminPass='';
+  }finally{btn.textContent='Enter →';btn.disabled=false;}
+}
+function doLogout(){adminPass='';location.reload();}
 
-// ── TABS ──────────────────────────────────
-function showTab(tab, el) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById(`tab-${tab}`).classList.add('active');
-  if (el) el.classList.add('active');
-  if (tab === 'users')   loadUsers();
-  if (tab === 'posts')   loadPosts();
-  if (tab === 'vents')   loadVents();
-  if (tab === 'moods')   loadMoods();
-  if (tab === 'reports') loadReports();
-  if (tab === 'crisis')  loadCrisis();
+// ── CONFIRM MODAL ─────────────────────────────────────────────
+function showConfirm(ico,title,msg,cb,danger=true){
+  q('c-ico').textContent=ico;
+  q('c-title').textContent=title;
+  q('c-msg').textContent=msg;
+  const ok=q('c-ok');
+  ok.textContent='Confirm';
+  ok.className='btn '+(danger?'btn-danger':'btn-primary')+' btn-sm';
+  ok.style='flex:1;justify-content:center';
+  confirmCb=cb;
+  q('confirm-modal').classList.add('on');
+}
+function closeConfirm(){q('confirm-modal').classList.remove('on');confirmCb=null;}
+async function execConfirm(){
+  if(!confirmCb)return;
+  const ok=q('c-ok');ok.textContent='...';ok.disabled=true;
+  try{await confirmCb();}catch(e){toast('Error: '+e.message);}
+  ok.disabled=false;closeConfirm();
+}
+document.addEventListener('click',e=>{if(e.target===q('confirm-modal'))closeConfirm();});
+
+// ── TABS ──────────────────────────────────────────────────────
+const TAB_META={
+  overview:  {title:'Overview',sub:'Live platform statistics'},
+  emotion:   {title:'Emotion Intelligence',sub:'Behavioral signal analysis & ad targeting'},
+  users:     {title:'User Management',sub:'Ban, unban, delete users'},
+  posts:     {title:'Post Moderation',sub:'Hide, delete, review flagged content'},
+  vents:     {title:'Vents Board',sub:'Anonymous vents — delete if harmful'},
+  reports:   {title:'Reports Queue',sub:'User-submitted reports awaiting action'},
+  crisis:    {title:'Crisis Posts',sub:'Posts flagged for self-harm — review immediately'},
+  whisper:   {title:'Whisper Chains',sub:'Anonymous collaborative poems'},
+  gratitude: {title:'Gratitude Bombs',sub:'Anonymous kindness between users'},
+  moods:     {title:'Mood Data',sub:'City-level emotion aggregation'},
+  export:    {title:'Export & Ads',sub:'Download CSV reports for analysis & advertising'},
+};
+function showTab(tab, navEl){
+  document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el=q('tab-'+tab);if(el)el.style.display='block';
+  if(navEl)navEl.classList.add('active');
+  else {const n=q('nav-'+tab);if(n)n.classList.add('active');}
+  currentTab=tab;
+  const meta=TAB_META[tab]||{title:tab,sub:''};
+  q('tb-title').textContent=meta.title;q('tb-sub').textContent=meta.sub;
+  // Lazy load
+  if(tab==='users')    loadUsers();
+  if(tab==='posts')    loadPosts();
+  if(tab==='vents')    loadVents();
+  if(tab==='reports')  loadReports();
+  if(tab==='crisis')   loadCrisis();
+  if(tab==='moods')    loadMoods();
+  if(tab==='whisper')  loadWhisperChains();
+  if(tab==='gratitude')loadGratitude();
 }
 
-// ── OVERVIEW ───────────────────────────────
-async function loadOverview() {
-  try {
-    const r = await af('/api/admin/stats');
-    if (!r.ok) throw new Error();
-    const d = await r.json();
-    document.getElementById('hdr-sub').textContent = `${d.users} users · ${d.posts} posts · ${d.todayUsers} new today`;
-    if (d.reports > 0) document.getElementById('reports-badge').style.display = 'inline';
+function refreshCurrent(){showTab(currentTab,null);}
+function loadAll(){loadOverview();updateOnline();}
 
-    document.getElementById('stats-grid').innerHTML = [
-      { ico:'👥', val:d.users,      label:'Total Users',    change:`+${d.todayUsers} today`,    up:true  },
-      { ico:'📢', val:d.posts,      label:'Total Posts',    change:'all types',                  up:true  },
-      { ico:'💭', val:d.vents,      label:'Total Vents',    change:'anonymous',                  up:true  },
-      { ico:'🌊', val:d.moods,      label:'Moods Logged',   change:'emotion data',               up:true  },
-      { ico:'🆘', val:d.crisis,     label:'Crisis Posts',   change:'needs review',               up:false },
-      { ico:'⚠️', val:d.reports||0, label:'Open Reports',   change:'unresolved',                 up:false },
-      { ico:'🚫', val:d.banned||0,  label:'Banned Users',   change:'blocked',                    up:false },
-      { ico:'🔥', val:d.todayUsers, label:'New Today',      change:'registered',                 up:true  },
-    ].map(s => `<div class="stat-card">
-      <div class="stat-icon">${s.ico}</div>
-      <div class="stat-value">${(s.val||0).toLocaleString()}</div>
-      <div class="stat-label">${s.label}</div>
-      <div class="stat-change ${s.up?'up':'down'}">${s.change}</div>
+// ── OVERVIEW ──────────────────────────────────────────────────
+async function loadOverview(){
+  try{
+    const [statsR, analyticsR] = await Promise.all([
+      af('/api/admin/stats'),
+      af('/api/admin/export/analytics').catch(()=>null),
+    ]);
+    if(!statsR.ok)throw new Error('Auth failed');
+    const d=await statsR.json();
+
+    const grid=q('stats-grid');
+    grid.innerHTML=[
+      {color:'purple', val:num(d.users),     label:'Total Users',       sub:'+'+num(d.todayUsers)+' today'},
+      {color:'teal',   val:num(d.posts),     label:'Total Posts',       sub:'All time'},
+      {color:'orange', val:num(d.moods),     label:'Mood Logs',         sub:'Emotional data points'},
+      {color:'green',  val:num(d.vents),     label:'Vents',             sub:'Anonymous vents'},
+      {color:'red',    val:num(d.crisis),    label:'Crisis Posts',      sub:'Need immediate review'},
+      {color:'red',    val:num(d.reports),   label:'Open Reports',      sub:'Awaiting action'},
+      {color:'purple', val:num(d.banned),    label:'Banned Users',      sub:'Blocked accounts'},
+      {color:'teal',   val:num(d.whisperChains||0), label:'Whisper Chains', sub:num(d.gratitudeBombs||0)+' gratitude bombs'},
+    ].map(s=>`
+      <div class="stat-card ${s.color}">
+        <div class="stat-val">${s.val}</div>
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-change neutral">${s.sub}</div>
+      </div>`).join('');
+
+    if(d.reports>0){const b=q('reports-badge');if(b)b.style.display='inline';}
+
+    // Load analytics for charts
+    if(analyticsR?.ok){
+      const ad=await analyticsR.json();
+      renderEmoBar(ad.emotionDistribution||{});
+      renderCityList(ad.topCities||[]);
+      renderSignupChart(ad.dailySignups||[]);
+      renderActivity(ad);
+    }
+  }catch(e){
+    q('stats-grid').innerHTML='<div class="empty" style="grid-column:1/-1">&#128683; Could not load — verify admin password and ADMIN_PASSWORD env var on Render<br><small>'+e.message+'</small></div>';
+  }
+}
+
+function renderEmoBar(dist){
+  const el=q('emo-bars');if(!el)return;
+  const EMO_COLORS={happy:'#52B788',sad:'#7B5EA7',anxious:'#FF4D6D',lonely:'#C4A8FF',grateful:'#00C9A7',inspired:'#F4A261',hopeful:'#5CB8E4',angry:'#FF6B6B',confused:'#A8D8EA',proud:'#FFD700',excited:'#FF85A1',neutral:'#666'};
+  const total=Object.values(dist).reduce((s,v)=>s+v,0)||1;
+  const sorted=Object.entries(dist).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  el.innerHTML=sorted.map(([emo,count])=>`
+    <div class="emo-row">
+      <div class="emo-label">${emo}</div>
+      <div class="emo-track"><div class="emo-fill" style="width:${Math.round(count/total*100)}%;background:${EMO_COLORS[emo]||'#888'}"></div></div>
+      <div class="emo-pct">${Math.round(count/total*100)}%</div>
     </div>`).join('');
-  } catch(e) {
-    document.getElementById('stats-grid').innerHTML = '<div class="empty" style="grid-column:1/-1">Could not load stats — check API + ADMIN_PASSWORD env var on Render</div>';
+}
+
+function renderCityList(cities){
+  const el=q('city-list');if(!el)return;
+  if(!cities.length){el.innerHTML='<div class="empty">No city data yet</div>';return;}
+  el.innerHTML=cities.slice(0,8).map((c,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bd)">
+      <span style="width:20px;font-size:.75rem;color:var(--tx3);font-family:var(--fM)">${i+1}</span>
+      <span style="flex:1;font-size:.82rem">${c.city||'Unknown'}</span>
+      <span style="font-size:.78rem;color:var(--tx3);font-family:var(--fM)">${num(c.count)}</span>
+    </div>`).join('');
+}
+
+function renderSignupChart(signups){
+  const el=q('signup-chart');if(!el)return;
+  if(!signups.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem">No signup data</div>';return;}
+  const max=Math.max(...signups.map(s=>s.count),1);
+  el.innerHTML=signups.slice(-14).map(s=>`
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="mini-bar" style="height:${Math.max(4,Math.round(s.count/max*46))}px;background:var(--v);width:100%;border-radius:3px 3px 0 0" title="${s.date}: ${s.count} signups"></div>
+    </div>`).join('');
+}
+
+function renderActivity(ad){
+  const el=q('activity-feed');if(!el)return;
+  const items=[];
+  if(ad.todayUsers)    items.push({ico:'👤',text:num(ad.todayUsers)+' new users today'});
+  if(ad.emotionDistribution){
+    const top=Object.entries(ad.emotionDistribution).sort((a,b)=>b[1]-a[1])[0];
+    if(top)items.push({ico:'😊',text:'Top emotion today: '+top[0]+' ('+num(top[1])+' logs)'});
   }
-  loadEmoDist();
-  loadCityDist();
-  loadDailySignups();
+  if(!items.length){el.innerHTML='<div class="empty">No activity data</div>';return;}
+  el.innerHTML=items.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:.82rem"><span style="font-size:1.1rem">${i.ico}</span>${i.text}</div>`).join('');
 }
 
-async function loadEmoDist() {
-  try {
-    const r = await af('/api/moods/pulse');
-    if (!r.ok) return;
-    const data = await r.json();
-    const el = document.getElementById('emo-dist');
-    const agg = {};
-    data.forEach(city => (city.breakdown||[]).forEach(b => { agg[b.emotion] = (agg[b.emotion]||0)+b.count; }));
-    const sorted = Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    const max = Math.max(...sorted.map(s=>s[1]),1);
-    const ec = {happy:'#F4A261',sad:'#9B7FD4',anxious:'#FF4D6D',lonely:'#C4A8FF',grateful:'#52B788',inspired:'#00C9A7',excited:'#FF85A1',angry:'#FF6B6B'};
-    el.innerHTML = sorted.map(([emo,cnt]) => `
-      <div class="emo-bar-wrap">
-        <div class="emo-bar-label"><span style="font-weight:600">${emo}</span><span style="color:var(--tx3);font-family:var(--fM)">${cnt}</span></div>
-        <div class="emo-bar-track"><div class="emo-bar-fill" style="width:${Math.round(cnt/max*100)}%;background:${ec[emo]||'var(--v)'}"></div></div>
-      </div>`).join('') || '<div class="empty">No mood data yet</div>';
-  } catch(_) {}
+// ── ONLINE COUNT ──────────────────────────────────────────────
+async function updateOnline(){
+  try{const r=await fetch(API+'/health');const d=await r.json();if(d.ok){q('online-num').textContent='server OK';}}catch(_){}
 }
 
-async function loadCityDist() {
-  try {
-    const r = await af('/api/moods/pulse');
-    if (!r.ok) return;
-    const data = await r.json();
-    document.getElementById('city-dist').innerHTML = data.slice(0,8).map(c => `
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:.5px solid var(--bd);font-size:.78rem">
-        <span>📍 ${c.city||'Unknown'}</span>
-        <span class="badge badge-v">${c.dominantEmotion}</span>
-        <span style="color:var(--tx3);font-family:var(--fM)">${c.total}</span>
-      </div>`).join('') || '<div class="empty">No city data</div>';
-  } catch(_) {}
+// ── EMOTION INTELLIGENCE ──────────────────────────────────────
+async function loadEmotionPulse(){
+  q('emotion-content').innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/pulse');
+    if(!r.ok)throw new Error('Emotion API not loaded');
+    const d=await r.json();
+    q('emotion-content').innerHTML='<pre style="font-size:.78rem;color:var(--tx2);white-space:pre-wrap;line-height:1.6">'+JSON.stringify(d,null,2)+'</pre>';
+  }catch(e){q('emotion-content').innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+async function loadEmotionHourly(){
+  q('emotion-content').innerHTML='<div class="spin"></div>';
+  try{const r=await af('/api/emotion/hourly-breakdown');if(!r.ok)throw new Error();const d=await r.json();q('emotion-content').innerHTML='<pre style="font-size:.78rem;color:var(--tx2);white-space:pre-wrap">'+JSON.stringify(d,null,2)+'</pre>';}
+  catch(_){q('emotion-content').innerHTML='<div class="empty">Emotion intelligence not loaded on server</div>';}
+}
+async function loadAdMatrix(){
+  q('emotion-content').innerHTML='<div class="spin"></div>';
+  try{const r=await af('/api/emotion/ad-matrix');if(!r.ok)throw new Error();const d=await r.json();q('emotion-content').innerHTML='<pre style="font-size:.78rem;color:var(--tx2);white-space:pre-wrap">'+JSON.stringify(d,null,2)+'</pre>';}
+  catch(_){q('emotion-content').innerHTML='<div class="empty">Ad matrix not available</div>';}
+}
+async function loadDataQuality(){
+  q('emotion-content').innerHTML='<div class="spin"></div>';
+  try{const r=await af('/api/emotion/quality');if(!r.ok)throw new Error();const d=await r.json();
+  q('emotion-content').innerHTML='<div style="padding:10px">'+Object.entries(d).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:.83rem"><span style="color:var(--tx2)">${k}</span><span style="font-family:var(--fM);color:var(--vl)">${JSON.stringify(v)}</span></div>`).join('')+'</div>';}
+  catch(_){q('emotion-content').innerHTML='<div class="empty">Data quality endpoint not available</div>';}
 }
 
-async function loadDailySignups() {
-  // Shown in export — just placeholder here
-  document.getElementById('daily-signups').innerHTML = '<span style="color:var(--tx3)">Download "Full Analytics" export to see daily signup graph in Excel</span>';
+// ── USERS ─────────────────────────────────────────────────────
+let allUsers=[], currentUserFilter='all';
+async function loadUsers(search=''){
+  const el=q('users-table');el.innerHTML='<div class="spin"></div>';
+  try{
+    const url='/api/admin/users?limit=300'+(search?'&search='+encodeURIComponent(search):'');
+    const r=await af(url);
+    if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();
+    allUsers=d.users||d||[];
+    renderUsers(filterUsersList(allUsers));
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+function filterUsersList(users){
+  if(currentUserFilter==='banned')return users.filter(u=>u.isBanned);
+  if(currentUserFilter==='premium')return users.filter(u=>u.isPremium);
+  return users;
+}
+function filterUsers(f,el){
+  currentUserFilter=f;
+  document.querySelectorAll('.tab-content.active .fpill').forEach(p=>p.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderUsers(filterUsersList(allUsers));
+}
+function searchUsers(q2){
+  const filtered=allUsers.filter(u=>(u.anonymousName||'').toLowerCase().includes(q2.toLowerCase())||(u.email||'').toLowerCase().includes(q2.toLowerCase()));
+  renderUsers(filterUsersList(filtered));
+}
+function renderUsers(users){
+  const el=q('users-table');
+  if(!users.length){el.innerHTML='<div class="empty">No users found</div>';return;}
+  let html='<table><thead><tr><th>Avatar</th><th>Name</th><th>Email</th><th>Level</th><th>Streak</th><th>Posts</th><th>Top Emotion</th><th>City</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
+  users.forEach(u=>{
+    const topEmo=(u.topEmotions||[]).sort((a,b)=>b.count-a.count)[0]?.emotion||'—';
+    const status=u.isBanned?'<span class="badge badge-cr">Banned</span>':u.isPremium?'<span class="badge badge-go">Premium</span>':'<span class="badge badge-lm">Active</span>';
+    const banBtn=u.isBanned
+      ?'<button class="ab ab-unban" onclick="unbanUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Unban</button>'
+      :'<button class="ab ab-ban"   onclick="banUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Ban</button>';
+    html+='<tr>';
+    html+='<td style="font-size:1.3rem">'+esc(u.avatarEmoji||'🎭')+'</td>';
+    html+='<td style="font-weight:600">'+esc(u.anonymousName||'—')+'</td>';
+    html+='<td style="color:var(--tx3);font-size:.75rem">'+esc(u.email||'—')+'</td>';
+    html+='<td><span class="badge badge-g">Lv '+(u.level||1)+'</span></td>';
+    html+='<td style="font-family:var(--fM)">'+(u.streak||0)+' 🔥</td>';
+    html+='<td style="font-family:var(--fM)">'+(u.postCount||0)+'</td>';
+    html+='<td><span class="badge badge-v">'+esc(topEmo)+'</span></td>';
+    html+='<td style="font-size:.75rem;color:var(--tx3)">'+esc(u.city||'—')+'</td>';
+    html+='<td>'+status+'</td>';
+    html+='<td style="font-size:.7rem;color:var(--tx3)">'+(u.createdAt?new Date(u.createdAt).toLocaleDateString('en-IN'):'—')+'</td>';
+    html+='<td><div class="actions">'+banBtn+'<button class="ab ab-del" onclick="deleteUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Delete</button></div></td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  el.innerHTML=html;
 }
 
-// ── USERS ─────────────────────────────────
-async function loadUsers() {
-  const el = document.getElementById('users-table');
-  el.innerHTML = '<div class="spinner" style="padding:40px"></div>';
-  try {
-    const search = document.getElementById('user-search')?.value || '';
-    const r = await af(`/api/admin/users?limit=200${search?`&search=${encodeURIComponent(search)}`:''}`) ;
-    if (!r.ok) throw new Error();
-    const d = await r.json();
-    allUsers = d.users || [];
-    document.getElementById('user-count').textContent = `${allUsers.length} of ${d.total} users`;
-    renderUsers(allUsers);
-  } catch(e) {
-    el.innerHTML = '<div class="empty">Could not load users — make sure admin_backend.js is deployed</div>';
-  }
-}
-
-function renderUsers(users) {
-  const el = document.getElementById('users-table');
-  if (!users.length) { el.innerHTML = '<div class="empty">No users found</div>'; return; }
-  el.innerHTML = `<table>
-    <thead><tr><th>Avatar</th><th>Name</th><th>Email</th><th>Level</th><th>XP</th><th>Streak</th><th>Posts</th><th>Top Emotion</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
-    <tbody>${users.map(u => {
-      const topEmo = (u.topEmotions||[]).sort((a,b)=>b.count-a.count)[0]?.emotion || '—';
-      return `<tr>
-        <td style="font-size:1.2rem">${u.avatarEmoji||'🎭'}</td>
-        <td><b style="font-family:var(--fD);font-size:.82rem">${u.anonymousName||'Anonymous'}</b></td>
-        <td style="font-family:var(--fM);font-size:.68rem;color:var(--tx3)">${u.email||''}</td>
-        <td style="font-family:var(--fM)">L${u.level||1}</td>
-        <td style="font-family:var(--fM)">${u.xp||0}</td>
-        <td>🔥${u.streak||0}</td>
-        <td>${u.postCount||0}</td>
-        <td><span class="badge badge-v">${topEmo}</span></td>
-        <td>${u.isBanned?'<span class="badge badge-cr">Banned</span>':u.isPremium?'<span class="badge badge-go">Premium</span>':'<span class="badge badge-lm">Active</span>'}</td>
-        <td style="font-size:.68rem;color:var(--tx3)">${u.createdAt?new Date(u.createdAt).toLocaleDateString():''}</td>
-        <td><div class="actions">
-          ${u.isBanned
-            ? `<button class="ab ab-unban" onclick="unbanUser('${u._id}','${esc(u.anonymousName)}')">Unban</button>`
-            : `<button class="ab ab-ban" onclick="banUser('${u._id}','${esc(u.anonymousName)}')">Ban</button>`}
-          <button class="ab ab-del" onclick="deleteUser('${u._id}','${esc(u.anonymousName)}')">Delete</button>
-        </div></td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table>`;
-}
-
-function searchUsers(q) {
-  if (!q.trim()) return renderUsers(allUsers);
-  renderUsers(allUsers.filter(u =>
-    (u.anonymousName||'').toLowerCase().includes(q.toLowerCase()) ||
-    (u.email||'').toLowerCase().includes(q.toLowerCase())
-  ));
-}
-
-function banUser(id, name) {
-  showConfirm('🚫', `Ban ${name}?`, 'They will be blocked from all activity.', async () => {
-    const r = await af(`/api/admin/ban/${id}`, { method:'POST', body: JSON.stringify({reason:'Admin action'}) });
-    toast(r.ok ? `🚫 ${name} banned` : 'Failed'); loadUsers();
+function banUser(id,name){
+  showConfirm('🚫','Ban '+name+'?','They will be blocked from all activity. You can unban later.',async()=>{
+    const r=await af('/api/admin/ban/'+id,{method:'POST',body:JSON.stringify({reason:'Admin action'})});
+    toast(r.ok?'🚫 '+name+' banned':'❌ Ban failed — '+r.status);
+    if(r.ok)loadUsers();
   });
 }
-function unbanUser(id, name) {
-  showConfirm('✅', `Unban ${name}?`, 'They will regain full access.', async () => {
-    const r = await af(`/api/admin/unban/${id}`, { method:'POST' });
-    toast(r.ok ? `✅ ${name} unbanned` : 'Failed'); loadUsers();
-  });
+function unbanUser(id,name){
+  showConfirm('✅','Unban '+name+'?','They will regain full access to the platform.',async()=>{
+    const r=await af('/api/admin/unban/'+id,{method:'POST'});
+    toast(r.ok?'✅ '+name+' unbanned':'❌ Unban failed — '+r.status);
+    if(r.ok)loadUsers();
+  },false);
 }
-function deleteUser(id, name) {
-  showConfirm('💀', `DELETE ${name} PERMANENTLY?`, 'This deletes the user AND all their posts, vents, messages, moods. Cannot be undone.', async () => {
-    const r = await af(`/api/admin/users/${id}`, { method:'DELETE' });
-    toast(r.ok ? `🗑️ ${name} deleted` : 'Failed'); loadUsers();
-  });
-  document.getElementById('c-ok').style.background = 'linear-gradient(135deg,#FF4D6D,#E0304E)';
-}
-
-// ── POSTS ─────────────────────────────────
-async function loadPosts(crisis=false, hidden=false) {
-  const el = document.getElementById('posts-table');
-  el.innerHTML = '<div class="spinner" style="padding:40px"></div>';
-  let url = `/api/admin/posts?limit=100`;
-  if (crisis) url += '&crisis=true';
-  if (hidden) url += '&hidden=true';
-  try {
-    const r = await af(url);
-    if (!r.ok) throw new Error();
-    const d = await r.json();
-    const posts = d.posts || [];
-    if (!posts.length) { el.innerHTML = '<div class="empty">No posts found</div>'; return; }
-    el.innerHTML = `<table>
-      <thead><tr><th>Author</th><th>Caption</th><th>Type</th><th>Emotion</th><th>Likes</th><th>Reports</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
-      <tbody>${posts.map(p => `<tr class="${p.isCrisis?'crisis-row':p.isHidden?'hidden-row':''}">
-        <td style="font-family:var(--fD);font-size:.78rem;font-weight:600">${p.authorName||'Anonymous'}</td>
-        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">${(p.caption||'(no caption)').substring(0,60)}</td>
-        <td><span class="badge badge-g">${p.type||'post'}</span></td>
-        <td>${p.emotion?`<span class="badge badge-v">${p.emotion}</span>`:'—'}</td>
-        <td style="font-family:var(--fM)">${(p.likes||[]).length}</td>
-        <td style="font-family:var(--fM)">${p.reportCount||0}</td>
-        <td>${p.isCrisis?'<span class="badge badge-cr">⚠️ Crisis</span>':''}${p.isHidden?'<span class="badge badge-g">Hidden</span>':''}</td>
-        <td style="font-size:.67rem;color:var(--tx3)">${p.createdAt?new Date(p.createdAt).toLocaleString():''}</td>
-        <td><div class="actions">
-          ${p.isHidden
-            ? `<button class="ab ab-show" onclick="unhidePost('${p._id}')">Show</button>`
-            : `<button class="ab ab-hide" onclick="hidePost('${p._id}')">Hide</button>`}
-          <button class="ab ab-del" onclick="deletePost('${p._id}')">Delete</button>
-        </div></td>
-      </tr>`).join('')}</tbody>
-    </table>`;
-  } catch(e) { el.innerHTML = '<div class="empty">Could not load posts</div>'; }
-}
-
-async function hidePost(id) {
-  const r = await af(`/api/admin/posts/${id}/hide`, { method:'POST' });
-  toast(r.ok ? '🚫 Post hidden' : 'Failed'); loadPosts();
-}
-async function unhidePost(id) {
-  const r = await af(`/api/admin/posts/${id}/unhide`, { method:'POST' });
-  toast(r.ok ? '✅ Post visible' : 'Failed'); loadPosts();
-}
-function deletePost(id) {
-  showConfirm('🗑️', 'Delete this post?', 'Permanently removes the post. Cannot be undone.', async () => {
-    const r = await af(`/api/admin/posts/${id}`, { method:'DELETE' });
-    toast(r.ok ? '🗑️ Post deleted' : 'Failed'); loadPosts();
+function deleteUser(id,name){
+  showConfirm('⚠️','PERMANENTLY DELETE '+name+'?','This DELETES the user AND all their posts, vents, messages, moods. This CANNOT be undone.',async()=>{
+    const r=await af('/api/admin/users/'+id,{method:'DELETE'});
+    toast(r.ok?'🗑️ '+name+' deleted permanently':'❌ Delete failed — '+r.status);
+    if(r.ok)loadUsers();
   });
 }
 
-// ── VENTS ─────────────────────────────────
-async function loadVents() {
-  const el = document.getElementById('vents-table');
-  el.innerHTML = '<div class="spinner" style="padding:40px"></div>';
-  try {
-    const r = await af('/api/vents?limit=100');
-    if (!r.ok) throw new Error();
-    const d = await r.json();
-    const vents = Array.isArray(d) ? d : (d.vents||[]);
-    if (!vents.length) { el.innerHTML = '<div class="empty">No vents</div>'; return; }
-    el.innerHTML = `<table>
-      <thead><tr><th>Author</th><th>Text</th><th>Emotion</th><th>Hugs</th><th>Crisis</th><th>City</th><th>Posted</th><th>Action</th></tr></thead>
-      <tbody>${vents.map(v => `<tr class="${v.isCrisis?'crisis-row':''}">
-        <td style="font-family:var(--fD);font-size:.78rem;font-weight:600">${v.authorName||'Anonymous'}</td>
-        <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">${(v.text||'').substring(0,80)}</td>
-        <td>${v.emotion?`<span class="badge badge-v">${v.emotion}</span>`:'—'}</td>
-        <td style="font-family:var(--fM)">${(v.hugs||[]).length}</td>
-        <td>${v.isCrisis?'<span class="badge badge-cr">⚠️</span>':'—'}</td>
-        <td style="font-size:.7rem">${v.city||'—'}</td>
-        <td style="font-size:.67rem;color:var(--tx3)">${v.createdAt?new Date(v.createdAt).toLocaleString():''}</td>
-        <td><button class="ab ab-del" onclick="deleteVent('${v._id}')">Delete</button></td>
-      </tr>`).join('')}</tbody>
-    </table>`;
-  } catch(e) { el.innerHTML = '<div class="empty">Could not load vents</div>'; }
+// ── POSTS ─────────────────────────────────────────────────────
+async function loadPosts(crisis=false,hidden=false,reported=false,pillEl=null){
+  const el=q('posts-table');el.innerHTML='<div class="spin"></div>';
+  if(pillEl){document.querySelectorAll('#tab-posts .fpill').forEach(p=>p.classList.remove('active'));pillEl.classList.add('active');}
+  let url='/api/admin/posts?limit=200';
+  if(crisis)url+='&crisis=true';
+  if(hidden)url+='&hidden=true';
+  try{
+    const r=await af(url);
+    if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();
+    allPostsCache=d.posts||d||[];
+    if(reported)allPostsCache=allPostsCache.filter(p=>(p.reportCount||0)>0);
+    renderPosts(allPostsCache);
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+function filterPostsLive(q2){
+  const filtered=allPostsCache.filter(p=>(p.caption||'').toLowerCase().includes(q2.toLowerCase())||(p.authorName||'').toLowerCase().includes(q2.toLowerCase()));
+  renderPosts(filtered);
+}
+function renderPosts(posts){
+  const el=q('posts-table');
+  if(!posts.length){el.innerHTML='<div class="empty">No posts found</div>';return;}
+  let html='<table><thead><tr><th>Author</th><th>Caption</th><th>Type</th><th>Emotion</th><th>Likes</th><th>Reports</th><th>Flags</th><th>Date</th><th>Actions</th></tr></thead><tbody>';
+  posts.forEach(p=>{
+    const flags=[];
+    if(p.isCrisis) flags.push('<span class="badge badge-cr">🆘 Crisis</span>');
+    if(p.isHidden) flags.push('<span class="badge badge-g">Hidden</span>');
+    if((p.reportCount||0)>0)flags.push('<span class="badge badge-go">⚠️ '+p.reportCount+' reports</span>');
+    const showHideBtn=p.isHidden
+      ?'<button class="ab ab-show" onclick="unhidePost(\''+p._id+'\')">Show</button>'
+      :'<button class="ab ab-hide" onclick="hidePost(\''+p._id+'\')">Hide</button>';
+    html+='<tr class="'+(p.isCrisis?'crisis-row':p.isHidden?'hidden-row':'')+'">';
+    html+='<td style="font-size:.78rem;font-weight:600">'+esc(p.authorName||'Anonymous')+'</td>';
+    html+='<td style="max-width:220px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((p.caption||'(no caption)').substring(0,70))+'</div></td>';
+    html+='<td><span class="badge badge-g">'+esc(p.type||'post')+'</span></td>';
+    html+='<td>'+(p.emotion?'<span class="badge badge-v">'+esc(p.emotion)+'</span>':'—')+'</td>';
+    html+='<td style="font-family:var(--fM)">'+(p.likes?.length||0)+'</td>';
+    html+='<td style="font-family:var(--fM)">'+(p.reportCount||0)+'</td>';
+    html+='<td>'+flags.join(' ')+'</td>';
+    html+='<td style="font-size:.7rem;color:var(--tx3)">'+(p.createdAt?timeAgo(p.createdAt):'')+'</td>';
+    html+='<td><div class="actions">'+showHideBtn+'<button class="ab ab-del" onclick="deletePost(\''+p._id+'\')">Delete</button></div></td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  el.innerHTML=html;
 }
 
-async function deleteVent(id) {
-  showConfirm('🗑️','Delete vent?','Remove this vent permanently.', async () => {
-    const r = await af(`/api/vents/${id}`, { method:'DELETE' });
-    toast(r.ok?'Deleted':'Failed'); loadVents();
+async function hidePost(id){
+  const r=await af('/api/admin/posts/'+id+'/hide',{method:'POST'});
+  toast(r.ok?'🚫 Post hidden':'❌ Failed: '+r.status);
+  if(r.ok){const p=allPostsCache.find(x=>x._id===id);if(p)p.isHidden=true;renderPosts(allPostsCache);}
+}
+async function unhidePost(id){
+  const r=await af('/api/admin/posts/'+id+'/unhide',{method:'POST'});
+  toast(r.ok?'✅ Post visible':'❌ Failed: '+r.status);
+  if(r.ok){const p=allPostsCache.find(x=>x._id===id);if(p)p.isHidden=false;renderPosts(allPostsCache);}
+}
+function deletePost(id){
+  showConfirm('🗑️','Delete this post?','Permanently removes the post. Cannot be undone.',async()=>{
+    const r=await af('/api/admin/posts/'+id,{method:'DELETE'});
+    toast(r.ok?'🗑️ Post deleted':'❌ Failed: '+r.status);
+    if(r.ok){allPostsCache=allPostsCache.filter(p=>p._id!==id);renderPosts(allPostsCache);}
   });
 }
 
-// ── MOODS ─────────────────────────────────
-async function loadMoods() {
-  const el = document.getElementById('moods-content');
-  el.innerHTML = '<div class="spinner" style="padding:40px"></div>';
-  try {
-    const r = await af('/api/moods/pulse');
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    if (!data.length) { el.innerHTML = '<div class="empty">No mood data yet</div>'; return; }
-    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
-    ${data.map(city => `<div class="card">
-      <div class="card-title">📍 ${city.city||'Unknown'} <span class="badge badge-v">${city.dominantEmotion}</span></div>
-      <div style="font-size:.7rem;color:var(--tx3);margin-bottom:10px">${city.total} mood logs</div>
-      ${(city.breakdown||[]).sort((a,b)=>b.count-a.count).slice(0,5).map(b => `
-        <div style="display:flex;justify-content:space-between;font-size:.75rem;padding:3px 0">
-          <span>${b.emotion}</span>
-          <span style="color:var(--tx3);font-family:var(--fM)">${b.count}</span>
-        </div>`).join('')}
-    </div>`).join('')}</div>`;
-  } catch(e) { el.innerHTML = '<div class="empty">No mood data</div>'; }
+// ── VENTS ─────────────────────────────────────────────────────
+async function loadVents(){
+  const el=q('vents-table');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/vents?limit=100');
+    if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();
+    const vents=Array.isArray(d)?d:(d.vents||[]);
+    if(!vents.length){el.innerHTML='<div class="empty">No vents</div>';return;}
+    let html='<table><thead><tr><th>Author</th><th>Text</th><th>Emotion</th><th>Hugs</th><th>Crisis</th><th>City</th><th>Posted</th><th>Action</th></tr></thead><tbody>';
+    vents.forEach(v=>{
+      html+='<tr class="'+(v.isCrisis?'crisis-row':'')+'">';
+      html+='<td style="font-weight:600">'+esc(v.authorName||'Anonymous')+'</td>';
+      html+='<td style="max-width:280px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((v.text||'').substring(0,100))+'</div></td>';
+      html+='<td>'+(v.emotion?'<span class="badge badge-v">'+esc(v.emotion)+'</span>':'—')+'</td>';
+      html+='<td style="font-family:var(--fM)">'+(v.hugs?.length||0)+'</td>';
+      html+='<td>'+(v.isCrisis?'<span class="badge badge-cr">Crisis</span>':'')+'</td>';
+      html+='<td style="font-size:.75rem;color:var(--tx3)">'+esc(v.city||'—')+'</td>';
+      html+='<td style="font-size:.7rem;color:var(--tx3)">'+(v.createdAt?timeAgo(v.createdAt):'')+'</td>';
+      html+='<td><button class="ab ab-del" onclick="deleteVent(\''+v._id+'\')">Delete</button></td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+async function deleteVent(id){
+  showConfirm('🗑️','Delete this vent?','Cannot be undone.',async()=>{
+    const r=await af('/api/vents/'+id,{method:'DELETE'});
+    toast(r.ok?'🗑️ Vent deleted':'❌ Failed: '+r.status);
+    if(r.ok)loadVents();
+  });
 }
 
-// ── REPORTS ───────────────────────────────
-async function loadReports() {
-  const el = document.getElementById('reports-table');
-  const el2 = document.getElementById('flagged-table');
-  el.innerHTML = '<div class="spinner" style="padding:20px"></div>';
-  el2.innerHTML = '<div class="spinner" style="padding:20px"></div>';
-  try {
-    const r = await af('/api/admin/reports');
-    if (!r.ok) throw new Error();
-    const d = await r.json();
-
-    // Reports collection
-    if (!d.reports?.length) {
-      el.innerHTML = '<div class="empty">No open reports</div>';
-    } else {
-      el.innerHTML = `<table>
-        <thead><tr><th>Reporter</th><th>Target Type</th><th>Reason</th><th>Reported</th><th>Action</th></tr></thead>
-        <tbody>${d.reports.map(rep => `<tr>
-          <td style="font-size:.75rem">${rep.reporterName||'Anonymous'}</td>
-          <td><span class="badge badge-g">${rep.targetType||'post'}</span></td>
-          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">${rep.reason||'No reason'}</td>
-          <td style="font-size:.67rem;color:var(--tx3)">${rep.createdAt?new Date(rep.createdAt).toLocaleString():''}</td>
-          <td><div class="actions">
-            <button class="ab ab-hide" onclick="resolveReport('${rep._id}')">Resolve</button>
-            ${rep.targetId?`<button class="ab ab-del" onclick="deletePost('${rep.targetId}')">Delete Post</button>`:''}
-          </div></td>
-        </tr>`).join('')}</tbody>
-      </table>`;
-    }
-
-    // High report count posts
-    if (!d.flagged?.length) {
-      el2.innerHTML = '<div class="empty">No posts with multiple reports</div>';
-    } else {
-      el2.innerHTML = `<table>
-        <thead><tr><th>Author</th><th>Caption</th><th>Reports</th><th>Emotion</th><th>Posted</th><th>Action</th></tr></thead>
-        <tbody>${d.flagged.map(p => `<tr>
-          <td style="font-family:var(--fD);font-size:.78rem;font-weight:600">${p.authorName||'Anonymous'}</td>
-          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">${(p.caption||'').substring(0,70)}</td>
-          <td><span class="badge badge-cr">${p.reportCount} reports</span></td>
-          <td>${p.emotion?`<span class="badge badge-v">${p.emotion}</span>`:'—'}</td>
-          <td style="font-size:.67rem;color:var(--tx3)">${p.createdAt?new Date(p.createdAt).toLocaleString():''}</td>
-          <td><div class="actions">
-            <button class="ab ab-hide" onclick="hidePost('${p._id}')">Hide</button>
-            <button class="ab ab-del" onclick="deletePost('${p._id}')">Delete</button>
-          </div></td>
-        </tr>`).join('')}</tbody>
-      </table>`;
-    }
-  } catch(e) {
-    el.innerHTML = '<div class="empty">Could not load reports</div>';
-    el2.innerHTML = '';
-  }
+// ── REPORTS ───────────────────────────────────────────────────
+async function loadReports(){
+  const el=q('reports-table');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/admin/reports');
+    if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();
+    const reports=(d.reports||d||[]);
+    const badge=q('reports-badge');
+    if(badge)badge.style.display=reports.length>0?'inline':'none';
+    if(!reports.length){el.innerHTML='<div class="empty">No open reports ✅</div>';return;}
+    let html='<table><thead><tr><th>Type</th><th>Reason</th><th>Reporter</th><th>Content</th><th>Time</th><th>Action</th></tr></thead><tbody>';
+    reports.forEach(rep=>{
+      html+='<tr>';
+      html+='<td><span class="badge badge-g">'+esc(rep.type||'post')+'</span></td>';
+      html+='<td style="color:var(--tx2)">'+esc(rep.reason||'—')+'</td>';
+      html+='<td style="font-size:.75rem;color:var(--tx3)">'+esc(rep.reporterName||'Anonymous')+'</td>';
+      html+='<td style="max-width:200px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((rep.content||'').substring(0,60))+'</div></td>';
+      html+='<td style="font-size:.7rem;color:var(--tx3)">'+(rep.createdAt?timeAgo(rep.createdAt):'')+'</td>';
+      html+='<td><div class="actions"><button class="ab ab-show" onclick="resolveReport(\''+rep._id+'\')">Resolve</button>';
+      if(rep.postId)html+='<button class="ab ab-del" onclick="deletePost(\''+rep.postId+'\')">Del Post</button>';
+      html+='</div></td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+async function resolveReport(id){
+  const r=await af('/api/admin/reports/'+id+'/resolve',{method:'POST'});
+  toast(r.ok?'✅ Report resolved':'❌ Failed');
+  if(r.ok)loadReports();
 }
 
-async function resolveReport(id) {
-  const r = await af(`/api/admin/reports/${id}/resolve`, { method:'POST' });
-  toast(r.ok?'✅ Report resolved':'Failed'); loadReports();
+// ── CRISIS ────────────────────────────────────────────────────
+async function loadCrisis(){
+  const el=q('crisis-table');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/admin/posts?crisis=true&limit=50');
+    if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();
+    const posts=d.posts||d||[];
+    if(!posts.length){el.innerHTML='<div class="empty" style="color:var(--tl)">&#10003; No crisis posts right now</div>';return;}
+    let html='<table><thead><tr><th>Author</th><th>Caption</th><th>Emotion</th><th>Posted</th><th>Actions</th></tr></thead><tbody>';
+    posts.forEach(p=>{
+      html+='<tr class="crisis-row">';
+      html+='<td style="font-weight:600">'+esc(p.authorName||'Anonymous')+'</td>';
+      html+='<td><div style="max-width:350px;color:var(--tx2);white-space:pre-wrap;font-size:.82rem;line-height:1.5">'+esc((p.caption||'').substring(0,200))+'</div></td>';
+      html+='<td><span class="badge badge-v">'+esc(p.emotion||'—')+'</span></td>';
+      html+='<td style="font-size:.7rem;color:var(--tx3)">'+(p.createdAt?timeAgo(p.createdAt):'')+'</td>';
+      html+='<td><div class="actions"><button class="ab ab-hide" onclick="hidePost(\''+p._id+'\')">Hide</button><button class="ab ab-del" onclick="deletePost(\''+p._id+'\')">Delete</button></div></td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
 
-// ── CRISIS ────────────────────────────────
-async function loadCrisis() {
-  const el = document.getElementById('crisis-table');
-  el.innerHTML = '<div class="spinner" style="padding:40px"></div>';
-  try {
-    const r = await af('/api/admin/posts?crisis=true&limit=50');
-    if (!r.ok) throw new Error();
-    const d = await r.json();
-    const posts = (d.posts||[]).filter(p => p.isCrisis);
-    if (!posts.length) { el.innerHTML = '<div class="empty" style="color:var(--lm)">✅ No crisis posts right now</div>'; return; }
-    el.innerHTML = `
-      <div style="padding:10px 14px;background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);border-radius:10px;font-size:.8rem;color:var(--cr);margin-bottom:12px">
-        ⚠️ ${posts.length} post(s) flagged. Review and take action immediately.
-      </div>
-      <table>
-        <thead><tr><th>Author</th><th>Content</th><th>Emotion</th><th>Posted</th><th>Actions</th></tr></thead>
-        <tbody>${posts.map(p => `<tr class="crisis-row">
-          <td style="font-family:var(--fD);font-size:.78rem;font-weight:600">${p.authorName||'Anonymous'}</td>
-          <td style="max-width:280px;color:var(--tx2)">${(p.caption||'').substring(0,120)}</td>
-          <td><span class="badge badge-cr">${p.emotion||'—'}</span></td>
-          <td style="font-size:.67rem;color:var(--tx3)">${p.createdAt?new Date(p.createdAt).toLocaleString():''}</td>
-          <td><div class="actions">
-            <button class="ab ab-hide" onclick="hidePost('${p._id}')">Hide</button>
-            <button class="ab ab-del" onclick="deletePost('${p._id}')">Delete</button>
-          </div></td>
-        </tr>`).join('')}</tbody>
-      </table>`;
-  } catch(e) { el.innerHTML = '<div class="empty">Could not load crisis posts</div>'; }
+// ── WHISPER CHAINS ────────────────────────────────────────────
+async function loadWhisperChains(){
+  const el=q('whisper-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/special/admin/whisper');
+    if(!r.ok)throw new Error('Special routes not loaded');
+    const chains=await r.json();
+    if(!chains.length){el.innerHTML='<div class="empty">No whisper chains yet</div>';return;}
+    el.innerHTML=chains.map(c=>`
+      <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span class="badge ${c.isComplete?'badge-lm':'badge-g'}">${c.isComplete?'Complete':'In Progress'}</span>
+          <span style="font-size:.75rem;color:var(--tx3)">${(c.lines||[]).length}/5 lines · ${c.createdAt?timeAgo(c.createdAt):''}</span>
+          <button class="ab ab-del" style="margin-left:auto" onclick="hideWhisperChain('${c._id}')">Remove</button>
+        </div>
+        ${(c.lines||[]).map((l,i)=>'<div style="padding:8px 12px;background:var(--bg3);border-radius:8px;margin-bottom:6px;font-size:.85rem;color:var(--tx2)"><span style="color:var(--tx3);font-size:.7rem;margin-right:8px">Line '+(i+1)+'</span>'+esc(l.text)+'</div>').join('')}
+      </div>`).join('');
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+async function hideWhisperChain(id){
+  showConfirm('🗑️','Remove this chain?','It will be hidden from all users.',async()=>{
+    const r=await af('/api/special/admin/whisper/'+id,{method:'DELETE'});
+    toast(r.ok?'Removed':'Failed');if(r.ok)loadWhisperChains();
+  });
 }
 
-// ── EXPORT ────────────────────────────────
-async function dlExport(type) {
-  toast(`⬇️ Preparing ${type}...`);
-  try {
-    const r = await af(`/api/admin/export/${type}`);
-    if (!r.ok) { toast('Export failed — check backend'); return; }
-    const blob = await r.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `annomuss_${type}_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
+// ── GRATITUDE BOMBS ───────────────────────────────────────────
+async function loadGratitude(){
+  const el=q('gratitude-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/special/admin/gratitude');
+    if(!r.ok)throw new Error('Special routes not loaded');
+    const d=await r.json();
+    const bombs=d.bombs||[];
+    if(!bombs.length){el.innerHTML='<div class="empty">No gratitude bombs sent yet</div>';return;}
+    el.innerHTML='<div style="margin-bottom:12px;color:var(--tx3);font-size:.82rem">'+num(d.total||bombs.length)+' total gratitude bombs sent</div>'+
+      '<table><thead><tr><th>From</th><th>To Post</th><th>Message</th><th>When</th></tr></thead><tbody>'+
+      bombs.map(b=>'<tr><td style="font-size:.75rem;color:var(--tx3)">'+esc(b.fromUserId?.toString()?.slice(-6)||'anon')+'</td><td style="font-size:.75rem;color:var(--tx3)">'+esc(b.postId?.toString()?.slice(-6)||'—')+'</td><td style="color:var(--tx2)">'+esc(b.message||'—')+'</td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(b.createdAt)+'</td></tr>').join('')+
+      '</tbody></table>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+
+// ── MOODS ─────────────────────────────────────────────────────
+async function loadMoods(){
+  const el=q('moods-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/moods/pulse');
+    if(!r.ok)throw new Error('Failed: '+r.status);
+    const cities=await r.json();
+    const EMO_COLORS={happy:'#52B788',sad:'#7B5EA7',anxious:'#FF4D6D',lonely:'#C4A8FF',grateful:'#00C9A7',inspired:'#F4A261',hopeful:'#5CB8E4',angry:'#FF6B6B',neutral:'#888'};
+    el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">'+
+      cities.map(c=>'<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px">'+
+        '<div style="font-size:.85rem;font-weight:700;margin-bottom:10px">'+esc(c.city||'Unknown')+'</div>'+
+        (c.breakdown||[]).slice(0,5).map(e=>'<div class="emo-row"><div class="emo-label">'+esc(e.emotion)+'</div><div class="emo-track"><div class="emo-fill" style="width:'+Math.round(e.count/(c.total||1)*100)+'%;background:'+(EMO_COLORS[e.emotion]||'#888')+'"></div></div><div class="emo-pct">'+e.count+'</div></div>').join('')+
+        '</div>').join('')+
+      '</div>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+
+// ── EXPORTS ───────────────────────────────────────────────────
+async function dlExport(type){
+  const btn=event.currentTarget;btn.style.opacity='.5';
+  try{
+    const r=await af('/api/admin/export/'+type);
+    if(!r.ok)throw new Error('Failed: '+r.status);
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='annomuss_'+type+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
     URL.revokeObjectURL(url);
-    const time = new Date().toLocaleString();
-    exportLog.unshift(`${time} — ${type}.csv`);
-    document.getElementById('export-history').innerHTML =
-      exportLog.slice(0,10).map(e => `<div style="padding:5px 0;border-bottom:.5px solid var(--bd);font-size:.75rem">${e}</div>`).join('');
-    toast(`✅ ${type} downloaded!`);
-  } catch(e) { toast('Export failed'); }
+    logExport(type);toast('&#11015; Downloading '+type+' data...');
+  }catch(e){toast('Export failed: '+e.message);}
+  finally{btn.style.opacity='1';}
 }
-
-// ── CONFIRM ───────────────────────────────
-function showConfirm(ico, title, msg, cb) {
-  document.getElementById('c-ico').textContent   = ico;
-  document.getElementById('c-title').textContent = title;
-  document.getElementById('c-msg').textContent   = msg;
-  confirmCb = cb;
-  document.getElementById('confirm-overlay').classList.add('open');
+async function dlEmotionExport(){
+  const r=await af('/api/emotion/export');
+  if(!r.ok){toast('Emotion export not available');return;}
+  const blob=await r.blob();
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='annomuss_emotion_intel_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  URL.revokeObjectURL(url);
+  logExport('emotion-intel');toast('&#11015; Downloading emotion intelligence data...');
 }
-function closeConfirm() { document.getElementById('confirm-overlay').classList.remove('open'); confirmCb = null; }
-function execConfirm()  { closeConfirm(); if (confirmCb) confirmCb(); }
-
-// ── TOAST ─────────────────────────────────
-function toast(msg) {
-  const el = document.createElement('div');
-  el.style.cssText = 'position:fixed;top:18px;right:18px;background:#111126;border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:9px 18px;font-size:.8rem;font-weight:700;font-family:var(--fD);color:#F5F3FF;z-index:9999';
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 3000);
+function logExport(type){
+  exportLog.push({type,time:new Date().toLocaleTimeString()});
+  const el=q('export-log');if(!el)return;
+  el.innerHTML=exportLog.map(e=>'<div>'+e.time+' — exported <strong>'+e.type+'</strong></div>').reverse().join('');
 }
-
-function esc(s) { return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
-
-document.getElementById('admin-pass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
 </script>
 </body>
 </html>

@@ -241,16 +241,26 @@ tr:hover td{background:rgba(255,255,255,.02)}
             <div id="emo-bars"></div>
           </div>
           <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
-            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Top Cities</div>
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Top Cities by Mood Logs</div>
             <div id="city-list"></div>
           </div>
         </div>
-        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:20px">
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:16px">
           <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">New Signups — Last 14 Days</div>
           <div id="signup-chart" class="mini-chart"></div>
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Post Types (7d)</div>
+            <div id="post-types"></div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Trending Hashtags (7d)</div>
+            <div id="hashtag-list"></div>
+          </div>
+        </div>
         <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
-          <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Recent Activity</div>
+          <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Platform Activity</div>
           <div id="activity-feed"><div class="spin"></div></div>
         </div>
       </div>
@@ -501,89 +511,156 @@ function loadAll(){loadOverview();updateOnline();}
 // ── OVERVIEW ──────────────────────────────────────────────────
 async function loadOverview(){
   try{
-    const [statsR, analyticsR] = await Promise.all([
+    // Load stats and overview in parallel
+    // NOTE: /overview returns JSON, /export/analytics returns CSV (different endpoints!)
+    const [statsR, overviewR] = await Promise.all([
       af('/api/admin/stats'),
-      af('/api/admin/export/analytics').catch(()=>null),
+      af('/api/admin/overview').catch(()=>null),
     ]);
-    if(!statsR.ok)throw new Error('Auth failed');
+
+    if(!statsR.ok){
+      const errText = await statsR.text().catch(()=>'Unknown error');
+      throw new Error(statsR.status===403?'Wrong password':'Server error: '+statsR.status+' '+errText.slice(0,100));
+    }
     const d=await statsR.json();
 
+    // ── Stat cards ──────────────────────────────────────────────
     const grid=q('stats-grid');
-    grid.innerHTML=[
-      {color:'purple', val:num(d.users),     label:'Total Users',       sub:'+'+num(d.todayUsers)+' today'},
-      {color:'teal',   val:num(d.posts),     label:'Total Posts',       sub:'All time'},
-      {color:'orange', val:num(d.moods),     label:'Mood Logs',         sub:'Emotional data points'},
-      {color:'green',  val:num(d.vents),     label:'Vents',             sub:'Anonymous vents'},
-      {color:'red',    val:num(d.crisis),    label:'Crisis Posts',      sub:'Need immediate review'},
-      {color:'red',    val:num(d.reports),   label:'Open Reports',      sub:'Awaiting action'},
-      {color:'purple', val:num(d.banned),    label:'Banned Users',      sub:'Blocked accounts'},
-      {color:'teal',   val:num(d.whisperChains||0), label:'Whisper Chains', sub:num(d.gratitudeBombs||0)+' gratitude bombs'},
-    ].map(s=>`
-      <div class="stat-card ${s.color}">
-        <div class="stat-val">${s.val}</div>
-        <div class="stat-label">${s.label}</div>
-        <div class="stat-change neutral">${s.sub}</div>
-      </div>`).join('');
+    const cards=[
+      {color:'purple', val:num(d.users),            label:'Total Users',         sub:'+'+num(d.todayUsers)+' today · +'+num(d.weekUsers||0)+' this week'},
+      {color:'teal',   val:num(d.posts),             label:'Total Posts',         sub:'All time across all types'},
+      {color:'orange', val:num(d.moods),             label:'Mood Logs',           sub:'Emotional data points collected'},
+      {color:'green',  val:num(d.vents),             label:'Vents',               sub:'Anonymous vents posted'},
+      {color:'red',    val:num(d.crisis),            label:'🆘 Crisis Posts',     sub:'Need immediate review'},
+      {color:'red',    val:num(d.reports),           label:'Open Reports',        sub:d.reports>0?'⚠️ Action needed':'✅ All clear'},
+      {color:'purple', val:num(d.banned),            label:'Banned Users',        sub:'Blocked from platform'},
+      {color:'teal',   val:num(d.whisperChains||0),  label:'Whisper Chains',      sub:num(d.gratitudeBombs||0)+' gratitude bombs sent'},
+    ];
+    grid.innerHTML=cards.map(s=>
+      '<div class="stat-card '+s.color+'">'+
+        '<div class="stat-val">'+s.val+'</div>'+
+        '<div class="stat-label">'+s.label+'</div>'+
+        '<div class="stat-change neutral">'+s.sub+'</div>'+
+      '</div>'
+    ).join('');
 
-    if(d.reports>0){const b=q('reports-badge');if(b)b.style.display='inline';}
+    // ── Reports badge ───────────────────────────────────────────
+    const b=q('reports-badge');
+    if(b)b.style.display=d.reports>0?'inline':'none';
 
-    // Load analytics for charts
-    if(analyticsR?.ok){
-      const ad=await analyticsR.json();
-      renderEmoBar(ad.emotionDistribution||{});
-      renderCityList(ad.topCities||[]);
-      renderSignupChart(ad.dailySignups||[]);
-      renderActivity(ad);
+    // ── Charts from /overview ────────────────────────────────────
+    if(overviewR?.ok){
+      try{
+        const ov=await overviewR.json();
+        renderEmoBar(ov.emotionDistribution||{});
+        renderCityList(ov.topCities||[]);
+        renderSignupChart(ov.dailySignups||[]);
+        renderHashtags(ov.topHashtags||[]);
+        renderPostTypes(ov.postTypes||{});
+        renderActivity(d, ov);
+      }catch(jsonErr){
+        console.warn('Overview JSON parse failed:',jsonErr.message);
+        renderEmoBar({});renderCityList([]);renderSignupChart([]);
+      }
+    } else {
+      // /overview not deployed yet — show placeholder
+      q('emo-bars').innerHTML='<div style="color:var(--tx3);font-size:.8rem;padding:8px">Deploy admin_FINAL.js to get charts</div>';
+      q('city-list').innerHTML='';
+      renderActivity(d, {});
     }
   }catch(e){
-    q('stats-grid').innerHTML='<div class="empty" style="grid-column:1/-1">&#128683; Could not load — verify admin password and ADMIN_PASSWORD env var on Render<br><small>'+e.message+'</small></div>';
+    q('stats-grid').innerHTML=
+      '<div class="empty" style="grid-column:1/-1">'+
+        '<div style="font-size:1.5rem;margin-bottom:8px">🔐</div>'+
+        '<div style="font-size:.9rem;margin-bottom:6px">'+e.message+'</div>'+
+        '<div style="font-size:.78rem;opacity:.6">Make sure ADMIN_PASSWORD is set on Render → Environment</div>'+
+      '</div>';
   }
 }
 
 function renderEmoBar(dist){
   const el=q('emo-bars');if(!el)return;
   const EMO_COLORS={happy:'#52B788',sad:'#7B5EA7',anxious:'#FF4D6D',lonely:'#C4A8FF',grateful:'#00C9A7',inspired:'#F4A261',hopeful:'#5CB8E4',angry:'#FF6B6B',confused:'#A8D8EA',proud:'#FFD700',excited:'#FF85A1',neutral:'#666'};
-  const total=Object.values(dist).reduce((s,v)=>s+v,0)||1;
-  const sorted=Object.entries(dist).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  el.innerHTML=sorted.map(([emo,count])=>`
-    <div class="emo-row">
-      <div class="emo-label">${emo}</div>
-      <div class="emo-track"><div class="emo-fill" style="width:${Math.round(count/total*100)}%;background:${EMO_COLORS[emo]||'#888'}"></div></div>
-      <div class="emo-pct">${Math.round(count/total*100)}%</div>
-    </div>`).join('');
+  const entries=Object.entries(dist).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(!entries.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem;padding:8px">No mood data yet — users need to log moods</div>';return;}
+  const total=entries.reduce((s,[,v])=>s+v,0)||1;
+  el.innerHTML=entries.map(([emo,count])=>
+    '<div class="emo-row">'+
+      '<div class="emo-label">'+esc(emo)+'</div>'+
+      '<div class="emo-track"><div class="emo-fill" style="width:'+Math.round(count/total*100)+'%;background:'+(EMO_COLORS[emo]||'#888')+'"></div></div>'+
+      '<div class="emo-pct">'+Math.round(count/total*100)+'%</div>'+
+    '</div>'
+  ).join('');
 }
 
 function renderCityList(cities){
   const el=q('city-list');if(!el)return;
-  if(!cities.length){el.innerHTML='<div class="empty">No city data yet</div>';return;}
-  el.innerHTML=cities.slice(0,8).map((c,i)=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bd)">
-      <span style="width:20px;font-size:.75rem;color:var(--tx3);font-family:var(--fM)">${i+1}</span>
-      <span style="flex:1;font-size:.82rem">${c.city||'Unknown'}</span>
-      <span style="font-size:.78rem;color:var(--tx3);font-family:var(--fM)">${num(c.count)}</span>
-    </div>`).join('');
+  if(!cities.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem;padding:8px">No city data yet</div>';return;}
+  el.innerHTML=cities.slice(0,8).map((c,i)=>
+    '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bd)">'+
+      '<span style="width:22px;font-size:.72rem;color:var(--tx3);font-family:var(--fM);font-weight:600">'+(i+1)+'</span>'+
+      '<span style="flex:1;font-size:.83rem">'+esc(c.city||'Unknown')+'</span>'+
+      '<span style="font-size:.78rem;color:var(--tx3);font-family:var(--fM)">'+num(c.count)+'</span>'+
+    '</div>'
+  ).join('');
 }
 
 function renderSignupChart(signups){
   const el=q('signup-chart');if(!el)return;
-  if(!signups.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem">No signup data</div>';return;}
+  if(!signups.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem">No signup data yet</div>';return;}
   const max=Math.max(...signups.map(s=>s.count),1);
-  el.innerHTML=signups.slice(-14).map(s=>`
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
-      <div class="mini-bar" style="height:${Math.max(4,Math.round(s.count/max*46))}px;background:var(--v);width:100%;border-radius:3px 3px 0 0" title="${s.date}: ${s.count} signups"></div>
-    </div>`).join('');
+  // Fill missing days
+  const chartData=signups.slice(-14);
+  el.innerHTML=chartData.map(s=>{
+    const h=Math.max(4,Math.round(s.count/max*44));
+    const date=new Date(s.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" title="'+date+': '+s.count+' signups">'+
+      '<span style="font-size:.55rem;color:var(--tx3);font-family:var(--fM)">'+s.count+'</span>'+
+      '<div style="height:'+h+'px;background:var(--v);width:100%;border-radius:3px 3px 0 0;transition:height .6s ease"></div>'+
+    '</div>';
+  }).join('');
 }
 
-function renderActivity(ad){
+function renderHashtags(hashtags){
+  const el=q('hashtag-list');if(!el||!hashtags.length)return;
+  el.innerHTML=hashtags.slice(0,10).map(h=>
+    '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--bg3);border-radius:100px;font-size:.75rem;margin:3px;color:var(--vl)">#'+esc(h.tag)+'<span style="color:var(--tx3)">'+h.count+'</span></span>'
+  ).join('');
+}
+
+function renderPostTypes(types){
+  const el=q('post-types');if(!el)return;
+  const TYPE_ICONS={post:'📢',story:'📸',confession:'🤫',unsent:'💌',diary:'📖',poll:'📊',voice:'🎙️',vent:'💭',challenge:'🎯'};
+  const entries=Object.entries(types).sort((a,b)=>b[1]-a[1]);
+  if(!entries.length)return;
+  const total=entries.reduce((s,[,v])=>s+v,0)||1;
+  el.innerHTML=entries.map(([type,count])=>
+    '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)">'+
+      '<span>'+(TYPE_ICONS[type]||'📝')+'</span>'+
+      '<span style="flex:1;font-size:.82rem;text-transform:capitalize">'+esc(type)+'</span>'+
+      '<span style="font-size:.78rem;color:var(--tx3)">'+num(count)+'</span>'+
+      '<span style="font-size:.7rem;color:var(--tx3);width:32px;text-align:right">'+Math.round(count/total*100)+'%</span>'+
+    '</div>'
+  ).join('');
+}
+
+function renderActivity(stats, overview){
   const el=q('activity-feed');if(!el)return;
   const items=[];
-  if(ad.todayUsers)    items.push({ico:'👤',text:num(ad.todayUsers)+' new users today'});
-  if(ad.emotionDistribution){
-    const top=Object.entries(ad.emotionDistribution).sort((a,b)=>b[1]-a[1])[0];
-    if(top)items.push({ico:'😊',text:'Top emotion today: '+top[0]+' ('+num(top[1])+' logs)'});
-  }
-  if(!items.length){el.innerHTML='<div class="empty">No activity data</div>';return;}
-  el.innerHTML=items.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:.82rem"><span style="font-size:1.1rem">${i.ico}</span>${i.text}</div>`).join('');
+  if(stats.todayUsers>0) items.push({ico:'👤',c:'var(--tl)', text:num(stats.todayUsers)+' new users today'});
+  if(stats.weekUsers>0)  items.push({ico:'📈',c:'var(--v)',  text:num(stats.weekUsers)+' users this week'});
+  if(stats.crisis>0)     items.push({ico:'🆘',c:'var(--cr)', text:stats.crisis+' crisis post'+(stats.crisis===1?'':'s')+' need review'});
+  if(stats.reports>0)    items.push({ico:'⚠️',c:'var(--go)', text:stats.reports+' open report'+(stats.reports===1?'':'s')});
+  const emo=Object.entries(overview.emotionDistribution||{}).sort((a,b)=>b[1]-a[1])[0];
+  if(emo) items.push({ico:'😊',c:'var(--tx2)', text:'Top mood this week: '+emo[0]+' ('+num(emo[1])+' logs)'});
+  if(stats.whisperChains>0) items.push({ico:'🌀',c:'var(--vl)', text:num(stats.whisperChains)+' whisper chains · '+num(stats.gratitudeBombs||0)+' gratitude bombs'});
+  if(!items.length){el.innerHTML='<div class="empty">Platform is quiet — share annomuss to get users!</div>';return;}
+  el.innerHTML=items.map(i=>
+    '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd)">'+
+      '<span style="font-size:1.1rem;width:24px;text-align:center">'+i.ico+'</span>'+
+      '<span style="font-size:.83rem;color:'+i.c+'">'+i.text+'</span>'+
+    '</div>'
+  ).join('');
 }
 
 // ── ONLINE COUNT ──────────────────────────────────────────────

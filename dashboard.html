@@ -151,7 +151,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .pa{display:flex;align-items:center;padding:6px 10px 12px;gap:2px;border-top:1px solid var(--bd)}
 .pak{display:flex;align-items:center;gap:4px;padding:7px 10px;border-radius:9px;
   font-size:.77rem;color:var(--tx3);font-weight:600;font-family:var(--fD);cursor:pointer;transition:all .12s}
-.pak:active{background:var(--bg3)}.pak.liked{color:var(--cr)}
+.pak:active{background:var(--bg3)}
+.pak.liked{color:var(--cr)}
+.pak.heart-pop span:first-child{animation:heartPop .35s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes heartPop{0%{transform:scale(1)}30%{transform:scale(1.5)}60%{transform:scale(.88)}100%{transform:scale(1)}}
 /* buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
   padding:10px 22px;border-radius:100px;font-size:.82rem;font-weight:700;
@@ -1996,8 +1999,8 @@ function renderPost(p){
     </div>
     ${cap}${media}${pollHtml}${voiceHtml}${reacts}
     <div class="pa">
-      <div class="pak ${liked?'liked':''}" onclick="doLike('${p._id}',this)" id="lb-${p._id}" title="${liked?'You felt this':'Feel this'}">
-        <span>${liked?'💙':'🤍'}</span><span id="lc-${p._id}" style="font-size:.72rem">${(p.likes||[]).length>0?(p.likes||[]).length:''}</span>
+      <div class="pak ${liked?'liked':''}" onclick="doLike('${p._id}',this)" id="lb-${p._id}" title="${liked?'This resonated with me':'This resonated with me'}">
+        <span>${liked?'❤️':'🤍'}</span><span id="lc-${p._id}" style="font-size:.72rem">${(p.likes||[]).length>0?(p.likes||[]).length:''}</span>
       </div>
       <div class="pak" onclick="openPModal('${p._id}')">💬<span style="margin-left:3px">${p.commentCount||''}</span></div>
       <div class="pak ${isSaved?'saved':''}" onclick="doSave('${p._id}',this)" id="sv-${p._id}">
@@ -2037,23 +2040,23 @@ async function doLike(id,btn){
   const was=btn.classList.contains('liked');
   // Optimistic update
   btn.classList.toggle('liked',!was);
-  ico.textContent=was?'🤍':'💙';
-  if(!was)sound('like');
+  ico.textContent=was?'🤍':'❤️';
+  if(!was){sound('like');btn.classList.add('heart-pop');setTimeout(()=>btn.classList.remove('heart-pop'),400);}
   lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?-1:1))||'';
   try{
     const r=await api(`/api/posts/${id}/like`,{method:'POST'});
     const d=await r.json();
     if(!r.ok){// revert
-      btn.classList.toggle('liked',was);ico.textContent=was?'💙':'🤍';
+      btn.classList.toggle('liked',was);ico.textContent=was?'❤️':'🤍';
       lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?1:-1));return;
     }
     // Sync with server
     const count=typeof d.likeCount==='number'?d.likeCount:(typeof d.likes==='number'?d.likes:null);
     if(count!==null)lc.textContent=count;
-    if(d.liked!==undefined){btn.classList.toggle('liked',!!d.liked);ico.textContent=d.liked?'💙':'🤍';}
+    if(d.liked!==undefined){btn.classList.toggle('liked',!!d.liked);ico.textContent=d.liked?'❤️':'🤍';}
   }catch(e){
     // revert on network error
-    btn.classList.toggle('liked',was);ico.textContent=was?'💙':'🤍';
+    btn.classList.toggle('liked',was);ico.textContent=was?'❤️':'🤍';
     lc.textContent=Math.max(0,parseInt(lc.textContent||0)+(was?1:-1));
   }
 }

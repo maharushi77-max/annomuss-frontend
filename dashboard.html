@@ -2688,8 +2688,8 @@ async function loadStoryViewers(postId){
     panel.style.cssText='position:absolute;bottom:0;left:0;right:0;background:rgba(5,4,12,.92);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.1);padding:14px 16px;z-index:20;border-radius:0 0 16px 16px';
     panel.innerHTML=
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
-        '<div style="font-size:.82rem;font-weight:700;color:#fff">'+String.fromCodePoint(0x1F441)+' '+d.total+' views</div>'+
-        '<button onclick="document.getElementById('sv-viewer-panel').remove()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:1rem;cursor:pointer">'+String.fromCharCode(215)+'</button>'+
+        '<div style="font-size:.82rem;font-weight:700;color:#fff">&#128065; '+d.total+' views</div>'+
+        '<button onclick="var p=document.getElementById(\'sv-viewer-panel\');if(p)p.remove()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:1rem;cursor:pointer">&#215;</button>'+
       '</div>'+
       topCities.map(function(pair){
         return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.78rem">'+

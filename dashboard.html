@@ -4197,7 +4197,7 @@ function renderAm3RoomSelection(counts,isOpen){
   ];
   el.innerHTML=rooms.map(r=>{
     const cnt=(counts&&counts[r.mood])||0;
-    return '<div onclick="joinAm3Room(''+r.mood+'')" style="padding:14px 16px;background:'+r.color+';border:1px solid '+r.border+';border-radius:14px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:transform .15s" onmousedown="this.style.transform='scale(.97)'" onmouseup="this.style.transform=''">'
+    return '<div onclick="joinAm3Room(\'' + r.mood + '\')" style="padding:14px 16px;background:' + r.color + ';border:1px solid ' + r.border + ';border-radius:14px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:12px">'
       +'<span style="font-size:1.4rem">'+r.icon+'</span>'
       +'<div style="flex:1"><div style="font-size:.88rem;font-weight:700;color:rgba(196,168,255,.9)">'+r.name+'</div>'
       +'<div style="font-size:.72rem;color:rgba(152,150,184,.6);margin-top:2px">'+(cnt>0?cnt+' people inside':'Be the first tonight')+'</div></div>'

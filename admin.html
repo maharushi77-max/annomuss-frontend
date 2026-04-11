@@ -260,21 +260,46 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </div>
         </div>
         <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
-          <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Platform Activity</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Live Activity Feed</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="pdot"></div>
+              <span style="font-size:.72rem;color:var(--tx3)" id="live-window">last 5 min</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap" id="live-stats">
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:1.3rem;font-weight:500;color:var(--vl)" id="live-users">—</div>
+              <div style="font-size:.7rem;color:var(--tx3)">new users</div>
+            </div>
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:1.3rem;font-weight:500;color:var(--tl)" id="live-posts">—</div>
+              <div style="font-size:.7rem;color:var(--tx3)">posts</div>
+            </div>
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:1.3rem;font-weight:500;color:var(--go)" id="live-moods">—</div>
+              <div style="font-size:.7rem;color:var(--tx3)">mood logs</div>
+            </div>
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:1.3rem;font-weight:500;color:var(--lm)" id="live-vents">—</div>
+              <div style="font-size:.7rem;color:var(--tx3)">vents</div>
+            </div>
+          </div>
           <div id="activity-feed"><div class="spin"></div></div>
         </div>
       </div>
 
       <!-- EMOTION INTELLIGENCE TAB -->
       <div id="tab-emotion" class="tab-content" style="display:none">
-        <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-primary btn-sm" onclick="loadEmotionPulse()">Live Pulse</button>
-          <button class="btn btn-ghost btn-sm" onclick="loadEmotionHourly()">Hourly Breakdown</button>
-          <button class="btn btn-ghost btn-sm" onclick="loadAdMatrix()">Ad Matrix</button>
-          <button class="btn btn-ghost btn-sm" onclick="loadDataQuality()">Data Quality</button>
+        <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" id="ebtn-pulse"    onclick="switchEmotionView('pulse',this)">Live Pulse</button>
+          <button class="btn btn-ghost btn-sm"  id="ebtn-hourly"   onclick="switchEmotionView('hourly',this)">Hourly Breakdown</button>
+          <button class="btn btn-ghost btn-sm"  id="ebtn-admatrix" onclick="switchEmotionView('admatrix',this)">Ad Matrix</button>
+          <button class="btn btn-ghost btn-sm"  id="ebtn-segments" onclick="switchEmotionView('segments',this)">Ad Segments</button>
+          <button class="btn btn-ghost btn-sm"  id="ebtn-quality"  onclick="switchEmotionView('quality',this)">Data Quality</button>
           <a href="https://api.annomuss.in/api/emotion/export" target="_blank" class="btn btn-ghost btn-sm">&#11015; Export CSV</a>
         </div>
-        <div id="emotion-content"><div class="empty">Select a view above</div></div>
+        <div id="emotion-content"><div class="spin"></div></div>
       </div>
 
       <!-- USERS TAB -->
@@ -503,10 +528,18 @@ function showTab(tab, navEl){
   if(tab==='moods')    loadMoods();
   if(tab==='whisper')  loadWhisperChains();
   if(tab==='gratitude')loadGratitude();
+  if(tab==='emotion')  switchEmotionView('pulse', q('ebtn-pulse'));
 }
 
 function refreshCurrent(){showTab(currentTab,null);}
 function loadAll(){loadOverview();updateOnline();}
+
+// Stop live polling when leaving overview tab
+const _origShowTab=showTab;
+function showTab(tab,navEl){
+  if(tab!=='overview'&&liveTimer){clearInterval(liveTimer);liveTimer=null;}
+  _origShowTab(tab,navEl);
+}
 
 // ── OVERVIEW ──────────────────────────────────────────────────
 async function loadOverview(){
@@ -661,6 +694,44 @@ function renderActivity(stats, overview){
       '<span style="font-size:.83rem;color:'+i.c+'">'+i.text+'</span>'+
     '</div>'
   ).join('');
+  // Kick off live activity polling
+  loadLiveActivity();
+}
+
+// ── LIVE ACTIVITY — polls /api/admin/live every 15s ───────────
+let liveTimer=null;
+async function loadLiveActivity(){
+  clearInterval(liveTimer);
+  await fetchLiveData();
+  liveTimer=setInterval(fetchLiveData, 15000);
+}
+async function fetchLiveData(){
+  try{
+    const r=await af('/api/admin/live');
+    if(!r.ok)return;
+    const d=await r.json();
+    // Update mini counters
+    const set=(id,val)=>{const el=q(id);if(el)el.textContent=val;};
+    set('live-users', d.newUsers);
+    set('live-posts', d.newPosts);
+    set('live-moods', d.newMoods);
+    set('live-vents', d.newVents);
+    // Update activity feed with real-time posts
+    const el=q('activity-feed');
+    if(el&&d.recentActivity&&d.recentActivity.length){
+      const EMO_ICONS={happy:'😊',sad:'😢',anxious:'😰',lonely:'💙',grateful:'🙏',inspired:'✨',hopeful:'🌱',angry:'😤',neutral:'😶',excited:'⚡',proud:'💪',confused:'😕'};
+      el.innerHTML=d.recentActivity.map(a=>
+        '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--bd)">'+
+          '<span style="font-size:1rem;width:22px;text-align:center">'+(EMO_ICONS[a.emotion]||'📝')+'</span>'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="font-size:.8rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(a.text||(a.type+' posted'))+'</div>'+
+            '<div style="font-size:.7rem;color:var(--tx3);margin-top:1px">'+(a.city?esc(a.city)+' · ':'')+'<span style="text-transform:capitalize">'+esc(a.type||'post')+'</span>'+' · '+timeAgo(a.time)+'</div>'+
+          '</div>'+
+          (a.emotion?'<span style="padding:2px 8px;border-radius:100px;font-size:.68rem;background:rgba(123,94,167,.12);color:var(--vl)">'+esc(a.emotion)+'</span>':'')+
+        '</div>'
+      ).join('');
+    }
+  }catch(_){}
 }
 
 // ── ONLINE COUNT ──────────────────────────────────────────────
@@ -669,30 +740,180 @@ async function updateOnline(){
 }
 
 // ── EMOTION INTELLIGENCE ──────────────────────────────────────
+// ── EMOTION INTELLIGENCE ──────────────────────────────────────
+const EMO_COLORS={happy:'#52B788',sad:'#7B5EA7',anxious:'#FF4D6D',lonely:'#C4A8FF',grateful:'#00C9A7',inspired:'#F4A261',hopeful:'#5CB8E4',angry:'#FF6B6B',confused:'#A8D8EA',proud:'#FFD700',excited:'#FF85A1',neutral:'#666'};
+
+function switchEmotionView(view, btn){
+  document.querySelectorAll('[id^="ebtn-"]').forEach(b=>{b.className='btn btn-ghost btn-sm';});
+  if(btn)btn.className='btn btn-primary btn-sm';
+  if(view==='pulse')    loadEmotionPulse();
+  else if(view==='hourly')   loadEmotionHourly();
+  else if(view==='admatrix') loadAdMatrix();
+  else if(view==='segments') loadSegments();
+  else if(view==='quality')  loadDataQuality();
+}
+
 async function loadEmotionPulse(){
-  q('emotion-content').innerHTML='<div class="spin"></div>';
+  const el=q('emotion-content');
+  el.innerHTML='<div class="spin"></div>';
   try{
     const r=await af('/api/emotion/pulse');
-    if(!r.ok)throw new Error('Emotion API not loaded');
-    const d=await r.json();
-    q('emotion-content').innerHTML='<pre style="font-size:.78rem;color:var(--tx2);white-space:pre-wrap;line-height:1.6">'+JSON.stringify(d,null,2)+'</pre>';
-  }catch(e){q('emotion-content').innerHTML='<div class="empty">'+e.message+'</div>';}
+    if(!r.ok)throw new Error('Emotion API not responding ('+r.status+') — check emotionAnalytics.js is deployed');
+    const data=await r.json();
+    if(!data.length){el.innerHTML='<div class="empty">No emotion signals yet — users need to post and log moods first</div>';return;}
+    const total=data.reduce((s,e)=>s+e.count,0)||1;
+    el.innerHTML=
+      '<div style="margin-bottom:16px"><div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Live Emotion Pulse — Last 30 Minutes</div>'+
+      data.map(e=>{
+        const pct=Math.round(e.count/total*100);
+        const col=EMO_COLORS[e.emotion]||'#888';
+        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
+          '<div style="width:80px;font-size:.82rem;text-transform:capitalize;color:var(--tx2)">'+esc(e.emotion)+'</div>'+
+          '<div style="flex:1;height:10px;background:var(--bg3);border-radius:100px;overflow:hidden">'+
+            '<div style="height:100%;border-radius:100px;background:'+col+';width:'+pct+'%;transition:width .8s ease"></div>'+
+          '</div>'+
+          '<div style="width:36px;font-size:.75rem;font-family:var(--fM);color:var(--tx3)">'+pct+'%</div>'+
+          '<div style="width:48px;font-size:.72rem;color:var(--tx3)">'+num(e.count)+'</div>'+
+          '<div style="font-size:.7rem;color:var(--tx3)">'+Math.round(e.confidence)+'% conf</div>'+
+        '</div>';
+      }).join('')+
+      '</div>'+
+      '<div style="font-size:.75rem;color:var(--tx3);margin-top:8px">Total signals: '+num(total)+' · Refresh for latest</div>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
+
 async function loadEmotionHourly(){
-  q('emotion-content').innerHTML='<div class="spin"></div>';
-  try{const r=await af('/api/emotion/hourly-breakdown');if(!r.ok)throw new Error();const d=await r.json();q('emotion-content').innerHTML='<pre style="font-size:.78rem;color:var(--tx2);white-space:pre-wrap">'+JSON.stringify(d,null,2)+'</pre>';}
-  catch(_){q('emotion-content').innerHTML='<div class="empty">Emotion intelligence not loaded on server</div>';}
+  const el=q('emotion-content');
+  el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/hourly-breakdown');
+    if(!r.ok)throw new Error('Hourly breakdown not available ('+r.status+')');
+    const data=await r.json();
+    if(!data.length){el.innerHTML='<div class="empty">No hourly data yet</div>';return;}
+    const maxCount=Math.max(...data.map(d=>d.userCount),1);
+    el.innerHTML=
+      '<div style="margin-bottom:12px;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Emotion Activity — Last 24 Hours</div>'+
+      '<div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:8px">'+
+      Array.from({length:24},(_,h)=>{
+        const d=data.find(x=>x.hour===h);
+        const count=d?.userCount||0;
+        const barH=Math.max(4,Math.round(count/maxCount*76));
+        const topEmo=d?Object.entries(d.emotions||{}).sort((a,b)=>b[1]-a[1])[0]:null;
+        const col=topEmo?EMO_COLORS[topEmo[0]]||'#7B5EA7':'#1e1e2e';
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px" title="'+h+':00 — '+count+' signals'+(topEmo?' · '+topEmo[0]:'')+'">'+
+          '<div style="width:100%;border-radius:2px 2px 0 0;background:'+col+';height:'+barH+'px;opacity:.85"></div>'+
+        '</div>';
+      }).join('')+
+      '</div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--tx3);font-family:var(--fM);margin-bottom:14px">'+
+      Array.from({length:7},(_,i)=>'<span>'+String(i*4).padStart(2,'0')+'h</span>').join('')+
+      '</div>'+
+      '<div style="overflow-x:auto"><table><thead><tr><th>Hour</th><th>Signals</th><th>Anxious</th><th>Happy</th><th>Sad</th><th>Lonely</th><th>Grateful</th><th>Confidence</th></tr></thead><tbody>'+
+      data.map(d=>'<tr><td style="font-family:var(--fM)">'+String(d.hour).padStart(2,'0')+':00</td><td>'+num(d.userCount)+'</td>'+
+        ['anxious','happy','sad','lonely','grateful'].map(e=>'<td style="color:'+(EMO_COLORS[e]||'#888')+'">'+d.emotions[e]+'</td>').join('')+
+        '<td>'+d.confidence+'%</td></tr>'
+      ).join('')+
+      '</tbody></table></div>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
+
 async function loadAdMatrix(){
-  q('emotion-content').innerHTML='<div class="spin"></div>';
-  try{const r=await af('/api/emotion/ad-matrix');if(!r.ok)throw new Error();const d=await r.json();q('emotion-content').innerHTML='<pre style="font-size:.78rem;color:var(--tx2);white-space:pre-wrap">'+JSON.stringify(d,null,2)+'</pre>';}
-  catch(_){q('emotion-content').innerHTML='<div class="empty">Ad matrix not available</div>';}
+  const el=q('emotion-content');
+  el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/ad-matrix');
+    if(!r.ok)throw new Error('Ad matrix not available ('+r.status+')');
+    const data=await r.json();
+    if(!data.length){el.innerHTML='<div class="empty">No ad targeting data yet — needs emotion snapshots</div>';return;}
+    // Group by segment
+    const bySegment={};
+    data.forEach(row=>{
+      const seg=row._id?.segment||'unknown';
+      if(!bySegment[seg])bySegment[seg]=[];
+      bySegment[seg].push(row);
+    });
+    el.innerHTML=
+      '<div style="margin-bottom:12px;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Ad Targeting Matrix — Emotion × Hour × Segment</div>'+
+      Object.entries(bySegment).slice(0,8).map(([seg,rows])=>{
+        const topHour=rows.sort((a,b)=>b.userCount-a.userCount)[0];
+        const cities=[...new Set(rows.flatMap(r=>r.cities||[]))].filter(Boolean).slice(0,4);
+        const totalUsers=rows.reduce((s,r)=>s+r.userCount,0);
+        return '<div style="background:var(--bg2);border:0.5px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px">'+
+          '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'+
+            '<div style="padding:3px 10px;background:rgba(123,94,167,.15);border-radius:100px;font-size:.72rem;font-weight:700;color:var(--vl)">'+esc(seg)+'</div>'+
+            '<div style="font-size:.75rem;color:var(--tx3)">'+num(totalUsers)+' users</div>'+
+            (topHour?'<div style="font-size:.75rem;color:var(--tx3)">Peak: '+String(topHour._id?.hour||0).padStart(2,'0')+':00</div>':'')+'</div>'+
+          '<div style="font-size:.75rem;color:var(--tx3)">Top cities: '+cities.map(c=>esc(c)).join(' · ')+'</div>'+
+        '</div>';
+      }).join('')+
+      '<div style="font-size:.72rem;color:var(--tx3);margin-top:8px">'+num(data.length)+' total data points · use Export CSV for full matrix</div>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
+
 async function loadDataQuality(){
-  q('emotion-content').innerHTML='<div class="spin"></div>';
-  try{const r=await af('/api/emotion/quality');if(!r.ok)throw new Error();const d=await r.json();
-  q('emotion-content').innerHTML='<div style="padding:10px">'+Object.entries(d).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:.83rem"><span style="color:var(--tx2)">${k}</span><span style="font-family:var(--fM);color:var(--vl)">${JSON.stringify(v)}</span></div>`).join('')+'</div>';}
-  catch(_){q('emotion-content').innerHTML='<div class="empty">Data quality endpoint not available</div>';}
+  const el=q('emotion-content');
+  el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/quality');
+    if(!r.ok)throw new Error('Data quality endpoint not available ('+r.status+')');
+    const d=await r.json();
+    const score=d.dataQualityScore||0;
+    const scoreCol=score>=70?'var(--lm)':score>=40?'var(--go)':'var(--cr)';
+    el.innerHTML=
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'+
+      [
+        {label:'Total Signals',val:num(d.totalSignals||0),col:'var(--vl)'},
+        {label:'Unique Users',val:num(d.uniqueUsers||0),col:'var(--tl)'},
+        {label:'Avg Signals/User',val:d.avgSignalsPerUser||0,col:'var(--go)'},
+        {label:'High Confidence',val:(d.highConfidencePct||0)+'%',col:'var(--lm)'},
+      ].map(s=>'<div style="background:var(--bg2);border-radius:10px;padding:12px;border:0.5px solid var(--bd)"><div style="font-size:.7rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">'+s.label+'</div><div style="font-size:1.4rem;font-weight:500;color:'+s.col+'">'+s.val+'</div></div>').join('')+
+      '</div>'+
+      '<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:14px">'+
+        '<div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px">Data Quality Score</div>'+
+        '<div style="display:flex;align-items:center;gap:12px">'+
+          '<div style="font-size:2rem;font-weight:500;color:'+scoreCol+'">'+score+'</div>'+
+          '<div style="flex:1;height:8px;background:var(--bg3);border-radius:100px"><div style="height:100%;border-radius:100px;background:'+scoreCol+';width:'+score+'%;transition:width .8s ease"></div></div>'+
+          '<div style="font-size:.75rem;color:var(--tx3)">/ 100</div>'+
+        '</div>'+
+        '<div style="font-size:.72rem;color:var(--tx3);margin-top:6px">Score = 70% high-confidence signals + 30% unique user coverage</div>'+
+      '</div>'+
+      '<div style="margin-bottom:14px"><div style="font-size:.75rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Signal Breakdown</div>'+
+      (d.signalBreakdown||[]).map(s=>'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--bd)"><div style="flex:1;font-size:.82rem;text-transform:capitalize">'+esc(s._id||'unknown')+'</div><div style="font-size:.78rem;font-family:var(--fM);color:var(--tx3)">'+num(s.count)+'</div><div style="font-size:.72rem;color:var(--tx3)">'+Math.round((s.avgConfidence||0)*100)+'% conf</div></div>').join('')+
+      '</div>'+
+      '<div><div style="font-size:.75rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Top Cities by Emotional Data</div>'+
+      (d.cityBreakdown||[]).slice(0,10).map((c,i)=>'<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--bd)"><div style="width:18px;font-size:.72rem;color:var(--tx3)">'+(i+1)+'</div><div style="flex:1;font-size:.82rem">'+esc(c._id||'Unknown')+'</div><div style="font-size:.78rem;font-family:var(--fM);color:var(--tx3)">'+num(c.count)+'</div></div>').join('')+'</div>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+
+async function loadCityTrend(){
+  const el=q('emotion-content');
+  el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/city-trend?city=Mumbai&hours=24');
+    if(!r.ok)throw new Error('City trend not available');
+    const d=await r.json();
+    el.innerHTML='<div style="font-size:.78rem;font-weight:700;color:var(--tx3);margin-bottom:10px">Mumbai — 24h emotion trend</div><pre style="font-size:.78rem;color:var(--tx2);white-space:pre-wrap;line-height:1.6">'+JSON.stringify(d,null,2)+'</pre>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+
+async function loadSegments(){
+  const el=q('emotion-content');
+  el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/segments');
+    if(!r.ok)throw new Error('Segments endpoint not available');
+    const data=await r.json();
+    if(!data.length){el.innerHTML='<div class="empty">No segment data yet</div>';return;}
+    el.innerHTML=
+      '<div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Ad Segments (7-day)</div>'+
+      data.slice(0,12).map(seg=>{
+        return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--bd)">'+
+          '<div style="width:140px;font-size:.82rem;color:var(--tx2);text-transform:capitalize">'+esc(seg._id||'unknown')+'</div>'+
+          '<div style="flex:1;height:8px;background:var(--bg3);border-radius:100px"><div style="height:100%;border-radius:100px;background:var(--v);width:'+Math.min(100,Math.round((seg.userCount||0)/Math.max(...data.map(s=>s.userCount),1)*100))+'%"></div></div>'+
+          '<div style="width:40px;font-size:.75rem;font-family:var(--fM);color:var(--tx3);text-align:right">'+num(seg.userCount||0)+'</div>'+
+        '</div>';
+      }).join('');
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
 
 // ── USERS ─────────────────────────────────────────────────────

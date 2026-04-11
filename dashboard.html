@@ -1940,7 +1940,14 @@ function renderPost(p){
 
   // Psychology-driven relatability label
   const rel=getRelatabilityLabel(p);
-  const relLabel=rel?`<span style="font-size:.62rem;padding:2px 7px;border-radius:100px;background:${rel.c};color:#fff;font-family:var(--fD);font-weight:700;letter-spacing:.04em">${rel.t}</span>`:'';
+  const relLabel=rel?'<span style="font-size:.62rem;padding:2px 7px;border-radius:100px;background:'+rel.c+';color:#fff;font-family:var(--fD);font-weight:700;letter-spacing:.04em">'+rel.t+'</span>':'';
+
+  // City badge — show when post is from user's city
+  const userCity=userLoc?.city||user?.city||null;
+  const cityBadge=(p.city&&userCity&&p.city===userCity&&!isOwn)
+    ?'<span style="font-size:.6rem;padding:2px 7px;border-radius:100px;background:rgba(0,201,167,.12);color:#00C9A7;font-family:var(--fD);font-weight:700;border:1px solid rgba(0,201,167,.2)">'+esc(p.city)+'</span>'
+    :'';
+
 
   const isSaved=(p.saves||[]).some(id=>id===user?._id?.toString()||id===user?.anonymousName)||p.isSaved;
 
@@ -1992,7 +1999,7 @@ function renderPost(p){
         <div style="display:flex;align-items:center;gap:4px;margin-top:2px;flex-wrap:wrap">
           <span class="pt">${timeAgo(p.createdAt)}</span>
           ${epill}${stbdg}${mnbdg}${ubdg}${pbdg}${vbdg}
-          ${relLabel}
+          ${relLabel}${cityBadge}
         </div>
       </div>
       <button style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:.9rem" onclick="ctxMenu(event,'${p._id}',${isOwn},'${esc(author)}','${esc(av)}','${p.authorId||p._authorId||''}')">⋯</button>
@@ -2631,14 +2638,23 @@ function showSVItem(){
   // Show ⋯ menu button always (delete for own, report for others)
   q('sv-menu-btn').style.display='block';
 
-  // Track view — call API (fire and forget)
+  // Track view — call API (fire and forget, get back real count)
   if(it._id){
-    api(`/api/posts/${it._id}/view`,{method:'POST'}).catch(()=>{});
-    // Show view count for own stories
-    const isOwn=g.nm===user?.anonymousName||it.authorName===user?.anonymousName;
-    if(isOwn&&it.storyViews!==undefined){
-      q('sv-name').innerHTML=`${esc(g.nm)} <span style="font-size:.65rem;color:rgba(255,255,255,.5);font-family:var(--fM)">👁 ${(it.storyViews||0)+1}</span>`;
-    }
+    api(`/api/posts/${it._id}/view`,{method:'POST'})
+      .then(r=>r.json())
+      .then(d=>{
+        if(d.storyViews!==undefined){
+          it.storyViews=d.storyViews;
+          const isOwn=g.nm===user?.anonymousName||it.authorId?.toString()===user?._id?.toString()||it.authorId?.toString()===(user?.id?.toString());
+          if(isOwn){
+            // Show view count badge
+            const nameEl=q('sv-name');
+            if(nameEl)nameEl.innerHTML=esc(g.nm)+'<span style="margin-left:8px;font-size:.65rem;color:rgba(255,255,255,.55);font-family:var(--fM)">&#128065; '+d.storyViews+' views</span>';
+            // Load full viewer list
+            loadStoryViewers(it._id);
+          }
+        }
+      }).catch(()=>{});
   }
   const prog=q('sv-progress');prog.innerHTML='';
   g.items.forEach((_,i)=>{const bar=document.createElement('div');bar.style.cssText=`flex:1;height:2.5px;background:${i<svItemIdx?'#fff':'rgba(255,255,255,.25)'};border-radius:2px;overflow:hidden`;if(i===svItemIdx){const fill=document.createElement('div');fill.style.cssText='height:100%;background:#fff;width:0;transition:width linear';bar.appendChild(fill);}prog.appendChild(bar);});
@@ -2655,6 +2671,36 @@ function showSVItem(){
 function svNext(){clearTimeout(svTimer);const g=storyGroups[svGroupIdx];if(svItemIdx<g.items.length-1){svItemIdx++;showSVItem();}else if(svGroupIdx<storyGroups.length-1){svGroupIdx++;svItemIdx=0;showSVItem();}else closeSV();}
 function svPrev(){clearTimeout(svTimer);if(svItemIdx>0){svItemIdx--;showSVItem();}else if(svGroupIdx>0){svGroupIdx--;svItemIdx=0;showSVItem();}}
 function closeSV(){clearTimeout(svTimer);q('sv').classList.remove('on');document.body.style.overflow='';}
+// ── STORY VIEWERS — show city breakdown to owner ──────────────
+async function loadStoryViewers(postId){
+  try{
+    const r=await api('/api/posts/'+postId+'/viewers');
+    if(!r.ok)return;
+    const d=await r.json();
+    if(!d.total)return;
+    const existing=document.getElementById('sv-viewer-panel');
+    if(existing)existing.remove();
+    const panel=document.createElement('div');
+    panel.id='sv-viewer-panel';
+    const cities={};
+    (d.viewers||[]).forEach(v=>{cities[v.city||'Unknown']=(cities[v.city||'Unknown']||0)+1;});
+    const topCities=Object.entries(cities).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    panel.style.cssText='position:absolute;bottom:0;left:0;right:0;background:rgba(5,4,12,.92);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.1);padding:14px 16px;z-index:20;border-radius:0 0 16px 16px';
+    panel.innerHTML=
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
+        '<div style="font-size:.82rem;font-weight:700;color:#fff">'+String.fromCodePoint(0x1F441)+' '+d.total+' views</div>'+
+        '<button onclick="document.getElementById('sv-viewer-panel').remove()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:1rem;cursor:pointer">'+String.fromCharCode(215)+'</button>'+
+      '</div>'+
+      topCities.map(function(pair){
+        return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.78rem">'+
+          '<div style="flex:1;color:rgba(255,255,255,.7)">'+pair[0]+'</div>'+
+          '<div style="color:rgba(255,255,255,.4)">'+pair[1]+' view'+(pair[1]>1?'s':'')+'</div>'+
+        '</div>';
+      }).join('');
+    const svContent=document.getElementById('sv-content');
+    if(svContent){svContent.style.position='relative';svContent.appendChild(panel);}
+  }catch(_){}
+}
 
 /* ═══════════ POST MODAL ═══════════ */
 async function openPModal(id){

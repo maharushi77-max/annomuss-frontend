@@ -199,6 +199,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="nav-section">Moderation</div>
     <div class="nav-item" id="nav-users" onclick="showTab('users',this)"><span class="nav-ico">👥</span>Users</div>
     <div class="nav-item" id="nav-posts" onclick="showTab('posts',this)"><span class="nav-ico">📢</span>Posts</div>
+    <div class="nav-item" id="nav-stories" onclick="showTab('stories',this)"><span class="nav-ico">📸</span>Stories</div>
     <div class="nav-item" id="nav-vents" onclick="showTab('vents',this)"><span class="nav-ico">💭</span>Vents</div>
     <div class="nav-item" id="nav-reports" onclick="showTab('reports',this)"><span class="nav-ico">⚠️</span>Reports <span class="nav-badge" id="reports-badge" style="display:none">!</span></div>
     <div class="nav-item" id="nav-crisis" onclick="showTab('crisis',this)"><span class="nav-ico">🆘</span>Crisis</div>
@@ -321,13 +322,23 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div class="search-bar">
           <input class="search-inp" type="text" placeholder="Search posts..." id="post-search" oninput="filterPostsLive(this.value)"/>
           <div class="filter-pills">
-            <span class="fpill active" id="pf-all" onclick="loadPosts(false,false,false,this)">All</span>
-            <span class="fpill" id="pf-crisis" onclick="loadPosts(true,false,false,this)">&#128682; Crisis</span>
-            <span class="fpill" id="pf-hidden" onclick="loadPosts(false,true,false,this)">Hidden</span>
-            <span class="fpill" id="pf-reported" onclick="loadPosts(false,false,true,this)">Reported</span>
+            <span class="fpill active" id="pf-all"      onclick="loadPosts(false,false,false,false,this)">All Posts</span>
+            <span class="fpill"        id="pf-crisis"   onclick="loadPosts(true,false,false,false,this)">&#128682; Crisis</span>
+            <span class="fpill"        id="pf-hidden"   onclick="loadPosts(false,true,false,false,this)">Hidden</span>
+            <span class="fpill"        id="pf-reported" onclick="loadPosts(false,false,true,false,this)">Reported</span>
           </div>
         </div>
         <div style="overflow-x:auto"><div id="posts-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- STORIES TAB -->
+      <div id="tab-stories" class="tab-content" style="display:none">
+        <div class="page-head">
+          <div class="page-title">Active Stories</div>
+          <div class="page-sub">Stories expire after 24h · View counts shown · Delete immediately if harmful</div>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="loadStories()">↻ Refresh</button>
+        </div>
+        <div style="overflow-x:auto"><div id="stories-table"><div class="spin"></div></div></div>
       </div>
 
       <!-- VENTS TAB -->
@@ -502,6 +513,7 @@ const TAB_META={
   emotion:   {title:'Emotion Intelligence',sub:'Behavioral signal analysis & ad targeting'},
   users:     {title:'User Management',sub:'Ban, unban, delete users'},
   posts:     {title:'Post Moderation',sub:'Hide, delete, review flagged content'},
+  stories:   {title:'Stories',sub:'Active stories with view counts — expire after 24h'},
   vents:     {title:'Vents Board',sub:'Anonymous vents — delete if harmful'},
   reports:   {title:'Reports Queue',sub:'User-submitted reports awaiting action'},
   crisis:    {title:'Crisis Posts',sub:'Posts flagged for self-harm — review immediately'},
@@ -511,6 +523,9 @@ const TAB_META={
   export:    {title:'Export & Ads',sub:'Download CSV reports for analysis & advertising'},
 };
 function showTab(tab, navEl){
+  // Stop live polling when leaving overview tab
+  if(tab!=='overview' && liveTimer){ clearInterval(liveTimer); liveTimer=null; }
+
   document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const el=q('tab-'+tab);if(el)el.style.display='block';
@@ -519,9 +534,9 @@ function showTab(tab, navEl){
   currentTab=tab;
   const meta=TAB_META[tab]||{title:tab,sub:''};
   q('tb-title').textContent=meta.title;q('tb-sub').textContent=meta.sub;
-  // Lazy load
   if(tab==='users')    loadUsers();
   if(tab==='posts')    loadPosts();
+  if(tab==='stories')  loadStories();
   if(tab==='vents')    loadVents();
   if(tab==='reports')  loadReports();
   if(tab==='crisis')   loadCrisis();
@@ -529,17 +544,11 @@ function showTab(tab, navEl){
   if(tab==='whisper')  loadWhisperChains();
   if(tab==='gratitude')loadGratitude();
   if(tab==='emotion')  switchEmotionView('pulse', q('ebtn-pulse'));
+  if(tab==='overview') { loadOverview(); }
 }
 
 function refreshCurrent(){showTab(currentTab,null);}
 function loadAll(){loadOverview();updateOnline();}
-
-// Stop live polling when leaving overview tab
-const _origShowTab=showTab;
-function showTab(tab,navEl){
-  if(tab!=='overview'&&liveTimer){clearInterval(liveTimer);liveTimer=null;}
-  _origShowTab(tab,navEl);
-}
 
 // ── OVERVIEW ──────────────────────────────────────────────────
 async function loadOverview(){
@@ -994,8 +1003,75 @@ function deleteUser(id,name){
   });
 }
 
+// ── STORIES ───────────────────────────────────────────────────
+async function loadStories(){
+  const el=q('stories-table');if(!el)return;
+  el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/posts?type=story&limit=100');
+    if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();
+    const stories=(d.posts||d||[]).filter(p=>p.type==='story');
+    if(!stories.length){el.innerHTML='<div class="empty">No active stories right now</div>';return;}
+
+    let html='<table><thead><tr><th>Author</th><th>Preview</th><th>Emotion</th><th>City</th>'+
+      '<th>&#128065; Views</th><th>Posted</th><th>Expires</th><th>Flags</th><th>Actions</th></tr></thead><tbody>';
+
+    stories.forEach(s=>{
+      const flags=[];
+      if(s.isCrisis)flags.push('<span class="badge badge-cr">&#128682; Crisis</span>');
+      if(s.isHidden)flags.push('<span class="badge badge-g">Hidden</span>');
+
+      // Time remaining
+      const expiresAt=s.expiresAt?new Date(s.expiresAt):new Date(new Date(s.createdAt).getTime()+86400000);
+      const msLeft=expiresAt-Date.now();
+      const hLeft=Math.max(0,Math.floor(msLeft/3600000));
+      const mLeft=Math.max(0,Math.floor((msLeft%3600000)/60000));
+      const expiryStr=msLeft<=0?'<span style="color:var(--cr)">Expired</span>':
+        hLeft>0?'<span style="color:var(--go)">'+hLeft+'h '+mLeft+'m</span>':
+        '<span style="color:var(--cr)">'+mLeft+'m</span>';
+
+      // Preview
+      const preview=s.mediaUrl
+        ?'<span style="font-size:.7rem;color:var(--tl)">[Media]</span> '+(s.caption?esc(s.caption.substring(0,30)):'' )
+        :esc((s.caption||'').substring(0,50));
+
+      html+='<tr class="'+(s.isCrisis?'crisis-row':s.isHidden?'hidden-row':'')+'">';
+      html+='<td><div style="font-weight:600;font-size:.82rem">'+esc(s.authorName||'Anonymous')+'</div>'+
+            '<div style="font-size:.7rem;color:var(--tx3)">'+esc(s.authorEmoji||'🎭')+'</div></td>';
+      html+='<td style="max-width:200px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2);font-size:.82rem">'+preview+'</div></td>';
+      html+='<td>'+(s.emotion?'<span class="badge badge-v">'+esc(s.emotion)+'</span>':'—')+'</td>';
+      html+='<td style="font-size:.75rem;color:var(--tx3)">'+esc(s.city||'—')+'</td>';
+      html+='<td style="font-family:var(--fM);font-weight:600;color:var(--vl)">'+(s.storyViews||0)+'</td>';
+      html+='<td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(s.createdAt)+'</td>';
+      html+='<td>'+expiryStr+'</td>';
+      html+='<td>'+flags.join(' ')+'</td>';
+      html+='<td><div class="actions">'+
+        (s.isHidden
+          ?'<button class="ab ab-show" onclick="unhidePost(\''+s._id+'\')">Show</button>'
+          :'<button class="ab ab-hide" onclick="hidePost(\''+s._id+'\')">Hide</button>')+
+        '<button class="ab ab-del" onclick="deleteStory(\''+s._id+'\',\''+esc(s.authorName||'Anonymous')+'\')">Delete</button>'+
+      '</div></td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+
+function deleteStory(id, author){
+  showConfirm('🗑️','Delete '+author+'\'s story?',
+    'This permanently removes the story. Viewers will no longer see it.',
+    async()=>{
+      const r=await af('/api/admin/posts/'+id,{method:'DELETE'});
+      toast(r.ok?'🗑️ Story deleted':'❌ Failed: '+r.status);
+      if(r.ok)loadStories();
+    }
+  );
+}
+
 // ── POSTS ─────────────────────────────────────────────────────
-async function loadPosts(crisis=false,hidden=false,reported=false,pillEl=null){
+async function loadPosts(crisis=false,hidden=false,reported=false,includeStories=false,pillEl=null){
   const el=q('posts-table');el.innerHTML='<div class="spin"></div>';
   if(pillEl){document.querySelectorAll('#tab-posts .fpill').forEach(p=>p.classList.remove('active'));pillEl.classList.add('active');}
   let url='/api/admin/posts?limit=200';
@@ -1005,7 +1081,9 @@ async function loadPosts(crisis=false,hidden=false,reported=false,pillEl=null){
     const r=await af(url);
     if(!r.ok)throw new Error('Failed: '+r.status);
     const d=await r.json();
-    allPostsCache=d.posts||d||[];
+    allPostsCache=(d.posts||d||[]);
+    // Exclude stories from main posts tab (they have their own tab)
+    if(!includeStories)allPostsCache=allPostsCache.filter(p=>p.type!=='story');
     if(reported)allPostsCache=allPostsCache.filter(p=>(p.reportCount||0)>0);
     renderPosts(allPostsCache);
   }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}

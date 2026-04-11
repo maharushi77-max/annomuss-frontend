@@ -5,15 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Annomuss Admin</title>
 <style>
-:root{
-  --bg:#09090f;--bg1:#0f0f1a;--bg2:#141424;--bg3:#1a1a2e;
-  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);
-  --tx:#f0eeff;--tx2:#9896b8;--tx3:#4e4c6a;
-  --v:#7B5EA7;--v2:#6044a0;--vl:#c4a8ff;
-  --cr:#FF4D6D;--tl:#00C9A7;--go:#F4A261;--lm:#52B788;
-  --fD:'Trebuchet MS',sans-serif;--fM:'JetBrains Mono',monospace;
-  --r:12px;--r2:8px;
-}
+:root{--bg:#09090f;--bg1:#0f0f1a;--bg2:#141424;--bg3:#1a1a2e;--bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);--tx:#f0eeff;--tx2:#9896b8;--tx3:#4e4c6a;--v:#7B5EA7;--v2:#6044a0;--vl:#c4a8ff;--cr:#FF4D6D;--tl:#00C9A7;--go:#F4A261;--lm:#52B788;--fD:'Trebuchet MS',sans-serif;--fM:'JetBrains Mono',monospace;--r:12px;--r2:8px}
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}
 html,body{height:100%;background:var(--bg);color:var(--tx);font-size:14px}
 input,select,textarea,button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;outline:none}
@@ -24,51 +16,36 @@ th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx
 tr:hover td{background:rgba(255,255,255,.02)}
 .crisis-row td{background:rgba(255,77,109,.04)!important;border-left:3px solid var(--cr)}
 .hidden-row td{opacity:.5}
-/* Layout */
 #app{display:flex;height:100vh;overflow:hidden}
 #sidebar{width:220px;flex-shrink:0;background:var(--bg1);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow-y:auto}
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 #topbar{padding:14px 20px;background:var(--bg1);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;flex-shrink:0}
 #content{flex:1;overflow-y:auto;padding:20px}
-/* Sidebar */
 .sidebar-logo{padding:20px 16px 14px;border-bottom:1px solid var(--bd)}
 .sidebar-logo-text{font-size:1.1rem;font-weight:700;color:var(--vl)}
 .sidebar-logo-sub{font-size:.7rem;color:var(--tx3);margin-top:2px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;border-radius:0;transition:background .15s;color:var(--tx2);font-size:.85rem}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;transition:background .15s;color:var(--tx2);font-size:.85rem}
 .nav-item:hover{background:rgba(255,255,255,.04);color:var(--tx)}
 .nav-item.active{background:rgba(123,94,167,.15);color:var(--vl);border-right:2px solid var(--v)}
 .nav-ico{font-size:1rem;width:20px}
 .nav-badge{background:var(--cr);color:#fff;font-size:.62rem;padding:1px 6px;border-radius:100px;font-weight:700;margin-left:auto}
 .nav-section{padding:12px 16px 6px;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)}
-/* Top bar */
 .tb-title{font-weight:700;font-size:.95rem;color:var(--tx)}
 .tb-sub{font-size:.75rem;color:var(--tx3);margin-left:8px}
 .tb-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
-/* Stat cards */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
 .stat-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.stat-card.purple::before{background:var(--v)}
-.stat-card.red::before{background:var(--cr)}
-.stat-card.teal::before{background:var(--tl)}
-.stat-card.orange::before{background:var(--go)}
-.stat-card.green::before{background:var(--lm)}
+.stat-card.purple::before{background:var(--v)}.stat-card.red::before{background:var(--cr)}.stat-card.teal::before{background:var(--tl)}.stat-card.orange::before{background:var(--go)}.stat-card.green::before{background:var(--lm)}
 .stat-val{font-size:1.6rem;font-weight:700;color:var(--tx);line-height:1;margin-bottom:4px}
 .stat-label{font-size:.72rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
-.stat-change{font-size:.7rem;margin-top:4px}
-.stat-change.up{color:var(--tl)}.stat-change.down{color:var(--cr)}.stat-change.neutral{color:var(--tx3)}
-/* Buttons */
+.stat-change{font-size:.7rem;margin-top:4px;color:var(--tx3)}
 .btn{padding:7px 14px;border-radius:var(--r2);font-size:.8rem;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
-.btn-primary{background:var(--v);color:#fff}
-.btn-primary:hover{background:var(--v2)}
-.btn-danger{background:rgba(255,77,109,.15);color:var(--cr);border:1px solid rgba(255,77,109,.3)}
-.btn-danger:hover{background:rgba(255,77,109,.25)}
-.btn-ghost{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}
-.btn-ghost:hover{background:var(--bg2);color:var(--tx)}
+.btn-primary{background:var(--v);color:#fff}.btn-primary:hover{background:var(--v2)}
+.btn-danger{background:rgba(255,77,109,.15);color:var(--cr);border:1px solid rgba(255,77,109,.3)}.btn-danger:hover{background:rgba(255,77,109,.25)}
+.btn-ghost{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}.btn-ghost:hover{background:var(--bg2);color:var(--tx)}
 .btn-success{background:rgba(82,183,136,.15);color:var(--lm);border:1px solid rgba(82,183,136,.3)}
-.btn-sm{padding:5px 10px;font-size:.75rem}
-.btn-xs{padding:3px 8px;font-size:.7rem}
-/* Action buttons in table */
+.btn-sm{padding:5px 10px;font-size:.75rem}.btn-xs{padding:3px 8px;font-size:.7rem}
 .ab{padding:4px 10px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;white-space:nowrap}
 .ab-ban{background:rgba(255,77,109,.12);color:var(--cr)}.ab-ban:hover{background:rgba(255,77,109,.2)}
 .ab-unban{background:rgba(82,183,136,.12);color:var(--lm)}.ab-unban:hover{background:rgba(82,183,136,.2)}
@@ -77,87 +54,50 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .ab-show{background:rgba(0,201,167,.12);color:var(--tl)}.ab-show:hover{background:rgba(0,201,167,.22)}
 .ab-view{background:var(--bg3);color:var(--tx2)}.ab-view:hover{background:var(--bg2)}
 .actions{display:flex;gap:5px;flex-wrap:wrap}
-/* Badges */
 .badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:.68rem;font-weight:600}
-.badge-cr{background:rgba(255,77,109,.15);color:var(--cr)}
-.badge-g{background:rgba(123,94,167,.15);color:var(--vl)}
-.badge-v{background:rgba(0,201,167,.1);color:var(--tl)}
-.badge-go{background:rgba(244,162,97,.1);color:var(--go)}
-.badge-lm{background:rgba(82,183,136,.1);color:var(--lm)}
-/* Search */
+.badge-cr{background:rgba(255,77,109,.15);color:var(--cr)}.badge-g{background:rgba(123,94,167,.15);color:var(--vl)}.badge-v{background:rgba(0,201,167,.1);color:var(--tl)}.badge-go{background:rgba(244,162,97,.1);color:var(--go)}.badge-lm{background:rgba(82,183,136,.1);color:var(--lm)}
 .search-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 .search-inp{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r2);padding:8px 14px;color:var(--tx);flex:1;min-width:200px}
 .search-inp:focus{border-color:var(--v)}
 .filter-pills{display:flex;gap:6px;flex-wrap:wrap}
 .fpill{padding:5px 12px;border-radius:100px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--bd2);color:var(--tx2);transition:all .15s}
-.fpill:hover{border-color:var(--v);color:var(--vl)}
-.fpill.active{background:var(--v);color:#fff;border-color:var(--v)}
-/* Export cards */
+.fpill:hover{border-color:var(--v);color:var(--vl)}.fpill.active{background:var(--v);color:#fff;border-color:var(--v)}
 .export-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px}
 .export-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.export-card:hover{border-color:var(--v);transform:translateY(-2px)}
-.export-card.gold{border-color:rgba(244,162,97,.4);background:rgba(244,162,97,.04)}
-.export-card .ec-ico{font-size:1.8rem;margin-bottom:8px}
-.export-card .ec-title{font-size:.9rem;font-weight:700;margin-bottom:4px}
-.export-card .ec-desc{font-size:.75rem;color:var(--tx3);line-height:1.5}
+.export-card:hover{border-color:var(--v);transform:translateY(-2px)}.export-card.gold{border-color:rgba(244,162,97,.4);background:rgba(244,162,97,.04)}
+.export-card .ec-ico{font-size:1.8rem;margin-bottom:8px}.export-card .ec-title{font-size:.9rem;font-weight:700;margin-bottom:4px}.export-card .ec-desc{font-size:.75rem;color:var(--tx3);line-height:1.5}
 .export-card .ec-badge{position:absolute;top:10px;right:10px;background:var(--go);color:#000;font-size:.62rem;padding:2px 7px;border-radius:100px;font-weight:700}
-/* Confirm modal */
 #confirm-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:999;display:none;align-items:center;justify-content:center;padding:20px}
 #confirm-modal.on{display:flex}
 #confirm-box{background:var(--bg1);border:1px solid var(--bd2);border-radius:16px;padding:28px;max-width:360px;width:100%;text-align:center}
-.confirm-ico{font-size:2.5rem;margin-bottom:12px}
-.confirm-title{font-size:1.1rem;font-weight:700;margin-bottom:8px}
-.confirm-msg{font-size:.85rem;color:var(--tx3);line-height:1.6;margin-bottom:22px}
+.confirm-ico{font-size:2.5rem;margin-bottom:12px}.confirm-title{font-size:1.1rem;font-weight:700;margin-bottom:8px}.confirm-msg{font-size:.85rem;color:var(--tx3);line-height:1.6;margin-bottom:22px}
 .confirm-btns{display:flex;gap:10px}
-/* Toast */
 #toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast-item{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r2);padding:10px 16px;font-size:.83rem;color:var(--tx);animation:toastIn .2s ease;max-width:300px;pointer-events:all}
 @keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
-/* Login */
 #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
 .login-box{background:var(--bg1);border:1px solid var(--bd2);border-radius:20px;padding:32px 28px;width:100%;max-width:340px;text-align:center}
-.login-logo{font-size:2.5rem;margin-bottom:12px}
-.login-title{font-size:1.1rem;font-weight:700;margin-bottom:4px;color:var(--vl)}
-.login-sub{font-size:.8rem;color:var(--tx3);margin-bottom:22px}
+.login-logo{font-size:2.5rem;margin-bottom:12px}.login-title{font-size:1.1rem;font-weight:700;margin-bottom:4px;color:var(--vl)}.login-sub{font-size:.8rem;color:var(--tx3);margin-bottom:22px}
 .login-inp{width:100%;background:var(--bg2);border:1px solid var(--bd2);border-radius:10px;padding:12px 16px;margin-bottom:12px;color:var(--tx);text-align:center;letter-spacing:2px}
-.login-inp:focus{border-color:var(--v)}
-.login-err{color:var(--cr);font-size:.78rem;margin-top:8px;display:none}
-/* Page section */
+.login-inp:focus{border-color:var(--v)}.login-err{color:var(--cr);font-size:.78rem;margin-top:8px;display:none}
 .page-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-.page-title{font-size:1rem;font-weight:700;color:var(--tx)}
-.page-sub{font-size:.78rem;color:var(--tx3)}
-/* Charts */
+.page-title{font-size:1rem;font-weight:700;color:var(--tx)}.page-sub{font-size:.78rem;color:var(--tx3)}
 .mini-chart{display:flex;align-items:flex-end;gap:3px;height:50px}
-.mini-bar{flex:1;border-radius:3px 3px 0 0;min-width:4px;transition:height .5s ease;opacity:.8}
-/* Empty */
 .empty{padding:40px;text-align:center;color:var(--tx3);font-size:.85rem;line-height:1.8}
-/* Spinner */
 .spin{width:24px;height:24px;border:2.5px solid var(--bd2);border-top-color:var(--v);border-radius:50%;animation:spin .7s linear infinite;margin:auto}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* Scrollbar */
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
-/* Mood bars */
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
 .emo-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .emo-label{width:80px;font-size:.75rem;color:var(--tx2);text-transform:capitalize}
 .emo-track{flex:1;height:8px;background:var(--bg3);border-radius:100px;overflow:hidden}
 .emo-fill{height:100%;border-radius:100px;transition:width 1s ease}
 .emo-pct{width:36px;font-size:.72rem;color:var(--tx3);text-align:right;font-family:var(--fM)}
-/* Pulse dot */
-.pdot{width:8px;height:8px;border-radius:50%;background:var(--tl);animation:pdot 2s ease-in-out infinite}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--tl);animation:pdot 2s ease-in-out infinite;display:inline-block}
 @keyframes pdot{0%,100%{opacity:.4}50%{opacity:1}}
-/* Mobile responsive */
-@media(max-width:640px){
-  #sidebar{display:none}
-  #app{flex-direction:column}
-  .stats-grid{grid-template-columns:1fr 1fr}
-}
+@media(max-width:640px){#sidebar{display:none}}
 </style>
 </head>
 <body>
-
-<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">🛡️</div>
@@ -169,7 +109,6 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
-<!-- CONFIRM MODAL -->
 <div id="confirm-modal">
   <div id="confirm-box">
     <div class="confirm-ico" id="c-ico">⚠️</div>
@@ -182,12 +121,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast-wrap"></div>
 
-<!-- APP -->
 <div id="app" style="display:none">
-  <!-- SIDEBAR -->
   <div id="sidebar">
     <div class="sidebar-logo">
       <div class="sidebar-logo-text">🎭 annomuss</div>
@@ -214,29 +150,20 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </div>
   </div>
 
-  <!-- MAIN -->
   <div id="main">
     <div id="topbar">
-      <div>
-        <div class="tb-title" id="tb-title">Overview</div>
-        <div class="tb-sub" id="tb-sub">Live platform data</div>
-      </div>
+      <div><div class="tb-title" id="tb-title">Overview</div><div class="tb-sub" id="tb-sub">Live platform data</div></div>
       <div class="tb-actions">
-        <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--tx3)">
-          <div class="pdot"></div>
-          <span id="online-num">— online</span>
-        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--tx3)"><div class="pdot"></div><span id="online-num">— online</span></div>
         <button class="btn btn-ghost btn-sm" onclick="refreshCurrent()">↻ Refresh</button>
       </div>
     </div>
     <div id="content">
 
-      <!-- OVERVIEW TAB -->
-      <div id="tab-overview" class="tab-content active">
-        <div class="stats-grid" id="stats-grid">
-          <div class="empty" style="grid-column:1/-1"><div class="spin"></div></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <!-- OVERVIEW -->
+      <div id="tab-overview" class="tab-content" style="display:block">
+        <div class="stats-grid" id="stats-grid"><div class="empty" style="grid-column:1/-1"><div class="spin"></div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
           <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
             <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Emotion Distribution (7d)</div>
             <div id="emo-bars"></div>
@@ -262,35 +189,20 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </div>
         <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Live Activity Feed</div>
-            <div style="display:flex;align-items:center;gap:6px">
-              <div class="pdot"></div>
-              <span style="font-size:.72rem;color:var(--tx3)" id="live-window">last 5 min</span>
-            </div>
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Live Activity</div>
+            <div style="display:flex;align-items:center;gap:6px"><div class="pdot"></div><span style="font-size:.72rem;color:var(--tx3)">last 5 min</span></div>
           </div>
-          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap" id="live-stats">
-            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center">
-              <div style="font-size:1.3rem;font-weight:500;color:var(--vl)" id="live-users">—</div>
-              <div style="font-size:.7rem;color:var(--tx3)">new users</div>
-            </div>
-            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center">
-              <div style="font-size:1.3rem;font-weight:500;color:var(--tl)" id="live-posts">—</div>
-              <div style="font-size:.7rem;color:var(--tx3)">posts</div>
-            </div>
-            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center">
-              <div style="font-size:1.3rem;font-weight:500;color:var(--go)" id="live-moods">—</div>
-              <div style="font-size:.7rem;color:var(--tx3)">mood logs</div>
-            </div>
-            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center">
-              <div style="font-size:1.3rem;font-weight:500;color:var(--lm)" id="live-vents">—</div>
-              <div style="font-size:.7rem;color:var(--tx3)">vents</div>
-            </div>
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:500;color:var(--vl)" id="live-users">—</div><div style="font-size:.7rem;color:var(--tx3)">new users</div></div>
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:500;color:var(--tl)" id="live-posts">—</div><div style="font-size:.7rem;color:var(--tx3)">posts</div></div>
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:500;color:var(--go)" id="live-moods">—</div><div style="font-size:.7rem;color:var(--tx3)">moods</div></div>
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:500;color:var(--lm)" id="live-vents">—</div><div style="font-size:.7rem;color:var(--tx3)">vents</div></div>
           </div>
           <div id="activity-feed"><div class="spin"></div></div>
         </div>
       </div>
 
-      <!-- EMOTION INTELLIGENCE TAB -->
+      <!-- EMOTION INTEL -->
       <div id="tab-emotion" class="tab-content" style="display:none">
         <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-primary btn-sm" id="ebtn-pulse"    onclick="switchEmotionView('pulse',this)">Live Pulse</button>
@@ -303,11 +215,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div id="emotion-content"><div class="spin"></div></div>
       </div>
 
-      <!-- USERS TAB -->
+      <!-- USERS -->
       <div id="tab-users" class="tab-content" style="display:none">
         <div class="search-bar">
           <input class="search-inp" type="text" placeholder="Search by name or email..." id="user-search" oninput="searchUsers(this.value)"/>
-          <button class="btn btn-primary btn-sm" onclick="loadUsers()">Search</button>
           <div class="filter-pills">
             <span class="fpill active" onclick="filterUsers('all',this)">All</span>
             <span class="fpill" onclick="filterUsers('banned',this)">Banned</span>
@@ -317,107 +228,76 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div style="overflow-x:auto"><div id="users-table"><div class="spin"></div></div></div>
       </div>
 
-      <!-- POSTS TAB -->
+      <!-- POSTS -->
       <div id="tab-posts" class="tab-content" style="display:none">
         <div class="search-bar">
           <input class="search-inp" type="text" placeholder="Search posts..." id="post-search" oninput="filterPostsLive(this.value)"/>
           <div class="filter-pills">
-            <span class="fpill active" id="pf-all"      onclick="loadPosts(false,false,false,false,this)">All Posts</span>
-            <span class="fpill"        id="pf-crisis"   onclick="loadPosts(true,false,false,false,this)">&#128682; Crisis</span>
-            <span class="fpill"        id="pf-hidden"   onclick="loadPosts(false,true,false,false,this)">Hidden</span>
-            <span class="fpill"        id="pf-reported" onclick="loadPosts(false,false,true,false,this)">Reported</span>
+            <span class="fpill active" id="pf-all"      onclick="loadPosts(false,false,false,this)">All Posts</span>
+            <span class="fpill"        id="pf-crisis"   onclick="loadPosts(true,false,false,this)">&#128682; Crisis</span>
+            <span class="fpill"        id="pf-hidden"   onclick="loadPosts(false,true,false,this)">Hidden</span>
+            <span class="fpill"        id="pf-reported" onclick="loadPosts(false,false,true,this)">Reported</span>
           </div>
         </div>
         <div style="overflow-x:auto"><div id="posts-table"><div class="spin"></div></div></div>
       </div>
 
-      <!-- STORIES TAB -->
+      <!-- STORIES -->
       <div id="tab-stories" class="tab-content" style="display:none">
         <div class="page-head">
           <div class="page-title">Active Stories</div>
-          <div class="page-sub">Stories expire after 24h · View counts shown · Delete immediately if harmful</div>
+          <div class="page-sub">Stories expire after 24h · 👁 view counts · Delete if harmful</div>
           <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="loadStories()">↻ Refresh</button>
         </div>
         <div style="overflow-x:auto"><div id="stories-table"><div class="spin"></div></div></div>
       </div>
 
-      <!-- VENTS TAB -->
+      <!-- VENTS -->
       <div id="tab-vents" class="tab-content" style="display:none">
         <div class="page-head"><div class="page-title">Vents Board</div><div class="page-sub">Anonymous vents — delete if harmful</div></div>
         <div style="overflow-x:auto"><div id="vents-table"><div class="spin"></div></div></div>
       </div>
 
-      <!-- REPORTS TAB -->
+      <!-- REPORTS -->
       <div id="tab-reports" class="tab-content" style="display:none">
         <div class="page-head"><div class="page-title">Open Reports</div><div class="page-sub">User-submitted reports awaiting action</div></div>
         <div style="overflow-x:auto"><div id="reports-table"><div class="spin"></div></div></div>
       </div>
 
-      <!-- CRISIS TAB -->
+      <!-- CRISIS -->
       <div id="tab-crisis" class="tab-content" style="display:none">
-        <div class="page-head">
-          <div class="page-title" style="color:var(--cr)">&#128682; Crisis Posts</div>
-          <div class="page-sub">Posts flagged for self-harm content — review immediately</div>
-        </div>
+        <div class="page-head"><div class="page-title" style="color:var(--cr)">&#128682; Crisis Posts</div><div class="page-sub">Self-harm content — review immediately</div></div>
         <div style="overflow-x:auto"><div id="crisis-table"><div class="spin"></div></div></div>
       </div>
 
-      <!-- WHISPER CHAINS TAB -->
+      <!-- WHISPER -->
       <div id="tab-whisper" class="tab-content" style="display:none">
         <div class="page-head"><div class="page-title">Whisper Chains</div><div class="page-sub">Anonymous collaborative poems</div></div>
         <div id="whisper-content"><div class="spin"></div></div>
       </div>
 
-      <!-- GRATITUDE BOMBS TAB -->
+      <!-- GRATITUDE -->
       <div id="tab-gratitude" class="tab-content" style="display:none">
-        <div class="page-head"><div class="page-title">Gratitude Bombs</div><div class="page-sub">Anonymous kindness sent between users</div></div>
+        <div class="page-head"><div class="page-title">Gratitude Bombs</div><div class="page-sub">Anonymous kindness between users</div></div>
         <div id="gratitude-content"><div class="spin"></div></div>
       </div>
 
-      <!-- MOODS TAB -->
+      <!-- MOODS -->
       <div id="tab-moods" class="tab-content" style="display:none">
         <div class="page-head"><div class="page-title">Mood Data</div><div class="page-sub">City-level emotion aggregation</div></div>
         <div id="moods-content"><div class="spin"></div></div>
       </div>
 
-      <!-- EXPORT TAB -->
+      <!-- EXPORT -->
       <div id="tab-export" class="tab-content" style="display:none">
-        <div class="page-head">
-          <div class="page-title">Export & Advertiser Intelligence</div>
-          <div class="page-sub">Download CSV reports — UTF-8 BOM for Excel compatibility</div>
-        </div>
+        <div class="page-head"><div class="page-title">Export & Advertiser Intelligence</div><div class="page-sub">Download CSV reports</div></div>
         <div class="export-grid">
-          <div class="export-card" onclick="dlExport('users')">
-            <div class="ec-ico">👥</div>
-            <div class="ec-title">Users + Emotion Profile</div>
-            <div class="ec-desc">All users with top emotions, city, ad segment, premium status</div>
-          </div>
-          <div class="export-card" onclick="dlExport('moods')">
-            <div class="ec-ico">🌊</div>
-            <div class="ec-title">Mood Data</div>
-            <div class="ec-desc">Every mood log with city, time of day, intensity, ad category</div>
-          </div>
-          <div class="export-card" onclick="dlExport('posts')">
-            <div class="ec-ico">📢</div>
-            <div class="ec-title">Posts Data</div>
-            <div class="ec-desc">All posts with engagement metrics, flags, types</div>
-          </div>
-          <div class="export-card gold" onclick="dlExport('ad-targeting')">
-            <div class="ec-badge">★ KEY</div>
-            <div class="ec-ico">🎯</div>
-            <div class="ec-title">Ad Targeting Intelligence</div>
-            <div class="ec-desc">Emotion × city × hour × day — the advertiser pitch document</div>
-          </div>
-          <div class="export-card" onclick="dlExport('analytics')">
-            <div class="ec-ico">📊</div>
-            <div class="ec-title">Full Analytics</div>
-            <div class="ec-desc">DAU, signups, emotion distribution, top cities, trending hashtags</div>
-          </div>
-          <div class="export-card" onclick="dlEmotionExport()">
-            <div class="ec-ico">🧠</div>
-            <div class="ec-title">Emotion Intelligence</div>
-            <div class="ec-desc">Behavioral signals, snapshots, ad segments — full emotion data</div>
-          </div>
+          <div class="export-card" onclick="dlExport('users')"><div class="ec-ico">👥</div><div class="ec-title">Users + Emotion Profile</div><div class="ec-desc">All users with top emotions, city, ad segment</div></div>
+          <div class="export-card" onclick="dlExport('moods')"><div class="ec-ico">🌊</div><div class="ec-title">Mood Data</div><div class="ec-desc">Every mood log with city, time of day, intensity</div></div>
+          <div class="export-card" onclick="dlExport('posts')"><div class="ec-ico">📢</div><div class="ec-title">Posts Data</div><div class="ec-desc">All posts with engagement metrics</div></div>
+          <div class="export-card gold" onclick="dlExport('ad-targeting')"><div class="ec-badge">★ KEY</div><div class="ec-ico">🎯</div><div class="ec-title">Ad Targeting Intelligence</div><div class="ec-desc">Emotion × city × hour × day</div></div>
+          <div class="export-card" onclick="dlExport('analytics')"><div class="ec-ico">📊</div><div class="ec-title">Full Analytics</div><div class="ec-desc">DAU, emotion distribution, top cities</div></div>
+          <div class="export-card" onclick="dlEmotionExport()"><div class="ec-ico">🧠</div><div class="ec-title">Emotion Intelligence</div><div class="ec-desc">Behavioral signals, snapshots, ad segments</div></div>
         </div>
         <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
           <div style="font-size:.82rem;font-weight:700;margin-bottom:8px">Export Log</div>
@@ -425,78 +305,46 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </div>
       </div>
 
-    </div><!-- /content -->
-  </div><!-- /main -->
-</div><!-- /app -->
+    </div>
+  </div>
+</div>
 
 <script>
-const API = 'https://api.annomuss.in';
-let adminPass = '';
-let confirmCb  = null;
-let currentTab = 'overview';
-let allPostsCache = [];
-let exportLog = [];
+const API='https://api.annomuss.in';
+let adminPass='',confirmCb=null,currentTab='overview';
+let allUsers=[],allPostsCache=[],currentUserFilter='all';
+let exportLog=[],liveTimer=null;
+const EMO_COLORS={happy:'#52B788',sad:'#7B5EA7',anxious:'#FF4D6D',lonely:'#C4A8FF',grateful:'#00C9A7',inspired:'#F4A261',hopeful:'#5CB8E4',angry:'#FF6B6B',confused:'#A8D8EA',proud:'#FFD700',excited:'#FF85A1',neutral:'#666'};
 
-// ── HELPERS ──────────────────────────────────────────────────
 function q(id){return document.getElementById(id);}
-function toast(msg, dur=3000){
-  const w=q('toast-wrap'),el=document.createElement('div');
-  el.className='toast-item';el.textContent=msg;w.appendChild(el);
-  setTimeout(()=>{el.style.opacity='0';el.style.transition='.3s';setTimeout(()=>el.remove(),300);},dur);
-}
 function esc(t){return(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function timeAgo(d){
-  if(!d)return'';
-  const s=Math.floor((Date.now()-new Date(d))/1000);
-  if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';
-  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
-}
 function num(n){return(n||0).toLocaleString('en-IN');}
+function timeAgo(d){if(!d)return'';const s=Math.floor((Date.now()-new Date(d))/1000);if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+function toast(msg,dur=3000){const w=q('toast-wrap'),el=document.createElement('div');el.className='toast-item';el.textContent=msg;w.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='.3s';setTimeout(()=>el.remove(),300);},dur);}
 
-// ── AUTH FETCH ────────────────────────────────────────────────
-async function af(path, opts={}){
-  return fetch(API+path,{
-    ...opts,
-    headers:{'Content-Type':'application/json','x-admin-password':adminPass,...(opts.headers||{})},
-  });
+async function af(path,opts={}){
+  return fetch(API+path,{...opts,headers:{'Content-Type':'application/json','x-admin-password':adminPass,...(opts.headers||{})}});
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────
+// ── LOGIN ──────────────────────────────────────────────────────
 async function doLogin(){
-  const pass=q('admin-pass').value.trim();
-  if(!pass)return;
+  const pass=q('admin-pass').value.trim();if(!pass)return;
   const btn=q('login-btn');btn.textContent='Checking...';btn.disabled=true;
   adminPass=pass;
   try{
     const r=await af('/api/admin/stats');
-    if(r.ok){
-      q('login-screen').style.display='none';
-      q('app').style.display='flex';
-      loadAll();
-      setInterval(()=>{if(currentTab==='overview')loadOverview();},60000);
-    } else {
-      q('login-err').style.display='block';
-      adminPass='';
-    }
-  }catch(e){
-    q('login-err').textContent='Connection error — check API URL';
-    q('login-err').style.display='block';
-    adminPass='';
-  }finally{btn.textContent='Enter →';btn.disabled=false;}
+    if(r.ok){q('login-screen').style.display='none';q('app').style.display='flex';loadAll();setInterval(()=>{if(currentTab==='overview')fetchLiveData();},15000);}
+    else{q('login-err').style.display='block';adminPass='';}
+  }catch(e){q('login-err').textContent='Connection error: '+e.message;q('login-err').style.display='block';adminPass='';}
+  finally{btn.textContent='Enter →';btn.disabled=false;}
 }
 function doLogout(){adminPass='';location.reload();}
 
-// ── CONFIRM MODAL ─────────────────────────────────────────────
+// ── CONFIRM MODAL ──────────────────────────────────────────────
 function showConfirm(ico,title,msg,cb,danger=true){
-  q('c-ico').textContent=ico;
-  q('c-title').textContent=title;
-  q('c-msg').textContent=msg;
-  const ok=q('c-ok');
-  ok.textContent='Confirm';
-  ok.className='btn '+(danger?'btn-danger':'btn-primary')+' btn-sm';
-  ok.style='flex:1;justify-content:center';
-  confirmCb=cb;
-  q('confirm-modal').classList.add('on');
+  q('c-ico').textContent=ico;q('c-title').textContent=title;q('c-msg').textContent=msg;
+  const ok=q('c-ok');ok.textContent='Confirm';ok.className='btn '+(danger?'btn-danger':'btn-success')+' btn-sm';ok.style='flex:1;justify-content:center';
+  confirmCb=cb;q('confirm-modal').classList.add('on');
 }
 function closeConfirm(){q('confirm-modal').classList.remove('on');confirmCb=null;}
 async function execConfirm(){
@@ -507,33 +355,19 @@ async function execConfirm(){
 }
 document.addEventListener('click',e=>{if(e.target===q('confirm-modal'))closeConfirm();});
 
-// ── TABS ──────────────────────────────────────────────────────
-const TAB_META={
-  overview:  {title:'Overview',sub:'Live platform statistics'},
-  emotion:   {title:'Emotion Intelligence',sub:'Behavioral signal analysis & ad targeting'},
-  users:     {title:'User Management',sub:'Ban, unban, delete users'},
-  posts:     {title:'Post Moderation',sub:'Hide, delete, review flagged content'},
-  stories:   {title:'Stories',sub:'Active stories with view counts — expire after 24h'},
-  vents:     {title:'Vents Board',sub:'Anonymous vents — delete if harmful'},
-  reports:   {title:'Reports Queue',sub:'User-submitted reports awaiting action'},
-  crisis:    {title:'Crisis Posts',sub:'Posts flagged for self-harm — review immediately'},
-  whisper:   {title:'Whisper Chains',sub:'Anonymous collaborative poems'},
-  gratitude: {title:'Gratitude Bombs',sub:'Anonymous kindness between users'},
-  moods:     {title:'Mood Data',sub:'City-level emotion aggregation'},
-  export:    {title:'Export & Ads',sub:'Download CSV reports for analysis & advertising'},
-};
+// ── TAB SWITCHING — single definition, no overrides ───────────
 function showTab(tab, navEl){
-  // Stop live polling when leaving overview tab
-  if(tab!=='overview' && liveTimer){ clearInterval(liveTimer); liveTimer=null; }
-
+  if(tab!=='overview'&&liveTimer){clearInterval(liveTimer);liveTimer=null;}
   document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const el=q('tab-'+tab);if(el)el.style.display='block';
   if(navEl)navEl.classList.add('active');
-  else {const n=q('nav-'+tab);if(n)n.classList.add('active');}
+  else{const n=q('nav-'+tab);if(n)n.classList.add('active');}
   currentTab=tab;
-  const meta=TAB_META[tab]||{title:tab,sub:''};
-  q('tb-title').textContent=meta.title;q('tb-sub').textContent=meta.sub;
+  const TITLES={overview:'Overview',emotion:'Emotion Intelligence',users:'User Management',posts:'Post Moderation',stories:'Stories',vents:'Vents Board',reports:'Reports Queue',crisis:'Crisis Posts',whisper:'Whisper Chains',gratitude:'Gratitude Bombs',moods:'Mood Data',export:'Export & Ads'};
+  const SUBS={overview:'Live platform statistics',emotion:'Behavioral signal analysis & ad targeting',users:'Ban, unban, delete users',posts:'Hide, delete, review flagged content',stories:'Active stories — view counts & delete',vents:'Anonymous vents — delete if harmful',reports:'User-submitted reports awaiting action',crisis:'Posts flagged for self-harm — review immediately',whisper:'Anonymous collaborative poems',gratitude:'Anonymous kindness between users',moods:'City-level emotion aggregation',export:'Download CSV reports for analysis & advertising'};
+  q('tb-title').textContent=TITLES[tab]||tab;
+  q('tb-sub').textContent=SUBS[tab]||'';
   if(tab==='users')    loadUsers();
   if(tab==='posts')    loadPosts();
   if(tab==='stories')  loadStories();
@@ -543,8 +377,8 @@ function showTab(tab, navEl){
   if(tab==='moods')    loadMoods();
   if(tab==='whisper')  loadWhisperChains();
   if(tab==='gratitude')loadGratitude();
-  if(tab==='emotion')  switchEmotionView('pulse', q('ebtn-pulse'));
-  if(tab==='overview') { loadOverview(); }
+  if(tab==='emotion')  switchEmotionView('pulse',q('ebtn-pulse'));
+  if(tab==='overview') loadOverview();
 }
 
 function refreshCurrent(){showTab(currentTab,null);}
@@ -553,389 +387,170 @@ function loadAll(){loadOverview();updateOnline();}
 // ── OVERVIEW ──────────────────────────────────────────────────
 async function loadOverview(){
   try{
-    // Load stats and overview in parallel
-    // NOTE: /overview returns JSON, /export/analytics returns CSV (different endpoints!)
-    const [statsR, overviewR] = await Promise.all([
-      af('/api/admin/stats'),
-      af('/api/admin/overview').catch(()=>null),
-    ]);
-
-    if(!statsR.ok){
-      const errText = await statsR.text().catch(()=>'Unknown error');
-      throw new Error(statsR.status===403?'Wrong password':'Server error: '+statsR.status+' '+errText.slice(0,100));
-    }
+    const [statsR,overviewR]=await Promise.all([af('/api/admin/stats'),af('/api/admin/overview').catch(()=>null)]);
+    if(!statsR.ok)throw new Error(statsR.status===403?'Wrong password':'Server error '+statsR.status);
     const d=await statsR.json();
-
-    // ── Stat cards ──────────────────────────────────────────────
     const grid=q('stats-grid');
-    const cards=[
-      {color:'purple', val:num(d.users),            label:'Total Users',         sub:'+'+num(d.todayUsers)+' today · +'+num(d.weekUsers||0)+' this week'},
-      {color:'teal',   val:num(d.posts),             label:'Total Posts',         sub:'All time across all types'},
-      {color:'orange', val:num(d.moods),             label:'Mood Logs',           sub:'Emotional data points collected'},
-      {color:'green',  val:num(d.vents),             label:'Vents',               sub:'Anonymous vents posted'},
-      {color:'red',    val:num(d.crisis),            label:'🆘 Crisis Posts',     sub:'Need immediate review'},
-      {color:'red',    val:num(d.reports),           label:'Open Reports',        sub:d.reports>0?'⚠️ Action needed':'✅ All clear'},
-      {color:'purple', val:num(d.banned),            label:'Banned Users',        sub:'Blocked from platform'},
-      {color:'teal',   val:num(d.whisperChains||0),  label:'Whisper Chains',      sub:num(d.gratitudeBombs||0)+' gratitude bombs sent'},
-    ];
-    grid.innerHTML=cards.map(s=>
-      '<div class="stat-card '+s.color+'">'+
-        '<div class="stat-val">'+s.val+'</div>'+
-        '<div class="stat-label">'+s.label+'</div>'+
-        '<div class="stat-change neutral">'+s.sub+'</div>'+
-      '</div>'
-    ).join('');
-
-    // ── Reports badge ───────────────────────────────────────────
-    const b=q('reports-badge');
-    if(b)b.style.display=d.reports>0?'inline':'none';
-
-    // ── Charts from /overview ────────────────────────────────────
-    if(overviewR?.ok){
-      try{
-        const ov=await overviewR.json();
-        renderEmoBar(ov.emotionDistribution||{});
-        renderCityList(ov.topCities||[]);
-        renderSignupChart(ov.dailySignups||[]);
-        renderHashtags(ov.topHashtags||[]);
-        renderPostTypes(ov.postTypes||{});
-        renderActivity(d, ov);
-      }catch(jsonErr){
-        console.warn('Overview JSON parse failed:',jsonErr.message);
-        renderEmoBar({});renderCityList([]);renderSignupChart([]);
-      }
-    } else {
-      // /overview not deployed yet — show placeholder
-      q('emo-bars').innerHTML='<div style="color:var(--tx3);font-size:.8rem;padding:8px">Deploy admin_FINAL.js to get charts</div>';
-      q('city-list').innerHTML='';
-      renderActivity(d, {});
-    }
+    grid.innerHTML=[
+      {color:'purple',val:num(d.users),     label:'Total Users',    sub:'+'+num(d.todayUsers)+' today'},
+      {color:'teal',  val:num(d.posts),     label:'Total Posts',    sub:'All time'},
+      {color:'orange',val:num(d.moods),     label:'Mood Logs',      sub:'Emotion data points'},
+      {color:'green', val:num(d.vents),     label:'Vents',          sub:'Anonymous vents'},
+      {color:'red',   val:num(d.crisis),    label:'Crisis Posts',   sub:'Need review'},
+      {color:'red',   val:num(d.reports),   label:'Open Reports',   sub:d.reports>0?'Action needed':'All clear'},
+      {color:'purple',val:num(d.banned),    label:'Banned Users',   sub:'Blocked accounts'},
+      {color:'teal',  val:num(d.whisperChains||0),label:'Whisper Chains',sub:num(d.gratitudeBombs||0)+' gratitude bombs'},
+    ].map(s=>'<div class="stat-card '+s.color+'"><div class="stat-val">'+s.val+'</div><div class="stat-label">'+s.label+'</div><div class="stat-change">'+s.sub+'</div></div>').join('');
+    const b=q('reports-badge');if(b)b.style.display=d.reports>0?'inline':'none';
+    if(overviewR&&overviewR.ok){
+      try{const ov=await overviewR.json();renderEmoBar(ov.emotionDistribution||{});renderCityList(ov.topCities||[]);renderSignupChart(ov.dailySignups||[]);renderHashtags(ov.topHashtags||[]);renderPostTypes(ov.postTypes||{});renderActivity(d,ov);}
+      catch(_){renderActivity(d,{});}
+    }else{renderActivity(d,{});}
+    fetchLiveData();
+    liveTimer=setInterval(fetchLiveData,15000);
   }catch(e){
-    q('stats-grid').innerHTML=
-      '<div class="empty" style="grid-column:1/-1">'+
-        '<div style="font-size:1.5rem;margin-bottom:8px">🔐</div>'+
-        '<div style="font-size:.9rem;margin-bottom:6px">'+e.message+'</div>'+
-        '<div style="font-size:.78rem;opacity:.6">Make sure ADMIN_PASSWORD is set on Render → Environment</div>'+
-      '</div>';
+    q('stats-grid').innerHTML='<div class="empty" style="grid-column:1/-1"><div style="font-size:1.5rem;margin-bottom:8px">🔐</div><div>'+e.message+'</div><div style="font-size:.75rem;opacity:.6;margin-top:4px">Check ADMIN_PASSWORD env var on Render</div></div>';
   }
 }
 
 function renderEmoBar(dist){
   const el=q('emo-bars');if(!el)return;
-  const EMO_COLORS={happy:'#52B788',sad:'#7B5EA7',anxious:'#FF4D6D',lonely:'#C4A8FF',grateful:'#00C9A7',inspired:'#F4A261',hopeful:'#5CB8E4',angry:'#FF6B6B',confused:'#A8D8EA',proud:'#FFD700',excited:'#FF85A1',neutral:'#666'};
   const entries=Object.entries(dist).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  if(!entries.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem;padding:8px">No mood data yet — users need to log moods</div>';return;}
+  if(!entries.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem">No mood data yet</div>';return;}
   const total=entries.reduce((s,[,v])=>s+v,0)||1;
-  el.innerHTML=entries.map(([emo,count])=>
-    '<div class="emo-row">'+
-      '<div class="emo-label">'+esc(emo)+'</div>'+
-      '<div class="emo-track"><div class="emo-fill" style="width:'+Math.round(count/total*100)+'%;background:'+(EMO_COLORS[emo]||'#888')+'"></div></div>'+
-      '<div class="emo-pct">'+Math.round(count/total*100)+'%</div>'+
-    '</div>'
-  ).join('');
+  el.innerHTML=entries.map(([emo,count])=>'<div class="emo-row"><div class="emo-label">'+esc(emo)+'</div><div class="emo-track"><div class="emo-fill" style="width:'+Math.round(count/total*100)+'%;background:'+(EMO_COLORS[emo]||'#888')+'"></div></div><div class="emo-pct">'+Math.round(count/total*100)+'%</div></div>').join('');
 }
-
 function renderCityList(cities){
   const el=q('city-list');if(!el)return;
-  if(!cities.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem;padding:8px">No city data yet</div>';return;}
-  el.innerHTML=cities.slice(0,8).map((c,i)=>
-    '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bd)">'+
-      '<span style="width:22px;font-size:.72rem;color:var(--tx3);font-family:var(--fM);font-weight:600">'+(i+1)+'</span>'+
-      '<span style="flex:1;font-size:.83rem">'+esc(c.city||'Unknown')+'</span>'+
-      '<span style="font-size:.78rem;color:var(--tx3);font-family:var(--fM)">'+num(c.count)+'</span>'+
-    '</div>'
-  ).join('');
+  if(!cities.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem">No city data yet</div>';return;}
+  el.innerHTML=cities.slice(0,8).map((c,i)=>'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bd)"><span style="width:22px;font-size:.72rem;color:var(--tx3)">'+(i+1)+'</span><span style="flex:1;font-size:.83rem">'+esc(c.city||'Unknown')+'</span><span style="font-size:.78rem;color:var(--tx3)">'+num(c.count)+'</span></div>').join('');
 }
-
 function renderSignupChart(signups){
   const el=q('signup-chart');if(!el)return;
-  if(!signups.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem">No signup data yet</div>';return;}
+  if(!signups.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem">No signup data</div>';return;}
   const max=Math.max(...signups.map(s=>s.count),1);
-  // Fill missing days
-  const chartData=signups.slice(-14);
-  el.innerHTML=chartData.map(s=>{
-    const h=Math.max(4,Math.round(s.count/max*44));
-    const date=new Date(s.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
-    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" title="'+date+': '+s.count+' signups">'+
-      '<span style="font-size:.55rem;color:var(--tx3);font-family:var(--fM)">'+s.count+'</span>'+
-      '<div style="height:'+h+'px;background:var(--v);width:100%;border-radius:3px 3px 0 0;transition:height .6s ease"></div>'+
-    '</div>';
-  }).join('');
+  el.innerHTML=signups.slice(-14).map(s=>'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" title="'+s.date+': '+s.count+'"><span style="font-size:.55rem;color:var(--tx3)">'+s.count+'</span><div style="height:'+Math.max(4,Math.round(s.count/max*44))+'px;background:var(--v);width:100%;border-radius:3px 3px 0 0"></div></div>').join('');
 }
-
 function renderHashtags(hashtags){
   const el=q('hashtag-list');if(!el||!hashtags.length)return;
-  el.innerHTML=hashtags.slice(0,10).map(h=>
-    '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--bg3);border-radius:100px;font-size:.75rem;margin:3px;color:var(--vl)">#'+esc(h.tag)+'<span style="color:var(--tx3)">'+h.count+'</span></span>'
-  ).join('');
+  el.innerHTML=hashtags.slice(0,10).map(h=>'<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--bg3);border-radius:100px;font-size:.75rem;margin:3px;color:var(--vl)">#'+esc(h.tag)+'<span style="color:var(--tx3)">'+h.count+'</span></span>').join('');
 }
-
 function renderPostTypes(types){
   const el=q('post-types');if(!el)return;
-  const TYPE_ICONS={post:'📢',story:'📸',confession:'🤫',unsent:'💌',diary:'📖',poll:'📊',voice:'🎙️',vent:'💭',challenge:'🎯'};
-  const entries=Object.entries(types).sort((a,b)=>b[1]-a[1]);
-  if(!entries.length)return;
+  const ICONS={post:'📢',story:'📸',confession:'🤫',unsent:'💌',diary:'📖',poll:'📊',voice:'🎙️',vent:'💭',challenge:'🎯'};
+  const entries=Object.entries(types).sort((a,b)=>b[1]-a[1]);if(!entries.length)return;
   const total=entries.reduce((s,[,v])=>s+v,0)||1;
-  el.innerHTML=entries.map(([type,count])=>
-    '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)">'+
-      '<span>'+(TYPE_ICONS[type]||'📝')+'</span>'+
-      '<span style="flex:1;font-size:.82rem;text-transform:capitalize">'+esc(type)+'</span>'+
-      '<span style="font-size:.78rem;color:var(--tx3)">'+num(count)+'</span>'+
-      '<span style="font-size:.7rem;color:var(--tx3);width:32px;text-align:right">'+Math.round(count/total*100)+'%</span>'+
-    '</div>'
-  ).join('');
+  el.innerHTML=entries.map(([type,count])=>'<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)"><span>'+(ICONS[type]||'📝')+'</span><span style="flex:1;font-size:.82rem;text-transform:capitalize">'+esc(type)+'</span><span style="font-size:.78rem;color:var(--tx3)">'+num(count)+'</span><span style="font-size:.7rem;color:var(--tx3);width:32px;text-align:right">'+Math.round(count/total*100)+'%</span></div>').join('');
 }
-
-function renderActivity(stats, overview){
+function renderActivity(stats,overview){
   const el=q('activity-feed');if(!el)return;
   const items=[];
-  if(stats.todayUsers>0) items.push({ico:'👤',c:'var(--tl)', text:num(stats.todayUsers)+' new users today'});
-  if(stats.weekUsers>0)  items.push({ico:'📈',c:'var(--v)',  text:num(stats.weekUsers)+' users this week'});
-  if(stats.crisis>0)     items.push({ico:'🆘',c:'var(--cr)', text:stats.crisis+' crisis post'+(stats.crisis===1?'':'s')+' need review'});
-  if(stats.reports>0)    items.push({ico:'⚠️',c:'var(--go)', text:stats.reports+' open report'+(stats.reports===1?'':'s')});
+  if(stats.todayUsers>0)items.push({ico:'👤',c:'var(--tl)',text:num(stats.todayUsers)+' new users today'});
+  if(stats.crisis>0)items.push({ico:'🆘',c:'var(--cr)',text:stats.crisis+' crisis post'+(stats.crisis===1?'':'s')+' need review'});
+  if(stats.reports>0)items.push({ico:'⚠️',c:'var(--go)',text:stats.reports+' open report'+(stats.reports===1?'':'s')});
   const emo=Object.entries(overview.emotionDistribution||{}).sort((a,b)=>b[1]-a[1])[0];
-  if(emo) items.push({ico:'😊',c:'var(--tx2)', text:'Top mood this week: '+emo[0]+' ('+num(emo[1])+' logs)'});
-  if(stats.whisperChains>0) items.push({ico:'🌀',c:'var(--vl)', text:num(stats.whisperChains)+' whisper chains · '+num(stats.gratitudeBombs||0)+' gratitude bombs'});
+  if(emo)items.push({ico:'😊',c:'var(--tx2)',text:'Top mood this week: '+emo[0]+' ('+num(emo[1])+' logs)'});
   if(!items.length){el.innerHTML='<div class="empty">Platform is quiet — share annomuss to get users!</div>';return;}
-  el.innerHTML=items.map(i=>
-    '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd)">'+
-      '<span style="font-size:1.1rem;width:24px;text-align:center">'+i.ico+'</span>'+
-      '<span style="font-size:.83rem;color:'+i.c+'">'+i.text+'</span>'+
-    '</div>'
-  ).join('');
-  // Kick off live activity polling
-  loadLiveActivity();
-}
-
-// ── LIVE ACTIVITY — polls /api/admin/live every 15s ───────────
-let liveTimer=null;
-async function loadLiveActivity(){
-  clearInterval(liveTimer);
-  await fetchLiveData();
-  liveTimer=setInterval(fetchLiveData, 15000);
+  el.innerHTML=items.map(i=>'<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd)"><span style="font-size:1.1rem;width:24px;text-align:center">'+i.ico+'</span><span style="font-size:.83rem;color:'+i.c+'">'+i.text+'</span></div>').join('');
 }
 async function fetchLiveData(){
   try{
-    const r=await af('/api/admin/live');
-    if(!r.ok)return;
+    const r=await af('/api/admin/live');if(!r.ok)return;
     const d=await r.json();
-    // Update mini counters
-    const set=(id,val)=>{const el=q(id);if(el)el.textContent=val;};
-    set('live-users', d.newUsers);
-    set('live-posts', d.newPosts);
-    set('live-moods', d.newMoods);
-    set('live-vents', d.newVents);
-    // Update activity feed with real-time posts
+    const set=(id,v)=>{const e=q(id);if(e)e.textContent=v;};
+    set('live-users',d.newUsers);set('live-posts',d.newPosts);set('live-moods',d.newMoods);set('live-vents',d.newVents);
     const el=q('activity-feed');
     if(el&&d.recentActivity&&d.recentActivity.length){
-      const EMO_ICONS={happy:'😊',sad:'😢',anxious:'😰',lonely:'💙',grateful:'🙏',inspired:'✨',hopeful:'🌱',angry:'😤',neutral:'😶',excited:'⚡',proud:'💪',confused:'😕'};
-      el.innerHTML=d.recentActivity.map(a=>
-        '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--bd)">'+
-          '<span style="font-size:1rem;width:22px;text-align:center">'+(EMO_ICONS[a.emotion]||'📝')+'</span>'+
-          '<div style="flex:1;min-width:0">'+
-            '<div style="font-size:.8rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(a.text||(a.type+' posted'))+'</div>'+
-            '<div style="font-size:.7rem;color:var(--tx3);margin-top:1px">'+(a.city?esc(a.city)+' · ':'')+'<span style="text-transform:capitalize">'+esc(a.type||'post')+'</span>'+' · '+timeAgo(a.time)+'</div>'+
-          '</div>'+
-          (a.emotion?'<span style="padding:2px 8px;border-radius:100px;font-size:.68rem;background:rgba(123,94,167,.12);color:var(--vl)">'+esc(a.emotion)+'</span>':'')+
-        '</div>'
-      ).join('');
+      const EICO={happy:'😊',sad:'😢',anxious:'😰',lonely:'💙',grateful:'🙏',inspired:'✨',hopeful:'🌱',angry:'😤',neutral:'😶',excited:'⚡',proud:'💪',confused:'😕'};
+      el.innerHTML=d.recentActivity.map(a=>'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--bd)"><span style="font-size:1rem;width:22px;text-align:center">'+(EICO[a.emotion]||'📝')+'</span><div style="flex:1;min-width:0"><div style="font-size:.8rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(a.text||(a.type+' posted'))+'</div><div style="font-size:.7rem;color:var(--tx3);margin-top:1px">'+(a.city?esc(a.city)+' · ':'')+esc(a.type||'post')+' · '+timeAgo(a.time)+'</div></div>'+(a.emotion?'<span style="padding:2px 8px;border-radius:100px;font-size:.68rem;background:rgba(123,94,167,.12);color:var(--vl)">'+esc(a.emotion)+'</span>':'')+'</div>').join('');
     }
   }catch(_){}
 }
-
-// ── ONLINE COUNT ──────────────────────────────────────────────
-async function updateOnline(){
-  try{const r=await fetch(API+'/health');const d=await r.json();if(d.ok){q('online-num').textContent='server OK';}}catch(_){}
-}
+async function updateOnline(){try{const r=await fetch(API+'/health');const d=await r.json();if(d.ok)q('online-num').textContent='API OK';}catch(_){}}
 
 // ── EMOTION INTELLIGENCE ──────────────────────────────────────
-// ── EMOTION INTELLIGENCE ──────────────────────────────────────
-const EMO_COLORS={happy:'#52B788',sad:'#7B5EA7',anxious:'#FF4D6D',lonely:'#C4A8FF',grateful:'#00C9A7',inspired:'#F4A261',hopeful:'#5CB8E4',angry:'#FF6B6B',confused:'#A8D8EA',proud:'#FFD700',excited:'#FF85A1',neutral:'#666'};
-
-function switchEmotionView(view, btn){
+function switchEmotionView(view,btn){
   document.querySelectorAll('[id^="ebtn-"]').forEach(b=>{b.className='btn btn-ghost btn-sm';});
   if(btn)btn.className='btn btn-primary btn-sm';
-  if(view==='pulse')    loadEmotionPulse();
-  else if(view==='hourly')   loadEmotionHourly();
-  else if(view==='admatrix') loadAdMatrix();
-  else if(view==='segments') loadSegments();
-  else if(view==='quality')  loadDataQuality();
+  if(view==='pulse')     loadEmotionPulse();
+  else if(view==='hourly')    loadEmotionHourly();
+  else if(view==='admatrix')  loadAdMatrix();
+  else if(view==='segments')  loadSegments();
+  else if(view==='quality')   loadDataQuality();
 }
-
 async function loadEmotionPulse(){
-  const el=q('emotion-content');
-  el.innerHTML='<div class="spin"></div>';
+  const el=q('emotion-content');el.innerHTML='<div class="spin"></div>';
   try{
-    const r=await af('/api/emotion/pulse');
-    if(!r.ok)throw new Error('Emotion API not responding ('+r.status+') — check emotionAnalytics.js is deployed');
-    const data=await r.json();
-    if(!data.length){el.innerHTML='<div class="empty">No emotion signals yet — users need to post and log moods first</div>';return;}
+    const r=await af('/api/emotion/pulse');if(!r.ok)throw new Error('Emotion API not responding ('+r.status+')');
+    const data=await r.json();if(!data.length){el.innerHTML='<div class="empty">No emotion signals yet</div>';return;}
     const total=data.reduce((s,e)=>s+e.count,0)||1;
-    el.innerHTML=
-      '<div style="margin-bottom:16px"><div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Live Emotion Pulse — Last 30 Minutes</div>'+
-      data.map(e=>{
-        const pct=Math.round(e.count/total*100);
-        const col=EMO_COLORS[e.emotion]||'#888';
-        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
-          '<div style="width:80px;font-size:.82rem;text-transform:capitalize;color:var(--tx2)">'+esc(e.emotion)+'</div>'+
-          '<div style="flex:1;height:10px;background:var(--bg3);border-radius:100px;overflow:hidden">'+
-            '<div style="height:100%;border-radius:100px;background:'+col+';width:'+pct+'%;transition:width .8s ease"></div>'+
-          '</div>'+
-          '<div style="width:36px;font-size:.75rem;font-family:var(--fM);color:var(--tx3)">'+pct+'%</div>'+
-          '<div style="width:48px;font-size:.72rem;color:var(--tx3)">'+num(e.count)+'</div>'+
-          '<div style="font-size:.7rem;color:var(--tx3)">'+Math.round(e.confidence)+'% conf</div>'+
-        '</div>';
-      }).join('')+
-      '</div>'+
-      '<div style="font-size:.75rem;color:var(--tx3);margin-top:8px">Total signals: '+num(total)+' · Refresh for latest</div>';
+    el.innerHTML='<div style="margin-bottom:12px;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Live Emotion Pulse — Last 30 Minutes</div>'+
+      data.map(e=>{const pct=Math.round(e.count/total*100);const col=EMO_COLORS[e.emotion]||'#888';
+        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:80px;font-size:.82rem;text-transform:capitalize;color:var(--tx2)">'+esc(e.emotion)+'</div><div style="flex:1;height:10px;background:var(--bg3);border-radius:100px;overflow:hidden"><div style="height:100%;border-radius:100px;background:'+col+';width:'+pct+'%;transition:width .8s ease"></div></div><div style="width:36px;font-size:.75rem;font-family:var(--fM);color:var(--tx3)">'+pct+'%</div><div style="width:48px;font-size:.72rem;color:var(--tx3)">'+num(e.count)+'</div></div>';
+      }).join('')+'<div style="font-size:.75rem;color:var(--tx3);margin-top:8px">Total signals: '+num(total)+'</div>';
   }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
-
 async function loadEmotionHourly(){
-  const el=q('emotion-content');
-  el.innerHTML='<div class="spin"></div>';
+  const el=q('emotion-content');el.innerHTML='<div class="spin"></div>';
   try{
-    const r=await af('/api/emotion/hourly-breakdown');
-    if(!r.ok)throw new Error('Hourly breakdown not available ('+r.status+')');
-    const data=await r.json();
-    if(!data.length){el.innerHTML='<div class="empty">No hourly data yet</div>';return;}
+    const r=await af('/api/emotion/hourly-breakdown');if(!r.ok)throw new Error('Hourly data not available ('+r.status+')');
+    const data=await r.json();if(!data.length){el.innerHTML='<div class="empty">No hourly data yet</div>';return;}
     const maxCount=Math.max(...data.map(d=>d.userCount),1);
-    el.innerHTML=
-      '<div style="margin-bottom:12px;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Emotion Activity — Last 24 Hours</div>'+
+    el.innerHTML='<div style="margin-bottom:12px;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">24h Emotion Activity</div>'+
       '<div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:8px">'+
-      Array.from({length:24},(_,h)=>{
-        const d=data.find(x=>x.hour===h);
-        const count=d?.userCount||0;
-        const barH=Math.max(4,Math.round(count/maxCount*76));
-        const topEmo=d?Object.entries(d.emotions||{}).sort((a,b)=>b[1]-a[1])[0]:null;
-        const col=topEmo?EMO_COLORS[topEmo[0]]||'#7B5EA7':'#1e1e2e';
-        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px" title="'+h+':00 — '+count+' signals'+(topEmo?' · '+topEmo[0]:'')+'">'+
-          '<div style="width:100%;border-radius:2px 2px 0 0;background:'+col+';height:'+barH+'px;opacity:.85"></div>'+
-        '</div>';
-      }).join('')+
-      '</div>'+
-      '<div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--tx3);font-family:var(--fM);margin-bottom:14px">'+
-      Array.from({length:7},(_,i)=>'<span>'+String(i*4).padStart(2,'0')+'h</span>').join('')+
-      '</div>'+
-      '<div style="overflow-x:auto"><table><thead><tr><th>Hour</th><th>Signals</th><th>Anxious</th><th>Happy</th><th>Sad</th><th>Lonely</th><th>Grateful</th><th>Confidence</th></tr></thead><tbody>'+
-      data.map(d=>'<tr><td style="font-family:var(--fM)">'+String(d.hour).padStart(2,'0')+':00</td><td>'+num(d.userCount)+'</td>'+
-        ['anxious','happy','sad','lonely','grateful'].map(e=>'<td style="color:'+(EMO_COLORS[e]||'#888')+'">'+d.emotions[e]+'</td>').join('')+
-        '<td>'+d.confidence+'%</td></tr>'
-      ).join('')+
-      '</tbody></table></div>';
+      Array.from({length:24},(_,h)=>{const d=data.find(x=>x.hour===h);const count=d?.userCount||0;const barH=Math.max(4,Math.round(count/maxCount*76));const topEmo=d?Object.entries(d.emotions||{}).sort((a,b)=>b[1]-a[1])[0]:null;const col=topEmo?EMO_COLORS[topEmo[0]]||'#7B5EA7':'#1e1e2e';return'<div style="flex:1;display:flex;flex-direction:column;align-items:center" title="'+h+':00 — '+count+'"><div style="width:100%;border-radius:2px 2px 0 0;background:'+col+';height:'+barH+'px;opacity:.85"></div></div>';}).join('')+
+      '</div><div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--tx3);margin-bottom:14px">'+Array.from({length:7},(_,i)=>'<span>'+String(i*4).padStart(2,'0')+'h</span>').join('')+'</div>'+
+      '<div style="overflow-x:auto"><table><thead><tr><th>Hour</th><th>Signals</th><th>Anxious</th><th>Happy</th><th>Sad</th><th>Lonely</th><th>Grateful</th><th>Conf%</th></tr></thead><tbody>'+
+      data.map(d=>'<tr><td style="font-family:var(--fM)">'+String(d.hour).padStart(2,'0')+':00</td><td>'+num(d.userCount)+'</td>'+['anxious','happy','sad','lonely','grateful'].map(e=>'<td style="color:'+(EMO_COLORS[e]||'#888')+'">'+d.emotions[e]+'</td>').join('')+'<td>'+d.confidence+'%</td></tr>').join('')+'</tbody></table></div>';
   }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
-
 async function loadAdMatrix(){
-  const el=q('emotion-content');
-  el.innerHTML='<div class="spin"></div>';
+  const el=q('emotion-content');el.innerHTML='<div class="spin"></div>';
   try{
-    const r=await af('/api/emotion/ad-matrix');
-    if(!r.ok)throw new Error('Ad matrix not available ('+r.status+')');
-    const data=await r.json();
-    if(!data.length){el.innerHTML='<div class="empty">No ad targeting data yet — needs emotion snapshots</div>';return;}
-    // Group by segment
+    const r=await af('/api/emotion/ad-matrix');if(!r.ok)throw new Error('Ad matrix not available ('+r.status+')');
+    const data=await r.json();if(!data.length){el.innerHTML='<div class="empty">No ad targeting data yet</div>';return;}
     const bySegment={};
-    data.forEach(row=>{
-      const seg=row._id?.segment||'unknown';
-      if(!bySegment[seg])bySegment[seg]=[];
-      bySegment[seg].push(row);
-    });
-    el.innerHTML=
-      '<div style="margin-bottom:12px;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Ad Targeting Matrix — Emotion × Hour × Segment</div>'+
+    data.forEach(row=>{const seg=row._id?.segment||'unknown';if(!bySegment[seg])bySegment[seg]=[];bySegment[seg].push(row);});
+    el.innerHTML='<div style="margin-bottom:12px;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Ad Targeting Matrix</div>'+
       Object.entries(bySegment).slice(0,8).map(([seg,rows])=>{
         const topHour=rows.sort((a,b)=>b.userCount-a.userCount)[0];
         const cities=[...new Set(rows.flatMap(r=>r.cities||[]))].filter(Boolean).slice(0,4);
         const totalUsers=rows.reduce((s,r)=>s+r.userCount,0);
-        return '<div style="background:var(--bg2);border:0.5px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px">'+
-          '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'+
-            '<div style="padding:3px 10px;background:rgba(123,94,167,.15);border-radius:100px;font-size:.72rem;font-weight:700;color:var(--vl)">'+esc(seg)+'</div>'+
-            '<div style="font-size:.75rem;color:var(--tx3)">'+num(totalUsers)+' users</div>'+
-            (topHour?'<div style="font-size:.75rem;color:var(--tx3)">Peak: '+String(topHour._id?.hour||0).padStart(2,'0')+':00</div>':'')+'</div>'+
-          '<div style="font-size:.75rem;color:var(--tx3)">Top cities: '+cities.map(c=>esc(c)).join(' · ')+'</div>'+
-        '</div>';
-      }).join('')+
-      '<div style="font-size:.72rem;color:var(--tx3);margin-top:8px">'+num(data.length)+' total data points · use Export CSV for full matrix</div>';
-  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+        return '<div style="background:var(--bg2);border:0.5px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="padding:3px 10px;background:rgba(123,94,167,.15);border-radius:100px;font-size:.72rem;font-weight:700;color:var(--vl)">'+esc(seg)+'</div><div style="font-size:.75rem;color:var(--tx3)">'+num(totalUsers)+' users</div>'+(topHour?'<div style="font-size:.75rem;color:var(--tx3)">Peak: '+String(topHour._id?.hour||0).padStart(2,'0')+':00</div>':'')+'</div><div style="font-size:.75rem;color:var(--tx3)">Cities: '+cities.map(c=>esc(c)).join(' · ')+'</div></div>';
+      }).join('')+'<div style="font-size:.72rem;color:var(--tx3);margin-top:8px">'+num(data.length)+' data points</div>';
+}catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
-
-async function loadDataQuality(){
-  const el=q('emotion-content');
-  el.innerHTML='<div class="spin"></div>';
-  try{
-    const r=await af('/api/emotion/quality');
-    if(!r.ok)throw new Error('Data quality endpoint not available ('+r.status+')');
-    const d=await r.json();
-    const score=d.dataQualityScore||0;
-    const scoreCol=score>=70?'var(--lm)':score>=40?'var(--go)':'var(--cr)';
-    el.innerHTML=
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'+
-      [
-        {label:'Total Signals',val:num(d.totalSignals||0),col:'var(--vl)'},
-        {label:'Unique Users',val:num(d.uniqueUsers||0),col:'var(--tl)'},
-        {label:'Avg Signals/User',val:d.avgSignalsPerUser||0,col:'var(--go)'},
-        {label:'High Confidence',val:(d.highConfidencePct||0)+'%',col:'var(--lm)'},
-      ].map(s=>'<div style="background:var(--bg2);border-radius:10px;padding:12px;border:0.5px solid var(--bd)"><div style="font-size:.7rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">'+s.label+'</div><div style="font-size:1.4rem;font-weight:500;color:'+s.col+'">'+s.val+'</div></div>').join('')+
-      '</div>'+
-      '<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:14px">'+
-        '<div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px">Data Quality Score</div>'+
-        '<div style="display:flex;align-items:center;gap:12px">'+
-          '<div style="font-size:2rem;font-weight:500;color:'+scoreCol+'">'+score+'</div>'+
-          '<div style="flex:1;height:8px;background:var(--bg3);border-radius:100px"><div style="height:100%;border-radius:100px;background:'+scoreCol+';width:'+score+'%;transition:width .8s ease"></div></div>'+
-          '<div style="font-size:.75rem;color:var(--tx3)">/ 100</div>'+
-        '</div>'+
-        '<div style="font-size:.72rem;color:var(--tx3);margin-top:6px">Score = 70% high-confidence signals + 30% unique user coverage</div>'+
-      '</div>'+
-      '<div style="margin-bottom:14px"><div style="font-size:.75rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Signal Breakdown</div>'+
-      (d.signalBreakdown||[]).map(s=>'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--bd)"><div style="flex:1;font-size:.82rem;text-transform:capitalize">'+esc(s._id||'unknown')+'</div><div style="font-size:.78rem;font-family:var(--fM);color:var(--tx3)">'+num(s.count)+'</div><div style="font-size:.72rem;color:var(--tx3)">'+Math.round((s.avgConfidence||0)*100)+'% conf</div></div>').join('')+
-      '</div>'+
-      '<div><div style="font-size:.75rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Top Cities by Emotional Data</div>'+
-      (d.cityBreakdown||[]).slice(0,10).map((c,i)=>'<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--bd)"><div style="width:18px;font-size:.72rem;color:var(--tx3)">'+(i+1)+'</div><div style="flex:1;font-size:.82rem">'+esc(c._id||'Unknown')+'</div><div style="font-size:.78rem;font-family:var(--fM);color:var(--tx3)">'+num(c.count)+'</div></div>').join('')+'</div>';
-  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
-}
-
-async function loadCityTrend(){
-  const el=q('emotion-content');
-  el.innerHTML='<div class="spin"></div>';
-  try{
-    const r=await af('/api/emotion/city-trend?city=Mumbai&hours=24');
-    if(!r.ok)throw new Error('City trend not available');
-    const d=await r.json();
-    el.innerHTML='<div style="font-size:.78rem;font-weight:700;color:var(--tx3);margin-bottom:10px">Mumbai — 24h emotion trend</div><pre style="font-size:.78rem;color:var(--tx2);white-space:pre-wrap;line-height:1.6">'+JSON.stringify(d,null,2)+'</pre>';
-  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
-}
-
 async function loadSegments(){
-  const el=q('emotion-content');
-  el.innerHTML='<div class="spin"></div>';
+  const el=q('emotion-content');el.innerHTML='<div class="spin"></div>';
   try{
-    const r=await af('/api/emotion/segments');
-    if(!r.ok)throw new Error('Segments endpoint not available');
-    const data=await r.json();
-    if(!data.length){el.innerHTML='<div class="empty">No segment data yet</div>';return;}
-    el.innerHTML=
-      '<div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Ad Segments (7-day)</div>'+
-      data.slice(0,12).map(seg=>{
-        return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--bd)">'+
-          '<div style="width:140px;font-size:.82rem;color:var(--tx2);text-transform:capitalize">'+esc(seg._id||'unknown')+'</div>'+
-          '<div style="flex:1;height:8px;background:var(--bg3);border-radius:100px"><div style="height:100%;border-radius:100px;background:var(--v);width:'+Math.min(100,Math.round((seg.userCount||0)/Math.max(...data.map(s=>s.userCount),1)*100))+'%"></div></div>'+
-          '<div style="width:40px;font-size:.75rem;font-family:var(--fM);color:var(--tx3);text-align:right">'+num(seg.userCount||0)+'</div>'+
-        '</div>';
-      }).join('');
+    const r=await af('/api/emotion/segments');if(!r.ok)throw new Error('Segments not available ('+r.status+')');
+    const data=await r.json();if(!data.length){el.innerHTML='<div class="empty">No segment data yet</div>';return;}
+    el.innerHTML='<div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Ad Segments (7d)</div>'+
+      data.slice(0,12).map(seg=>'<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--bd)"><div style="width:140px;font-size:.82rem;color:var(--tx2);text-transform:capitalize">'+esc(seg._id||'unknown')+'</div><div style="flex:1;height:8px;background:var(--bg3);border-radius:100px"><div style="height:100%;border-radius:100px;background:var(--v);width:'+Math.min(100,Math.round((seg.userCount||0)/Math.max(...data.map(s=>s.userCount),1)*100))+'%"></div></div><div style="width:40px;font-size:.75rem;font-family:var(--fM);color:var(--tx3);text-align:right">'+num(seg.userCount||0)+'</div></div>').join('');
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+async function loadDataQuality(){
+  const el=q('emotion-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/quality');if(!r.ok)throw new Error('Data quality endpoint not available ('+r.status+')');
+    const d=await r.json();
+    const score=d.dataQualityScore||0;const scoreCol=score>=70?'var(--lm)':score>=40?'var(--go)':'var(--cr)';
+    el.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'+
+      [{label:'Total Signals',val:num(d.totalSignals||0),col:'var(--vl)'},{label:'Unique Users',val:num(d.uniqueUsers||0),col:'var(--tl)'},{label:'Avg Signals/User',val:d.avgSignalsPerUser||0,col:'var(--go)'},{label:'High Confidence',val:(d.highConfidencePct||0)+'%',col:'var(--lm)'}]
+      .map(s=>'<div style="background:var(--bg2);border-radius:10px;padding:12px;border:0.5px solid var(--bd)"><div style="font-size:.7rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">'+s.label+'</div><div style="font-size:1.4rem;font-weight:500;color:'+s.col+'">'+s.val+'</div></div>').join('')+
+      '</div><div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px">Data Quality Score</div><div style="display:flex;align-items:center;gap:12px"><div style="font-size:2rem;font-weight:500;color:'+scoreCol+'">'+score+'</div><div style="flex:1;height:8px;background:var(--bg3);border-radius:100px"><div style="height:100%;border-radius:100px;background:'+scoreCol+';width:'+score+'%;transition:width .8s ease"></div></div><div style="font-size:.75rem;color:var(--tx3)">/ 100</div></div></div>'+
+      '<div style="margin-bottom:14px"><div style="font-size:.75rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Signal Breakdown</div>'+(d.signalBreakdown||[]).map(s=>'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--bd)"><div style="flex:1;font-size:.82rem;text-transform:capitalize">'+esc(s._id||'unknown')+'</div><div style="font-size:.78rem;font-family:var(--fM);color:var(--tx3)">'+num(s.count)+'</div><div style="font-size:.72rem;color:var(--tx3)">'+Math.round((s.avgConfidence||0)*100)+'% conf</div></div>').join('')+'</div>'+
+      '<div><div style="font-size:.75rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Top Cities</div>'+(d.cityBreakdown||[]).slice(0,10).map((c,i)=>'<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--bd)"><div style="width:18px;font-size:.72rem;color:var(--tx3)">'+(i+1)+'</div><div style="flex:1;font-size:.82rem">'+esc(c._id||'Unknown')+'</div><div style="font-size:.78rem;font-family:var(--fM);color:var(--tx3)">'+num(c.count)+'</div></div>').join('')+'</div>';
   }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
 
 // ── USERS ─────────────────────────────────────────────────────
-let allUsers=[], currentUserFilter='all';
 async function loadUsers(search=''){
   const el=q('users-table');el.innerHTML='<div class="spin"></div>';
   try{
-    const url='/api/admin/users?limit=300'+(search?'&search='+encodeURIComponent(search):'');
-    const r=await af(url);
+    const r=await af('/api/admin/users?limit=300'+(search?'&search='+encodeURIComponent(search):''));
     if(!r.ok)throw new Error('Failed: '+r.status);
-    const d=await r.json();
-    allUsers=d.users||d||[];
-    renderUsers(filterUsersList(allUsers));
+    const d=await r.json();allUsers=d.users||d||[];renderUsers(filterUsersList(allUsers));
   }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
 function filterUsersList(users){
@@ -943,290 +558,124 @@ function filterUsersList(users){
   if(currentUserFilter==='premium')return users.filter(u=>u.isPremium);
   return users;
 }
-function filterUsers(f,el){
-  currentUserFilter=f;
-  document.querySelectorAll('.tab-content.active .fpill').forEach(p=>p.classList.remove('active'));
-  if(el)el.classList.add('active');
-  renderUsers(filterUsersList(allUsers));
-}
-function searchUsers(q2){
-  const filtered=allUsers.filter(u=>(u.anonymousName||'').toLowerCase().includes(q2.toLowerCase())||(u.email||'').toLowerCase().includes(q2.toLowerCase()));
-  renderUsers(filterUsersList(filtered));
-}
+function filterUsers(f,el){currentUserFilter=f;document.querySelectorAll('#tab-users .fpill').forEach(p=>p.classList.remove('active'));if(el)el.classList.add('active');renderUsers(filterUsersList(allUsers));}
+function searchUsers(q2){renderUsers(filterUsersList(allUsers.filter(u=>(u.anonymousName||'').toLowerCase().includes(q2.toLowerCase())||(u.email||'').toLowerCase().includes(q2.toLowerCase()))));}
 function renderUsers(users){
-  const el=q('users-table');
-  if(!users.length){el.innerHTML='<div class="empty">No users found</div>';return;}
+  const el=q('users-table');if(!users.length){el.innerHTML='<div class="empty">No users found</div>';return;}
   let html='<table><thead><tr><th>Avatar</th><th>Name</th><th>Email</th><th>Level</th><th>Streak</th><th>Posts</th><th>Top Emotion</th><th>City</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
   users.forEach(u=>{
     const topEmo=(u.topEmotions||[]).sort((a,b)=>b.count-a.count)[0]?.emotion||'—';
     const status=u.isBanned?'<span class="badge badge-cr">Banned</span>':u.isPremium?'<span class="badge badge-go">Premium</span>':'<span class="badge badge-lm">Active</span>';
-    const banBtn=u.isBanned
-      ?'<button class="ab ab-unban" onclick="unbanUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Unban</button>'
-      :'<button class="ab ab-ban"   onclick="banUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Ban</button>';
-    html+='<tr>';
-    html+='<td style="font-size:1.3rem">'+esc(u.avatarEmoji||'🎭')+'</td>';
-    html+='<td style="font-weight:600">'+esc(u.anonymousName||'—')+'</td>';
-    html+='<td style="color:var(--tx3);font-size:.75rem">'+esc(u.email||'—')+'</td>';
-    html+='<td><span class="badge badge-g">Lv '+(u.level||1)+'</span></td>';
-    html+='<td style="font-family:var(--fM)">'+(u.streak||0)+' 🔥</td>';
-    html+='<td style="font-family:var(--fM)">'+(u.postCount||0)+'</td>';
-    html+='<td><span class="badge badge-v">'+esc(topEmo)+'</span></td>';
-    html+='<td style="font-size:.75rem;color:var(--tx3)">'+esc(u.city||'—')+'</td>';
-    html+='<td>'+status+'</td>';
-    html+='<td style="font-size:.7rem;color:var(--tx3)">'+(u.createdAt?new Date(u.createdAt).toLocaleDateString('en-IN'):'—')+'</td>';
-    html+='<td><div class="actions">'+banBtn+'<button class="ab ab-del" onclick="deleteUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Delete</button></div></td>';
-    html+='</tr>';
+    const banBtn=u.isBanned?'<button class="ab ab-unban" onclick="unbanUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Unban</button>':'<button class="ab ab-ban" onclick="banUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Ban</button>';
+    html+='<tr><td style="font-size:1.3rem">'+esc(u.avatarEmoji||'🎭')+'</td><td style="font-weight:600">'+esc(u.anonymousName||'—')+'</td><td style="color:var(--tx3);font-size:.75rem">'+esc(u.email||'—')+'</td><td><span class="badge badge-g">Lv '+(u.level||1)+'</span></td><td style="font-family:var(--fM)">'+(u.streak||0)+' 🔥</td><td style="font-family:var(--fM)">'+(u.postCount||0)+'</td><td><span class="badge badge-v">'+esc(topEmo)+'</span></td><td style="font-size:.75rem;color:var(--tx3)">'+esc(u.city||'—')+'</td><td>'+status+'</td><td style="font-size:.7rem;color:var(--tx3)">'+(u.createdAt?new Date(u.createdAt).toLocaleDateString('en-IN'):'—')+'</td><td><div class="actions">'+banBtn+'<button class="ab ab-del" onclick="deleteUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Delete</button></div></td></tr>';
   });
-  html+='</tbody></table>';
-  el.innerHTML=html;
+  html+='</tbody></table>';el.innerHTML=html;
 }
-
-function banUser(id,name){
-  showConfirm('🚫','Ban '+name+'?','They will be blocked from all activity. You can unban later.',async()=>{
-    const r=await af('/api/admin/ban/'+id,{method:'POST',body:JSON.stringify({reason:'Admin action'})});
-    toast(r.ok?'🚫 '+name+' banned':'❌ Ban failed — '+r.status);
-    if(r.ok)loadUsers();
-  });
-}
-function unbanUser(id,name){
-  showConfirm('✅','Unban '+name+'?','They will regain full access to the platform.',async()=>{
-    const r=await af('/api/admin/unban/'+id,{method:'POST'});
-    toast(r.ok?'✅ '+name+' unbanned':'❌ Unban failed — '+r.status);
-    if(r.ok)loadUsers();
-  },false);
-}
-function deleteUser(id,name){
-  showConfirm('⚠️','PERMANENTLY DELETE '+name+'?','This DELETES the user AND all their posts, vents, messages, moods. This CANNOT be undone.',async()=>{
-    const r=await af('/api/admin/users/'+id,{method:'DELETE'});
-    toast(r.ok?'🗑️ '+name+' deleted permanently':'❌ Delete failed — '+r.status);
-    if(r.ok)loadUsers();
-  });
-}
-
-// ── STORIES ───────────────────────────────────────────────────
-async function loadStories(){
-  const el=q('stories-table');if(!el)return;
-  el.innerHTML='<div class="spin"></div>';
-  try{
-    const r=await af('/api/posts?type=story&limit=100');
-    if(!r.ok)throw new Error('Failed: '+r.status);
-    const d=await r.json();
-    const stories=(d.posts||d||[]).filter(p=>p.type==='story');
-    if(!stories.length){el.innerHTML='<div class="empty">No active stories right now</div>';return;}
-
-    let html='<table><thead><tr><th>Author</th><th>Preview</th><th>Emotion</th><th>City</th>'+
-      '<th>&#128065; Views</th><th>Posted</th><th>Expires</th><th>Flags</th><th>Actions</th></tr></thead><tbody>';
-
-    stories.forEach(s=>{
-      const flags=[];
-      if(s.isCrisis)flags.push('<span class="badge badge-cr">&#128682; Crisis</span>');
-      if(s.isHidden)flags.push('<span class="badge badge-g">Hidden</span>');
-
-      // Time remaining
-      const expiresAt=s.expiresAt?new Date(s.expiresAt):new Date(new Date(s.createdAt).getTime()+86400000);
-      const msLeft=expiresAt-Date.now();
-      const hLeft=Math.max(0,Math.floor(msLeft/3600000));
-      const mLeft=Math.max(0,Math.floor((msLeft%3600000)/60000));
-      const expiryStr=msLeft<=0?'<span style="color:var(--cr)">Expired</span>':
-        hLeft>0?'<span style="color:var(--go)">'+hLeft+'h '+mLeft+'m</span>':
-        '<span style="color:var(--cr)">'+mLeft+'m</span>';
-
-      // Preview
-      const preview=s.mediaUrl
-        ?'<span style="font-size:.7rem;color:var(--tl)">[Media]</span> '+(s.caption?esc(s.caption.substring(0,30)):'' )
-        :esc((s.caption||'').substring(0,50));
-
-      html+='<tr class="'+(s.isCrisis?'crisis-row':s.isHidden?'hidden-row':'')+'">';
-      html+='<td><div style="font-weight:600;font-size:.82rem">'+esc(s.authorName||'Anonymous')+'</div>'+
-            '<div style="font-size:.7rem;color:var(--tx3)">'+esc(s.authorEmoji||'🎭')+'</div></td>';
-      html+='<td style="max-width:200px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2);font-size:.82rem">'+preview+'</div></td>';
-      html+='<td>'+(s.emotion?'<span class="badge badge-v">'+esc(s.emotion)+'</span>':'—')+'</td>';
-      html+='<td style="font-size:.75rem;color:var(--tx3)">'+esc(s.city||'—')+'</td>';
-      html+='<td style="font-family:var(--fM);font-weight:600;color:var(--vl)">'+(s.storyViews||0)+'</td>';
-      html+='<td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(s.createdAt)+'</td>';
-      html+='<td>'+expiryStr+'</td>';
-      html+='<td>'+flags.join(' ')+'</td>';
-      html+='<td><div class="actions">'+
-        (s.isHidden
-          ?'<button class="ab ab-show" onclick="unhidePost(\''+s._id+'\')">Show</button>'
-          :'<button class="ab ab-hide" onclick="hidePost(\''+s._id+'\')">Hide</button>')+
-        '<button class="ab ab-del" onclick="deleteStory(\''+s._id+'\',\''+esc(s.authorName||'Anonymous')+'\')">Delete</button>'+
-      '</div></td>';
-      html+='</tr>';
-    });
-    html+='</tbody></table>';
-    el.innerHTML=html;
-  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
-}
-
-function deleteStory(id, author){
-  showConfirm('🗑️','Delete '+author+'\'s story?',
-    'This permanently removes the story. Viewers will no longer see it.',
-    async()=>{
-      const r=await af('/api/admin/posts/'+id,{method:'DELETE'});
-      toast(r.ok?'🗑️ Story deleted':'❌ Failed: '+r.status);
-      if(r.ok)loadStories();
-    }
-  );
-}
+function banUser(id,name){showConfirm('🚫','Ban '+name+'?','Blocked from all activity. Can be unbanned later.',async()=>{const r=await af('/api/admin/ban/'+id,{method:'POST',body:JSON.stringify({reason:'Admin action'})});toast(r.ok?'🚫 '+name+' banned':'❌ Failed: '+r.status);if(r.ok)loadUsers();});}
+function unbanUser(id,name){showConfirm('✅','Unban '+name+'?','They will regain full access.',async()=>{const r=await af('/api/admin/unban/'+id,{method:'POST'});toast(r.ok?'✅ '+name+' unbanned':'❌ Failed: '+r.status);if(r.ok)loadUsers();},false);}
+function deleteUser(id,name){showConfirm('⚠️','PERMANENTLY DELETE '+name+'?','Deletes user AND all their posts, vents, messages, moods. CANNOT be undone.',async()=>{const r=await af('/api/admin/users/'+id,{method:'DELETE'});toast(r.ok?'🗑️ '+name+' deleted':'❌ Failed: '+r.status);if(r.ok)loadUsers();});}
 
 // ── POSTS ─────────────────────────────────────────────────────
-async function loadPosts(crisis=false,hidden=false,reported=false,includeStories=false,pillEl=null){
+async function loadPosts(crisis=false,hidden=false,reported=false,pillEl=null){
   const el=q('posts-table');el.innerHTML='<div class="spin"></div>';
   if(pillEl){document.querySelectorAll('#tab-posts .fpill').forEach(p=>p.classList.remove('active'));pillEl.classList.add('active');}
   let url='/api/admin/posts?limit=200';
-  if(crisis)url+='&crisis=true';
-  if(hidden)url+='&hidden=true';
+  if(crisis)url+='&crisis=true';if(hidden)url+='&hidden=true';
   try{
-    const r=await af(url);
-    if(!r.ok)throw new Error('Failed: '+r.status);
+    const r=await af(url);if(!r.ok)throw new Error('Failed: '+r.status);
     const d=await r.json();
-    allPostsCache=(d.posts||d||[]);
-    // Exclude stories from main posts tab (they have their own tab)
-    if(!includeStories)allPostsCache=allPostsCache.filter(p=>p.type!=='story');
+    allPostsCache=(d.posts||d||[]).filter(p=>p.type!=='story');
     if(reported)allPostsCache=allPostsCache.filter(p=>(p.reportCount||0)>0);
     renderPosts(allPostsCache);
   }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
-function filterPostsLive(q2){
-  const filtered=allPostsCache.filter(p=>(p.caption||'').toLowerCase().includes(q2.toLowerCase())||(p.authorName||'').toLowerCase().includes(q2.toLowerCase()));
-  renderPosts(filtered);
-}
+function filterPostsLive(q2){renderPosts(allPostsCache.filter(p=>(p.caption||'').toLowerCase().includes(q2.toLowerCase())||(p.authorName||'').toLowerCase().includes(q2.toLowerCase())));}
 function renderPosts(posts){
-  const el=q('posts-table');
-  if(!posts.length){el.innerHTML='<div class="empty">No posts found</div>';return;}
+  const el=q('posts-table');if(!posts.length){el.innerHTML='<div class="empty">No posts found</div>';return;}
   let html='<table><thead><tr><th>Author</th><th>Caption</th><th>Type</th><th>Emotion</th><th>Likes</th><th>Reports</th><th>Flags</th><th>Date</th><th>Actions</th></tr></thead><tbody>';
   posts.forEach(p=>{
     const flags=[];
-    if(p.isCrisis) flags.push('<span class="badge badge-cr">🆘 Crisis</span>');
-    if(p.isHidden) flags.push('<span class="badge badge-g">Hidden</span>');
-    if((p.reportCount||0)>0)flags.push('<span class="badge badge-go">⚠️ '+p.reportCount+' reports</span>');
-    const showHideBtn=p.isHidden
-      ?'<button class="ab ab-show" onclick="unhidePost(\''+p._id+'\')">Show</button>'
-      :'<button class="ab ab-hide" onclick="hidePost(\''+p._id+'\')">Hide</button>';
-    html+='<tr class="'+(p.isCrisis?'crisis-row':p.isHidden?'hidden-row':'')+'">';
-    html+='<td style="font-size:.78rem;font-weight:600">'+esc(p.authorName||'Anonymous')+'</td>';
-    html+='<td style="max-width:220px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((p.caption||'(no caption)').substring(0,70))+'</div></td>';
-    html+='<td><span class="badge badge-g">'+esc(p.type||'post')+'</span></td>';
-    html+='<td>'+(p.emotion?'<span class="badge badge-v">'+esc(p.emotion)+'</span>':'—')+'</td>';
-    html+='<td style="font-family:var(--fM)">'+(p.likes?.length||0)+'</td>';
-    html+='<td style="font-family:var(--fM)">'+(p.reportCount||0)+'</td>';
-    html+='<td>'+flags.join(' ')+'</td>';
-    html+='<td style="font-size:.7rem;color:var(--tx3)">'+(p.createdAt?timeAgo(p.createdAt):'')+'</td>';
-    html+='<td><div class="actions">'+showHideBtn+'<button class="ab ab-del" onclick="deletePost(\''+p._id+'\')">Delete</button></div></td>';
-    html+='</tr>';
+    if(p.isCrisis)flags.push('<span class="badge badge-cr">🆘 Crisis</span>');
+    if(p.isHidden)flags.push('<span class="badge badge-g">Hidden</span>');
+    if((p.reportCount||0)>0)flags.push('<span class="badge badge-go">⚠️ '+p.reportCount+'</span>');
+    const showHideBtn=p.isHidden?'<button class="ab ab-show" onclick="unhidePost(\''+p._id+'\')">Show</button>':'<button class="ab ab-hide" onclick="hidePost(\''+p._id+'\')">Hide</button>';
+    html+='<tr class="'+(p.isCrisis?'crisis-row':p.isHidden?'hidden-row':'')+'"><td style="font-size:.78rem;font-weight:600">'+esc(p.authorName||'Anonymous')+'</td><td style="max-width:220px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((p.caption||'(no caption)').substring(0,70))+'</div></td><td><span class="badge badge-g">'+esc(p.type||'post')+'</span></td><td>'+(p.emotion?'<span class="badge badge-v">'+esc(p.emotion)+'</span>':'—')+'</td><td style="font-family:var(--fM)">'+(p.likes?.length||0)+'</td><td style="font-family:var(--fM)">'+(p.reportCount||0)+'</td><td>'+flags.join(' ')+'</td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(p.createdAt)+'</td><td><div class="actions">'+showHideBtn+'<button class="ab ab-del" onclick="deletePost(\''+p._id+'\')">Delete</button></div></td></tr>';
   });
-  html+='</tbody></table>';
-  el.innerHTML=html;
+  html+='</tbody></table>';el.innerHTML=html;
 }
+async function hidePost(id){const r=await af('/api/admin/posts/'+id+'/hide',{method:'POST'});toast(r.ok?'🚫 Hidden':'❌ Failed: '+r.status);if(r.ok){const p=allPostsCache.find(x=>x._id===id);if(p)p.isHidden=true;renderPosts(allPostsCache);}}
+async function unhidePost(id){const r=await af('/api/admin/posts/'+id+'/unhide',{method:'POST'});toast(r.ok?'✅ Visible':'❌ Failed: '+r.status);if(r.ok){const p=allPostsCache.find(x=>x._id===id);if(p)p.isHidden=false;renderPosts(allPostsCache);}}
+function deletePost(id){showConfirm('🗑️','Delete this post?','Permanently removes the post. Cannot be undone.',async()=>{const r=await af('/api/admin/posts/'+id,{method:'DELETE'});toast(r.ok?'🗑️ Deleted':'❌ Failed: '+r.status);if(r.ok){allPostsCache=allPostsCache.filter(p=>p._id!==id);renderPosts(allPostsCache);}});}
 
-async function hidePost(id){
-  const r=await af('/api/admin/posts/'+id+'/hide',{method:'POST'});
-  toast(r.ok?'🚫 Post hidden':'❌ Failed: '+r.status);
-  if(r.ok){const p=allPostsCache.find(x=>x._id===id);if(p)p.isHidden=true;renderPosts(allPostsCache);}
+// ── STORIES ───────────────────────────────────────────────────
+async function loadStories(){
+  const el=q('stories-table');if(!el)return;el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/admin/posts?type=story&limit=100');
+    if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();
+    const stories=(d.posts||d||[]).filter(p=>p.type==='story');
+    if(!stories.length){el.innerHTML='<div class="empty">No active stories right now</div>';return;}
+    let html='<table><thead><tr><th>Author</th><th>Preview</th><th>Emotion</th><th>City</th><th>👁 Views</th><th>Posted</th><th>Expires</th><th>Flags</th><th>Actions</th></tr></thead><tbody>';
+    stories.forEach(s=>{
+      const flags=[];
+      if(s.isCrisis)flags.push('<span class="badge badge-cr">🆘 Crisis</span>');
+      if(s.isHidden)flags.push('<span class="badge badge-g">Hidden</span>');
+      const expiresAt=s.expiresAt?new Date(s.expiresAt):new Date(new Date(s.createdAt).getTime()+86400000);
+      const msLeft=expiresAt-Date.now();
+      const hLeft=Math.max(0,Math.floor(msLeft/3600000));
+      const mLeft=Math.max(0,Math.floor((msLeft%3600000)/60000));
+      const expiryStr=msLeft<=0?'<span style="color:var(--cr)">Expired</span>':hLeft>0?'<span style="color:var(--go)">'+hLeft+'h '+mLeft+'m</span>':'<span style="color:var(--cr)">'+mLeft+'m</span>';
+      const preview=s.mediaUrl?'[Media] '+esc((s.caption||'').substring(0,30)):esc((s.caption||'').substring(0,50));
+      const showHideBtn=s.isHidden?'<button class="ab ab-show" onclick="unhideStory(\''+s._id+'\')">Show</button>':'<button class="ab ab-hide" onclick="hideStory(\''+s._id+'\')">Hide</button>';
+      html+='<tr class="'+(s.isCrisis?'crisis-row':s.isHidden?'hidden-row':'')+'"><td><div style="font-weight:600;font-size:.82rem">'+esc(s.authorName||'Anonymous')+'</div><div style="font-size:.7rem;color:var(--tx3)">'+esc(s.authorEmoji||'🎭')+'</div></td><td style="max-width:200px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2);font-size:.82rem">'+preview+'</div></td><td>'+(s.emotion?'<span class="badge badge-v">'+esc(s.emotion)+'</span>':'—')+'</td><td style="font-size:.75rem;color:var(--tx3)">'+esc(s.city||'—')+'</td><td style="font-family:var(--fM);font-weight:600;color:var(--vl)">'+(s.storyViews||0)+'</td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(s.createdAt)+'</td><td>'+expiryStr+'</td><td>'+flags.join(' ')+'</td><td><div class="actions">'+showHideBtn+'<button class="ab ab-del" onclick="deleteStory(\''+s._id+'\',\''+esc(s.authorName||'Anonymous')+'\')">Delete</button></div></td></tr>';
+    });
+    html+='</tbody></table>';el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
-async function unhidePost(id){
-  const r=await af('/api/admin/posts/'+id+'/unhide',{method:'POST'});
-  toast(r.ok?'✅ Post visible':'❌ Failed: '+r.status);
-  if(r.ok){const p=allPostsCache.find(x=>x._id===id);if(p)p.isHidden=false;renderPosts(allPostsCache);}
-}
-function deletePost(id){
-  showConfirm('🗑️','Delete this post?','Permanently removes the post. Cannot be undone.',async()=>{
-    const r=await af('/api/admin/posts/'+id,{method:'DELETE'});
-    toast(r.ok?'🗑️ Post deleted':'❌ Failed: '+r.status);
-    if(r.ok){allPostsCache=allPostsCache.filter(p=>p._id!==id);renderPosts(allPostsCache);}
-  });
-}
+async function hideStory(id){const r=await af('/api/admin/posts/'+id+'/hide',{method:'POST'});toast(r.ok?'🚫 Story hidden':'❌ Failed: '+r.status);if(r.ok)loadStories();}
+async function unhideStory(id){const r=await af('/api/admin/posts/'+id+'/unhide',{method:'POST'});toast(r.ok?'✅ Story visible':'❌ Failed: '+r.status);if(r.ok)loadStories();}
+function deleteStory(id,author){showConfirm('🗑️','Delete '+author+"'s story?",'Permanently removes the story.',async()=>{const r=await af('/api/admin/posts/'+id,{method:'DELETE'});toast(r.ok?'🗑️ Story deleted':'❌ Failed: '+r.status);if(r.ok)loadStories();});}
 
 // ── VENTS ─────────────────────────────────────────────────────
 async function loadVents(){
   const el=q('vents-table');el.innerHTML='<div class="spin"></div>';
   try{
-    const r=await af('/api/vents?limit=100');
-    if(!r.ok)throw new Error('Failed: '+r.status);
-    const d=await r.json();
-    const vents=Array.isArray(d)?d:(d.vents||[]);
+    const r=await af('/api/vents?limit=100');if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();const vents=Array.isArray(d)?d:(d.vents||[]);
     if(!vents.length){el.innerHTML='<div class="empty">No vents</div>';return;}
     let html='<table><thead><tr><th>Author</th><th>Text</th><th>Emotion</th><th>Hugs</th><th>Crisis</th><th>City</th><th>Posted</th><th>Action</th></tr></thead><tbody>';
-    vents.forEach(v=>{
-      html+='<tr class="'+(v.isCrisis?'crisis-row':'')+'">';
-      html+='<td style="font-weight:600">'+esc(v.authorName||'Anonymous')+'</td>';
-      html+='<td style="max-width:280px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((v.text||'').substring(0,100))+'</div></td>';
-      html+='<td>'+(v.emotion?'<span class="badge badge-v">'+esc(v.emotion)+'</span>':'—')+'</td>';
-      html+='<td style="font-family:var(--fM)">'+(v.hugs?.length||0)+'</td>';
-      html+='<td>'+(v.isCrisis?'<span class="badge badge-cr">Crisis</span>':'')+'</td>';
-      html+='<td style="font-size:.75rem;color:var(--tx3)">'+esc(v.city||'—')+'</td>';
-      html+='<td style="font-size:.7rem;color:var(--tx3)">'+(v.createdAt?timeAgo(v.createdAt):'')+'</td>';
-      html+='<td><button class="ab ab-del" onclick="deleteVent(\''+v._id+'\')">Delete</button></td>';
-      html+='</tr>';
-    });
-    html+='</tbody></table>';
-    el.innerHTML=html;
+    vents.forEach(v=>{html+='<tr class="'+(v.isCrisis?'crisis-row':'')+'"><td style="font-weight:600">'+esc(v.authorName||'Anonymous')+'</td><td style="max-width:280px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((v.text||'').substring(0,100))+'</div></td><td>'+(v.emotion?'<span class="badge badge-v">'+esc(v.emotion)+'</span>':'—')+'</td><td style="font-family:var(--fM)">'+(v.hugs?.length||0)+'</td><td>'+(v.isCrisis?'<span class="badge badge-cr">Crisis</span>':'')+'</td><td style="font-size:.75rem;color:var(--tx3)">'+esc(v.city||'—')+'</td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(v.createdAt)+'</td><td><button class="ab ab-del" onclick="deleteVent(\''+v._id+'\')">Delete</button></td></tr>';});
+    html+='</tbody></table>';el.innerHTML=html;
   }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
-async function deleteVent(id){
-  showConfirm('🗑️','Delete this vent?','Cannot be undone.',async()=>{
-    const r=await af('/api/vents/'+id,{method:'DELETE'});
-    toast(r.ok?'🗑️ Vent deleted':'❌ Failed: '+r.status);
-    if(r.ok)loadVents();
-  });
-}
+function deleteVent(id){showConfirm('🗑️','Delete this vent?','Cannot be undone.',async()=>{const r=await af('/api/vents/'+id,{method:'DELETE'});toast(r.ok?'🗑️ Vent deleted':'❌ Failed: '+r.status);if(r.ok)loadVents();});}
 
 // ── REPORTS ───────────────────────────────────────────────────
 async function loadReports(){
   const el=q('reports-table');el.innerHTML='<div class="spin"></div>';
   try{
-    const r=await af('/api/admin/reports');
-    if(!r.ok)throw new Error('Failed: '+r.status);
-    const d=await r.json();
-    const reports=(d.reports||d||[]);
-    const badge=q('reports-badge');
-    if(badge)badge.style.display=reports.length>0?'inline':'none';
+    const r=await af('/api/admin/reports');if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();const reports=d.reports||d||[];
+    const badge=q('reports-badge');if(badge)badge.style.display=reports.length>0?'inline':'none';
     if(!reports.length){el.innerHTML='<div class="empty">No open reports ✅</div>';return;}
     let html='<table><thead><tr><th>Type</th><th>Reason</th><th>Reporter</th><th>Content</th><th>Time</th><th>Action</th></tr></thead><tbody>';
-    reports.forEach(rep=>{
-      html+='<tr>';
-      html+='<td><span class="badge badge-g">'+esc(rep.type||'post')+'</span></td>';
-      html+='<td style="color:var(--tx2)">'+esc(rep.reason||'—')+'</td>';
-      html+='<td style="font-size:.75rem;color:var(--tx3)">'+esc(rep.reporterName||'Anonymous')+'</td>';
-      html+='<td style="max-width:200px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((rep.content||'').substring(0,60))+'</div></td>';
-      html+='<td style="font-size:.7rem;color:var(--tx3)">'+(rep.createdAt?timeAgo(rep.createdAt):'')+'</td>';
-      html+='<td><div class="actions"><button class="ab ab-show" onclick="resolveReport(\''+rep._id+'\')">Resolve</button>';
-      if(rep.postId)html+='<button class="ab ab-del" onclick="deletePost(\''+rep.postId+'\')">Del Post</button>';
-      html+='</div></td>';
-      html+='</tr>';
-    });
-    html+='</tbody></table>';
-    el.innerHTML=html;
+    reports.forEach(rep=>{html+='<tr><td><span class="badge badge-g">'+esc(rep.type||'post')+'</span></td><td style="color:var(--tx2)">'+esc(rep.reason||'—')+'</td><td style="font-size:.75rem;color:var(--tx3)">'+esc(rep.reporterName||'Anonymous')+'</td><td style="max-width:200px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((rep.content||'').substring(0,60))+'</div></td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(rep.createdAt)+'</td><td><div class="actions"><button class="ab ab-show" onclick="resolveReport(\''+rep._id+'\')">Resolve</button>'+(rep.postId?'<button class="ab ab-del" onclick="deletePost(\''+rep.postId+'\')">Del Post</button>':'')+'</div></td></tr>';});
+    html+='</tbody></table>';el.innerHTML=html;
   }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
-async function resolveReport(id){
-  const r=await af('/api/admin/reports/'+id+'/resolve',{method:'POST'});
-  toast(r.ok?'✅ Report resolved':'❌ Failed');
-  if(r.ok)loadReports();
-}
+async function resolveReport(id){const r=await af('/api/admin/reports/'+id+'/resolve',{method:'POST'});toast(r.ok?'✅ Resolved':'❌ Failed');if(r.ok)loadReports();}
 
 // ── CRISIS ────────────────────────────────────────────────────
 async function loadCrisis(){
   const el=q('crisis-table');el.innerHTML='<div class="spin"></div>';
   try{
-    const r=await af('/api/admin/posts?crisis=true&limit=50');
-    if(!r.ok)throw new Error('Failed: '+r.status);
-    const d=await r.json();
-    const posts=d.posts||d||[];
-    if(!posts.length){el.innerHTML='<div class="empty" style="color:var(--tl)">&#10003; No crisis posts right now</div>';return;}
+    const r=await af('/api/admin/posts?crisis=true&limit=50');if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();const posts=d.posts||d||[];
+    if(!posts.length){el.innerHTML='<div class="empty" style="color:var(--tl)">✓ No crisis posts right now</div>';return;}
     let html='<table><thead><tr><th>Author</th><th>Caption</th><th>Emotion</th><th>Posted</th><th>Actions</th></tr></thead><tbody>';
-    posts.forEach(p=>{
-      html+='<tr class="crisis-row">';
-      html+='<td style="font-weight:600">'+esc(p.authorName||'Anonymous')+'</td>';
-      html+='<td><div style="max-width:350px;color:var(--tx2);white-space:pre-wrap;font-size:.82rem;line-height:1.5">'+esc((p.caption||'').substring(0,200))+'</div></td>';
-      html+='<td><span class="badge badge-v">'+esc(p.emotion||'—')+'</span></td>';
-      html+='<td style="font-size:.7rem;color:var(--tx3)">'+(p.createdAt?timeAgo(p.createdAt):'')+'</td>';
-      html+='<td><div class="actions"><button class="ab ab-hide" onclick="hidePost(\''+p._id+'\')">Hide</button><button class="ab ab-del" onclick="deletePost(\''+p._id+'\')">Delete</button></div></td>';
-      html+='</tr>';
-    });
-    html+='</tbody></table>';
-    el.innerHTML=html;
+    posts.forEach(p=>{html+='<tr class="crisis-row"><td style="font-weight:600">'+esc(p.authorName||'Anonymous')+'</td><td><div style="max-width:350px;color:var(--tx2);white-space:pre-wrap;font-size:.82rem;line-height:1.5">'+esc((p.caption||'').substring(0,200))+'</div></td><td><span class="badge badge-v">'+esc(p.emotion||'—')+'</span></td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(p.createdAt)+'</td><td><div class="actions"><button class="ab ab-hide" onclick="hidePost(\''+p._id+'\')">Hide</button><button class="ab ab-del" onclick="deletePost(\''+p._id+'\')">Delete</button></div></td></tr>';});
+    html+='</tbody></table>';el.innerHTML=html;
   }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
 
@@ -1234,36 +683,19 @@ async function loadCrisis(){
 async function loadWhisperChains(){
   const el=q('whisper-content');el.innerHTML='<div class="spin"></div>';
   try{
-    const r=await af('/api/special/admin/whisper');
-    if(!r.ok)throw new Error('Special routes not loaded');
-    const chains=await r.json();
-    if(!chains.length){el.innerHTML='<div class="empty">No whisper chains yet</div>';return;}
-    el.innerHTML=chains.map(c=>`
-      <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <span class="badge ${c.isComplete?'badge-lm':'badge-g'}">${c.isComplete?'Complete':'In Progress'}</span>
-          <span style="font-size:.75rem;color:var(--tx3)">${(c.lines||[]).length}/5 lines · ${c.createdAt?timeAgo(c.createdAt):''}</span>
-          <button class="ab ab-del" style="margin-left:auto" onclick="hideWhisperChain('${c._id}')">Remove</button>
-        </div>
-        ${(c.lines||[]).map((l,i)=>'<div style="padding:8px 12px;background:var(--bg3);border-radius:8px;margin-bottom:6px;font-size:.85rem;color:var(--tx2)"><span style="color:var(--tx3);font-size:.7rem;margin-right:8px">Line '+(i+1)+'</span>'+esc(l.text)+'</div>').join('')}
-      </div>`).join('');
+    const r=await af('/api/special/admin/whisper');if(!r.ok)throw new Error('Special routes not loaded ('+r.status+')');
+    const chains=await r.json();if(!chains.length){el.innerHTML='<div class="empty">No whisper chains yet</div>';return;}
+    el.innerHTML=chains.map(c=>'<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span class="badge '+(c.isComplete?'badge-lm':'badge-g')+'">'+(c.isComplete?'Complete':'In Progress')+'</span><span style="font-size:.75rem;color:var(--tx3)">'+(c.lines||[]).length+'/5 lines · '+timeAgo(c.createdAt)+'</span><button class="ab ab-del" style="margin-left:auto" onclick="hideWhisperChain(\''+c._id+'\')">Remove</button></div>'+(c.lines||[]).map((l,i)=>'<div style="padding:8px 12px;background:var(--bg3);border-radius:8px;margin-bottom:6px;font-size:.85rem;color:var(--tx2)"><span style="color:var(--tx3);font-size:.7rem;margin-right:8px">Line '+(i+1)+'</span>'+esc(l.text)+'</div>').join('')+'</div>').join('');
   }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
-async function hideWhisperChain(id){
-  showConfirm('🗑️','Remove this chain?','It will be hidden from all users.',async()=>{
-    const r=await af('/api/special/admin/whisper/'+id,{method:'DELETE'});
-    toast(r.ok?'Removed':'Failed');if(r.ok)loadWhisperChains();
-  });
-}
+function hideWhisperChain(id){showConfirm('🗑️','Remove this chain?','It will be hidden from all users.',async()=>{const r=await af('/api/special/admin/whisper/'+id,{method:'DELETE'});toast(r.ok?'Removed':'Failed');if(r.ok)loadWhisperChains();});}
 
 // ── GRATITUDE BOMBS ───────────────────────────────────────────
 async function loadGratitude(){
   const el=q('gratitude-content');el.innerHTML='<div class="spin"></div>';
   try{
-    const r=await af('/api/special/admin/gratitude');
-    if(!r.ok)throw new Error('Special routes not loaded');
-    const d=await r.json();
-    const bombs=d.bombs||[];
+    const r=await af('/api/special/admin/gratitude');if(!r.ok)throw new Error('Special routes not loaded ('+r.status+')');
+    const d=await r.json();const bombs=d.bombs||[];
     if(!bombs.length){el.innerHTML='<div class="empty">No gratitude bombs sent yet</div>';return;}
     el.innerHTML='<div style="margin-bottom:12px;color:var(--tx3);font-size:.82rem">'+num(d.total||bombs.length)+' total gratitude bombs sent</div>'+
       '<table><thead><tr><th>From</th><th>To Post</th><th>Message</th><th>When</th></tr></thead><tbody>'+
@@ -1276,47 +708,32 @@ async function loadGratitude(){
 async function loadMoods(){
   const el=q('moods-content');el.innerHTML='<div class="spin"></div>';
   try{
-    const r=await af('/api/moods/pulse');
-    if(!r.ok)throw new Error('Failed: '+r.status);
+    const r=await af('/api/moods/pulse');if(!r.ok)throw new Error('Failed: '+r.status);
     const cities=await r.json();
-    const EMO_COLORS={happy:'#52B788',sad:'#7B5EA7',anxious:'#FF4D6D',lonely:'#C4A8FF',grateful:'#00C9A7',inspired:'#F4A261',hopeful:'#5CB8E4',angry:'#FF6B6B',neutral:'#888'};
     el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">'+
-      cities.map(c=>'<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px">'+
-        '<div style="font-size:.85rem;font-weight:700;margin-bottom:10px">'+esc(c.city||'Unknown')+'</div>'+
-        (c.breakdown||[]).slice(0,5).map(e=>'<div class="emo-row"><div class="emo-label">'+esc(e.emotion)+'</div><div class="emo-track"><div class="emo-fill" style="width:'+Math.round(e.count/(c.total||1)*100)+'%;background:'+(EMO_COLORS[e.emotion]||'#888')+'"></div></div><div class="emo-pct">'+e.count+'</div></div>').join('')+
-        '</div>').join('')+
+      cities.map(c=>'<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px"><div style="font-size:.85rem;font-weight:700;margin-bottom:10px">'+esc(c.city||'Unknown')+'</div>'+(c.breakdown||[]).slice(0,5).map(e=>'<div class="emo-row"><div class="emo-label">'+esc(e.emotion)+'</div><div class="emo-track"><div class="emo-fill" style="width:'+Math.round(e.count/(c.total||1)*100)+'%;background:'+(EMO_COLORS[e.emotion]||'#888')+'"></div></div><div class="emo-pct">'+e.count+'</div></div>').join('')+'</div>').join('')+
       '</div>';
   }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
 
 // ── EXPORTS ───────────────────────────────────────────────────
 async function dlExport(type){
-  const btn=event.currentTarget;btn.style.opacity='.5';
   try{
-    const r=await af('/api/admin/export/'+type);
-    if(!r.ok)throw new Error('Failed: '+r.status);
-    const blob=await r.blob();
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download='annomuss_'+type+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
-    URL.revokeObjectURL(url);
-    logExport(type);toast('&#11015; Downloading '+type+' data...');
+    const r=await af('/api/admin/export/'+type);if(!r.ok)throw new Error('Failed: '+r.status);
+    const blob=await r.blob();const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='annomuss_'+type+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(url);
+    logExport(type);toast('⬇️ Downloading '+type+'...');
   }catch(e){toast('Export failed: '+e.message);}
-  finally{btn.style.opacity='1';}
 }
 async function dlEmotionExport(){
-  const r=await af('/api/emotion/export');
-  if(!r.ok){toast('Emotion export not available');return;}
-  const blob=await r.blob();
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='annomuss_emotion_intel_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
-  URL.revokeObjectURL(url);
-  logExport('emotion-intel');toast('&#11015; Downloading emotion intelligence data...');
+  try{
+    const r=await af('/api/emotion/export');if(!r.ok){toast('Emotion export not available');return;}
+    const blob=await r.blob();const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='annomuss_emotion_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(url);
+    logExport('emotion-intel');toast('⬇️ Downloading emotion intelligence...');
+  }catch(e){toast('Failed: '+e.message);}
 }
-function logExport(type){
-  exportLog.push({type,time:new Date().toLocaleTimeString()});
-  const el=q('export-log');if(!el)return;
-  el.innerHTML=exportLog.map(e=>'<div>'+e.time+' — exported <strong>'+e.type+'</strong></div>').reverse().join('');
-}
+function logExport(type){exportLog.push({type,time:new Date().toLocaleTimeString()});const el=q('export-log');if(el)el.innerHTML=exportLog.map(e=>'<div>'+e.time+' — exported <strong>'+e.type+'</strong></div>').reverse().join('');}
 </script>
 </body>
 </html>

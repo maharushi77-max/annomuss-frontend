@@ -1663,7 +1663,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <button class="nb on" id="nb-feed" onclick="goPage('feed')"><span class="nb-i">🏠</span><span>Feed</span></button>
   <button class="nb" id="nb-explore" onclick="goPage('explore')"><span class="nb-i">🔍</span><span>Explore</span></button>
   <button class="nb" onclick="openCompose('post')"><div class="nb-fab">✏️</div></button>
-  <button class="nb" id="nb-am3" onclick="open3amRoom()"><span class="nb-i">🌙<span class="am3-live"></span></span><span>3am</span></button>
+  <button class="nb" id="nb-connect" onclick="goPage('connect')"><span class="nb-i">💬<span class="am3-live" id="rc-live-dot" style="display:none"></span></span><span>Chat</span></button>
   <button class="nb" id="nb-profile" onclick="goPage('profile')"><span class="nb-i">🎭</span><span>Me</span></button>
 </nav>
 </div>
@@ -1854,8 +1854,15 @@ function applyUser(){
 function goPage(n){
   // Tap feed while on feed = scroll to top + refresh
   if(currentPage===n&&n==='feed'){
-    const fl=q('feed-list');if(fl)fl.scrollTo({top:0,behavior:'smooth'});
-    setTimeout(()=>loadFeed(true),300);
+    // Scroll both the page wrapper and inner list to top
+    const pg=q('pg-feed');if(pg)pg.scrollTop=0;
+    const fl=q('feed-list');
+    if(fl){
+      fl.scrollTo({top:0,behavior:'smooth'});
+      // Also scroll the window in case page uses body scroll
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    setTimeout(()=>loadFeed(true),350);
     return;
   }
   if(currentPage===n)return;
@@ -1869,8 +1876,10 @@ function goPage(n){
   if(n==='social'){socTab('inbox',null);const badge=q('notif-badge');if(badge)badge.style.display='none';}
   if(n==='profile'){applyUser();profileTab('posts',q('pt-posts'));}
   if(n==='explore')loadExplore();
+  if(n==='connect'){rcSetState('idle');}
   // scroll page back to top when switching
   if(pg)pg.scrollTop=0;
+  window.scrollTo(0,0);
 }
 
 /* ═══════════ FEED ═══════════ */
@@ -2925,7 +2934,8 @@ async function submitPost(){
     if(!q('ctxt').value.trim()){toast('Write your poll question ✏️');return;}
     if(!opt1||!opt2){toast('Add at least 2 poll options');return;}
   } else if(compType==='voice'){
-    if(!audioBlob&&!mediaUrl){toast('Record a voice note first 🎙️');return;}
+    if(!audioBlob&&!mediaUrl){toast('🎙️ Tap the microphone button to record first');return;}
+    if(audioBlob&&audioBlob.size===0){toast('Recording was empty — try again');audioBlob=null;return;}
   } else {
     if(!cap&&!mediaUrl){toast('Write something first ✏️');return;}
   }
@@ -2950,8 +2960,9 @@ async function submitPost(){
     if(compType==='voice'&&audioBlob&&!mediaUrl){
       btn.textContent='Uploading voice...';
       const fd=new FormData();
-      const ext=audioBlob.type.includes('mp4')?'mp4':'webm';
-      fd.append('file',new File([audioBlob],`voice.${ext}`,{type:audioBlob.type}));
+      const ext=audioBlob.type.includes('mp4')?'mp4':audioBlob.type.includes('ogg')?'ogg':'webm';
+      const safeType=audioBlob.type||'audio/webm';
+      fd.append('file',new File([audioBlob],`voice_${Date.now()}.${ext}`,{type:safeType}));
       const tk=getToken();
       const up=await fetch(`${API}/api/upload`,{method:'POST',headers:{Authorization:`Bearer ${tk}`},body:fd});
       if(!up.ok){toast('Voice upload failed — try again');btn.disabled=false;btn.textContent='Post';return;}
@@ -3476,18 +3487,24 @@ function initSocket(){
   socket.on('rchat-typing-stop',()=>q('rc-typing').classList.remove('on'));
 
   socket.on('rchat-partner-left',(d)=>{
-    const msg=d?.message||"This stranger has gone. What they heard from you was real.";
+    const msg=d?.message||"This stranger has left the conversation.";
     rcAddMsg(msg,'sys');
     q('rc-typing').classList.remove('on');
     stopCRing();stopDeepTalk();
-    rcSetState('idle');
-    // Auto-navigate back to feed after delay
-    if(d?.autoNav){
-      const delay=d.autoNavDelay||3500;
-      setTimeout(()=>{
-        rcAddMsg('Returning you to the feed...','sys');
-        setTimeout(()=>{goPage('feed');},1200);
-      },delay-1200);
+    rcRoom=null;rcState='idle';
+    // Show "Find Another" option — don't auto navigate, let user decide
+    const msgs=q('rc-msgs');
+    if(msgs){
+      const exitDiv=document.createElement('div');
+      exitDiv.style.cssText='text-align:center;padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:10px';
+      exitDiv.innerHTML=
+        '<div style="font-size:.78rem;color:var(--tx3);line-height:1.7">'+msg+'</div>'+
+        '<div style="display:flex;gap:8px;justify-content:center">'+
+          '<button onclick="rcStart()" style="background:var(--v);color:#fff;border:none;border-radius:100px;padding:9px 20px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:var(--fD)">🔀 Find Another</button>'+
+          '<button onclick="goPage(\'feed\')" style="background:var(--bg2);color:var(--tx2);border:1px solid var(--bd);border-radius:100px;padding:9px 20px;font-size:.82rem;cursor:pointer;font-family:var(--fD)">Back to Feed</button>'+
+        '</div>';
+      msgs.appendChild(exitDiv);
+      msgs.scrollTop=msgs.scrollHeight;
     }
   });
 
@@ -4723,7 +4740,7 @@ async function doSave(id,el){
 ═══════════════════════════════════════════════ */
 async function doPollVote(postId,optionId,el){
   try{
-    const r=await api(`/api/posts/${postId}/poll-vote`,{method:'POST',body:JSON.stringify({optionId})});
+    const r=await api(`/api/posts/${postId}/vote`,{method:'POST',body:JSON.stringify({optionId})});
     const d=await r.json();
     // Re-render the poll in-place
     const card=document.querySelector(`.card[data-id="${postId}"]`);
@@ -5220,12 +5237,25 @@ function checkReferral(){
 let pwaPrompt=null;
 
 window.addEventListener('beforeinstallprompt',(e)=>{
-  e.preventDefault();
+  e.preventDefault(); // MUST be first — prevents auto-banner (causes console warning)
   pwaPrompt=e;
-  // Show install banner after 30s if user hasn't dismissed it
-  setTimeout(showPWABanner, 30000);
+  window._pwaPrompt=e;
+  // Don't auto-show — only show when user taps Install in menu
+  // Track page views: show hint after 3 visits
+  const v=(parseInt(localStorage.getItem('ann_pv')||'0'))+1;
+  localStorage.setItem('ann_pv',String(v));
+  if(v>=3){const btn=q('install-app-btn');if(btn)btn.style.display='flex';}
 });
 
+function doInstallApp(){
+  if(!pwaPrompt&&!window._pwaPrompt){toast('Open this site in Chrome or Safari to install');return;}
+  const p=pwaPrompt||window._pwaPrompt;
+  p.prompt();
+  p.userChoice.then(r=>{
+    if(r.outcome==='accepted'){toast('✅ Installing annomuss...');pwaPrompt=null;window._pwaPrompt=null;}
+    else{toast('You can install later from the menu');}
+  });
+}
 function showPWABanner(){
   if(!pwaPrompt)return;
   if(localStorage.getItem('ann_pwa_dismissed'))return;

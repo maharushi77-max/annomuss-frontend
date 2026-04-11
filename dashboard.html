@@ -534,7 +534,37 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 .am3-locked{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:60px 32px;text-align:center}
 .am3-lock-icon{font-size:4rem;margin-bottom:20px}
 .am3-lock-title{font-family:var(--fD);font-size:1.2rem;color:rgba(196,168,255,.7);margin-bottom:10px}
-.am3-lock-sub{font-size:.83rem;color:rgba(152,150,184,.5);line-height:1.75;max-width:260px}@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.am3-lock-sub{font-size:.83rem;color:rgba(152,150,184,.5);line-height:1.75;max-width:260px}
+/* ── Gen Z Micro-interactions ── */
+.post-card{transition:transform .18s ease,box-shadow .18s ease}
+.post-card:active{transform:scale(.992)}
+.pak{transition:transform .2s cubic-bezier(.34,1.56,.64,1),color .15s;user-select:none}
+.pak:active{transform:scale(.82)}
+.pak.liked span:first-child,.pak.saved span:first-child{animation:heartBeat .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes heartBeat{0%{transform:scale(1)}30%{transform:scale(1.45)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+.nb{transition:transform .15s cubic-bezier(.34,1.56,.64,1),color .15s}
+.nb:active{transform:scale(.88)}
+.nb.on .nb-i{animation:navPop .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes navPop{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
+.feat-card-animate{animation:featureCardIn .4s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes featureCardIn{from{opacity:0;transform:scale(.85) translateY(8px)}to{opacity:1;transform:none}}
+.post-card{animation:postSlideIn .3s ease both}
+@keyframes postSlideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.rb{transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .15s}
+.rb:active{transform:scale(.82)}
+.rb.on{animation:reactPop .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes reactPop{0%{transform:scale(1)}40%{transform:scale(1.4)}70%{transform:scale(.95)}100%{transform:scale(1)}}
+.btn-v,.btn-primary{transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .15s}
+.btn-v:active,.btn-primary:active{transform:scale(.95)}
+/* Staggered feed cards */
+.post-card:nth-child(1){animation-delay:.02s}
+.post-card:nth-child(2){animation-delay:.05s}
+.post-card:nth-child(3){animation-delay:.08s}
+.post-card:nth-child(4){animation-delay:.11s}
+.post-card:nth-child(5){animation-delay:.14s}
+/* Floating particles on like */
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(.5)}}
+.float-particle{position:fixed;pointer-events:none;font-size:1.2rem;animation:floatUp .8s ease forwards;z-index:9999}@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 .am3-timer{font-size:1.5rem;font-family:var(--fM);color:rgba(196,168,255,.9);margin-top:14px}
 
 /* ══ TIME CAPSULE ══ */
@@ -1062,7 +1092,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   </div>
 
   <!-- MIDNIGHT BANNER -->
-  <div class="midnight-banner" id="midnight-banner" onclick="filterEmo('midnight',null)">
+  <div class="midnight-banner" id="midnight-banner" onclick="open3amRoom()" style="cursor:pointer">
     <div class="midnight-orb">🌙</div>
     <div>
       <div style="font-family:var(--fD);font-weight:700;font-size:.9rem;color:var(--v3)">Midnight Mode</div>
@@ -1137,10 +1167,10 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--tl)">Vent Board</div>
       <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4">Let it all out</div>
     </div>
-    <div onclick="openMoodRooms()" style="flex:0 0 auto;padding:11px 14px;background:rgba(244,162,97,.07);border:1px solid rgba(244,162,97,.16);border-radius:13px;cursor:pointer;width:130px">
-      <div style="font-size:1.3rem;margin-bottom:4px">🌊</div>
-      <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--go)">Mood Rooms</div>
-      <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4">Find your vibe</div>
+    <div onclick="open3amRoom()" id="feat-3am" style="flex:0 0 auto;padding:11px 14px;background:rgba(196,168,255,.07);border:1px solid rgba(196,168,255,.2);border-radius:13px;cursor:pointer;width:130px;position:relative;overflow:hidden">
+      <div style="font-size:1.3rem;margin-bottom:4px">🌙</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--v3)">3AM Room</div>
+      <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4" id="feat-3am-sub">11pm–4am only</div>
     </div>
   </div>
 
@@ -2042,7 +2072,7 @@ function renderPost(p){
       </div>
       <button style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:.9rem" onclick="ctxMenu(event,'${p._id}',${isOwn},'${esc(author)}','${esc(av)}','${p.authorId||p._authorId||''}')">⋯</button>
     </div>
-    ${cap}${media}${pollHtml}${voiceHtml}${reacts}
+    ${cap}${media}${pollHtml}${voiceHtml}
     <div class="pa" id="pa-${p._id}">
       <div class="pak ${liked?'liked':''}" onclick="doLike('${p._id}',this)" id="lb-${p._id}" title="${liked?'This resonated with me':'This resonated with me'}">
         <span>${liked?'❤️':'🤍'}</span><span id="lc-${p._id}" style="font-size:.72rem">${(p.likes||[]).length>0?(p.likes||[]).length:''}</span>
@@ -4153,6 +4183,12 @@ function open3amRoom(){
   overlay.classList.add('on');generate3amStars();haptic('medium');sound('am3');
   document.body.classList.add('am3-active');
   const h=new Date().getHours(),isOpen=h>=23||h<4;
+  // Update 3AM feature card
+  const feat3am=q('feat-3am-sub');
+  if(feat3am){
+    if(isOpen){feat3am.textContent='Open now — tap to join!';}
+    else{const hUntil=h<23?(23-h):0;feat3am.textContent=hUntil>0?'Opens in '+hUntil+'h':'Opens at 11pm';}
+  }
   q('am3-locked').style.display=isOpen?'none':'flex';
   q('am3-open').style.display=isOpen?'flex':'none';
   if(isOpen){
@@ -4609,7 +4645,7 @@ function sharePost(id){openShareSheet(id,'');}
 ═══════════════════════════════════════════════ */
 let searchPostDeb2=null;
 
-function openSearch(){q('search-overlay')?.classList.add('on');setTimeout(()=>q('so-inp')?.focus(),120);}
+function openSearch(){q('search-overlay')?.classList.add('on');showSearchSuggestions();setTimeout(()=>q('so-inp')?.focus(),120);}
 function closeSearch(){
   q('search-overlay')?.classList.remove('on');
   if(q('so-inp'))q('so-inp').value='';
@@ -4618,10 +4654,25 @@ function closeSearch(){
 
 function searchHashtag(tag){openSearch();const inp=q('so-inp');if(inp){inp.value='#'+tag;doPostSearch('#'+tag);}}
 
+function showSearchSuggestions(){
+  const trending=['#lonely','#3am','#anxious','#grateful','#confession','#unsent','#overthinking','#healing','#midnight','#vent'];
+  const moods=['lonely','anxious','happy','sad','inspired','grateful','angry','numb'];
+  q('so-results').innerHTML=
+    '<div style="padding:16px 20px">'+
+      '<div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);margin-bottom:10px">Trending hashtags</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px">'+
+        trending.map(t=>'<span onclick="doPostSearch(\'' + t + '\')" style="padding:6px 12px;background:rgba(123,94,167,.12);border:1px solid rgba(196,168,255,.2);border-radius:100px;font-size:.8rem;color:var(--v3);cursor:pointer">'+t+'</span>').join('')+
+      '</div>'+
+      '<div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);margin-bottom:10px">Browse by mood</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:6px">'+
+        moods.map(m=>{const EMO={lonely:'💙',anxious:'😰',happy:'😊',sad:'😔',inspired:'✨',grateful:'🙏',angry:'😤',numb:'😶'};return '<span onclick="doPostSearch(\'' + m + '\')" style="padding:7px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:100px;font-size:.82rem;color:var(--tx2);cursor:pointer">'+(EMO[m]||'')+'\xA0'+m+'</span>';}).join('')+
+      '</div>'+
+    '</div>';
+}
 function doPostSearch(raw){
   clearTimeout(searchPostDeb2);
   const q2=raw.trim();
-  if(!q2){q('so-results').innerHTML='<div style="padding:40px 24px;text-align:center;color:var(--tx3);font-size:.88rem">Search for posts, confessions, or #hashtags</div>';return;}
+  if(!q2){showSearchSuggestions();return;}
   q('so-results').innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
   searchPostDeb2=setTimeout(async()=>{
     try{

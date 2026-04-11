@@ -534,7 +534,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 .am3-locked{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:60px 32px;text-align:center}
 .am3-lock-icon{font-size:4rem;margin-bottom:20px}
 .am3-lock-title{font-family:var(--fD);font-size:1.2rem;color:rgba(196,168,255,.7);margin-bottom:10px}
-.am3-lock-sub{font-size:.83rem;color:rgba(152,150,184,.5);line-height:1.75;max-width:260px}
+.am3-lock-sub{font-size:.83rem;color:rgba(152,150,184,.5);line-height:1.75;max-width:260px}@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 .am3-timer{font-size:1.5rem;font-family:var(--fM);color:rgba(196,168,255,.9);margin-top:14px}
 
 /* ══ TIME CAPSULE ══ */
@@ -1550,6 +1550,27 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   </div>
   <!-- Open state (11pm–4am) -->
   <div class="am3-content" id="am3-open" style="display:none">
+    <!-- Room selection -->
+    <div id="am3-selection" style="width:100%;max-width:380px">
+      <div style="font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(196,168,255,.5);margin-bottom:16px;text-align:center">What are you feeling right now?</div>
+      <div id="am3-room-picker"></div>
+    </div>
+    <!-- Chat view (shown after joining a room) -->
+    <div id="am3-chat-view" style="width:100%;max-width:380px;display:none;flex-direction:column;height:70vh">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div id="am3-room-header" style="font-size:.9rem;font-weight:700;color:rgba(196,168,255,.9)">Room</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span id="am3-room-count" style="font-size:.72rem;color:rgba(152,150,184,.5)"></span>
+          <button onclick="window._am3CurrentMood=null;q('am3-selection').style.display='block';q('am3-chat-view').style.display='none'" style="background:none;border:none;color:rgba(152,150,184,.4);font-size:.75rem;cursor:pointer">← Back</button>
+        </div>
+      </div>
+      <div id="am3-room-chat" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:4px"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <input id="am3-msg-input" type="text" maxlength="350" placeholder="Say something..." onkeydown="if(event.key==='Enter')sendAm3Message()" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(196,168,255,.2);border-radius:100px;padding:10px 16px;color:#fff;font-size:.85rem;outline:none"/>
+        <button onclick="sendAm3Message()" style="background:rgba(123,94,167,.3);border:1px solid rgba(196,168,255,.3);color:#c4a8ff;border-radius:100px;padding:10px 16px;font-size:.85rem;cursor:pointer;white-space:nowrap">Send</button>
+      </div>
+      <div style="font-size:.65rem;color:rgba(152,150,184,.3);text-align:center;margin-top:8px">Anonymous · Deleted at 4am · Max 1 msg per 90s</div>
+    </div>
     <div class="am3-moon">🌙</div>
     <div class="am3-title">You made it to the 3am Room</div>
     <div class="am3-sub">This is the only place where 3am thoughts belong. No judgment. No performance. Just what you're actually carrying tonight.</div>
@@ -1831,6 +1852,12 @@ function applyUser(){
 
 /* nav */
 function goPage(n){
+  // Tap feed while on feed = scroll to top + refresh
+  if(currentPage===n&&n==='feed'){
+    const fl=q('feed-list');if(fl)fl.scrollTo({top:0,behavior:'smooth'});
+    setTimeout(()=>loadFeed(true),300);
+    return;
+  }
   if(currentPage===n)return;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
@@ -1902,6 +1929,8 @@ function loadMore(){if(!feedDone)loadFeed(false);}
 function filterEmo(emo,el){feedEmo=emo;document.querySelectorAll('.ec').forEach(c=>c.classList.remove('on'));if(el)el.classList.add('on');loadFeed();}
 
 function renderPost(p){
+  // Guard: never render the same post twice
+  if(document.getElementById('post-'+p._id)) return document.getElementById('post-'+p._id).outerHTML;
   const me    = user?.anonymousName || '';
   const myId  = String(user?._id || user?.id || '');
   // Use server-provided isOwn if available (most reliable)
@@ -2005,7 +2034,7 @@ function renderPost(p){
       <button style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:.9rem" onclick="ctxMenu(event,'${p._id}',${isOwn},'${esc(author)}','${esc(av)}','${p.authorId||p._authorId||''}')">⋯</button>
     </div>
     ${cap}${media}${pollHtml}${voiceHtml}${reacts}
-    <div class="pa">
+    <div class="pa" id="pa-${p._id}">
       <div class="pak ${liked?'liked':''}" onclick="doLike('${p._id}',this)" id="lb-${p._id}" title="${liked?'This resonated with me':'This resonated with me'}">
         <span>${liked?'❤️':'🤍'}</span><span id="lc-${p._id}" style="font-size:.72rem">${(p.likes||[]).length>0?(p.likes||[]).length:''}</span>
       </div>
@@ -2452,7 +2481,7 @@ function ctxMenu(e, id, isOwn, authorName, authorEmoji, authorId){
         }
         toast('🗑️ Post deleted');
         const sp=q('s-posts');if(sp)sp.textContent=Math.max(0,parseInt(sp.textContent||0)-1);
-        if(user)user.postCount=Math.max(0,(user.postCount||1)-1);
+        if(user)user.postCount=Math.max(0,(user.postCount||0)-1);q('s-posts').textContent=Math.max(0,(parseInt(q('s-posts')?.textContent||'0')-1));
       }).catch(()=>{
         toast('Delete failed ❌ — check connection');
         loadFeed();
@@ -2833,15 +2862,46 @@ function onCompose(el){
 }
 
 /* file upload */
+// ── Image compression helper ──────────────────────────────────
+async function compressImage(file){
+  if(!file.type.startsWith('image/'))return file;
+  try{
+    // Dynamic import of browser-image-compression
+    // Install: npm install browser-image-compression (or CDN)
+    const mod=await import('https://unpkg.com/browser-image-compression@2.0.2/dist/browser-image-compression.js').catch(()=>null);
+    const compress=mod?.default||window.imageCompression;
+    if(!compress)return file;
+    const compressed=await compress(file,{maxSizeMB:.8,maxWidthOrHeight:1200,useWebWorker:true,fileType:'image/webp'});
+    console.log('Compressed:',Math.round(file.size/1024),'KB →',Math.round(compressed.size/1024),'KB');
+    return compressed;
+  }catch(e){
+    console.warn('Compression skipped:',e.message);
+    return file; // fallback to original
+  }
+}
+
 async function handleUpload(inp){
-  const file=inp.files[0];if(!file)return;
-  const isVid=file.type.startsWith('video/');
+  const rawFile=inp.files[0];if(!rawFile)return;
+  const isVid=rawFile.type.startsWith('video/');
   const pv=q('mprev'),pi=q('mprev-img'),pv2=q('mprev-vid');
-  const url=URL.createObjectURL(file);
+
+  // Show preview immediately from original
+  const previewUrl=URL.createObjectURL(rawFile);
   pi.style.display=isVid?'none':'block';pv2.style.display=isVid?'block':'none';
-  if(isVid)pv2.src=url;else pi.src=url;
+  if(isVid)pv2.src=previewUrl;else pi.src=previewUrl;
   pv.style.display='block';
+
   const bar=q('up-bar'),fill=q('up-fill');bar.style.display='block';fill.style.width='5%';
+
+  // Compress image before upload
+  let file=rawFile;
+  if(!isVid&&rawFile.size>200*1024){ // Only compress if >200KB
+    toast('Optimising image...');
+    fill.style.width='15%';
+    file=await compressImage(rawFile);
+    fill.style.width='20%';
+  }
+
   try{
     const fd=new FormData();fd.append('file',file);
     fill.style.width='30%';
@@ -2871,6 +2931,15 @@ async function submitPost(){
   }
 
   if(!compEmo&&cap){const d=detectEmo(cap);if(d)compEmo=d;}
+  // MANDATORY MOOD: warn user if still no emotion selected
+  if(!compEmo&&compType!=='diary'&&compType!=='voice'){
+    // Highlight the mood picker
+    const emoWrap=document.querySelector('.emo-btns');
+    if(emoWrap){emoWrap.style.animation='none';requestAnimationFrame(()=>{emoWrap.style.animation='shake .4s ease';});}
+    toast('How are you feeling? Pick a mood first 💙');
+    q('post-btn').disabled=false;q('post-btn').textContent='Post';
+    return;
+  }
   const btn=q('post-btn');btn.disabled=true;btn.textContent='Posting...';
 
   try{
@@ -3407,9 +3476,19 @@ function initSocket(){
   socket.on('rchat-typing-stop',()=>q('rc-typing').classList.remove('on'));
 
   socket.on('rchat-partner-left',(d)=>{
-    rcAddMsg(d?.message||'👋 Stranger left. Find another?','sys');
+    const msg=d?.message||"This stranger has gone. What they heard from you was real.";
+    rcAddMsg(msg,'sys');
     q('rc-typing').classList.remove('on');
     stopCRing();stopDeepTalk();
+    rcSetState('idle');
+    // Auto-navigate back to feed after delay
+    if(d?.autoNav){
+      const delay=d.autoNavDelay||3500;
+      setTimeout(()=>{
+        rcAddMsg('Returning you to the feed...','sys');
+        setTimeout(()=>{goPage('feed');},1200);
+      },delay-1200);
+    }
   });
 
   socket.on('rchat-time-up',(d)=>{
@@ -3501,6 +3580,32 @@ function initSocket(){
     showReactionMoment('gratitude');
     haptic('celebration');
   });
+
+  // ── 3AM Mood Rooms ─────────────────────────────────────────
+  socket.on('am3-counts',({counts,isOpen,total})=>{
+    const liveEl=document.querySelector('.am3-live');
+    if(liveEl){liveEl.style.display=(isOpen&&total>0)?'block':'none';}
+    window._am3Counts=counts;window._am3IsOpen=isOpen;
+    renderAm3RoomSelection(counts,isOpen);
+  });
+  socket.on('am3-joined',({mood,count,message})=>{
+    const el=q('am3-room-chat'),header=q('am3-room-header');
+    if(el)el.innerHTML='';
+    if(header){const NAMES={lonely:'Midnight Lonely',anxious:"Can't Sleep Anxious",angry:'3am Angry',grateful:'Late Night Grateful',numb:'3am Numb',hopeful:'3am Hopeful'};header.textContent=NAMES[mood]||mood+' room';}
+    addAm3Msg(message,'sys');
+    addAm3Msg(count+' people feeling the same right now.','sys');
+    q('am3-selection')&&(q('am3-selection').style.display='none');
+    q('am3-chat-view')&&(q('am3-chat-view').style.display='flex');
+    window._am3CurrentMood=mood;
+  });
+  socket.on('am3-message',({text})=>{ addAm3Msg(text,'them');sound('like'); });
+  socket.on('am3-count',({mood,count})=>{ if(window._am3CurrentMood===mood){const el=q('am3-room-count');if(el)el.textContent=count+' people';} });
+  socket.on('am3-someone-joined',({count})=>{ const el=q('am3-room-count');if(el)el.textContent=count+' people'; });
+  socket.on('am3-rate-limited',({message})=>{ toast(message); });
+  socket.on('am3-closed',({message})=>{ addAm3Msg(message,'sys');setTimeout(()=>{close3amRoom();toast('🌙 3AM rooms closed for tonight');},2000); });
+  socket.on('am3-room-full',({suggestion})=>{ toast('Room full — '+suggestion); });
+  socket.on('am3-all-closed',()=>{ window._am3IsOpen=false;const el=document.querySelector('.am3-live');if(el)el.style.display='none'; });
+  socket.emit('get-am3-counts');
 
   // Silent room live count
   socket.on('silent-room-count',(d)=>{
@@ -4029,16 +4134,77 @@ let am3CurrentPrompt='';
 function open3amRoom(){
   const overlay=q('am3-overlay');if(!overlay)return;
   overlay.classList.add('on');generate3amStars();haptic('medium');sound('am3');
-  const h=new Date().getHours(),isOpen=h>=23||h<=4;
+  document.body.classList.add('am3-active');
+  const h=new Date().getHours(),isOpen=h>=23||h<4;
   q('am3-locked').style.display=isOpen?'none':'flex';
   q('am3-open').style.display=isOpen?'flex':'none';
   if(isOpen){
-    am3CurrentPrompt=AM3_PROMPTS[Math.floor(Date.now()/86400000)%AM3_PROMPTS.length];
-    const pt=q('am3-prompt-text');if(pt)pt.textContent=am3CurrentPrompt;
-    load3amFeed();document.body.classList.add('am3-active');
+    // Request live room counts from socket
+    if(socket)socket.emit('get-am3-counts');
+    // If not in a room yet, show selection; else show chat
+    if(!window._am3CurrentMood){
+      q('am3-selection')&&(q('am3-selection').style.display='block');
+      q('am3-chat-view')&&(q('am3-chat-view').style.display='none');
+    }
   } else {update3amCountdown();setInterval(update3amCountdown,60000);}
 }
-function close3amRoom(){q('am3-overlay')?.classList.remove('on');document.body.classList.remove('am3-active');}
+function close3amRoom(){
+  q('am3-overlay')?.classList.remove('on');
+  document.body.classList.remove('am3-active');
+  // Leave socket room if in one
+  if(window._am3CurrentMood&&socket){
+    socket.emit('leave-am3-room',{mood:window._am3CurrentMood});
+    window._am3CurrentMood=null;
+  }
+}
+
+function joinAm3Room(mood){
+  if(!socket)return;
+  window._am3CurrentMood=mood;
+  socket.emit('join-am3-room',{mood});
+  haptic('medium');sound('am3');
+}
+
+function sendAm3Message(){
+  const inp=q('am3-msg-input');if(!inp||!inp.value.trim())return;
+  const text=inp.value.trim();
+  if(!window._am3CurrentMood){toast('Join a room first');return;}
+  socket.emit('am3-message',{mood:window._am3CurrentMood,text});
+  addAm3Msg(text,'me');
+  inp.value='';
+}
+
+function addAm3Msg(text,from){
+  const el=q('am3-room-chat');if(!el)return;
+  const div=document.createElement('div');
+  div.style.cssText='padding:8px 12px;border-radius:12px;margin-bottom:8px;max-width:85%;font-size:.85rem;line-height:1.55;animation:cardIn .3s ease;'+(from==='me'?'background:rgba(123,94,167,.2);align-self:flex-end;':from==='sys'?'color:rgba(152,150,184,.6);font-style:italic;font-size:.78rem;align-self:center;text-align:center;':'background:rgba(255,255,255,.05);align-self:flex-start;');
+  div.textContent=text;el.appendChild(div);
+  el.scrollTop=el.scrollHeight;
+}
+
+function renderAm3RoomSelection(counts,isOpen){
+  const el=q('am3-room-picker');if(!el)return;
+  const h=new Date().getHours();
+  const open=isOpen||(h>=23||h<4);
+  if(!open){el.innerHTML='<div class="am3-lock-title" style="color:rgba(196,168,255,.5)">Opens at 11pm tonight</div>';return;}
+  const rooms=[
+    {mood:'lonely',  icon:'🌙',name:'Midnight Lonely',   color:'rgba(123,94,167,.15)',border:'rgba(123,94,167,.3)'},
+    {mood:'anxious', icon:'🌊',name:"Can't Sleep Anxious",color:'rgba(0,150,180,.12)',border:'rgba(0,150,180,.3)'},
+    {mood:'angry',   icon:'🔥',name:'3am Angry',          color:'rgba(244,80,40,.1)', border:'rgba(244,80,40,.25)'},
+    {mood:'grateful',icon:'⭐',name:'Late Night Grateful',color:'rgba(200,170,0,.1)', border:'rgba(200,170,0,.25)'},
+    {mood:'numb',    icon:'😶',name:'3am Numb',            color:'rgba(80,80,100,.12)',border:'rgba(80,80,100,.3)'},
+    {mood:'hopeful', icon:'🌱',name:'3am Hopeful',         color:'rgba(50,180,100,.1)',border:'rgba(50,180,100,.25)'},
+  ];
+  el.innerHTML=rooms.map(r=>{
+    const cnt=(counts&&counts[r.mood])||0;
+    return '<div onclick="joinAm3Room(''+r.mood+'')" style="padding:14px 16px;background:'+r.color+';border:1px solid '+r.border+';border-radius:14px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:transform .15s" onmousedown="this.style.transform='scale(.97)'" onmouseup="this.style.transform=''">'
+      +'<span style="font-size:1.4rem">'+r.icon+'</span>'
+      +'<div style="flex:1"><div style="font-size:.88rem;font-weight:700;color:rgba(196,168,255,.9)">'+r.name+'</div>'
+      +'<div style="font-size:.72rem;color:rgba(152,150,184,.6);margin-top:2px">'+(cnt>0?cnt+' people inside':'Be the first tonight')+'</div></div>'
+      +'<span style="font-size:.7rem;color:rgba(152,150,184,.4)">'+(cnt>0?'→':'')+'</span>'
+      +'</div>';
+  }).join('');
+}
 function generate3amStars(){
   const c=q('am3-stars');if(!c)return;c.innerHTML='';
   for(let i=0;i<80;i++){const s=document.createElement('div');s.className='am3-star';const sz=Math.random()*2.5+0.5;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;animation-delay:${Math.random()*3}s`;c.appendChild(s);}
@@ -5224,10 +5390,10 @@ async function main(){
 
   // ── NEW EXTRAORDINARY FEATURES ──
   // Permission to Feel — show after 1s so feed loads first
-  setTimeout(showPermissionToFeel, 1200);
+  // Permission to Feel removed — breaks emotional tone of platform
 
   // Memory Mirror — check if we have diary entries from a year ago
-  setTimeout(checkMemoryMirror, 1500);
+  // Memory Mirror removed — app <1yr old, no data to show
 
   // 3am Room — show live indicator if it's open right now
   const h=new Date().getHours();

@@ -174,7 +174,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .fld:focus{border-color:var(--v)}
 .fld::placeholder{color:var(--tx3)}
 /* ── COMPOSE OVERLAY ── */
-#compose{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column}
+#compose{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column}#compose.on::before{content:"";position:fixed;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(123,94,167,.6),rgba(155,77,202,.4),transparent);z-index:1}
 #compose.on{display:flex;animation:pgIn .2s ease}
 .ch{display:flex;align-items:center;padding:12px 18px;border-bottom:1px solid var(--bd);gap:12px}
 .cav{width:38px;height:38px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.1rem;border:1px solid var(--bd2)}
@@ -867,11 +867,13 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 
 <!-- COMPOSE OVERLAY -->
 <div id="compose">
-  <div class="ch">
-    <button class="ico-btn" onclick="closeCompose()">✕</button>
-    <div class="cav" id="cav">🎭</div>
-    <div style="flex:1;font-family:var(--fD);font-weight:600;font-size:.9rem" id="cname">Anonymous</div>
-    <button class="btn btn-v btn-sm" id="post-btn" onclick="submitPost()">Post</button>
+  <div class="ch" style="background:linear-gradient(180deg,rgba(123,94,167,.08),transparent)">
+    <button class="ico-btn" onclick="closeCompose()" style="color:var(--tx3)">✕</button>
+    <div style="flex:1;text-align:center">
+      <div style="font-family:var(--fD);font-weight:700;font-size:.88rem;color:var(--vl)" id="cname">Write anonymously</div>
+      <div style="font-size:.65rem;color:rgba(196,168,255,.4);margin-top:1px">No one knows it's you</div>
+    </div>
+    <button class="btn btn-v btn-sm" id="post-btn" onclick="submitPost()" style="background:linear-gradient(135deg,#7B5EA7,#9B4DCA);box-shadow:0 4px 20px rgba(123,94,167,.45);font-weight:700;letter-spacing:.02em">Post ✦</button>
   </div>
   <div class="cbody">
     <div class="type-row" id="type-row">
@@ -881,12 +883,13 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div class="tc" onclick="selType('unsent',this)">💌 Unsent</div>
       <div class="tc" onclick="selType('diary',this)">📖 Diary</div>
       <div class="tc" onclick="selType('poll',this)">📊 Poll</div>
-      <div class="tc" onclick="selType('voice',this)">🎙️ Voice</div>
+    </div>
+    <div style="text-align:center;margin:6px 0 12px">
+      <div style="font-size:.7rem;color:rgba(196,168,255,.35);letter-spacing:.08em;text-transform:uppercase">Your story. Your truth. No name. No judgment.</div>
     </div>
     <div class="notice blue" id="story-notice">📸 Stories auto-delete in 24 hours and appear in the top strip.</div>
     <div class="notice pink" id="unsent-notice">💌 Write what you wish you could say. Posts anonymously — no one knows it's you.</div>
     <div class="notice" id="poll-notice" style="display:none;background:rgba(123,94,167,.08);border-color:rgba(123,94,167,.2);color:var(--v3)">📊 Everyone votes anonymously. Results shown after voting.</div>
-    <div class="notice" id="voice-notice" style="display:none;background:rgba(255,77,109,.06);border-color:rgba(255,77,109,.18);color:var(--pk)">🎙️ Your voice is anonymously distorted. No one knows it's you.</div>
     <div class="diary-notice" id="diary-notice">📖 Dear Diary is completely private. Only you can see this. Never shown to anyone. Ever.</div>
     <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-family:var(--fD)">How are you feeling?</div>
     <div class="emo-hint" id="emo-hint">✨ <span id="emo-hint-txt">We sensed your mood</span> — tap to confirm</div>
@@ -900,9 +903,10 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div class="eb" onclick="selEmo('angry',this)">😤 Angry</div>
       <div class="eb" onclick="selEmo('inspired',this)">✨ Inspired</div>
     </div>
-    <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;font-family:var(--fD)" id="cap-lbl">What do you want to say?</div>
+    <div style="font-size:.68rem;font-weight:700;color:rgba(196,168,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;font-family:var(--fD)" id="cap-lbl">Your unheard story</div>
+    
     <textarea class="fld" id="ctxt" rows="5" maxlength="1000" placeholder="Say something real..." oninput="onCompose(this)"></textarea>
-    <div id="compose-warmth" style="font-size:.73rem;color:rgba(196,168,255,.45);text-align:center;padding:4px 0 2px;line-height:1.7">This space is safe. Your words are heard. Someone out there needs to read exactly what you write.</div>
+    <div id="compose-warmth" style="font-size:.72rem;color:rgba(196,168,255,.35);text-align:center;padding:6px 8px 2px;line-height:1.75;font-style:italic">Someone out there is lying awake tonight needing to read exactly what you are about to write.</div>
     <div class="char-c" id="char-c">0 / 1000</div>
 
     <!-- POLL OPTIONS — shown when type=poll -->
@@ -923,28 +927,14 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       </div>
     </div>
 
-    <!-- VOICE RECORDER — shown when type=voice -->
-    <div id="voice-fields" style="display:none;margin-top:10px">
-      <div id="voice-record-btn" class="voice-record" onclick="toggleRecording()">
-        <div id="voice-rec-icon" style="font-size:2rem;margin-bottom:6px">🎙️</div>
-        <div id="voice-rec-label" style="font-family:var(--fD);font-weight:700;font-size:.88rem;color:var(--tx2)">Tap to record</div>
-        <div style="font-size:.72rem;color:var(--tx3);margin-top:3px">Max 60 seconds · voice anonymised</div>
-      </div>
-      <div class="rec-timer" id="rec-timer" style="display:none">0:00</div>
-      <div id="voice-preview" style="display:none" class="voice-player">
-        <button class="vp-btn" onclick="playVoicePreview()">▶</button>
-        <div class="vp-wave" id="vp-wave"></div>
-        <div class="vp-dur" id="vp-dur">0:00</div>
-        <button onclick="clearRecording()" style="color:var(--tx3);font-size:.8rem;padding:4px;background:none;border:none;cursor:pointer">✕</button>
-      </div>
-    </div>
+
 
     <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;font-family:var(--fD)" id="media-lbl">Add Photo / Video</div>
     <div class="media-area" id="media-area" onclick="document.getElementById('file-in').click()">
       <div style="font-size:2rem;margin-bottom:4px">📷</div>
       <div style="font-size:.82rem;color:var(--tx2);font-family:var(--fD);font-weight:600">Tap to add photo or video</div>
       <div style="font-size:.72rem;color:var(--tx3);margin-top:3px">JPG, PNG, GIF, MP4 · Max 50MB</div>
-      <input type="file" id="file-in" accept="image/*,video/*,audio/*" onchange="handleUpload(this)" style="display:none"/>
+      <input type="file" id="file-in" accept="image/*,video/*" onchange="handleUpload(this)" style="display:none"/>
     </div>
     <div class="media-preview" id="mprev">
       <img id="mprev-img" src="" alt=""/>
@@ -1096,8 +1086,8 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <div class="midnight-banner" id="midnight-banner" onclick="open3amRoom()" style="cursor:pointer">
     <div class="midnight-orb">🌙</div>
     <div>
-      <div style="font-family:var(--fD);font-weight:700;font-size:.9rem;color:var(--v3)">Midnight Mode</div>
-      <div style="font-size:.76rem;color:var(--tx2);margin-top:2px">Late night thoughts. Auto-delete at dawn.</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.9rem;color:var(--v3)">3AM Room is open 🌙</div>
+      <div style="font-size:.76rem;color:var(--tx2);margin-top:2px">Tap to enter · Closes at 4am · Anonymous</div>
     </div>
     <span style="color:var(--tx3);margin-left:auto;font-size:1.1rem">›</span>
   </div>
@@ -1168,7 +1158,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--tl)">Vent Board</div>
       <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4">Let it all out</div>
     </div>
-    <div onclick="open3amRoom()" id="feat-3am" style="flex:0 0 auto;padding:11px 14px;background:rgba(196,168,255,.07);border:1px solid rgba(196,168,255,.2);border-radius:13px;cursor:pointer;width:130px;position:relative;overflow:hidden">
+    <div onclick="open3amRoom()" id="feat-3am" style="flex:0 0 auto;padding:11px 14px;background:rgba(196,168,255,.07);border:1px solid rgba(196,168,255,.2);border-radius:13px;cursor:pointer;width:130px;position:relative;overflow:hidden;transition:all .2s" onmousedown="this.style.transform='scale(.96)'" onmouseup="this.style.transform=''">
       <div style="font-size:1.3rem;margin-bottom:4px">🌙</div>
       <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;color:var(--v3)">3AM Room</div>
       <div style="font-size:.68rem;color:var(--tx3);margin-top:2px;line-height:1.4" id="feat-3am-sub">11pm–4am only</div>
@@ -1196,10 +1186,12 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 
 <!-- CONNECT (RANDOM CHAT) -->
 <div class="page" id="pg-connect">
-  <div class="tb"><div class="tb-title">⚡ Connect</div>
-    <div style="display:flex;align-items:center;gap:5px">
-      <div class="pulse-dot"></div>
-      <span id="con-online" style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">0 online</span>
+  <div class="tb" style="border-bottom:1px solid rgba(92,232,255,.1)">
+    <div style="font-family:var(--fD);font-weight:700;font-size:.95rem">⚡ Connect</div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:6px;background:rgba(0,201,167,.08);border:1px solid rgba(0,201,167,.2);border-radius:100px;padding:4px 10px">
+      <div class="pulse-dot" style="width:6px;height:6px;background:var(--tl)"></div>
+      <span id="con-online" style="font-size:.72rem;color:var(--tl);font-family:var(--fM);font-weight:700">0 online</span>
     </div>
   </div>
   <div class="rchat-wrap" id="rchat-wrap">
@@ -1212,9 +1204,42 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       </div>
       <div class="orb-label">Random Chat</div>
       <div class="orb-sub">Matched by emotion + location. Genuinely private. 5 minutes of real connection.</div>
-      <div class="online-pill"><div class="pulse-dot" style="width:5px;height:5px"></div><span class="online-num" id="rc-count">0</span>&nbsp;online now</div>
-      <div style="margin:8px 0 0;padding:10px 14px;background:rgba(123,94,167,.07);border:1px solid rgba(196,168,255,.12);border-radius:12px;text-align:center">
-        <div style="font-size:.78rem;color:rgba(196,168,255,.7);line-height:1.7">These are our people. Our Indian brothers, sisters, and friends.<br>Take care of them with your love. Be kind. Be real.</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0 4px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#00C9A7;animation:pdot 1.5s ease-in-out infinite"></div>
+        <span style="font-family:var(--fM);font-size:.82rem;color:var(--tl);font-weight:700" id="rc-count">0</span>
+        <span style="font-size:.78rem;color:rgba(0,201,167,.6)">people online right now</span>
+      </div>
+      <div style="margin:8px 0 4px;padding:0 2px">
+        <div style="background:linear-gradient(135deg,rgba(123,94,167,.1),rgba(255,77,109,.06));border:1px solid rgba(196,168,255,.18);border-radius:16px;padding:14px 16px;text-align:center;position:relative;overflow:hidden">
+          <!-- decorative top line -->
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,rgba(196,168,255,0),rgba(196,168,255,.4),rgba(255,133,161,.3),rgba(196,168,255,0))"></div>
+
+          <div style="font-size:1.1rem;margin-bottom:8px;letter-spacing:2px">🤝 🧡 🌙</div>
+
+          <div style="font-family:var(--fD);font-size:.82rem;font-weight:700;color:rgba(196,168,255,.95);margin-bottom:8px;letter-spacing:.02em">
+            Yahan jo bhi aa raha hai — woh akela hai.
+          </div>
+
+          <div style="font-size:.77rem;color:rgba(196,168,255,.65);line-height:1.85;margin-bottom:10px">
+            Koi apni family ko nahi bol sakta.<br>
+            Koi dost ko samjha nahi sakta.<br>
+            Koi raat ko sote waqt sirf sochta rehta hai.<br><br>
+            <span style="color:rgba(255,133,161,.8);font-weight:600">Woh tere paas aaya hai.</span>
+          </div>
+
+          <div style="height:1px;background:rgba(196,168,255,.1);margin:10px 0"></div>
+
+          <div style="font-size:.75rem;color:rgba(196,168,255,.5);line-height:1.8;font-style:italic">
+            "Yeh sab hamare apne log hain —<br>
+            hamare Indian bhai, behan, aur dost.<br>
+            Unhe apne pyaar se sambhalo.<br>
+            <span style="color:rgba(0,201,167,.7);font-style:normal;font-weight:600">Ek dost ban, judge mat ban.</span>"
+          </div>
+
+          <div style="margin-top:10px;font-size:.7rem;color:rgba(255,133,161,.4);letter-spacing:.06em;text-transform:uppercase">
+            Be the person they needed tonight
+          </div>
+        </div>
       </div>
 
       <div class="pref-section">
@@ -2842,7 +2867,7 @@ function openCompose(type='post'){
   q('story-notice').style.display='none';q('unsent-notice').style.display='none';
   document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));
   document.querySelectorAll('.eb').forEach(b=>b.classList.remove('on'));
-  const typeMap={post:0,story:1,confession:2,unsent:3,diary:4,poll:5,voice:6};
+  const typeMap={post:0,story:1,confession:2,unsent:3,diary:4,poll:5};
   const chips=document.querySelectorAll('.tc');chips[typeMap[type]??0]?.classList.add('on');
   selType(type, chips[typeMap[type]??0]);
   if(type==='story')q('story-notice').style.display='block';
@@ -2857,7 +2882,6 @@ function openCompose(type='post'){
     confession: 'Your secret is safe here. No names. No judgment. Just truth...',
     unsent:     'The message you never sent... say it here, anonymously',
     diary:      'Dear diary... only you will ever read this',
-    voice:      'Speak from the heart — your voice, your words, anonymous',
   };
   q('ctxt').placeholder=phs[type]||phs.post;
   // Auto-detect session emotion
@@ -2878,12 +2902,11 @@ function selType(t,el){
   document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));
   el?.classList.add('on');
   // Notices
-  const notices=['story-notice','unsent-notice','poll-notice','voice-notice','diary-notice'];
+  const notices=['story-notice','unsent-notice','poll-notice','diary-notice'];
   notices.forEach(n=>{ const el=q(n); if(el) el.style.display='none'; });
   if(t==='story')   q('story-notice').style.display='block';
   if(t==='unsent')  q('unsent-notice').style.display='block';
   if(t==='poll')    q('poll-notice').style.display='block';
-  if(t==='voice')   q('voice-notice').style.display='block';
   if(t==='diary')   q('diary-notice').style.display='block';
   // Fields
   if(q('poll-fields'))  q('poll-fields').style.display  = t==='poll'  ?'block':'none';
@@ -3000,16 +3023,13 @@ async function submitPost(){
     const opt2=q('poll-opt-2')?.value?.trim();
     if(!q('ctxt').value.trim()){toast('Write your poll question ✏️');return;}
     if(!opt1||!opt2){toast('Add at least 2 poll options');return;}
-  } else if(compType==='voice'){
-    if(!audioBlob&&!mediaUrl){toast('🎙️ Tap the microphone button to record first');return;}
-    if(audioBlob&&audioBlob.size===0){toast('Recording was empty — try again');audioBlob=null;return;}
   } else {
     if(!cap&&!mediaUrl){toast('Write something first ✏️');return;}
   }
 
   if(!compEmo&&cap){const d=detectEmo(cap);if(d)compEmo=d;}
   // MANDATORY MOOD: warn user if still no emotion selected
-  if(!compEmo&&compType!=='diary'&&compType!=='voice'){
+  if(!compEmo&&compType!=='diary'){
     // Highlight the mood picker
     const emoWrap=document.querySelector('.emo-btns');
     if(emoWrap){emoWrap.style.animation='none';requestAnimationFrame(()=>{emoWrap.style.animation='shake .4s ease';});}
@@ -3053,7 +3073,7 @@ async function submitPost(){
       emotion:    compEmo||undefined,
       mediaUrl:   finalMediaUrl||undefined,
       mediaType:  finalMediaType||undefined,
-      voiceDuration: compType==='voice'?recSecs:undefined,
+
       poll:       pollData||undefined,
     };
     if(compType==='story')body.expiresAt=new Date(Date.now()+24*60*60*1000).toISOString();

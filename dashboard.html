@@ -1209,37 +1209,8 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
         <span style="font-family:var(--fM);font-size:.82rem;color:var(--tl);font-weight:700" id="rc-count">0</span>
         <span style="font-size:.78rem;color:rgba(0,201,167,.6)">people online right now</span>
       </div>
-      <div style="margin:8px 0 4px;padding:0 2px">
-        <div style="background:linear-gradient(135deg,rgba(123,94,167,.1),rgba(255,77,109,.06));border:1px solid rgba(196,168,255,.18);border-radius:16px;padding:14px 16px;text-align:center;position:relative;overflow:hidden">
-          <!-- decorative top line -->
-          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,rgba(196,168,255,0),rgba(196,168,255,.4),rgba(255,133,161,.3),rgba(196,168,255,0))"></div>
-
-          <div style="font-size:1.1rem;margin-bottom:8px;letter-spacing:2px">🤝 🧡 🌙</div>
-
-          <div style="font-family:var(--fD);font-size:.82rem;font-weight:700;color:rgba(196,168,255,.95);margin-bottom:8px;letter-spacing:.02em">
-            Yahan jo bhi aa raha hai — woh akela hai.
-          </div>
-
-          <div style="font-size:.77rem;color:rgba(196,168,255,.65);line-height:1.85;margin-bottom:10px">
-            Koi apni family ko nahi bol sakta.<br>
-            Koi dost ko samjha nahi sakta.<br>
-            Koi raat ko sote waqt sirf sochta rehta hai.<br><br>
-            <span style="color:rgba(255,133,161,.8);font-weight:600">Woh tere paas aaya hai.</span>
-          </div>
-
-          <div style="height:1px;background:rgba(196,168,255,.1);margin:10px 0"></div>
-
-          <div style="font-size:.75rem;color:rgba(196,168,255,.5);line-height:1.8;font-style:italic">
-            "Yeh sab hamare apne log hain —<br>
-            hamare Indian bhai, behan, aur dost.<br>
-            Unhe apne pyaar se sambhalo.<br>
-            <span style="color:rgba(0,201,167,.7);font-style:normal;font-weight:600">Ek dost ban, judge mat ban.</span>"
-          </div>
-
-          <div style="margin-top:10px;font-size:.7rem;color:rgba(255,133,161,.4);letter-spacing:.06em;text-transform:uppercase">
-            Be the person they needed tonight
-          </div>
-        </div>
+      <div style="margin:10px 0 6px;padding:10px 14px;border-top:1px solid rgba(196,168,255,.08);border-bottom:1px solid rgba(196,168,255,.08);text-align:center">
+        <div style="font-size:.78rem;color:rgba(196,168,255,.45);font-style:italic;letter-spacing:.01em">Be the person you needed when you were lonely.</div>
       </div>
 
       <div class="pref-section">
@@ -1313,17 +1284,9 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div class="typing-row" id="rc-typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>
       <!-- input -->
       <div class="chat-foot">
-        <div id="rc-suggestions" style="display:flex;gap:6px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none">
-          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">What are you feeling?</button>
-          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">I am here to listen</button>
-          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">How was your day?</button>
-          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">Tell me something real</button>
-          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">What is on your mind?</button>
-          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">You are not alone</button>
-        </div>
         <input class="chat-inp" id="rc-inp" placeholder="Say something — they are listening" maxlength="500"
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();rcSend()}" oninput="rcTyping()"/>
-        <button class="send-btn" onclick="rcSend()">➤</button>
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();rcSend();return false;}" oninput="rcTyping()" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" enterkeyhint="send"/>
+        <button class="send-btn" onmousedown="event.preventDefault()" onclick="rcSend()">➤</button>
       </div>
       <!-- TIME UP overlay (inside rc-active) -->
       <div id="timeup-overlay">
@@ -1833,7 +1796,9 @@ function getRelatabilityLabel(post){
   return null;
 }
 function esc(t){return(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-const getToken=()=>localStorage.getItem('token');
+const TOKEN_KEY='ann_session_v1'; // versioned key — change to force re-login
+const getToken=()=>localStorage.getItem(TOKEN_KEY)||localStorage.getItem('token'); // fallback for old key
+const setToken=(t)=>{localStorage.setItem(TOKEN_KEY,t);localStorage.removeItem('token');}; // migrate old key
 
 async function api(path,opts={}){
   const t=getToken();
@@ -3460,7 +3425,17 @@ function showNoMatchOverlay(title, sub) {
 function rcSend(){
   const inp=q('rc-inp');const txt=inp.value.trim();
   if(!txt||!socket||rcState!=='active')return;
-  inp.value='';socket.emit('rchat-message',{roomId:rcRoom,text:txt});rcAddMsg(txt,'me');
+  inp.value='';
+  socket.emit('rchat-message',{roomId:rcRoom,text:txt});
+  rcAddMsg(txt,'me');
+  // Keep keyboard up on mobile — immediately re-focus the input
+  // requestAnimationFrame ensures DOM updates before focus
+  requestAnimationFrame(()=>{
+    inp.focus();
+    // Prevent page scroll-to-top on iOS when input refocuses
+    const msgs=q('rc-msgs');
+    if(msgs)msgs.scrollTop=msgs.scrollHeight;
+  });
 }
 
 function rcTyping(){
@@ -3743,7 +3718,7 @@ async function getLocation(){
 }
 
 /* ═══════════ LOGOUT ═══════════ */
-function doLogout(){if(!confirm('Log out?'))return;if(socket)socket.disconnect();localStorage.removeItem('token');localStorage.removeItem('user');location.href='/index.html';}
+function doLogout(){if(!confirm('Log out?'))return;if(socket)socket.disconnect();localStorage.removeItem(TOKEN_KEY);localStorage.removeItem('token');localStorage.removeItem('user');location.href='/index.html';}
 
 /* ═══════════════════════════════════════════════
    MIDNIGHT MODE

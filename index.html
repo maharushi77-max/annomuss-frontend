@@ -191,7 +191,7 @@ fetch(API+'/health',{method:'GET'}).catch(()=>{});
 (()=>{const c=q('canvas'),ctx=c.getContext('2d');const rs=()=>{c.width=innerWidth;c.height=innerHeight};rs();window.addEventListener('resize',rs);const pts=Array.from({length:45},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+.4,dx:(Math.random()-.5)*.22,dy:(Math.random()-.5)*.22,a:Math.random()*.25+.06,col:['rgba(123,94,167,','rgba(0,201,167,','rgba(255,77,109,'][Math.floor(Math.random()*3)]}));const draw=()=>{ctx.clearRect(0,0,c.width,c.height);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.col+p.a+')';ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>c.width)p.dx*=-1;if(p.y<0||p.y>c.height)p.dy*=-1;});requestAnimationFrame(draw);};draw();})();
 /* Auto-login — if token exists go straight to dashboard */
 (async()=>{
-  const tk=localStorage.getItem('token');
+  const TOKEN_KEY='ann_session_v1';const tk=localStorage.getItem(TOKEN_KEY)||localStorage.getItem('token');
   if(tk){
     try{
       const r=await fetch(API+'/api/users/me',{headers:{Authorization:'Bearer '+tk}});
@@ -206,7 +206,7 @@ fetch(API+'/health',{method:'GET'}).catch(()=>{});
         const body=await r.json().catch(()=>({}));
         const msg=(body.message||'').toLowerCase();
         if(msg.includes('invalid')||msg.includes('expired')||msg.includes('malformed')){
-          localStorage.removeItem('token');
+          localStorage.removeItem(TOKEN_KEY);localStorage.removeItem('token');
           localStorage.removeItem('user');
         } else {
           // Server returned 401 for another reason — still go to dashboard
@@ -284,7 +284,7 @@ async function doVerify(){
     const r=await fetch(API+'/api/auth/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,otp})});
     const d=await r.json();
     if(!r.ok){shakeOtp();clearOtp();throw new Error(d.message||'Verification failed');}
-    localStorage.setItem('token',d.token);localStorage.setItem('user',JSON.stringify(d.user));
+    localStorage.setItem(TOKEN_KEY,d.token);localStorage.setItem('user',JSON.stringify(d.user));
     // Process referral code if present
     const ref=localStorage.getItem('ann_ref')||new URLSearchParams(location.search).get('ref');
     if(ref&&d.isNew){

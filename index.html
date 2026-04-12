@@ -189,9 +189,12 @@ fetch(API+'/health',{method:'GET'}).catch(()=>{});
 
 /* Particles */
 (()=>{const c=q('canvas'),ctx=c.getContext('2d');const rs=()=>{c.width=innerWidth;c.height=innerHeight};rs();window.addEventListener('resize',rs);const pts=Array.from({length:45},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+.4,dx:(Math.random()-.5)*.22,dy:(Math.random()-.5)*.22,a:Math.random()*.25+.06,col:['rgba(123,94,167,','rgba(0,201,167,','rgba(255,77,109,'][Math.floor(Math.random()*3)]}));const draw=()=>{ctx.clearRect(0,0,c.width,c.height);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.col+p.a+')';ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>c.width)p.dx*=-1;if(p.y<0||p.y>c.height)p.dy*=-1;});requestAnimationFrame(draw);};draw();})();
+/* ── Token key — global so all functions can access it ── */
+const TOKEN_KEY='ann_session_v1';
+
 /* Auto-login — if token exists go straight to dashboard */
 (async()=>{
-  const TOKEN_KEY='ann_session_v1';const tk=localStorage.getItem(TOKEN_KEY)||localStorage.getItem('token');
+  const tk=localStorage.getItem(TOKEN_KEY)||localStorage.getItem('token');
   if(tk){
     try{
       const r=await fetch(API+'/api/users/me',{headers:{Authorization:'Bearer '+tk}});

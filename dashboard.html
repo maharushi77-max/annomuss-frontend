@@ -287,7 +287,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   border-top:1px solid var(--bd);background:var(--bg);flex-shrink:0}
 .chat-inp{flex:1;background:var(--bg2);border:1.5px solid var(--bd);border-radius:100px;
   padding:10px 18px;font-size:.9rem;color:var(--tx);transition:border-color .2s}
-.chat-inp:focus{border-color:var(--v)}
+.chat-inp:focus{border-color:var(--v)}.rc-chip{flex-shrink:0;padding:6px 12px;background:rgba(123,94,167,.12);border:1px solid rgba(196,168,255,.2);border-radius:100px;font-size:.74rem;color:var(--v3);cursor:pointer;white-space:nowrap;font-family:var(--fD);transition:background .15s}.rc-chip:hover{background:rgba(123,94,167,.22)}
 .send-btn{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--v),var(--cr));
   display:flex;align-items:center;justify-content:center;font-size:1rem;transition:transform .12s;
   flex-shrink:0;box-shadow:0 4px 12px rgba(123,94,167,.35)}
@@ -902,6 +902,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     </div>
     <div style="font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;font-family:var(--fD)" id="cap-lbl">What do you want to say?</div>
     <textarea class="fld" id="ctxt" rows="5" maxlength="1000" placeholder="Say something real..." oninput="onCompose(this)"></textarea>
+    <div id="compose-warmth" style="font-size:.73rem;color:rgba(196,168,255,.45);text-align:center;padding:4px 0 2px;line-height:1.7">This space is safe. Your words are heard. Someone out there needs to read exactly what you write.</div>
     <div class="char-c" id="char-c">0 / 1000</div>
 
     <!-- POLL OPTIONS — shown when type=poll -->
@@ -1212,6 +1213,9 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div class="orb-label">Random Chat</div>
       <div class="orb-sub">Matched by emotion + location. Genuinely private. 5 minutes of real connection.</div>
       <div class="online-pill"><div class="pulse-dot" style="width:5px;height:5px"></div><span class="online-num" id="rc-count">0</span>&nbsp;online now</div>
+      <div style="margin:8px 0 0;padding:10px 14px;background:rgba(123,94,167,.07);border:1px solid rgba(196,168,255,.12);border-radius:12px;text-align:center">
+        <div style="font-size:.78rem;color:rgba(196,168,255,.7);line-height:1.7">These are our people. Our Indian brothers, sisters, and friends.<br>Take care of them with your love. Be kind. Be real.</div>
+      </div>
 
       <div class="pref-section">
         <div class="pref-label">Gender preference</div>
@@ -1284,7 +1288,15 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div class="typing-row" id="rc-typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>
       <!-- input -->
       <div class="chat-foot">
-        <input class="chat-inp" id="rc-inp" placeholder="Say something kind..." maxlength="500"
+        <div id="rc-suggestions" style="display:flex;gap:6px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none">
+          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">What are you feeling?</button>
+          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">I am here to listen</button>
+          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">How was your day?</button>
+          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">Tell me something real</button>
+          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">What is on your mind?</button>
+          <button onclick="sendRcSuggestion(this.textContent)" class="rc-chip">You are not alone</button>
+        </div>
+        <input class="chat-inp" id="rc-inp" placeholder="Say something — they are listening" maxlength="500"
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();rcSend()}" oninput="rcTyping()"/>
         <button class="send-btn" onclick="rcSend()">➤</button>
       </div>
@@ -1422,6 +1434,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <!-- Profile tabs -->
   <div style="display:flex;border-bottom:1px solid var(--bd);margin-top:14px;padding:0 18px">
     <div class="ptab on" id="pt-posts" onclick="profileTab('posts',this)" style="flex:1;padding:10px 0;text-align:center;font-size:.73rem;font-weight:700;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fD);letter-spacing:.03em">📢 Posts</div>
+    <div class="ptab" id="pt-diary" onclick="profileTab('diary',this)" style="flex:1;padding:10px 0;text-align:center;font-size:.7rem;font-weight:700;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fD);letter-spacing:.03em">📖 Diary</div>
     <div class="ptab" id="pt-saved" onclick="profileTab('saved',this)" style="flex:1;padding:10px 0;text-align:center;font-size:.73rem;font-weight:700;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fD);letter-spacing:.03em">🔖 Saved</div>
     <div class="ptab" id="pt-menu" onclick="profileTab('menu',this)" style="flex:1;padding:10px 0;text-align:center;font-size:.73rem;font-weight:700;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fD);letter-spacing:.03em">☰ Menu</div>
   </div>
@@ -1434,6 +1447,19 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   <!-- Saved tab -->
   <div id="profile-saved" style="display:none">
     <div id="saved-feed" style="padding-top:8px"></div>
+  </div>
+
+  <!-- Diary tab -->
+  <div id="profile-diary" style="display:none;padding:16px 18px">
+    <div style="background:linear-gradient(135deg,rgba(244,162,97,.08),rgba(123,94,167,.06));border:1px solid rgba(244,162,97,.18);border-radius:18px;padding:16px 18px;margin-bottom:16px;text-align:center">
+      <div style="font-size:1.8rem;margin-bottom:6px">📖</div>
+      <div style="font-family:var(--fD);font-weight:700;font-size:.92rem;color:var(--go);margin-bottom:4px">Your Private Diary</div>
+      <div style="font-size:.76rem;color:var(--tx3);line-height:1.65">Only you can read this. Not stored on our servers. Not shared with anyone. Ever.</div>
+    </div>
+    <button onclick="openCompose('diary')" style="width:100%;padding:13px;background:rgba(244,162,97,.1);border:1px dashed rgba(244,162,97,.3);border-radius:14px;color:var(--go);font-family:var(--fD);font-weight:700;font-size:.88rem;cursor:pointer;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px">
+      ✍️ Write today's entry
+    </button>
+    <div id="diary-entries"></div>
   </div>
 
   <!-- Menu tab -->
@@ -1449,7 +1475,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <!-- Standard items -->
     <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);font-family:var(--fM);margin-bottom:8px;padding:0 2px">Your Space</div>
     <div class="pmi" onclick="location.href='/confessions.html'"><span style="font-size:1.1rem;width:22px">🤫</span><span style="flex:1;font-size:.88rem;font-weight:500">My Confessions</span><span style="color:var(--tx3)">›</span></div>
-    <div class="pmi" onclick="profileTab('posts',q('pt-posts'))"><span style="font-size:1.1rem;width:22px">📖</span><span style="flex:1;font-size:.88rem;font-weight:500">My Diary</span><span style="color:var(--tx3)">›</span></div>
+    <div class="pmi" onclick="profileTab('diary',q('pt-diary'))"><span style="font-size:1.1rem;width:22px">📖</span><span style="flex:1;font-size:.88rem;font-weight:500">My Diary</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="location.href='/badges.html'"><span style="font-size:1.1rem;width:22px">🏅</span><span style="flex:1;font-size:.88rem;font-weight:500">Badges & Rewards</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="showLeaderboard()"><span style="font-size:1.1rem;width:22px">🏆</span><span style="flex:1;font-size:.88rem;font-weight:500">Weekly Leaderboard</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="shareInvite()"><span style="font-size:1.1rem;width:22px">🎁</span><span style="flex:1;font-size:.88rem;font-weight:500">Invite Friends — earn 50 XP</span><span style="color:var(--v3)">Share</span></div>
@@ -2821,7 +2847,18 @@ function openCompose(type='post'){
   selType(type, chips[typeMap[type]??0]);
   if(type==='story')q('story-notice').style.display='block';
   if(type==='unsent')q('unsent-notice').style.display='block';
-  const phs={post:'Say something real...',story:'What\'s happening right now?',confession:'Your deepest truth... (no one will know)',unsent:'What do you wish you could say?'};
+  const HOUR=new Date().getHours();
+  const isLate=HOUR>=22||HOUR<=4;
+  const phs={
+    post: isLate
+      ? 'Write your unheard story... someone here is listening'
+      : 'Say what you could not say today... this is a safe space',
+    story:      "What's on your mind right now? Share it before it fades...",
+    confession: 'Your secret is safe here. No names. No judgment. Just truth...',
+    unsent:     'The message you never sent... say it here, anonymously',
+    diary:      'Dear diary... only you will ever read this',
+    voice:      'Speak from the heart — your voice, your words, anonymous',
+  };
   q('ctxt').placeholder=phs[type]||phs.post;
   // Auto-detect session emotion
   const h=new Date().getHours();let hint=null;
@@ -3413,6 +3450,17 @@ function rcTyping(){
   rcTypingTimeout=setTimeout(()=>{if(socket)socket.emit('rchat-typing-stop',{roomId:rcRoom});},1500);
 }
 
+function sendRcSuggestion(text){
+  const inp=q('rc-inp');
+  if(!inp)return;
+  inp.value=text;
+  inp.focus();
+  // auto-send after brief delay so user sees it
+  setTimeout(()=>{
+    const inp2=q('rc-inp');
+    if(inp2&&inp2.value===text)rcSend();
+  },400);
+}
 function rcAddMsg(txt,type){
   const box=q('rc-msgs');
   const div=document.createElement('div');div.className=`bubble ${type}`;
@@ -5121,11 +5169,13 @@ function loadNotifications(){
 function profileTab(tab, el){
   document.querySelectorAll('.ptab').forEach(t=>{t.classList.remove('on');t.style.color='var(--tx3)';t.style.borderBottomColor='transparent';});
   if(el){el.classList.add('on');el.style.color='var(--v3)';el.style.borderBottomColor='var(--v)';}
-  q('profile-posts').style.display = tab==='posts'?'block':'none';
-  q('profile-saved').style.display = tab==='saved'?'block':'none';
-  q('profile-menu').style.display  = tab==='menu' ?'block':'none';
+  q('profile-posts').style.display  = tab==='posts' ?'block':'none';
+  const diaryEl=q('profile-diary');if(diaryEl)diaryEl.style.display = tab==='diary' ?'block':'none';
+  q('profile-saved').style.display  = tab==='saved' ?'block':'none';
+  q('profile-menu').style.display   = tab==='menu'  ?'block':'none';
   if(tab==='posts') loadProfilePosts();
   if(tab==='saved') loadSavedPosts();
+  if(tab==='diary') loadDiaryInProfile();
 }
 
 async function loadProfilePosts(){

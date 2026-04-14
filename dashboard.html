@@ -1387,7 +1387,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 
 <!-- PROFILE -->
 <div class="page" id="pg-profile">
-  <div class="tb"><div class="tb-title">Profile</div><button class="ico-btn" onclick="location.href='/security.html'">⚙️</button></div>
+  <div class="tb"><div class="tb-title">Profile</div><button class="ico-btn" onclick="openSettings()">⚙️</button></div>
 
   <!-- Hero card -->
   <div style="padding:22px 18px 14px;text-align:center">
@@ -2788,15 +2788,64 @@ async function loadStoryViewers(postId){
 
 /* ═══════════ POST MODAL ═══════════ */
 async function openPModal(id){
-  currentPost=id;const m=q('pmodal');m.classList.add('on');document.body.style.overflow='hidden';
+  currentPost=id;
+  const m=q('pmodal');
+  m.classList.add('on');
+  document.body.style.overflow='hidden';
+
+  // ── Show post content cleanly ─────────────────────────────
+  const cl=q('comments-list');
+  const pc=q('pmodal-content');
+
+  // Try to get post data from feed card
   const card=document.querySelector(`.card[data-id="${id}"]`);
-  q('pmodal-content').innerHTML=card?card.outerHTML:'';
-  const cl=q('comments-list');cl.innerHTML='<div style="padding:16px;text-align:center"><div class="spin"></div></div>';
-  try{const r=await api(`/api/posts/${id}/comments`);const d=await r.json();const cs=Array.isArray(d)?d:(d.comments||[]);
-    if(!cs.length){cl.innerHTML='<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--tx3)">No comments yet</div>';return;}
-    cl.innerHTML=cs.map(c=>`<div style="padding:10px 0;border-bottom:1px solid var(--bd)"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span>${c.avatarEmoji||'🎭'}</span><b style="font-size:.82rem;font-family:var(--fD)">${esc(c.anonymousName||'Anonymous')}</b><span style="font-size:.7rem;color:var(--tx3)">${timeAgo(c.createdAt)}</span></div><div style="font-size:.875rem;padding-left:24px">${esc(c.text||'')}</div></div>`).join('');
-  }catch(e){cl.innerHTML='<div style="padding:16px;text-align:center;color:var(--tx3)">Couldn\'t load</div>';}
+  if(card){
+    // Show a clean caption + meta — not the full action-bar-heavy card
+    const caption=card.querySelector('.post-caption,.ptxt,[class*="caption"]');
+    const meta=card.querySelector('.post-meta,.pmeta');
+    const emoEl=card.querySelector('[class*="emo-pill"],[class*="mood"],[data-emotion]');
+    const captionText=caption?.textContent||card.querySelector('.card-body')?.textContent||'';
+    pc.innerHTML=`<div style="padding:14px 18px 8px;border-bottom:1px solid var(--bd)">
+      <div style="font-size:.93rem;line-height:1.6;color:var(--tx)">${esc(captionText.trim().substring(0,600))}</div>
+      <div style="font-size:.72rem;color:var(--tx3);margin-top:8px;font-family:var(--fD)">💬 Comments</div>
+    </div>`;
+  } else {
+    // Fetch post from API if card not in DOM
+    try{
+      const pr=await api(`/api/posts/${id}`);
+      const pd=await pr.json();
+      pc.innerHTML=`<div style="padding:14px 18px 8px;border-bottom:1px solid var(--bd)">
+        <div style="font-size:.93rem;line-height:1.6;color:var(--tx)">${esc((pd.caption||'').substring(0,600))}</div>
+        <div style="font-size:.72rem;color:var(--tx3);margin-top:8px;font-family:var(--fD)">💬 Comments</div>
+      </div>`;
+    }catch(_){pc.innerHTML='';}
+  }
+
+  // ── Load comments ─────────────────────────────────────────
+  cl.innerHTML='<div style="padding:16px;text-align:center"><div class="spin"></div></div>';
+  try{
+    const r=await api(`/api/posts/${id}/comments`);
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    const cs=Array.isArray(d)?d:(d.comments||[]);
+    if(!cs.length){
+      cl.innerHTML='<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--tx3)">No comments yet — be the first 💬</div>';
+      return;
+    }
+    cl.innerHTML=cs.map(cm=>`<div style="padding:10px 0;border-bottom:1px solid var(--bd)">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+        <span style="font-size:1rem">${cm.avatarEmoji||'🎭'}</span>
+        <b style="font-size:.82rem;font-family:var(--fD)">${esc(cm.anonymousName||'Anonymous')}</b>
+        <span style="font-size:.7rem;color:var(--tx3)">${timeAgo(cm.createdAt)}</span>
+      </div>
+      <div style="font-size:.875rem;padding-left:26px;color:var(--tx);line-height:1.5">${esc(cm.text||cm.content||'')}</div>
+    </div>`).join('');
+  }catch(e){
+    cl.innerHTML=`<div style="padding:16px;text-align:center;color:var(--tx3)">Couldn't load comments</div>`;
+    console.error('[openPModal] comments error:',e.message);
+  }
 }
+
 function closePModal(){q('pmodal').classList.remove('on');document.body.style.overflow='';currentPost=null;}
 async function submitComment(){
   if(!currentPost)return;
@@ -5221,6 +5270,26 @@ const _origApplyUser=typeof applyUser==='function'?applyUser:null;
    WEEKLY LEADERBOARD
 ═══════════════════════════════════════════════ */
 async function showLeaderboard(){
+  const overlay=q('leaderboard-overlay')||document.createElement('div');
+  overlay.id='leaderboard-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;animation:pgIn .25s ease';
+  overlay.onclick=(e)=>{if(e.target===overlay)overlay.remove();};
+  overlay.innerHTML='<div style="width:100%;max-width:420px;background:var(--bg1);border-radius:20px;padding:24px;max-height:80vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px"><div style="font-family:var(--fD);font-weight:700;font-size:1.1rem">🏆 Weekly Leaderboard</div><button onclick="this.closest('[id=leaderboard-overlay]').remove()" style="background:none;border:none;font-size:1.2rem;color:var(--tx3);cursor:pointer">✕</button></div><div id="lb-inner"><div class="spin"></div></div></div>';
+  document.body.appendChild(overlay);
+  try{
+    const r=await api('/api/posts/leaderboard');
+    const d=await r.json();
+    const lb=d.leaderboard||[];
+    const medals=['🥇','🥈','🥉'];
+    const myRank=lb.find(u=>u.isMe);
+    let html='';
+    if(myRank) html+=`<div style="padding:10px 14px;border-radius:12px;background:rgba(123,94,167,.15);border:1px solid var(--vb);margin-bottom:12px;font-size:.82rem;color:var(--v3);font-family:var(--fD)">You are #${myRank.rank} · ${myRank.xp} XP · Level ${myRank.level}</div>`;
+    html+=lb.slice(0,20).map((u,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd)"><div style="width:28px;text-align:center;font-size:${i<3?'1.2':'0.85'}rem">${i<3?medals[i]:'#'+(i+1)}</div><div style="font-size:1.2rem">${u.avatarEmoji||'🎭'}</div><div style="flex:1;min-width:0"><div style="font-family:var(--fD);font-weight:700;font-size:.85rem;${u.isMe?'color:var(--v3)':''}">${esc(u.anonymousName||'Anonymous')}${u.isMe?' (you)':''}</div><div style="font-size:.72rem;color:var(--tx3)">Level ${u.level||1} · ${u.streak||0}🔥 streak${u.city?' · '+u.city:''}</div></div><div style="font-family:var(--fM);font-weight:700;font-size:.88rem;color:var(--go)">${u.xp||0} XP</div></div>`).join('');
+    if(!lb.length) html='<div style="text-align:center;padding:24px;color:var(--tx3)">No data yet — start posting!</div>';
+    q('lb-inner').innerHTML=html;
+  }catch(e){q('lb-inner').innerHTML='<div style="text-align:center;color:var(--tx3)">Could not load</div>';}
+  return; // ── old code below replaced ──
+  // OLD_LEADERBOARD_START
   q('leaderboard-modal').style.display='flex';
   const list=q('leaderboard-list');
   list.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
@@ -5412,6 +5481,13 @@ async function awardXP(amount,reason='action'){
   if(fill)fill.style.width=`${user.xp%100}%`;
   if(lbl)lbl.textContent=`${user.xp} XP`;
   if(nxt)nxt.textContent=`${100-(user.xp%100)} XP to level up`;
+  // ── Save to backend (non-blocking) ──────────────────────────
+  api('/api/posts/xp',{method:'POST',body:JSON.stringify({amount,reason})})
+    .then(r=>r.json()).then(d=>{
+      if(d.xp!=null){user.xp=d.xp;user.level=d.level||newLevel;}
+      if(d.streak!=null){user.streak=d.streak;}
+      localStorage.setItem('user',JSON.stringify(user));
+    }).catch(()=>{});
   // Level up!
   if(newLevel>oldLevel){
     document.getElementById('levelup-title').textContent=`Level ${newLevel} 🎊`;
@@ -5496,6 +5572,28 @@ function sharePost(id){
 /* ═══════════════════════════════════════════════
    INIT — enhanced
 ═══════════════════════════════════════════════ */
+
+function openSettings(){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);backdrop-filter:blur(16px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;animation:pgIn .25s ease';
+  overlay.onclick=(e)=>{if(e.target===overlay)overlay.remove();};
+  overlay.innerHTML=`<div style="width:100%;max-width:380px;background:var(--bg1);border-radius:20px;padding:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-family:var(--fD);font-weight:700;font-size:1.05rem">⚙️ Settings</div>
+      <button onclick="this.closest('div[style]').parentElement.remove()" style="background:none;border:none;font-size:1.2rem;color:var(--tx3);cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-g" style="text-align:left;padding:12px 16px;border-radius:12px" onclick="this.closest('div[style]').parentElement.remove();goPage('profile');profileTab('menu',q('pt-menu'))">📋 Account settings</button>
+      <button class="btn btn-g" style="text-align:left;padding:12px 16px;border-radius:12px" onclick="this.closest('div[style]').parentElement.remove();openSearch()">🔍 Search</button>
+      <button class="btn btn-g" style="text-align:left;padding:12px 16px;border-radius:12px" onclick="this.closest('div[style]').parentElement.remove();showLeaderboard()">🏆 Leaderboard</button>
+      <button class="btn btn-g" style="text-align:left;padding:12px 16px;border-radius:12px" onclick="this.closest('div[style]').parentElement.remove();openPremium()">⭐ Annomuss Premium</button>
+      <div style="height:1px;background:var(--bd);margin:4px 0"></div>
+      <button class="btn" style="text-align:left;padding:12px 16px;border-radius:12px;color:var(--cr)" onclick="if(confirm('Log out of Annomuss?')){localStorage.clear();location.href='/';}">🚪 Log out</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
 async function main(){
   await initSession();
   checkMidnightMode();

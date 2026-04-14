@@ -562,15 +562,54 @@ function filterUsers(f,el){currentUserFilter=f;document.querySelectorAll('#tab-u
 function searchUsers(q2){renderUsers(filterUsersList(allUsers.filter(u=>(u.anonymousName||'').toLowerCase().includes(q2.toLowerCase())||(u.email||'').toLowerCase().includes(q2.toLowerCase()))));}
 function renderUsers(users){
   const el=q('users-table');if(!users.length){el.innerHTML='<div class="empty">No users found</div>';return;}
-  let html='<table><thead><tr><th>Avatar</th><th>Name</th><th>Email</th><th>Level</th><th>Streak</th><th>Posts</th><th>Top Emotion</th><th>City</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
+  let html='<table><thead><tr><th>Avatar</th><th>Name</th><th>Level/XP</th><th>Streak</th><th>IP Address</th><th>Location</th><th>Device</th><th>Last Seen</th><th>Logins</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
   users.forEach(u=>{
-    const topEmo=(u.topEmotions||[]).sort((a,b)=>b.count-a.count)[0]?.emotion||'—';
     const status=u.isBanned?'<span class="badge badge-cr">Banned</span>':u.isPremium?'<span class="badge badge-go">Premium</span>':'<span class="badge badge-lm">Active</span>';
     const banBtn=u.isBanned?'<button class="ab ab-unban" onclick="unbanUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Unban</button>':'<button class="ab ab-ban" onclick="banUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Ban</button>';
-    html+='<tr><td style="font-size:1.3rem">'+esc(u.avatarEmoji||'🎭')+'</td><td style="font-weight:600">'+esc(u.anonymousName||'—')+'</td><td style="color:var(--tx3);font-size:.75rem">'+esc(u.email||'—')+'</td><td><span class="badge badge-g">Lv '+(u.level||1)+'</span></td><td style="font-family:var(--fM)">'+(u.streak||0)+' 🔥</td><td style="font-family:var(--fM)">'+(u.postCount||0)+'</td><td><span class="badge badge-v">'+esc(topEmo)+'</span></td><td style="font-size:.75rem;color:var(--tx3)">'+esc(u.city||'—')+'</td><td>'+status+'</td><td style="font-size:.7rem;color:var(--tx3)">'+(u.createdAt?new Date(u.createdAt).toLocaleDateString('en-IN'):'—')+'</td><td><div class="actions">'+banBtn+'<button class="ab ab-del" onclick="deleteUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Delete</button></div></td></tr>';
+    const ipDisplay=u.ipMasked?'<span style="font-family:monospace;font-size:.72rem;color:#5DCAA5">'+esc(u.ipMasked)+'</span>':'<span style="color:var(--tx3);font-size:.72rem">No login yet</span>';
+    const locDisplay=u.ipCity?'<div style="font-size:.75rem"><b>'+esc(u.ipCity)+'</b>'+(u.ipState?', '+esc(u.ipState):'')+'</div><div style="font-size:.68rem;color:var(--tx3)">'+(u.ipCountry||'IN')+'</div>':'<span style="color:var(--tx3);font-size:.72rem">—</span>';
+    const deviceDisplay=u.deviceHash?'<div style="font-size:.68rem;color:var(--tx3);font-family:monospace">'+esc(u.deviceHash.substring(0,12))+'...</div><div style="font-size:.65rem;color:var(--tx3)">'+(u.isMobile?'📱 Mobile':'💻 Desktop')+'</div>':'<span style="color:var(--tx3)">—</span>';
+    const ipBtn='<button class="ab" style="background:rgba(0,201,167,.15);color:#5DCAA5;border-color:rgba(0,201,167,.3)" onclick="viewUserIP(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">🔍 IP</button>';
+    const lastSeen=u.lastSeenAt?timeAgo(u.lastSeenAt):'—';
+    html+='<tr><td style="font-size:1.2rem">'+esc(u.avatarEmoji||'🎭')+'</td>'
+      +'<td><div style="font-weight:600;font-size:.82rem">'+esc(u.anonymousName||'—')+'</div><div style="font-size:.68rem;color:var(--tx3)">'+esc(u.email||'')+'</div></td>'
+      +'<td><span class="badge badge-g">Lv '+(u.level||1)+'</span><div style="font-size:.68rem;color:var(--tx3);font-family:var(--fM)">'+(u.xp||0)+' XP</div></td>'
+      +'<td style="font-family:var(--fM)">'+(u.streak||0)+' 🔥</td>'
+      +'<td>'+ipDisplay+'</td>'
+      +'<td>'+locDisplay+'</td>'
+      +'<td>'+deviceDisplay+'</td>'
+      +'<td style="font-size:.72rem;color:var(--tx3)">'+lastSeen+'</td>'
+      +'<td style="font-family:var(--fM);font-size:.8rem;text-align:center">'+(u.loginCount||0)+'</td>'
+      +'<td>'+status+'</td>'
+      +'<td style="font-size:.7rem;color:var(--tx3)">'+(u.createdAt?new Date(u.createdAt).toLocaleDateString('en-IN'):'—')+'</td>'
+      +'<td><div class="actions">'+banBtn+ipBtn+'<button class="ab ab-del" onclick="deleteUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Delete</button></div></td></tr>';
   });
   html+='</tbody></table>';el.innerHTML=html;
 }
+
+function viewUserIP(userId, name){
+  const modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.onclick=(e)=>{if(e.target===modal)modal.remove();};
+  modal.innerHTML='<div style="background:var(--bg);border-radius:16px;padding:24px;width:100%;max-width:500px;max-height:80vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;margin-bottom:16px"><b>🔍 IP Logs — '+esc(name)+'</b><button onclick="this.closest('div[style]').parentElement.remove()" style="background:none;border:none;color:var(--tx3);font-size:1.1rem;cursor:pointer">✕</button></div><div id="ip-modal-inner"><div class="spin"></div></div></div>';
+  document.body.appendChild(modal);
+  af('/api/compliance/admin/user-ip/'+userId,{headers:{'x-admin-password':adminPass}})
+    .then(r=>r.json()).then(d=>{
+      const logs=d.ipLogs||[];
+      if(!logs.length){q('ip-modal-inner').innerHTML='<div style="color:var(--tx3);text-align:center;padding:20px">No IP logs found for this user yet.<br><small>Logs are captured on login — user may not have logged in since IP logging was deployed.</small></div>';return;}
+      const html=logs.map(l=>`<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-family:monospace;font-size:.8rem;color:#5DCAA5">${l.ipFull||l.ipMasked||'—'}</span>
+          <span style="font-size:.7rem;color:var(--tx3)">${l.eventType}</span>
+        </div>
+        <div style="font-size:.75rem;color:var(--tx2)">📍 ${l.city||'?'}${l.state?', '+l.state:''}</div>
+        <div style="font-size:.68rem;color:var(--tx3)">${l.userAgent||''}</div>
+        <div style="font-size:.68rem;color:var(--tx3)">${l.isMobile?'📱 Mobile':'💻 Desktop'} · ${new Date(l.timestamp).toLocaleString('en-IN')}</div>
+      </div>`).join('');
+      q('ip-modal-inner').innerHTML=html;
+    }).catch(e=>{q('ip-modal-inner').innerHTML='<div style="color:var(--cr)">Error: '+e.message+'</div>';});
+}
+
 function banUser(id,name){showConfirm('🚫','Ban '+name+'?','Blocked from all activity. Can be unbanned later.',async()=>{const r=await af('/api/admin/ban/'+id,{method:'POST',body:JSON.stringify({reason:'Admin action'})});toast(r.ok?'🚫 '+name+' banned':'❌ Failed: '+r.status);if(r.ok)loadUsers();});}
 function unbanUser(id,name){showConfirm('✅','Unban '+name+'?','They will regain full access.',async()=>{const r=await af('/api/admin/unban/'+id,{method:'POST'});toast(r.ok?'✅ '+name+' unbanned':'❌ Failed: '+r.status);if(r.ok)loadUsers();},false);}
 function deleteUser(id,name){showConfirm('⚠️','PERMANENTLY DELETE '+name+'?','Deletes user AND all their posts, vents, messages, moods. CANNOT be undone.',async()=>{const r=await af('/api/admin/users/'+id,{method:'DELETE'});toast(r.ok?'🗑️ '+name+' deleted':'❌ Failed: '+r.status);if(r.ok)loadUsers();});}

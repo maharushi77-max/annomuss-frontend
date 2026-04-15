@@ -1462,12 +1462,12 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div class="pmi" style="background:rgba(82,183,136,.05);border:1px solid rgba(82,183,136,.15);border-radius:14px;margin-bottom:12px" onclick="openRitual()"><span style="font-size:1.1rem;width:22px">☁️</span><span style="flex:1;font-size:.88rem;font-weight:500;color:var(--lm)">Collective Breathing</span><span style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">Breathe with India</span></div>
     <!-- Standard items -->
     <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);font-family:var(--fM);margin-bottom:8px;padding:0 2px">Your Space</div>
-    <div class="pmi" onclick="location.href='/confessions.html'"><span style="font-size:1.1rem;width:22px">🤫</span><span style="flex:1;font-size:.88rem;font-weight:500">My Confessions</span><span style="color:var(--tx3)">›</span></div>
+    <div class="pmi" onclick="openConfessionsInline()"><span style="font-size:1.1rem;width:22px">🤫</span><span style="flex:1;font-size:.88rem;font-weight:500">My Confessions</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="profileTab('diary',q('pt-diary'))"><span style="font-size:1.1rem;width:22px">📖</span><span style="flex:1;font-size:.88rem;font-weight:500">My Diary</span><span style="color:var(--tx3)">›</span></div>
-    <div class="pmi" onclick="location.href='/badges.html'"><span style="font-size:1.1rem;width:22px">🏅</span><span style="flex:1;font-size:.88rem;font-weight:500">Badges & Rewards</span><span style="color:var(--tx3)">›</span></div>
+    <div class="pmi" onclick="openBadgesInline()"><span style="font-size:1.1rem;width:22px">🏅</span><span style="flex:1;font-size:.88rem;font-weight:500">Badges & Rewards</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="showLeaderboard()"><span style="font-size:1.1rem;width:22px">🏆</span><span style="flex:1;font-size:.88rem;font-weight:500">Weekly Leaderboard</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="shareInvite()"><span style="font-size:1.1rem;width:22px">🎁</span><span style="flex:1;font-size:.88rem;font-weight:500">Invite Friends — earn 50 XP</span><span style="color:var(--v3)">Share</span></div>
-    <div class="pmi" onclick="location.href='/security.html'"><span style="font-size:1.1rem;width:22px">🔒</span><span style="flex:1;font-size:.88rem;font-weight:500">Security & Privacy</span><span style="color:var(--tx3)">›</span></div>
+    <div class="pmi" onclick="openSecurityInline()"><span style="font-size:1.1rem;width:22px">🔒</span><span style="flex:1;font-size:.88rem;font-weight:500">Security & Privacy</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="toggleSound()"><span style="font-size:1.1rem;width:22px" id="sound-ico">🔊</span><span style="flex:1;font-size:.88rem;font-weight:500" id="sound-lbl">Sounds on</span><span style="color:var(--tx3)">Toggle</span></div>
     <div class="pmi" onclick="doLogout()" style="color:var(--cr)"><span style="font-size:1.1rem;width:22px">🚪</span><span style="flex:1;font-size:.88rem;font-weight:500">Log Out</span></div>
     <div id="capsule-confetti-anchor" style="height:1px"></div>
@@ -1879,21 +1879,34 @@ async function initSession(){
 }
 function applyUser(){
   if(!user)return;
-  const em=user.avatarEmoji||'🎭',nm=user.anonymousName||'Anonymous';
-  const xp=user.xp||0,lv=Math.floor(xp/100)+1,xpIn=xp%100;
-  q('cav').textContent=em;q('cname').textContent=nm;
-  q('pav').textContent=em;q('pname').textContent=nm;
-  q('phandle').textContent=`@${nm.toLowerCase().replace(/\s+/g,'')}`;
-  q('lvl-badge').textContent=`⭐ Level ${lv}`;
-  q('xp-fill').style.width=`${xpIn}%`;
-  q('xp-lbl').textContent=`${xp} XP`;
-  q('xp-next').textContent=`${100-xpIn} XP to level up`;
-  q('s-posts').textContent=user.postCount||0;
-  q('s-streak').textContent=user.streak||0;
-  q('s-chats').textContent=user.chatCount||user.totalChats||0;
-  q('s-friends').textContent=(user.friends||[]).length||user.friendCount||0;
+  // ── null-safe DOM writer — never crashes on missing elements ──
+  function set(id,val,prop='textContent'){
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(prop==='width')el.style.width=val;
+    else el[prop]=val;
+  }
+  const em=user.avatarEmoji||'🎭', nm=user.anonymousName||'Anonymous';
+  const xp=user.xp||0, lv=Math.floor(xp/100)+1, xpIn=xp%100;
+
+  // avatars (cav may not exist on every page — safe)
+  set('cav',em); set('cname',nm);
+  set('pav',em); set('pname',nm);
+  set('phandle','@'+nm.toLowerCase().replace(/\s+/g,''));
+  set('lvl-badge','⭐ Level '+lv);
+  set('xp-fill',xpIn+'%','width');
+  set('xp-lbl',xp+' XP');
+  set('xp-next',(100-xpIn)+' XP to level up');
+  set('s-posts',user.postCount||0);
+  set('s-streak',user.streak||0);
+  set('s-chats',user.chatCount||user.totalChats||0);
+  set('s-friends',(user.friends||[]).length||user.friendCount||0);
+
   const mood=localStorage.getItem('ann_mood_'+new Date().toDateString());
-  if(mood){const em2={happy:'😊',sad:'😔',excited:'🤩',anxious:'😰',grateful:'🙏',lonely:'🌧️',angry:'😤',inspired:'✨'};q('pmood').textContent=`${em2[mood]||'🌊'} Feeling ${mood} today`;}
+  if(mood){
+    const em2={happy:'😊',sad:'😔',excited:'🤩',anxious:'😰',grateful:'🙏',lonely:'🌧️',angry:'😤',inspired:'✨'};
+    set('pmood',(em2[mood]||'🌊')+' Feeling '+mood+' today');
+  }
 }
 
 /* nav */
@@ -2048,7 +2061,7 @@ function renderPost(p){
     const totalVotes=p.poll.options.reduce((s,o)=>(s+((o.votes||[]).length||o.voteCount||0)),0);
     const myVote=p.poll.options.find(o=>(o.votes||[]).some(v=>v===user?._id?.toString()));
     const ended=p.poll.endsAt&&new Date()>new Date(p.poll.endsAt);
-    pollHtml='<div class="poll-wrap">'+p.poll.options.map((o,i)=>{
+    pollHtml='<div class="poll-wrap" data-poll="'+p._id+'" data-post-id="'+p._id+'">'+p.poll.options.map((o,i)=>{
       const cnt=(o.votes||[]).length||o.voteCount||0;
       const pct=totalVotes>0?Math.round(cnt/totalVotes*100):0;
       const isMyVote=myVote?._id?.toString()===o._id?.toString();
@@ -2827,21 +2840,25 @@ async function openPModal(id){
     const r=await api(`/api/posts/${id}/comments`);
     if(!r.ok) throw new Error('HTTP '+r.status);
     const d=await r.json();
+    // API returns { comments: [...], total: N } or plain array (backward compat)
     const cs=Array.isArray(d)?d:(d.comments||[]);
     if(!cs.length){
-      cl.innerHTML='<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--tx3)">No comments yet — be the first 💬</div>';
+      cl.innerHTML='<div style="padding:16px 18px;text-align:center;font-size:.82rem;color:var(--tx3)">No comments yet — be the first 💬</div>';
       return;
     }
-    cl.innerHTML=cs.map(cm=>`<div style="padding:10px 0;border-bottom:1px solid var(--bd)">
-      <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
-        <span style="font-size:1rem">${cm.avatarEmoji||'🎭'}</span>
-        <b style="font-size:.82rem;font-family:var(--fD)">${esc(cm.anonymousName||'Anonymous')}</b>
+    cl.innerHTML=cs.map(cm=>`<div style="padding:11px 0;border-bottom:1px solid var(--bd)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-size:1.05rem">${cm.authorEmoji||cm.avatarEmoji||'🎭'}</span>
+        <b style="font-size:.82rem;font-family:var(--fD);color:var(--tx)">${esc(cm.authorName||cm.anonymousName||'Anonymous')}</b>
         <span style="font-size:.7rem;color:var(--tx3)">${timeAgo(cm.createdAt)}</span>
       </div>
-      <div style="font-size:.875rem;padding-left:26px;color:var(--tx);line-height:1.5">${esc(cm.text||cm.content||'')}</div>
+      <div style="font-size:.875rem;padding-left:28px;color:var(--tx2);line-height:1.55">${esc(cm.text||cm.content||'')}</div>
     </div>`).join('');
+    // Scroll comments to top
+    cl.scrollTop=0;
   }catch(e){
-    cl.innerHTML=`<div style="padding:16px;text-align:center;color:var(--tx3)">Couldn't load comments</div>`;
+    cl.innerHTML='<div style="padding:16px 18px;text-align:center;color:var(--tx3)">Couldn\x27t load comments — tap to retry</div>';
+    cl.onclick=()=>openPModal(id);
     console.error('[openPModal] comments error:',e.message);
   }
 }
@@ -4882,30 +4899,53 @@ async function doSave(id,el){
    POLL VOTING
 ═══════════════════════════════════════════════ */
 async function doPollVote(postId,optionId,el){
+  // Find the poll wrap containing this option button
+  const wrap=el.closest('.poll-wrap')||el.closest('[data-poll]');
+  const allOpts=document.querySelectorAll(`[data-poll="${postId}"] .poll-opt,[data-post-id="${postId}"] .poll-opt`);
+
+  // Disable all options immediately — prevent double-vote
+  allOpts.forEach(b=>{b.disabled=true;b.style.pointerEvents='none';});
+
+  // Optimistic: highlight selected option instantly
+  el.style.background='rgba(123,94,167,.35)';
+  el.style.borderColor='rgba(196,168,255,.5)';
+
   try{
-    const r=await api(`/api/posts/${postId}/vote`,{method:'POST',body:JSON.stringify({optionId})});
-    const d=await r.json();
-    // Re-render the poll in-place
-    const card=document.querySelector(`.card[data-id="${postId}"]`);
-    if(card){
-      const wrap=card.querySelector('.poll-wrap');
-      if(wrap&&d.results){
-        const totalVotes=d.totalVotes||0;
-        wrap.innerHTML=d.results.map(o=>{
-          const pct=totalVotes>0?Math.round(o.votes/totalVotes*100):0;
-          return`<div class="poll-opt ${o.votedByMe?'voted':''}">
-            <div class="poll-bar" style="width:${pct}%"></div>
-            <span class="poll-text">${esc(o.text)}</span>
-            <span class="poll-pct">${pct}%</span>
-            ${o.votedByMe?'<span style="font-size:.7rem">✓</span>':''}
-          </div>`;
-        }).join('');
-        const meta=card.querySelector('.poll-meta');
-        if(meta)meta.textContent=`${totalVotes} vote${totalVotes!==1?'s':''} · Thanks for voting!`;
-      }
+    const r=await api(`/api/posts/${postId}/vote`,{
+      method:'POST',
+      body:JSON.stringify({optionId})
+    });
+    if(!r.ok){
+      const err=await r.json().catch(()=>({}));
+      // Restore if failed (already voted, etc.)
+      allOpts.forEach(b=>{b.disabled=false;b.style.pointerEvents='';});
+      el.style.background='';el.style.borderColor='';
+      toast(err.message||'Vote failed');
+      return;
     }
-    toast('🗳️ Vote recorded!');
-  }catch(e){toast('Vote failed — try again');}
+    const d=await r.json();
+
+    // Re-render just the poll result bars without full post re-render
+    const updatedPost=d.post||d;
+    if(updatedPost&&updatedPost.poll&&updatedPost.poll.options){
+      const total=updatedPost.poll.options.reduce((s,o)=>s+(o.votes||[]).length,0)||1;
+      document.querySelectorAll(`[data-poll="${postId}"] .poll-opt,[data-post-id="${postId}"] .poll-opt`).forEach((btn,i)=>{
+        const opt=updatedPost.poll.options[i];if(!opt)return;
+        const pct=Math.round(((opt.votes||[]).length/total)*100);
+        btn.disabled=true;btn.style.pointerEvents='none';
+        btn.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:5px"><span>${esc(opt.text||'')}</span><span style="font-weight:700">${pct}%</span></div>`
+          +`<div style="height:5px;border-radius:3px;background:rgba(255,255,255,.08)"><div style="height:100%;border-radius:3px;background:var(--v);width:${pct}%;transition:width .4s ease"></div></div>`;
+      });
+    } else {
+      // Fallback if post data not in response — just mark as voted
+      allOpts.forEach(b=>{b.disabled=true;b.style.pointerEvents='none';});
+      toast('✅ Vote counted!');
+    }
+    awardXP(3,'Voted on poll');
+  }catch(e){
+    allOpts.forEach(b=>{b.disabled=false;b.style.pointerEvents='';});
+    toast('Network error — try again');
+  }
 }
 
 /* ═══════════════════════════════════════════════
@@ -5407,13 +5447,19 @@ window.addEventListener('beforeinstallprompt',(e)=>{
 });
 
 function doInstallApp(){
-  if(!pwaPrompt&&!window._pwaPrompt){toast('Open this site in Chrome or Safari to install');return;}
   const p=pwaPrompt||window._pwaPrompt;
-  p.prompt();
-  p.userChoice.then(r=>{
-    if(r.outcome==='accepted'){toast('✅ Installing annomuss...');pwaPrompt=null;window._pwaPrompt=null;}
-    else{toast('You can install later from the menu');}
-  });
+  if(!p){toast('Open in Chrome on Android to install as app');return;}
+  // Must be called from a user gesture — this function is only called on tap
+  try{
+    p.prompt();
+    p.userChoice.then(r=>{
+      pwaPrompt=null;window._pwaPrompt=null;
+      if(r.outcome==='accepted') toast('✅ Installed! Open from your home screen.');
+      else toast('You can install anytime from the ⚙️ menu');
+    }).catch(()=>{});
+  }catch(e){
+    toast('Already installed or browser does not support it');
+  }
 }
 function showPWABanner(){
   if(!pwaPrompt)return;
@@ -5577,7 +5623,7 @@ function openSettings(){
       <button onclick="this.closest('div[style]').parentElement.remove()" style="background:none;border:none;font-size:1.2rem;color:var(--tx3);cursor:pointer">✕</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-g" style="text-align:left;padding:12px 16px;border-radius:12px" onclick="this.closest('div[style]').parentElement.remove();goPage('profile');profileTab('menu',q('pt-menu'))">📋 Account settings</button>
+      <button class="btn btn-g" style="text-align:left;padding:12px 16px;border-radius:12px" onclick="this.closest('div[style]').parentElement.remove();openSecurityInline()">📋 Account & Privacy</button>
       <button class="btn btn-g" style="text-align:left;padding:12px 16px;border-radius:12px" onclick="this.closest('div[style]').parentElement.remove();openSearch()">🔍 Search</button>
       <button class="btn btn-g" style="text-align:left;padding:12px 16px;border-radius:12px" onclick="this.closest('div[style]').parentElement.remove();showLeaderboard()">🏆 Leaderboard</button>
       <button class="btn btn-g" style="text-align:left;padding:12px 16px;border-radius:12px" onclick="this.closest('div[style]').parentElement.remove();openPremium()">⭐ Annomuss Premium</button>
@@ -5587,6 +5633,177 @@ function openSettings(){
   </div>`;
   document.body.appendChild(overlay);
 }
+
+// ══════════════════════════════════════════════════════
+//  INLINE OVERLAYS — replaces redirect to separate pages
+//  No auth issues — user is already authenticated here
+// ══════════════════════════════════════════════════════
+
+function _makeOverlay(title, contentHtml){
+  var ov=document.createElement('div');
+  ov.className='inline-overlay';
+  ov.setAttribute('style','position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);display:flex;flex-direction:column;overflow-y:auto;animation:pgIn .25s ease');
+  var closeBtn=document.createElement('button');
+  closeBtn.setAttribute('style','background:rgba(255,255,255,.08);border:none;width:36px;height:36px;border-radius:50%;color:var(--tx2);font-size:1.1rem;cursor:pointer;flex-shrink:0');
+  closeBtn.textContent='←';
+  closeBtn.onclick=function(){ov.remove();};
+  var header=document.createElement('div');
+  header.setAttribute('style','display:flex;align-items:center;gap:12px;margin-bottom:18px;position:sticky;top:0;background:rgba(0,0,0,.7);padding:12px 0;backdrop-filter:blur(8px)');
+  var titleEl=document.createElement('div');
+  titleEl.setAttribute('style','font-family:var(--fD);font-weight:700;font-size:1.05rem;color:var(--tx)');
+  titleEl.textContent=title;
+  header.appendChild(closeBtn);
+  header.appendChild(titleEl);
+  var body=document.createElement('div');
+  body.id='inline-overlay-body';
+  body.innerHTML=contentHtml;
+  var wrap=document.createElement('div');
+  wrap.setAttribute('style','width:100%;max-width:520px;margin:0 auto;padding:20px');
+  wrap.appendChild(header);
+  wrap.appendChild(body);
+  ov.appendChild(wrap);
+  document.body.appendChild(ov);
+  return ov;
+}
+
+async function openConfessionsInline(){
+  var ov=_makeOverlay('🤫 My Confessions','<div style="padding:24px;text-align:center"><div class="spin"></div></div>');
+  try{
+    var r=await api('/api/posts?mine=true&type=confession&limit=30');
+    var d=await r.json();
+    var posts=Array.isArray(d)?d:(d.posts||[]);
+    var body=ov.querySelector('#inline-overlay-body');
+    if(!posts.length){
+      body.innerHTML='';
+      var empty=document.createElement('div');
+      empty.className='empty';
+      empty.innerHTML='<div style="font-size:3rem">🤫</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem;margin-top:8px">No confessions yet</div><div style="font-size:.82rem;color:var(--tx3);margin-top:4px">Your anonymous confessions will appear here</div>';
+      var btn=document.createElement('button');
+      btn.className='btn btn-v btn-sm';
+      btn.style.marginTop='14px';
+      btn.textContent='Write a confession ✦';
+      btn.onclick=function(){ov.remove();openCompose('confession');};
+      empty.appendChild(btn);
+      body.appendChild(empty);
+      return;
+    }
+    body.innerHTML='';
+    posts.forEach(function(p){
+      var d2=document.createElement('div');
+      d2.innerHTML=renderPost(p);
+      var card=d2.firstElementChild;
+      if(card)body.appendChild(card);
+    });
+  }catch(e){
+    var body=ov.querySelector('#inline-overlay-body');
+    if(body)body.innerHTML='<div class="empty">Could not load confessions</div>';
+  }
+}
+
+function openBadgesInline(){
+  var xp=user?user.xp||0:0;
+  var lv=Math.floor(xp/100)+1;
+  var streak=user?user.streak||0:0;
+  var postCount=user?user.postCount||0:0;
+
+  var badges=[
+    {ico:'🌱',name:'First Post',    desc:'Posted for the first time',  earned:postCount>=1},
+    {ico:'🔥',name:'3-Day Streak',  desc:'3 days of mood logging',     earned:streak>=3},
+    {ico:'💫',name:'Level 5',       desc:'Reached Level 5',            earned:lv>=5},
+    {ico:'🤫',name:'Confessor',     desc:'Made your first confession',  earned:postCount>=1},
+    {ico:'🌙',name:'Night Owl',     desc:'Joined the 3AM Room',        earned:!!(localStorage.getItem('ann_am3_joined'))},
+    {ico:'⚡',name:'Connector',     desc:'Completed a random chat',    earned:!!(localStorage.getItem('ann_chats'))},
+    {ico:'🏆',name:'Level 10',      desc:'Reached Level 10',           earned:lv>=10},
+    {ico:'💎',name:'Level 25',      desc:'Reached Level 25',           earned:lv>=25},
+    {ico:'🎯',name:'7-Day Streak',  desc:'7 consecutive mood days',    earned:streak>=7},
+    {ico:'❤️','name':'Empath',      desc:'Reacted to 50 posts',        earned:false},
+  ];
+
+  var html=badges.map(function(b){
+    return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bd);opacity:'+(b.earned?'1':'0.38')+'">'
+      +'<div style="font-size:2rem;width:42px;text-align:center">'+b.ico+'</div>'
+      +'<div style="flex:1"><div style="font-family:var(--fD);font-weight:700;font-size:.88rem;color:var(--tx)">'+b.name+'</div>'
+      +'<div style="font-size:.75rem;color:var(--tx3)">'+b.desc+'</div></div>'
+      +(b.earned?'<div style="font-size:.72rem;font-weight:700;color:var(--lm);font-family:var(--fD)">✓ Earned</div>':'<div style="font-size:.72rem;color:var(--tx3)">Locked</div>')
+    +'</div>';
+  }).join('');
+
+  _makeOverlay('🏅 Badges & Rewards',
+    '<div style="padding:12px 0;margin-bottom:14px;background:rgba(123,94,167,.12);border-radius:12px;text-align:center">'
+    +'<div style="font-size:.72rem;color:var(--tx3);font-family:var(--fD);letter-spacing:.05em;text-transform:uppercase">Your Progress</div>'
+    +'<div style="font-size:1.8rem;font-weight:700;color:var(--v3);font-family:var(--fD)">'+xp+' XP</div>'
+    +'<div style="font-size:.8rem;color:var(--tx2)">Level '+lv+' · '+streak+'🔥 streak</div>'
+    +'</div>'+html
+  );
+}
+
+function openSecurityInline(){
+  var nm=user?user.anonymousName||'Anonymous':'—';
+  var email=user?user.email||'—':'—';
+  var joined=user&&user.createdAt?new Date(user.createdAt).toLocaleDateString('en-IN'):'—';
+
+  var ov=_makeOverlay('🔒 Security & Privacy','');
+  var body=ov.querySelector('#inline-overlay-body');
+
+  function row(label, value){
+    var d=document.createElement('div');
+    d.setAttribute('style','padding:14px 0;border-bottom:1px solid var(--bd)');
+    d.innerHTML='<div style="font-size:.82rem;color:var(--tx3)">'+label+'</div>'
+      +'<div style="font-family:var(--fD);font-weight:700;font-size:.9rem;color:var(--tx);margin-top:3px">'+value+'</div>';
+    return d;
+  }
+
+  var section1=document.createElement('div');
+  section1.setAttribute('style','font-size:.72rem;color:var(--tx3);font-family:var(--fD);letter-spacing:.06em;text-transform:uppercase;padding:4px 0 10px');
+  section1.textContent='Your Account';
+
+  var privacyNote=document.createElement('div');
+  privacyNote.setAttribute('style','padding:12px 14px;background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.15);border-radius:12px;font-size:.82rem;color:var(--tx2);line-height:1.6;margin:16px 0');
+  privacyNote.textContent='No real name stored. No phone number. No face. Your identity is always anonymous. Location is city-level only, never exact GPS.';
+
+  var section2=document.createElement('div');
+  section2.setAttribute('style','font-size:.72rem;color:var(--tx3);font-family:var(--fD);letter-spacing:.06em;text-transform:uppercase;padding:4px 0 10px;margin-top:8px');
+  section2.textContent='Privacy';
+
+  var exportBtn=document.createElement('button');
+  exportBtn.className='btn btn-g';
+  exportBtn.setAttribute('style','padding:12px 16px;border-radius:12px;text-align:left;width:100%;margin-bottom:8px');
+  exportBtn.textContent='📦 Export my data';
+  exportBtn.onclick=function(){
+    api('/api/compliance/data-request',{method:'POST',body:JSON.stringify({requestType:'export'})})
+      .then(function(r){return r.json();}).then(function(d){toast('📦 Data export ready — check console');console.log(d);}).catch(function(){toast('Export failed');});
+  };
+
+  var logoutBtn=document.createElement('button');
+  logoutBtn.className='btn';
+  logoutBtn.setAttribute('style','padding:12px 16px;border-radius:12px;text-align:left;color:var(--cr);width:100%;margin-bottom:8px');
+  logoutBtn.textContent='🚪 Log out';
+  logoutBtn.onclick=function(){if(confirm('Log out of Annomuss?')){localStorage.clear();location.href='/';}};
+
+  var deleteBtn=document.createElement('button');
+  deleteBtn.className='btn';
+  deleteBtn.setAttribute('style','padding:12px 16px;border-radius:12px;text-align:left;color:var(--cr);opacity:.7;width:100%');
+  deleteBtn.textContent='🗑️ Delete account';
+  deleteBtn.onclick=function(){
+    if(confirm('DELETE ACCOUNT? This permanently deletes all posts, chats, and data. Cannot be undone.')){
+      api('/api/compliance/data-request',{method:'POST',body:JSON.stringify({requestType:'erasure'})})
+        .then(function(){toast('Account deletion requested. Processed within 72 hours.');setTimeout(function(){localStorage.clear();location.href='/';},3000);})
+        .catch(function(){toast('Request failed');});
+    }
+  };
+
+  body.appendChild(section1);
+  body.appendChild(row('Anonymous Name', nm));
+  body.appendChild(row('Email', email));
+  body.appendChild(row('Account created', joined));
+  body.appendChild(section2);
+  body.appendChild(privacyNote);
+  body.appendChild(exportBtn);
+  body.appendChild(logoutBtn);
+  body.appendChild(deleteBtn);
+}
+
+
 
 async function main(){
   await initSession();

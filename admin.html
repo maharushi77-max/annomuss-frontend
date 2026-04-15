@@ -588,26 +588,64 @@ function renderUsers(users){
 }
 
 function viewUserIP(userId, name){
-  const modal=document.createElement('div');
+  var modal=document.createElement('div');
   modal.style.cssText='position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px';
-  modal.onclick=(e)=>{if(e.target===modal)modal.remove();};
-  modal.innerHTML='<div style="background:var(--bg);border-radius:16px;padding:24px;width:100%;max-width:500px;max-height:80vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;margin-bottom:16px"><b>🔍 IP Logs — '+esc(name)+'</b><button onclick="this.closest('div[style]').parentElement.remove()" style="background:none;border:none;color:var(--tx3);font-size:1.1rem;cursor:pointer">✕</button></div><div id="ip-modal-inner"><div class="spin"></div></div></div>';
+  modal.onclick=function(e){if(e.target===modal)modal.remove();};
+
+  var inner=document.createElement('div');
+  inner.setAttribute('style','background:var(--bg);border-radius:16px;padding:24px;width:100%;max-width:500px;max-height:80vh;overflow-y:auto');
+
+  var header=document.createElement('div');
+  header.setAttribute('style','display:flex;justify-content:space-between;margin-bottom:16px;align-items:center');
+
+  var title=document.createElement('b');
+  title.textContent='🔍 IP Logs — '+name;
+
+  var closeBtn=document.createElement('button');
+  closeBtn.setAttribute('style','background:none;border:none;color:var(--tx3);font-size:1.1rem;cursor:pointer');
+  closeBtn.textContent='✕';
+  closeBtn.onclick=function(){modal.remove();};
+
+  var ipBody=document.createElement('div');
+  ipBody.id='ip-modal-inner';
+  ipBody.innerHTML='<div class="spin"></div>';
+
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+  inner.appendChild(header);
+  inner.appendChild(ipBody);
+  modal.appendChild(inner);
   document.body.appendChild(modal);
+
   af('/api/compliance/admin/user-ip/'+userId,{headers:{'x-admin-password':adminPass}})
-    .then(r=>r.json()).then(d=>{
-      const logs=d.ipLogs||[];
-      if(!logs.length){q('ip-modal-inner').innerHTML='<div style="color:var(--tx3);text-align:center;padding:20px">No IP logs found for this user yet.<br><small>Logs are captured on login — user may not have logged in since IP logging was deployed.</small></div>';return;}
-      const html=logs.map(l=>`<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span style="font-family:monospace;font-size:.8rem;color:#5DCAA5">${l.ipFull||l.ipMasked||'—'}</span>
-          <span style="font-size:.7rem;color:var(--tx3)">${l.eventType}</span>
-        </div>
-        <div style="font-size:.75rem;color:var(--tx2)">📍 ${l.city||'?'}${l.state?', '+l.state:''}</div>
-        <div style="font-size:.68rem;color:var(--tx3)">${l.userAgent||''}</div>
-        <div style="font-size:.68rem;color:var(--tx3)">${l.isMobile?'📱 Mobile':'💻 Desktop'} · ${new Date(l.timestamp).toLocaleString('en-IN')}</div>
-      </div>`).join('');
-      q('ip-modal-inner').innerHTML=html;
-    }).catch(e=>{q('ip-modal-inner').innerHTML='<div style="color:var(--cr)">Error: '+e.message+'</div>';});
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var logs=d.ipLogs||[];
+      if(!logs.length){
+        ipBody.innerHTML='<div style="color:var(--tx3);text-align:center;padding:20px">No IP logs found for this user yet.<br><small>Logs are captured on login. User may not have logged in since IP logging was deployed.</small></div>';
+        return;
+      }
+      ipBody.innerHTML='';
+      logs.forEach(function(l){
+        var entry=document.createElement('div');
+        entry.setAttribute('style','padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)');
+        var ip=l.ipFull||l.ipMasked||'—';
+        var loc=(l.city||'?')+(l.state?', '+l.state:'');
+        var device=(l.isMobile?'📱 Mobile':'💻 Desktop');
+        var ts=l.timestamp?new Date(l.timestamp).toLocaleString('en-IN'):'—';
+        entry.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+          +'<span style="font-family:monospace;font-size:.8rem;color:#5DCAA5">'+ip+'</span>'
+          +'<span style="font-size:.7rem;color:var(--tx3)">'+esc(l.eventType||'')+'</span>'
+          +'</div>'
+          +'<div style="font-size:.75rem;color:var(--tx2)">📍 '+esc(loc)+'</div>'
+          +'<div style="font-size:.68rem;color:var(--tx3)">'+device+'</div>'
+          +'<div style="font-size:.68rem;color:var(--tx3)">'+ts+'</div>';
+        ipBody.appendChild(entry);
+      });
+    })
+    .catch(function(e){
+      ipBody.innerHTML='<div style="color:var(--cr)">Error: '+e.message+'</div>';
+    });
 }
 
 function banUser(id,name){showConfirm('🚫','Ban '+name+'?','Blocked from all activity. Can be unbanned later.',async()=>{const r=await af('/api/admin/ban/'+id,{method:'POST',body:JSON.stringify({reason:'Admin action'})});toast(r.ok?'🚫 '+name+' banned':'❌ Failed: '+r.status);if(r.ok)loadUsers();});}

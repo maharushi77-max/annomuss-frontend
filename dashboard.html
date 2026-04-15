@@ -2088,7 +2088,7 @@ function renderPost(p){
     </div>`;
   }
 
-  return`<div class="card" data-id="${p._id}" style="${st}">
+  return`<div class="card" data-id="${p._id}" data-post-id="${p._id}" style="${st}">
     <div class="ph">
       <div class="pav">${esc(av)}</div>
       <div style="flex:1;min-width:0">
@@ -2870,19 +2870,43 @@ async function submitComment(){
   inp.value='';inp.disabled=true;
   try{
     const r=await api(`/api/posts/${currentPost}/comments`,{method:'POST',body:JSON.stringify({text:txt})});
-    if(!r.ok){inp.value=txt;toast('Failed to comment ❌');return;}
-    const c=await r.json();
-    // Instantly insert the new comment at bottom
+    if(!r.ok){
+      inp.value=txt;
+      const errData=await r.json().catch(()=>({}));
+      toast(errData.message||'Failed to post comment ❌');
+      return;
+    }
+    const resp=await r.json();
+    // API returns { comment: {...}, commentCount: N }
+    const cm=resp.comment||resp;
+    const newCount=resp.commentCount||null;
+
+    // Insert new comment into list
     const cl=q('comments-list');
+    if(cl.innerHTML.includes('No comments yet')||cl.innerHTML.includes('be the first'))cl.innerHTML='';
     const div=document.createElement('div');
-    div.style.cssText='padding:10px 0;border-bottom:1px solid var(--bd);animation:cdIn .2s ease both';
-    div.innerHTML=`<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span>${user?.avatarEmoji||'🎭'}</span><b style="font-size:.82rem;font-family:var(--fD)">${esc(user?.anonymousName||'Anonymous')}</b><span style="font-size:.7rem;color:var(--tx3)">just now</span></div><div style="font-size:.875rem;padding-left:24px">${esc(txt)}</div>`;
-    // Remove "no comments" placeholder if present
-    if(cl.textContent.includes('No comments yet'))cl.innerHTML='';
+    div.style.cssText='padding:11px 0;border-bottom:1px solid var(--bd);animation:cdIn .2s ease both';
+    div.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+      +'<span style="font-size:1.05rem">'+(cm.authorEmoji||user?.avatarEmoji||'🎭')+'</span>'
+      +'<b style="font-size:.82rem;font-family:var(--fD);color:var(--tx)">'
+        +esc(cm.authorName||user?.anonymousName||'Anonymous')
+      +'</b>'
+      +'<span style="font-size:.7rem;color:var(--tx3)">just now</span>'
+      +'</div>'
+      +'<div style="font-size:.875rem;padding-left:28px;color:var(--tx2);line-height:1.55">'+esc(txt)+'</div>';
     cl.appendChild(div);
-    // Update comment count on the card
-    const cc=document.querySelector(`.card[data-id="${currentPost}"] .pak:nth-child(2) span`);
-    if(cc)cc.textContent=parseInt(cc.textContent||0)+1;
+    cl.scrollTop=cl.scrollHeight;
+
+    // Update comment count badge on the feed card — use server count if available
+    document.querySelectorAll(`.card[data-id="${currentPost}"] .pak`).forEach(pak=>{
+      if(pak.textContent.includes('💬')||pak.querySelector('[data-comment-count]')){
+        const span=pak.querySelector('span');
+        if(span){
+          const serverCount=newCount||(parseInt(span.textContent||'0')+1);
+          span.textContent=serverCount;
+        }
+      }
+    });
     toast('💬 Added!');
     awardXP(2,'Commented');
   }catch(e){inp.value=txt;toast('Network error ❌');}
@@ -5258,7 +5282,7 @@ function profileTab(tab, el){
   q('profile-saved').style.display  = tab==='saved' ?'block':'none';
   q('profile-menu').style.display   = tab==='menu'  ?'block':'none';
   if(tab==='posts') loadProfilePosts();
-  if(tab==='saved') loadSavedPosts();
+  if(tab==='saved') loadSavedPosts(true);
   if(tab==='diary') loadDiaryInProfile();
 }
 

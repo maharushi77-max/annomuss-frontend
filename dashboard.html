@@ -761,6 +761,12 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 .deep-q.on{display:block}
 </style>
 </head>
+
+<!-- OFFLINE BANNER -->
+<div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a0a00;color:#F4A261;text-align:center;padding:10px 16px;font-size:.82rem;font-family:var(--fD);font-weight:700;letter-spacing:.03em">
+  📶 You're offline — showing cached content
+</div>
+
 <body>
 <div id="toasts"></div>
 
@@ -1804,11 +1810,16 @@ async function api(path,opts={}){
   const t=getToken();
   const h={'Content-Type':'application/json',...(opts.headers||{})};
   if(t)h.Authorization=`Bearer ${t}`;
+  // 15-second timeout on all API calls
+  const ctrl=new AbortController();
+  const tId=setTimeout(()=>ctrl.abort(),15000);
   let r;
   try{
-    r=await fetch(`${API}${path}`,{...opts,headers:h});
+    r=await fetch(`${API}${path}`,{...opts,headers:h,signal:ctrl.signal});
+    clearTimeout(tId);
   }catch(e){
-    // Network error (Render cold start, offline) — never log out
+    clearTimeout(tId);
+    if(e.name==='AbortError') throw new Error('Request timed out. Check your connection.');
     throw e;
   }
   if(r.status===401){
@@ -3017,21 +3028,119 @@ function onCompose(el){
 
 /* file upload */
 // ── Image compression helper ──────────────────────────────────
+// ── Image compression — 90% size reduction via Canvas ──────────
+// Uses native Canvas API — no external library needed
 async function compressImage(file){
   if(!file.type.startsWith('image/'))return file;
-  try{
-    // Dynamic import of browser-image-compression
-    // Install: npm install browser-image-compression (or CDN)
-    const mod=await import('https://unpkg.com/browser-image-compression@2.0.2/dist/browser-image-compression.js').catch(()=>null);
-    const compress=mod?.default||window.imageCompression;
-    if(!compress)return file;
-    const compressed=await compress(file,{maxSizeMB:.8,maxWidthOrHeight:1200,useWebWorker:true,fileType:'image/webp'});
-    console.log('Compressed:',Math.round(file.size/1024),'KB →',Math.round(compressed.size/1024),'KB');
-    return compressed;
-  }catch(e){
-    console.warn('Compression skipped:',e.message);
-    return file; // fallback to original
-  }
+  return new Promise((resolve)=>{
+    const img=new Image();
+    const objUrl=URL.createObjectURL(file);
+    img.onload=()=>{
+      URL.revokeObjectURL(objUrl);
+      const MAX_DIM=1080; // Instagram-level quality
+      let {width:w, height:h}=img;
+      // Scale down if too large
+      if(w>MAX_DIM||h>MAX_DIM){
+        const ratio=MAX_DIM/Math.max(w,h);
+        w=Math.round(w*ratio);
+        h=Math.round(h*ratio);
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      // 0.1 quality = ~90% compression
+      canvas.toBlob(blob=>{
+        if(!blob||blob.size>=file.size){resolve(file);return;}
+        const compressed=new File([blob],file.name.replace(/\.[^.]+$/,'.jpg'),{type:'image/jpeg'});
+        console.log('[Compress] Image:',Math.round(file.size/1024),'KB →',Math.round(compressed.size/1024),'KB (',Math.round((1-compressed.size/file.size)*100),'% reduction)');
+        resolve(compressed);
+      },'image/jpeg',0.10); // 0.10 = 90% compression
+    };
+    img.onerror=()=>{URL.revokeObjectURL(objUrl);resolve(file);};
+    img.src=objUrl;
+  });
+}
+
+// ── Video compression — 90% size reduction via MediaRecorder ────
+// Records re-encoded video at low bitrate using browser APIs
+async function compressVideo(file){
+  if(!file.type.startsWith('video/'))return file;
+  return new Promise((resolve)=>{
+    const video=document.createElement('video');
+    const objUrl=URL.createObjectURL(file);
+    video.muted=true;
+    video.playsInline=true;
+    video.preload='metadata';
+
+    video.onloadedmetadata=async()=>{
+      URL.revokeObjectURL(objUrl);
+      const originalSizeMB=file.size/1024/1024;
+
+      // Skip compression for small videos (<2MB) — not worth the processing
+      if(originalSizeMB<2){resolve(file);return;}
+
+      // Cap resolution at 720p
+      const MAX_DIM=720;
+      let {videoWidth:vw, videoHeight:vh}=video;
+      if(!vw||!vh){resolve(file);return;}
+      if(vw>MAX_DIM||vh>MAX_DIM){
+        const ratio=MAX_DIM/Math.max(vw,vh);
+        vw=Math.round(vw*ratio);
+        vh=Math.round(vh*ratio);
+      }
+
+      // Check MediaRecorder support
+      if(!window.MediaRecorder||!MediaRecorder.isTypeSupported('video/webm;codecs=vp8')){
+        console.warn('[Compress] MediaRecorder not supported — skipping video compression');
+        resolve(file);return;
+      }
+
+      try{
+        const canvas=document.createElement('canvas');
+        canvas.width=vw; canvas.height=vh;
+        const ctx=canvas.getContext('2d');
+        const stream=canvas.captureStream(24); // 24fps
+
+        // Target bitrate: ~10% of original = 90% reduction
+        const targetBitrate=Math.round((file.size*8/video.duration)*0.10);
+        const recorder=new MediaRecorder(stream,{
+          mimeType:'video/webm;codecs=vp8',
+          videoBitsPerSecond:Math.max(200000, Math.min(targetBitrate, 1500000))
+        });
+
+        const chunks=[];
+        recorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+        recorder.onstop=()=>{
+          const blob=new Blob(chunks,{type:'video/webm'});
+          const compressed=new File([blob],file.name.replace(/\.[^.]+$/,'.webm'),{type:'video/webm'});
+          console.log('[Compress] Video:',Math.round(file.size/1024/1024),'MB →',Math.round(compressed.size/1024/1024),'MB (',Math.round((1-compressed.size/file.size)*100),'% reduction)');
+          video.pause();
+          resolve(compressed.size<file.size?compressed:file);
+        };
+
+        recorder.start(100);
+        video.currentTime=0;
+        await video.play();
+
+        const drawFrame=()=>{
+          if(video.ended||video.paused){recorder.stop();return;}
+          ctx.drawImage(video,0,0,vw,vh);
+          requestAnimationFrame(drawFrame);
+        };
+        drawFrame();
+
+        video.onended=()=>recorder.stop();
+        // Safety timeout
+        setTimeout(()=>{if(recorder.state==='recording')recorder.stop();},video.duration*1000+5000);
+      }catch(e){
+        console.warn('[Compress] Video compression error:',e.message);
+        resolve(file);
+      }
+    };
+    video.onerror=()=>{URL.revokeObjectURL(objUrl);resolve(file);};
+    video.src=objUrl;
+  });
 }
 
 async function handleUpload(inp){
@@ -3047,13 +3156,19 @@ async function handleUpload(inp){
 
   const bar=q('up-bar'),fill=q('up-fill');bar.style.display='block';fill.style.width='5%';
 
-  // Compress image before upload
+  // Compress before upload — 90% reduction on all media
   let file=rawFile;
-  if(!isVid&&rawFile.size>200*1024){ // Only compress if >200KB
-    toast('Optimising image...');
+  if(isVid && rawFile.size>2*1024*1024){ // compress videos >2MB
+    toast('⚡ Compressing video...');
+    fill.style.width='10%';
+    file=await compressVideo(rawFile);
+    fill.style.width='25%';
+    toast('✅ Video compressed!');
+  } else if(!isVid && rawFile.size>100*1024){ // compress images >100KB
+    toast('⚡ Optimising image...');
     fill.style.width='15%';
     file=await compressImage(rawFile);
-    fill.style.width='20%';
+    fill.style.width='25%';
   }
 
   try{
@@ -3610,8 +3725,24 @@ function initSocket(){
   // Create new socket
   socket=io(API,{auth:{token:getToken()},transports:['websocket','polling'],reconnection:true,reconnectionDelay:1000,reconnectionAttempts:10});
 
-  socket.on('connect',()=>{socket.emit('register');});
-  socket.on('disconnect',()=>{if(rcState==='active')rcAddMsg('⚠️ Connection lost...','sys');});
+  socket.on('connect',()=>{
+  socket.emit('register');
+  // If we were in a chat room, rejoin
+  if(rcRoom && rcState==='active'){
+    socket.emit('rejoin-room',{roomId:rcRoom});
+    toast('🔄 Reconnected');
+  }
+});
+  socket.on('disconnect',()=>{
+    if(rcState==='active')rcAddMsg('⚠️ Connection lost — reconnecting...','sys');
+  });
+  socket.on('reconnect',()=>{
+    // Rejoin 3AM room if was in one
+    if(am3CurrentMood&&socket.connected){
+      socket.emit('join-am3-room',{mood:am3CurrentMood});
+    }
+    toast('✅ Reconnected');
+  });
 
   socket.on('online-count',(n)=>{
     const c=typeof n==='number'?n:(n?.count||n||0);
@@ -4857,7 +4988,8 @@ async function subscribePush(){
     // VAPID public key — replace with your actual key from:
     // node -e "const webpush=require('web-push');const k=webpush.generateVAPIDKeys();console.log(k)"
     // Or use Firebase Cloud Messaging instead (simpler)
-    const VAPID_PUBLIC_KEY='BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjZkbYGI3B8A6oLEBGRaxAOhKsPxA';
+    const VAPID_PUBLIC_KEY=window.VAPID_KEY||''; // Set via <meta name="vapid-key"> or window.VAPID_KEY
+    if(!VAPID_PUBLIC_KEY){console.warn('[PWA] VAPID key not set — push disabled');return;}
     const sub=await reg.pushManager.subscribe({
       userVisibleOnly:true,
       applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
@@ -5766,29 +5898,88 @@ function openSecurityInline(){
   var email=user?user.email||'—':'—';
   var joined=user&&user.createdAt?new Date(user.createdAt).toLocaleDateString('en-IN'):'—';
 
-  var ov=_makeOverlay('🔒 Security & Privacy','');
+  var ov=_makeOverlay('🔒 Account & Privacy','');
   var body=ov.querySelector('#inline-overlay-body');
 
   function row(label, value){
     var d=document.createElement('div');
     d.setAttribute('style','padding:14px 0;border-bottom:1px solid var(--bd)');
-    d.innerHTML='<div style="font-size:.82rem;color:var(--tx3)">'+label+'</div>'
-      +'<div style="font-family:var(--fD);font-weight:700;font-size:.9rem;color:var(--tx);margin-top:3px">'+value+'</div>';
+    d.innerHTML='<div style="font-size:.78rem;color:var(--tx3)">'+label+'</div>'
+      +'<div style="font-size:.9rem;color:var(--tx);margin-top:3px">'+value+'</div>';
     return d;
   }
 
-  var section1=document.createElement('div');
-  section1.setAttribute('style','font-size:.72rem;color:var(--tx3);font-family:var(--fD);letter-spacing:.06em;text-transform:uppercase;padding:4px 0 10px');
-  section1.textContent='Your Account';
+  function sectionLabel(txt){
+    var d=document.createElement('div');
+    d.setAttribute('style','font-size:.68rem;color:var(--tx3);font-family:var(--fM);letter-spacing:.08em;text-transform:uppercase;padding:18px 0 8px');
+    d.textContent=txt;
+    return d;
+  }
 
+  // ── Name change card ───────────────────────────────────────
+  var nameCard=document.createElement('div');
+  nameCard.setAttribute('style','padding:14px;background:rgba(123,94,167,.08);border:1px solid var(--vb);border-radius:14px;margin-bottom:4px');
+  nameCard.innerHTML='<div style="font-size:.78rem;color:var(--tx3);margin-bottom:8px">Anonymous Name</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'
+      +'<input id="name-change-inp" maxlength="30" placeholder="New anonymous name..." value="'+nm+'" '
+        +'style="flex:1;background:var(--bg1);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;color:var(--tx);font-size:.88rem;outline:none"/>'
+      +'<button id="name-change-btn" style="padding:9px 14px;background:var(--v);border:none;border-radius:10px;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap">Save</button>'
+    +'</div>'
+    +'<div id="name-change-msg" style="font-size:.72rem;margin-top:6px;color:var(--tx3)">One change per 7 days. 2–30 chars, letters/numbers only.</div>';
+
+  nameCard.querySelector('#name-change-btn').onclick=async function(){
+    var inp=nameCard.querySelector('#name-change-inp');
+    var msg=nameCard.querySelector('#name-change-msg');
+    var newName=inp.value.trim();
+    if(!newName||newName===nm){msg.textContent='No change made.';return;}
+    if(newName.length<2||newName.length>30){msg.style.color='var(--cr)';msg.textContent='Must be 2–30 characters.';return;}
+    var btn=nameCard.querySelector('#name-change-btn');
+    btn.disabled=true;btn.textContent='Saving...';
+    try{
+      var r=await api('/api/users/me',{method:'PATCH',body:JSON.stringify({anonymousName:newName})});
+      var d=await r.json();
+      if(!r.ok){msg.style.color='var(--cr)';msg.textContent=d.message||'Failed.';btn.disabled=false;btn.textContent='Save';return;}
+      // Update local session
+      user.anonymousName=d.anonymousName||newName;
+      localStorage.setItem('user',JSON.stringify(user));
+      applyUser();
+      msg.style.color='var(--lm)';msg.textContent='✅ Name changed to "'+d.anonymousName+'"!';
+      btn.textContent='Saved ✓';
+      setTimeout(function(){btn.disabled=false;btn.textContent='Save';},3000);
+    }catch(e){msg.style.color='var(--cr)';msg.textContent='Network error';btn.disabled=false;btn.textContent='Save';}
+  };
+
+  // ── Emoji picker ───────────────────────────────────────────
+  var emojiCard=document.createElement('div');
+  emojiCard.setAttribute('style','padding:14px;background:rgba(123,94,167,.06);border:1px solid var(--bd);border-radius:14px;margin-top:10px');
+  var currentEmoji=user?user.avatarEmoji||'🎭':'🎭';
+  var emojis=['🎭','🌙','⭐','🦋','🌊','🔥','💫','🎪','🌸','🦊','🐉','🌺','💎','🎯','🌈','🦅'];
+  var emojiHtml='<div style="font-size:.78rem;color:var(--tx3);margin-bottom:10px">Avatar Emoji</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  emojis.forEach(function(em){
+    emojiHtml+='<button class="emo-pick-btn" data-em="'+em+'" style="font-size:1.4rem;background:'+(em===currentEmoji?'rgba(123,94,167,.3)':'rgba(255,255,255,.04)')+';border:'+(em===currentEmoji?'2px solid var(--v)':'1.5px solid var(--bd)')+';border-radius:10px;width:42px;height:42px;cursor:pointer;transition:all .15s">'+em+'</button>';
+  });
+  emojiHtml+='</div>';
+  emojiCard.innerHTML=emojiHtml;
+  emojiCard.querySelectorAll('.emo-pick-btn').forEach(function(btn){
+    btn.onclick=async function(){
+      var em=btn.getAttribute('data-em');
+      emojiCard.querySelectorAll('.emo-pick-btn').forEach(function(b){
+        b.style.background='rgba(255,255,255,.04)';b.style.border='1.5px solid var(--bd)';
+      });
+      btn.style.background='rgba(123,94,167,.3)';btn.style.border='2px solid var(--v)';
+      try{
+        var r=await api('/api/users/me',{method:'PATCH',body:JSON.stringify({avatarEmoji:em})});
+        if(r.ok){var d=await r.json();user.avatarEmoji=em;localStorage.setItem('user',JSON.stringify(user));applyUser();toast('Avatar updated! '+em);}
+      }catch(e){}
+    };
+  });
+
+  // ── Privacy info ───────────────────────────────────────────
   var privacyNote=document.createElement('div');
-  privacyNote.setAttribute('style','padding:12px 14px;background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.15);border-radius:12px;font-size:.82rem;color:var(--tx2);line-height:1.6;margin:16px 0');
+  privacyNote.setAttribute('style','padding:12px 14px;background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.15);border-radius:12px;font-size:.82rem;color:var(--tx2);line-height:1.6;margin:4px 0');
   privacyNote.textContent='No real name stored. No phone number. No face. Your identity is always anonymous. Location is city-level only, never exact GPS.';
 
-  var section2=document.createElement('div');
-  section2.setAttribute('style','font-size:.72rem;color:var(--tx3);font-family:var(--fD);letter-spacing:.06em;text-transform:uppercase;padding:4px 0 10px;margin-top:8px');
-  section2.textContent='Privacy';
-
+  // ── Action buttons ─────────────────────────────────────────
   var exportBtn=document.createElement('button');
   exportBtn.className='btn btn-g';
   exportBtn.setAttribute('style','padding:12px 16px;border-radius:12px;text-align:left;width:100%;margin-bottom:8px');
@@ -5816,11 +6007,14 @@ function openSecurityInline(){
     }
   };
 
-  body.appendChild(section1);
-  body.appendChild(row('Anonymous Name', nm));
+  // ── Build layout ───────────────────────────────────────────
+  body.appendChild(sectionLabel('Your Profile'));
+  body.appendChild(nameCard);
+  body.appendChild(emojiCard);
+  body.appendChild(sectionLabel('Account Info'));
   body.appendChild(row('Email', email));
   body.appendChild(row('Account created', joined));
-  body.appendChild(section2);
+  body.appendChild(sectionLabel('Privacy'));
   body.appendChild(privacyNote);
   body.appendChild(exportBtn);
   body.appendChild(logoutBtn);
@@ -5829,11 +6023,46 @@ function openSecurityInline(){
 
 
 
+// ── Offline detection ─────────────────────────────────────────
+function updateOnlineStatus(){
+  const banner=document.getElementById('offline-banner');
+  if(!banner)return;
+  if(navigator.onLine){
+    banner.style.display='none';
+    // Refresh feed when back online
+    if(window._wasOffline){window._wasOffline=false;loadFeed(true);}
+  } else {
+    banner.style.display='block';
+    window._wasOffline=true;
+  }
+}
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
 async function main(){
   await initSession();
   checkMidnightMode();
 
-  // ── Parallel startup — load everything at once instead of sequentially ──
+  // ── Offline banner ────────────────────────────────────────
+  function updateOnlineStatus(){
+    var existing=document.getElementById('offline-banner');
+    if(!navigator.onLine){
+      if(!existing){
+        var banner=document.createElement('div');
+        banner.id='offline-banner';
+        banner.setAttribute('style','position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(239,68,68,.92);color:#fff;text-align:center;padding:10px;font-size:.82rem;font-weight:700;font-family:var(--fD)');
+        banner.textContent='⚠️ No internet connection — some features may not work';
+        document.body.appendChild(banner);
+      }
+    } else {
+      if(existing) existing.remove();
+    }
+  }
+  window.addEventListener('online',  updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+
+  // ── Parallel startup ──────────────────────────────────────
   Promise.all([
     loadFeed(),
     loadStories(),

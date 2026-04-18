@@ -369,7 +369,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   display:none;flex-direction:column;overflow-y:auto}
 #pmodal.on{display:flex;align-items:flex-end}
 .pmodal-inner{background:var(--bg1);border-radius:22px 22px 0 0;margin-top:auto;width:100%;
+  max-height:90vh;display:flex;flex-direction:column;
   padding-bottom:calc(32px + var(--safe));animation:shUp .25s cubic-bezier(.32,1,.4,1)}
+#comments-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 18px;min-height:60px}
 /* skeleton */
 .skel{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
   background-size:200%;animation:shim 1.5s infinite;border-radius:6px}
@@ -1457,7 +1459,8 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   </div>
 
   <!-- Menu tab -->
-  <div id="profile-menu" style="display:none;margin:8px 18px 0">
+  <div
+    <div class="pmi" onclick="openMoodCalendar()"><span style="font-size:1.1rem;width:22px">📅</span><span style="flex:1;font-size:.88rem;font-weight:500">Mood Calendar</span><span style="color:var(--tx3)">›</span></div> id="profile-menu" style="display:none;margin:8px 18px 0">
     <!-- Special Features Section -->
     <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);font-family:var(--fM);margin-bottom:8px;padding:0 2px">✨ Special Spaces</div>
     <div class="pmi" style="background:rgba(196,168,255,.06);border:1px solid rgba(196,168,255,.15);border-radius:14px;margin-bottom:6px" onclick="open3amRoom()"><span style="font-size:1.1rem;width:22px">🌙</span><span style="flex:1;font-size:.88rem;font-weight:500;color:var(--v3)">3am Room</span><span style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">11pm–4am only</span></div>
@@ -1469,6 +1472,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <!-- Standard items -->
     <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);font-family:var(--fM);margin-bottom:8px;padding:0 2px">Your Space</div>
     <div class="pmi" onclick="openConfessionsInline()"><span style="font-size:1.1rem;width:22px">🤫</span><span style="flex:1;font-size:.88rem;font-weight:500">My Confessions</span><span style="color:var(--tx3)">›</span></div>
+    <div class="pmi" onclick="openComplimentInbox()"><span style="font-size:1.1rem;width:22px">🎁</span><span style="flex:1;font-size:.88rem;font-weight:500">Compliment Inbox</span><span id="comp-inbox-badge" style="display:none;background:var(--pk);color:#fff;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:100px">New</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="profileTab('diary',q('pt-diary'))"><span style="font-size:1.1rem;width:22px">📖</span><span style="flex:1;font-size:.88rem;font-weight:500">My Diary</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="openBadgesInline()"><span style="font-size:1.1rem;width:22px">🏅</span><span style="flex:1;font-size:.88rem;font-weight:500">Badges & Rewards</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="showLeaderboard()"><span style="font-size:1.1rem;width:22px">🏆</span><span style="flex:1;font-size:.88rem;font-weight:500">Weekly Leaderboard</span><span style="color:var(--tx3)">›</span></div>
@@ -2857,16 +2861,65 @@ async function openPModal(id){
       cl.innerHTML='<div style="padding:16px 18px;text-align:center;font-size:.82rem;color:var(--tx3)">No comments yet — be the first 💬</div>';
       return;
     }
-    cl.innerHTML=cs.map(cm=>`<div style="padding:11px 0;border-bottom:1px solid var(--bd)">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-        <span style="font-size:1.05rem">${cm.authorEmoji||cm.avatarEmoji||'🎭'}</span>
-        <b style="font-size:.82rem;font-family:var(--fD);color:var(--tx)">${esc(cm.authorName||cm.anonymousName||'Anonymous')}</b>
-        <span style="font-size:.7rem;color:var(--tx3)">${timeAgo(cm.createdAt)}</span>
-      </div>
-      <div style="font-size:.875rem;padding-left:28px;color:var(--tx2);line-height:1.55">${esc(cm.text||cm.content||'')}</div>
-    </div>`).join('');
-    // Scroll comments to top
+    cl.innerHTML='';
     cl.scrollTop=0;
+    cs.forEach(cm=>{
+      var cmDiv=document.createElement('div');
+      cmDiv.setAttribute('style','padding:11px 0;border-bottom:1px solid var(--bd)');
+      var cmId=cm._id||cm.id||Math.random().toString(36).slice(2);
+      cmDiv.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+        +'<span style="font-size:1.05rem">'+(cm.authorEmoji||cm.avatarEmoji||'🎭')+'</span>'
+        +'<b style="font-size:.82rem;font-family:var(--fD);color:var(--tx)">'+esc(cm.authorName||cm.anonymousName||'Anonymous')+'</b>'
+        +'<span style="font-size:.7rem;color:var(--tx3)">'+timeAgo(cm.createdAt)+'</span>'
+        +'</div>'
+        +'<div style="font-size:.875rem;padding-left:28px;color:var(--tx2);line-height:1.55">'+esc(cm.text||cm.content||'')+'</div>'
+        // Replies
+        +'<div id="replies-'+cmId+'" style="margin-left:28px;margin-top:4px"></div>'
+        +'<div id="reply-box-'+cmId+'" style="display:none;margin-left:28px;margin-top:6px"></div>';
+      // Create reply input via DOM to avoid quote nesting
+      var replyBox=cmDiv.querySelector('#reply-box-'+cmId);
+      if(replyBox){
+        var rinp=document.createElement('input');
+        rinp.id='reply-inp-'+cmId;
+        rinp.maxLength=300;
+        rinp.placeholder='Write a reply...';
+        rinp.setAttribute('style','flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:7px 12px;color:var(--tx);font-size:.82rem;outline:none');
+        var rbtn=document.createElement('button');
+        rbtn.setAttribute('style','padding:7px 12px;background:var(--v);border:none;border-radius:10px;color:#fff;font-size:.78rem;font-weight:700;cursor:pointer');
+        rbtn.textContent='Send';
+        rbtn.onclick=(function(pid,cid){return function(){submitReply(pid,cid);};})(id,cmId);
+        var rflex=document.createElement('div');
+        rflex.setAttribute('style','display:flex;gap:6px');
+        rflex.appendChild(rinp); rflex.appendChild(rbtn);
+        replyBox.appendChild(rflex);
+      }
+      // Add reply button via DOM (avoids quote nesting in template string)
+      var headerDiv=cmDiv.querySelector('div');
+      if(headerDiv){
+        var replyBtn=document.createElement('button');
+        replyBtn.setAttribute('style','margin-left:auto;background:none;border:none;font-size:.72rem;color:var(--tx3);cursor:pointer;padding:2px 6px;border-radius:6px');
+        replyBtn.textContent='↩ Reply';
+        replyBtn.onclick=(function(id){return function(){toggleReplyBox(id);};})(cmId);
+        headerDiv.appendChild(replyBtn);
+      }
+
+      // Load existing replies
+      if((cm.replies||[]).length){
+        var repDiv=cmDiv.querySelector('#replies-'+cmId);
+        cm.replies.forEach(function(rep){
+          var rd=document.createElement('div');
+          rd.setAttribute('style','padding:6px 0;border-top:1px solid var(--bd2)');
+          rd.innerHTML='<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">'
+            +'<span style="font-size:.9rem">'+(rep.authorEmoji||'🎭')+'</span>'
+            +'<b style="font-size:.78rem;color:var(--tx)">'+esc(rep.authorName||'Anonymous')+'</b>'
+            +'<span style="font-size:.65rem;color:var(--tx3)">'+timeAgo(rep.createdAt)+'</span>'
+            +'</div>'
+            +'<div style="font-size:.82rem;padding-left:22px;color:var(--tx2)">'+esc(rep.text||'')+'</div>';
+          repDiv.appendChild(rd);
+        });
+      }
+      cl.appendChild(cmDiv);
+    });
   }catch(e){
     cl.innerHTML='<div style="padding:16px 18px;text-align:center;color:var(--tx3)">Couldn\x27t load comments — tap to retry</div>';
     cl.onclick=()=>openPModal(id);
@@ -2875,6 +2928,54 @@ async function openPModal(id){
 }
 
 function closePModal(){q('pmodal').classList.remove('on');document.body.style.overflow='';currentPost=null;}
+function toggleReplyBox(cmId){
+  var box=document.getElementById('reply-box-'+cmId);
+  if(!box)return;
+  var isHidden=box.style.display==='none'||!box.style.display;
+  box.style.display=isHidden?'block':'none';
+  if(isHidden){var inp=document.getElementById('reply-inp-'+cmId);if(inp)setTimeout(()=>inp.focus(),80);}
+}
+
+async function submitReply(postId, cmId){
+  var inp=document.getElementById('reply-inp-'+cmId);
+  if(!inp)return;
+  var txt=inp.value.trim();
+  if(!txt)return;
+  inp.disabled=true;
+  try{
+    var r=await api('/api/posts/'+postId+'/comments/'+cmId+'/replies',{
+      method:'POST',
+      body:JSON.stringify({text:txt})
+    });
+    if(!r.ok){var e=await r.json().catch(()=>({}));toast(e.message||'Reply failed');inp.disabled=false;return;}
+    var d=await r.json();
+    var rep=d.reply||d;
+    // Insert reply into UI
+    var repDiv=document.getElementById('replies-'+cmId);
+    if(repDiv){
+      var rd=document.createElement('div');
+      rd.setAttribute('style','padding:8px 0 8px 12px;border-left:2px solid rgba(123,94,167,.25);margin-top:6px;animation:cdIn .2s ease both');
+      var replyHeader=document.createElement('div');
+      replyHeader.setAttribute('style','display:flex;align-items:center;gap:6px;margin-bottom:3px');
+      replyHeader.innerHTML='<span style="font-size:.9rem">'+(user&&user.avatarEmoji?user.avatarEmoji:'🎭')+'</span>'
+        +'<b style="font-size:.78rem;color:var(--tx)">'+esc(user&&user.anonymousName?user.anonymousName:'You')+'</b>'
+        +'<span style="font-size:.65rem;color:var(--tx3)">just now</span>';
+      var replyText=document.createElement('div');
+      replyText.setAttribute('style','font-size:.82rem;color:var(--tx2);line-height:1.5;padding-left:22px');
+      replyText.textContent=txt;
+      rd.appendChild(replyHeader);
+      rd.appendChild(replyText);
+      repDiv.appendChild(rd);
+    }
+    inp.value='';
+    var box=document.getElementById('reply-box-'+cmId);
+    if(box)box.style.display='none';
+    toast('↩ Reply sent!');
+    awardXP(1,'Replied to comment');
+  }catch(e){toast('Network error');console.error(e);}
+  finally{inp.disabled=false;}
+}
+
 async function submitComment(){
   if(!currentPost)return;
   const inp=q('comment-inp');const txt=inp.value.trim();if(!txt)return;
@@ -3727,6 +3828,8 @@ function initSocket(){
 
   socket.on('connect',()=>{
   socket.emit('register');
+  // Join personal user room for private notifications (compliments, DMs)
+  if(user&&user._id) socket.emit('join-user-room', user._id);
   // If we were in a chat room, rejoin
   if(rcRoom && rcState==='active'){
     socket.emit('rejoin-room',{roomId:rcRoom});
@@ -3881,8 +3984,17 @@ function initSocket(){
   });
 
   socket.on('compliment-received',(d)=>{
-    const msg=d.message||'A stranger thinks you\'re amazing ✨';
-    showGratitudeNotif(msg);
+    const msg=d.message||d.text||'A stranger thinks you\'re amazing ✨';
+    const emoji=d.emoji||'🌟';
+    // Persist to localStorage inbox
+    var stored=JSON.parse(localStorage.getItem('ann_compliments')||'[]');
+    stored.unshift({message:msg,emoji:emoji,ts:Date.now()});
+    if(stored.length>50)stored=stored.slice(0,50); // keep last 50
+    localStorage.setItem('ann_compliments',JSON.stringify(stored));
+    // Show badge
+    var badge=document.getElementById('comp-inbox-badge');
+    if(badge)badge.style.display='inline';
+    showGratitudeNotif(emoji+' '+msg);
     addNotification('gift',msg,null);
   });
 
@@ -4140,41 +4252,37 @@ async function sendCompliment(){
   btn.innerHTML='<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;margin-right:6px"></span>Sending...';
 
   try{
-    // Try to send via API if we have a target ID
-    if(complimentTargetId){
-      await api(`/api/users/${complimentTargetId}/compliment`,{
-        method:'POST',
-        body:JSON.stringify({message:selectedCompliment})
-      }).catch(()=>{}); // Fail silently — compliment always "sends" from UX perspective
-    }else{
-      // Post as an anonymous compliment in the feed
-      // This is a real post that the target might see
-      await api('/api/posts',{
-        method:'POST',
-        body:JSON.stringify({
-          type:'post',
-          caption:`💌 Anonymous: "${selectedCompliment}" — for ${complimentTargetName}`,
-          emotion:'grateful',
-        })
-      }).catch(()=>{});
+    if(!complimentTargetId){
+      // No target — close gracefully, nothing sent to feed
+      closeCompliment();
+      toast('🎁 Select someone to send a compliment to');
+      return;
     }
 
+    // ── PRIVATE: goes only to recipient's inbox, NEVER to public feed ──
+    await api(`/api/users/${complimentTargetId}/compliment`,{
+      method:'POST',
+      body:JSON.stringify({
+        message: selectedCompliment,
+        emoji:   selectedComplimentEmoji||'🌟',
+      })
+    });
+
     closeCompliment();
 
-    // Show beautiful success animation
-    toast(`🎁 Sent secretly to ${complimentTargetName}!`);
-
-    // Show what was sent, then fade
+    // Beautiful success moment for the sender
+    toast(`🎁 Sent secretly to ${complimentTargetName||'them'}!`);
     setTimeout(()=>{
-      toast(`💌 "${selectedCompliment.substring(0,40)}${selectedCompliment.length>40?'...':''}"`)
-    },800);
+      toast(`💌 Only they can see it — in their private inbox`);
+    },1600);
 
     awardXP(10,'Sent an anonymous compliment');
+    haptic('celebration');
 
   }catch(e){
-    // Even on error, show success — the point is the dopamine of giving
+    // Even on network error — show success (dopamine for giving)
     closeCompliment();
-    toast('🎁 Compliment sent into the universe ✨');
+    toast('🎁 Compliment sent ✨');
     awardXP(10,'Sent an anonymous compliment');
   }
 }
@@ -4985,29 +5093,38 @@ function dismissPushBanner(){
 async function subscribePush(){
   try{
     const reg=await navigator.serviceWorker.ready;
-    // VAPID public key — replace with your actual key from:
-    // node -e "const webpush=require('web-push');const k=webpush.generateVAPIDKeys();console.log(k)"
-    // Or use Firebase Cloud Messaging instead (simpler)
-    const VAPID_PUBLIC_KEY=window.VAPID_KEY||''; // Set via <meta name="vapid-key"> or window.VAPID_KEY
-    if(!VAPID_PUBLIC_KEY){console.warn('[PWA] VAPID key not set — push disabled');return;}
-    const sub=await reg.pushManager.subscribe({
-      userVisibleOnly:true,
-      applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    }).catch(e=>{
-      // VAPID key mismatch or unsupported — save FCM token approach instead
-      console.warn('VAPID push failed, trying FCM approach:', e.message);
-      return null;
-    });
-    if(!sub){return;}
-    await api('/api/users/push-subscribe',{
-      method:'POST',
-      body:JSON.stringify({subscription:sub})
-    });
-    toast('🔔 Notifications enabled!');
-    
-  }catch(e){
-    console.warn('Push subscribe error:',e.message);
-  }
+
+    // ── FCM token approach (uses firebase-admin on backend) ────
+    if(window.firebaseMessaging){
+      try{
+        const {getToken}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js').catch(()=>({}));
+        if(getToken){
+          const fcmToken=await getToken(window.firebaseMessaging,{serviceWorkerRegistration:reg});
+          if(fcmToken){
+            await api('/api/users/push-subscribe',{method:'POST',body:JSON.stringify({fcmToken})});
+            console.log('[Push] FCM token registered');
+            return;
+          }
+        }
+      }catch(fcmErr){
+        console.warn('[Push] FCM failed, trying VAPID:',fcmErr.message);
+      }
+    }
+
+    // ── VAPID web push fallback ────────────────────────────────
+    let VAPID_KEY=window._vapidKey||'';
+    if(!VAPID_KEY){
+      try{
+        const cr=await fetch(API+'/api/config/vapid-key');
+        if(cr.ok){const cfg=await cr.json();VAPID_KEY=cfg.key||'';}
+      }catch(_){}
+    }
+    if(!VAPID_KEY){console.warn('[Push] No VAPID key');return;}
+    const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_KEY)}).catch(()=>null);
+    if(!sub)return;
+    await api('/api/users/push-subscribe',{method:'POST',body:JSON.stringify({subscription:sub})});
+    console.log('[Push] VAPID subscription saved');
+  }catch(e){console.warn('[Push] error:',e.message);}
 }
 
 function urlBase64ToUint8Array(base64String){
@@ -5346,8 +5463,13 @@ function openPremium(){q('premium-sheet')?.classList.add('on');}
 function closePremium(){q('premium-sheet')?.classList.remove('on');}
 
 async function startPremiumCheckout(){
-  const RAZORPAY_KEY='rzp_live_XXXXXXXXXXXXXXXX'; // ← Replace with your key
-  if(RAZORPAY_KEY.includes('XXXX')){
+  // ── Get Razorpay key from backend config ─────────────────────
+  let RAZORPAY_KEY='';
+  try{
+    const cfgR=await fetch(API+'/api/config/razorpay-key');
+    if(cfgR.ok){const cfg=await cfgR.json();RAZORPAY_KEY=cfg.key||'';}
+  }catch(_){}
+  if(!RAZORPAY_KEY){
     toast('💳 Premium payment coming soon!');closePremium();return;
   }
   const opts={
@@ -5479,7 +5601,7 @@ async function showLeaderboard(){
   document.body.appendChild(ov);
   document.getElementById('lb-close-btn').onclick=function(){ov.remove();};
   try{
-    var r=await api('/api/posts/leaderboard');
+    var r=await api('/api/users/leaderboard');
     var d=await r.json();
     var lb=d.leaderboard||[];
     var medals=['🥇','🥈','🥉'];
@@ -5856,6 +5978,174 @@ async function openConfessionsInline(){
   }
 }
 
+async function openComplimentInbox(){
+  var ov=_makeOverlay('🎁 Compliment Inbox','');
+  var body=ov.querySelector('#inline-overlay-body');
+  body.innerHTML='<div style="padding:32px;text-align:center"><div class="spin"></div></div>';
+
+  // ── Privacy notice at top ──────────────────────────────────
+  var notice=document.createElement('div');
+  notice.setAttribute('style','padding:10px 12px;background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.15);border-radius:10px;font-size:.75rem;color:var(--tl);margin-bottom:16px;line-height:1.5');
+  notice.textContent='🔒 Only you can see these. Nobody else — not even the sender knows your name.';
+
+  try{
+    // ── Load from backend (authoritative) ─────────────────────
+    var r=await api('/api/users/me/compliments');
+    var d=await r.json();
+    var serverItems=d.compliments||[];
+
+    // ── Merge with localStorage (for offline/recent socket items) ─
+    var localItems=JSON.parse(localStorage.getItem('ann_compliments')||'[]');
+    // Deduplicate: server is source of truth, local only adds very recent
+    var serverTs=new Set(serverItems.map(function(i){return Math.floor((new Date(i.sentAt||0).getTime())/1000);}));
+    var localOnly=localItems.filter(function(i){
+      var ts=Math.floor((i.ts||0)/1000);
+      return !serverTs.has(ts);
+    });
+    var all=[...serverItems.map(function(i){return {
+      message:i.message, emoji:i.emoji||'🌟',
+      ts:new Date(i.sentAt).getTime(), read:i.read
+    }}), ...localOnly].sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+
+    body.innerHTML='';
+    // Clear unread badge
+    var badge=document.getElementById('comp-inbox-badge');
+    if(badge)badge.style.display='none';
+    localStorage.setItem('ann_comp_seen',String(all.length));
+
+    if(!all.length){
+      body.appendChild(notice);
+      var empty=document.createElement('div');
+      empty.className='empty';
+      empty.innerHTML='<div style="font-size:3rem">🎁</div>'
+        +'<div style="font-family:var(--fD);font-weight:700;font-size:.95rem;margin-top:10px">No compliments yet</div>'
+        +'<div style="font-size:.82rem;color:var(--tx3);margin-top:6px;line-height:1.6">When someone anonymously appreciates you, it shows here — and only here.</div>';
+      body.appendChild(empty);
+      return;
+    }
+
+    body.appendChild(notice);
+    all.forEach(function(item){
+      var card=document.createElement('div');
+      var isNew=!item.read;
+      card.setAttribute('style','padding:16px;background:'+(isNew?'rgba(255,133,161,.08)':'rgba(255,133,161,.04)')+';border:1px solid rgba(255,133,161,'+(isNew?'.25':'.12')+');border-radius:14px;margin-bottom:10px;position:relative');
+      if(isNew){
+        var dot=document.createElement('div');
+        dot.setAttribute('style','position:absolute;top:12px;right:12px;width:7px;height:7px;border-radius:50%;background:#F472B6');
+        card.appendChild(dot);
+      }
+      var emoDiv=document.createElement('div');
+      emoDiv.setAttribute('style','font-size:1.5rem;margin-bottom:8px');
+      emoDiv.textContent=item.emoji||'🌟';
+      var msgDiv=document.createElement('div');
+      msgDiv.setAttribute('style','font-size:.92rem;color:var(--tx);line-height:1.65;font-style:italic');
+      msgDiv.textContent='"'+(item.message||'')+'"';
+      var timeDiv=document.createElement('div');
+      timeDiv.setAttribute('style','font-size:.7rem;color:var(--tx3);margin-top:8px');
+      timeDiv.textContent=item.ts
+        ?new Date(item.ts).toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
+        :'Received anonymously';
+      card.appendChild(emoDiv);
+      card.appendChild(msgDiv);
+      card.appendChild(timeDiv);
+      body.appendChild(card);
+    });
+
+  }catch(err){
+    // Fallback to localStorage only
+    var localItems=JSON.parse(localStorage.getItem('ann_compliments')||'[]');
+    localItems.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+    body.innerHTML='';
+    body.appendChild(notice);
+    if(!localItems.length){
+      var empty=document.createElement('div');
+      empty.className='empty';
+      empty.innerHTML='<div style="font-size:3rem">🎁</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem;margin-top:10px">No compliments yet</div>';
+      body.appendChild(empty);
+      return;
+    }
+    localItems.forEach(function(item){
+      var card=document.createElement('div');
+      card.setAttribute('style','padding:16px;background:rgba(255,133,161,.04);border:1px solid rgba(255,133,161,.12);border-radius:14px;margin-bottom:10px');
+      var emoDiv=document.createElement('div');emoDiv.setAttribute('style','font-size:1.5rem;margin-bottom:8px');emoDiv.textContent=item.emoji||'🌟';
+      var msgDiv=document.createElement('div');msgDiv.setAttribute('style','font-size:.92rem;color:var(--tx);line-height:1.65;font-style:italic');msgDiv.textContent='"'+(item.message||item.text||'')+'"';
+      var timeDiv=document.createElement('div');timeDiv.setAttribute('style','font-size:.7rem;color:var(--tx3);margin-top:8px');
+      timeDiv.textContent=item.ts?new Date(item.ts).toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Received anonymously';
+      card.appendChild(emoDiv);card.appendChild(msgDiv);card.appendChild(timeDiv);
+      body.appendChild(card);
+    });
+  }
+}
+
+function openMoodCalendar(){
+  var MOOD_EMOJI={happy:'😊',sad:'😔',excited:'🤩',anxious:'😰',grateful:'🙏',lonely:'🌧️',angry:'😤',inspired:'✨',neutral:'😶'};
+  var MOOD_COLOR={happy:'#F59E0B',sad:'#6366F1',excited:'#EC4899',anxious:'#8B5CF6',grateful:'#10B981',lonely:'#3B82F6',angry:'#EF4444',inspired:'#F97316',neutral:'#888'};
+
+  // Build 30-day calendar from localStorage
+  var days=[];
+  var today=new Date();
+  for(var i=29;i>=0;i--){
+    var d=new Date(today);
+    d.setDate(today.getDate()-i);
+    var key='ann_mood_'+d.toDateString();
+    var mood=localStorage.getItem(key)||null;
+    days.push({date:d,mood:mood});
+  }
+
+  var streakCount=0;
+  for(var i=days.length-1;i>=0;i--){
+    if(days[i].mood)streakCount++;
+    else break;
+  }
+
+  var ov=_makeOverlay('📅 Mood Calendar','');
+  var body=ov.querySelector('#inline-overlay-body');
+
+  // Stats row
+  var logged=days.filter(function(d){return d.mood;}).length;
+  var statsHtml='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px">'
+    +'<div style="background:rgba(123,94,167,.1);border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.4rem;font-weight:700;color:var(--v3)">'+logged+'</div><div style="font-size:.7rem;color:var(--tx3)">Days logged</div></div>'
+    +'<div style="background:rgba(244,162,97,.1);border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.4rem;font-weight:700;color:var(--go)">'+streakCount+'🔥</div><div style="font-size:.7rem;color:var(--tx3)">Current streak</div></div>'
+    +'<div style="background:rgba(0,201,167,.1);border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.4rem;font-weight:700;color:var(--tl)">'+Math.round(logged/30*100)+'%</div><div style="font-size:.7rem;color:var(--tx3)">Consistency</div></div>'
+    +'</div>';
+
+  // Calendar grid — 7 columns (Sun-Sat)
+  var calHtml='<div style="font-size:.72rem;color:var(--tx3);display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:4px">';
+  ['S','M','T','W','T','F','S'].forEach(function(d){calHtml+='<div>'+d+'</div>';});
+  calHtml+='</div>';
+
+  // Pad start to correct day of week
+  var firstDay=days[0].date.getDay();
+  calHtml+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px">';
+  for(var i=0;i<firstDay;i++) calHtml+='<div></div>';
+
+  days.forEach(function(day){
+    var isToday=day.date.toDateString()===today.toDateString();
+    var bg=day.mood?(MOOD_COLOR[day.mood]||'#7B5EA7'):'rgba(255,255,255,.04)';
+    var border=isToday?'2px solid #fff':'1.5px solid transparent';
+    var title=day.mood?day.mood.charAt(0).toUpperCase()+day.mood.slice(1):'No mood';
+    calHtml+='<div title="'+day.date.toLocaleDateString('en-IN')+' — '+title+'" '
+      +'style="aspect-ratio:1;border-radius:8px;background:'+bg+';border:'+border
+      +';display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:default;opacity:'+(day.mood?'1':'0.3')+'">'
+      +(day.mood?(MOOD_EMOJI[day.mood]||'🌊'):'')
+      +'</div>';
+  });
+  calHtml+='</div>';
+
+  // Legend
+  var legendHtml='<div style="font-size:.72rem;color:var(--tx3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Mood Legend</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:8px">';
+  Object.keys(MOOD_EMOJI).forEach(function(mood){
+    legendHtml+='<div style="display:flex;align-items:center;gap:4px;font-size:.78rem;color:var(--tx2)">'
+      +'<span style="width:10px;height:10px;border-radius:50%;background:'+(MOOD_COLOR[mood]||'#888')+';display:inline-block"></span>'
+      +MOOD_EMOJI[mood]+' '+mood
+      +'</div>';
+  });
+  legendHtml+='</div>';
+
+  body.innerHTML=statsHtml+calHtml+legendHtml;
+}
+
 function openBadgesInline(){
   var xp=user?user.xp||0:0;
   var lv=Math.floor(xp/100)+1;
@@ -6102,7 +6392,31 @@ async function main(){
   setTimeout(initInfiniteScroll, 800);
 
   // Init push notifications after 5s (not on first load)
-  setTimeout(initPushNotifications, 5000);
+  // ── Load Firebase Messaging SDK for push notifications ─────
+  setTimeout(async ()=>{
+    try{
+      // Only load if firebase-messaging-sw.js exists on the server
+      // Replace the config values below with yours from Firebase Console
+      const FIREBASE_CONFIG = window._firebaseConfig || null;
+      if(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'PASTE_YOUR_apiKey_HERE'){
+        const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js').catch(()=>({}));
+        const {getMessaging,getToken,onMessage}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js').catch(()=>({}));
+        if(initializeApp&&getMessaging){
+          const app=initializeApp(FIREBASE_CONFIG);
+          window.firebaseMessaging=getMessaging(app);
+          // Show foreground notifications as toasts
+          if(onMessage){
+            onMessage(window.firebaseMessaging,(payload)=>{
+              const title=payload?.notification?.title||'annomuss';
+              const body=payload?.notification?.body||'';
+              toast(title+(body?' — '+body:''));
+            });
+          }
+        }
+      }
+    }catch(e){console.warn('[Firebase]',e.message);}
+    initPushNotifications();
+  }, 4000);
 
   // Mood checkin — only if not done today
   setTimeout(()=>{

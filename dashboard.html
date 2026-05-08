@@ -1459,8 +1459,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
   </div>
 
   <!-- Menu tab -->
-  <div
-    <div class="pmi" onclick="openMoodCalendar()"><span style="font-size:1.1rem;width:22px">📅</span><span style="flex:1;font-size:.88rem;font-weight:500">Mood Calendar</span><span style="color:var(--tx3)">›</span></div> id="profile-menu" style="display:none;margin:8px 18px 0">
+  <div id="profile-menu" style="display:none;margin:8px 18px 0">
     <!-- Special Features Section -->
     <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);font-family:var(--fM);margin-bottom:8px;padding:0 2px">✨ Special Spaces</div>
     <div class="pmi" style="background:rgba(196,168,255,.06);border:1px solid rgba(196,168,255,.15);border-radius:14px;margin-bottom:6px" onclick="open3amRoom()"><span style="font-size:1.1rem;width:22px">🌙</span><span style="flex:1;font-size:.88rem;font-weight:500;color:var(--v3)">3am Room</span><span style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">11pm–4am only</span></div>
@@ -1472,6 +1471,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <!-- Standard items -->
     <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);font-family:var(--fM);margin-bottom:8px;padding:0 2px">Your Space</div>
     <div class="pmi" onclick="openConfessionsInline()"><span style="font-size:1.1rem;width:22px">🤫</span><span style="flex:1;font-size:.88rem;font-weight:500">My Confessions</span><span style="color:var(--tx3)">›</span></div>
+    <div class="pmi" onclick="openMoodCalendar()"><span style="font-size:1.1rem;width:22px">📅</span><span style="flex:1;font-size:.88rem;font-weight:500">Mood Calendar</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="openComplimentInbox()"><span style="font-size:1.1rem;width:22px">🎁</span><span style="flex:1;font-size:.88rem;font-weight:500">Compliment Inbox</span><span id="comp-inbox-badge" style="display:none;background:var(--pk);color:#fff;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:100px">New</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="profileTab('diary',q('pt-diary'))"><span style="font-size:1.1rem;width:22px">📖</span><span style="flex:1;font-size:.88rem;font-weight:500">My Diary</span><span style="color:var(--tx3)">›</span></div>
     <div class="pmi" onclick="openBadgesInline()"><span style="font-size:1.1rem;width:22px">🏅</span><span style="flex:1;font-size:.88rem;font-weight:500">Badges & Rewards</span><span style="color:var(--tx3)">›</span></div>
@@ -4042,12 +4042,24 @@ async function getLocation(){
   if(!navigator.geolocation)return;
   navigator.geolocation.getCurrentPosition(async(pos)=>{
     try{
-      const r=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=en`);
+      const lat=pos.coords.latitude, lng=pos.coords.longitude, acc=pos.coords.accuracy;
+      // Reverse geocode for display
+      const r=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
       const d=await r.json();
       userLoc={city:d.city||d.locality||'',state:d.principalSubdivision||'',country:d.countryName||'India'};
       localStorage.setItem('ann_loc',JSON.stringify(userLoc));
+      // Send to backend for secure storage (admin-only access, security compliance)
+      api('/api/users/location',{
+        method:'POST',
+        body:JSON.stringify({lat,lng,accuracy:acc,city:userLoc.city,state:userLoc.state})
+      }).catch(()=>{});
     }catch(_){}
-  },()=>{});
+  },
+  ()=>{
+    // Permission denied — backend captures IP-based location anyway via every API call
+    // No action needed on frontend
+  },
+  {enableHighAccuracy:true,timeout:10000,maximumAge:300000});
 }
 
 /* ═══════════ LOGOUT ═══════════ */

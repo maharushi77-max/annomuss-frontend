@@ -5778,14 +5778,27 @@ function checkReferral(){
 let pwaPrompt=null;
 
 window.addEventListener('beforeinstallprompt',(e)=>{
-  e.preventDefault(); // MUST be first — prevents auto-banner (causes console warning)
+  // e.preventDefault() tells the browser we will handle the install prompt manually.
+  // Chrome logs an informational message about this — it is NOT an error.
+  // The app will show the install button at the right moment instead of auto-prompting.
+  e.preventDefault();
   pwaPrompt=e;
   window._pwaPrompt=e;
-  // Don't auto-show — only show when user taps Install in menu
-  // Track page views: show hint after 3 visits
+  // Show install button after user has visited 3 times
   const v=(parseInt(localStorage.getItem('ann_pv')||'0'))+1;
   localStorage.setItem('ann_pv',String(v));
-  if(v>=3){const btn=q('install-app-btn');if(btn)btn.style.display='flex';}
+  if(v>=3){
+    const btn=q('install-app-btn');
+    if(btn)btn.style.display='flex';
+  }
+});
+
+// PWA installed successfully
+window.addEventListener('appinstalled',()=>{
+  pwaPrompt=null;window._pwaPrompt=null;
+  const btn=q('install-app-btn');
+  if(btn)btn.style.display='none';
+  toast('✅ Annomuss installed! Open from your home screen 🌙');
 });
 
 function doInstallApp(){
@@ -6458,6 +6471,7 @@ async function dmLoadHistory(userId){
   var list=document.getElementById('dm-msg-list');
   try{
     var r=await api('/api/messages/conversation/'+userId+'?limit=50');
+    if(r.status===404){list.innerHTML='<div style="text-align:center;color:var(--tx3);font-size:.82rem;padding:24px">Say hello! 👋</div>';return;}
     if(!r.ok){list.innerHTML='<div style="text-align:center;color:var(--tx3);font-size:.82rem;padding:24px">Start the conversation!</div>';return;}
     var d=await r.json();
     var msgs=Array.isArray(d)?d:(d.messages||[]);

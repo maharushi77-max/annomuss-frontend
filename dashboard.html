@@ -3552,15 +3552,53 @@ async function loadInbox(){
     // Count unread and update bell badge
     const unreadCount=cs.filter(c=>c.unread).length;
     const badge=q('notif-badge');if(badge)badge.style.display=unreadCount>0?'block':'none';
-    l.innerHTML=cs.map(c=>`<div class="friend-card" onclick="location.href='/messages.html?with=${c.with||c._id||''}&name=${encodeURIComponent(c.withName||'Anonymous')}&emoji=${encodeURIComponent(c.withAvatar||'🎭')}'"><div class="fav">${c.withAvatar||'🎭'}</div><div style="flex:1;min-width:0"><div style="font-family:var(--fD);font-weight:700;font-size:.875rem">${esc(c.withName||'Anonymous')}</div><div style="font-size:.77rem;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${esc(c.lastMessage?.text||'Tap to chat')}</div></div>${c.unread?'<div style="width:8px;height:8px;border-radius:50%;background:var(--v)"></div>':''}</div>`).join('');
-  }catch(e){l.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">No messages yet</div></div>';}
+    l.innerHTML='';
+    cs.forEach(function(conv){
+      var card=document.createElement('div');
+      card.className='friend-card';
+      var uid=conv.with||conv._id||'';
+      var nm=conv.withName||'Anonymous';
+      var em=conv.withAvatar||'🎭';
+      card.onclick=function(){openInlineDM(uid,nm,em);};
+      var fav=document.createElement('div');fav.className='fav';fav.textContent=em;
+      var info=document.createElement('div');
+      info.setAttribute('style','flex:1;min-width:0');
+      var lastMsg=conv.lastMessage||conv.preview||'';
+      info.innerHTML='<div style="font-family:var(--fD);font-weight:700;font-size:.875rem">'+esc(nm)+'</div>'
+        +'<div style="font-size:.72rem;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">'+(lastMsg?esc(lastMsg):'Start chatting...')+'</div>';
+      if(conv.unread){
+        var badge=document.createElement('div');
+        badge.setAttribute('style','width:8px;height:8px;border-radius:50%;background:var(--v);flex-shrink:0');
+        card.appendChild(fav);card.appendChild(info);card.appendChild(badge);
+      } else {
+        card.appendChild(fav);card.appendChild(info);
+      }
+      l.appendChild(card);
+    });  }catch(e){l.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">No messages yet</div></div>';}
 }
 
 async function loadFriends(){
   const l=q('friends-list');l.innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
   try{const r=await api('/api/users/friends');const d=await r.json();const fs=Array.isArray(d)?d:(d.friends||[]);
     if(!fs.length){l.innerHTML='<div class="empty"><div style="font-size:3rem">👥</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">No friends yet</div><div style="font-size:.82rem;color:var(--tx3)">Discover people in the Discover tab</div></div>';return;}
-    l.innerHTML=fs.map(f=>`<div class="friend-card" onclick="location.href='/messages.html?with=${f._id}&name=${encodeURIComponent(f.anonymousName||'Anonymous')}&emoji=${encodeURIComponent(f.avatarEmoji||'🎭')}'"><div class="fav">${f.avatarEmoji||'🎭'}${f.online?'<div class="on-dot"></div>':''}</div><div style="flex:1;min-width:0"><div style="font-family:var(--fD);font-weight:700;font-size:.875rem">${esc(f.anonymousName||'Anonymous')}</div><div style="font-size:.72rem;color:var(--tx3);margin-top:2px">${f.online?'Online now':'Offline'}</div></div><button class="btn btn-sm btn-g" onclick="event.stopPropagation();location.href='/messages.html?with=${f._id}&name=${encodeURIComponent(f.anonymousName||'Anonymous')}&emoji=${encodeURIComponent(f.avatarEmoji||'🎭')}'">Message</button></div>`).join('');
+    l.innerHTML='';
+    fs.forEach(function(f){
+      var card=document.createElement('div');
+      card.className='friend-card';
+      card.onclick=function(){openInlineDM(f._id,f.anonymousName||'Anonymous',f.avatarEmoji||'🎭');};
+      var fav=document.createElement('div');fav.className='fav';fav.textContent=f.avatarEmoji||'🎭';
+      if(f.online){var dot=document.createElement('div');dot.className='on-dot';fav.appendChild(dot);}
+      var info=document.createElement('div');
+      info.setAttribute('style','flex:1;min-width:0');
+      info.innerHTML='<div style="font-family:var(--fD);font-weight:700;font-size:.875rem">'+esc(f.anonymousName||'Anonymous')+'</div>'
+        +'<div style="font-size:.72rem;color:var(--tx3);margin-top:2px">'+(f.online?'🟢 Online now':'Offline')+'</div>';
+      var msgBtn=document.createElement('button');
+      msgBtn.className='btn btn-sm btn-g';
+      msgBtn.textContent='Message';
+      msgBtn.onclick=function(e){e.stopPropagation();openInlineDM(f._id,f.anonymousName||'Anonymous',f.avatarEmoji||'🎭');};
+      card.appendChild(fav);card.appendChild(info);card.appendChild(msgBtn);
+      l.appendChild(card);
+    });
   }catch(e){l.innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">Couldn\'t load</div></div>';}
 }
 
@@ -3981,6 +4019,20 @@ function initSocket(){
         helped:'✨ Your post helped someone'})[d.type]||'❤️ Someone reacted to your post',
       d.postId);
     const badge=q('notif-badge');if(badge)badge.style.display='block';
+  });
+
+  // Real-time DM — if DM overlay is open and matches sender, append message
+  socket.on('dm-received', function(d){
+    if(dmOverlay&&dmRecipient&&dmRecipient._id===d.from){
+      // Overlay is open for this sender — append message
+      dmMessages.push({text:d.text,senderId:d.from,isMe:false,createdAt:d.createdAt||new Date().toISOString()});
+      dmRenderMessages();
+    } else {
+      // Not in that DM — show toast notification
+      toast((d.fromEmoji||'🎭')+' '+esc(d.fromName||'Someone')+': '+esc((d.text||'').slice(0,40)));
+      // Update inbox badge
+      var badge=q('notif-badge');if(badge)badge.style.display='block';
+    }
   });
 
   socket.on('compliment-received',(d)=>{
@@ -6340,6 +6392,144 @@ function updateOnlineStatus(){
 }
 window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
+
+// ══════════════════════════════════════════════════════════════
+//  INLINE DM CHAT — replaces messages.html redirect
+//  Called from friends list + inbox. No page navigation needed.
+// ══════════════════════════════════════════════════════════════
+let dmOverlay=null, dmRecipient=null, dmSocket=null, dmMessages=[];
+
+function openInlineDM(userId, name, emoji){
+  emoji=emoji||'🎭'; name=name||'Anonymous';
+  dmRecipient={_id:userId, anonymousName:name, avatarEmoji:emoji};
+  dmMessages=[];
+
+  // Remove existing overlay
+  if(dmOverlay){dmOverlay.remove();dmOverlay=null;}
+
+  // Build overlay
+  var ov=document.createElement('div');
+  ov.id='dm-overlay';
+  ov.setAttribute('style','position:fixed;inset:0;z-index:800;background:var(--bg1);display:flex;flex-direction:column;animation:pgIn .22s ease');
+
+  // Header
+  var hdr=document.createElement('div');
+  hdr.setAttribute('style','display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--bd);flex-shrink:0');
+  hdr.innerHTML='<button onclick="closeInlineDM()" style="background:none;border:none;font-size:1.2rem;color:var(--tx3);cursor:pointer;padding:0 4px">←</button>'
+    +'<div style="font-size:1.2rem">'+emoji+'</div>'
+    +'<div style="flex:1;min-width:0"><div style="font-family:var(--fD);font-weight:700;font-size:.9rem;color:var(--tx)">'+esc(name)+'</div><div id="dm-status" style="font-size:.72rem;color:var(--tx3)">Anonymous · Private</div></div>';
+
+  // Message list
+  var msgList=document.createElement('div');
+  msgList.id='dm-msg-list';
+  msgList.setAttribute('style','flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch');
+  msgList.innerHTML='<div style="text-align:center;padding:24px 0"><div class="spin"></div></div>';
+
+  // Input bar
+  var inputBar=document.createElement('div');
+  inputBar.setAttribute('style','display:flex;align-items:center;gap:10px;padding:12px 18px;border-top:1px solid var(--bd);flex-shrink:0;background:var(--bg1);padding-bottom:calc(12px + env(safe-area-inset-bottom))');
+  var inp=document.createElement('input');
+  inp.id='dm-inp';
+  inp.maxLength=500;
+  inp.placeholder='Message...';
+  inp.setAttribute('style','flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:100px;padding:10px 16px;color:var(--tx);font-size:.88rem;outline:none');
+  inp.onkeydown=function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();dmSend();}};
+  var sendBtn=document.createElement('button');
+  sendBtn.setAttribute('style','width:40px;height:40px;background:var(--v);border:none;border-radius:50%;color:#fff;font-size:1.1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center');
+  sendBtn.textContent='↑';
+  sendBtn.onclick=dmSend;
+  inputBar.appendChild(inp);
+  inputBar.appendChild(sendBtn);
+
+  ov.appendChild(hdr);
+  ov.appendChild(msgList);
+  ov.appendChild(inputBar);
+  document.body.appendChild(ov);
+  dmOverlay=ov;
+
+  // Focus input
+  setTimeout(function(){inp.focus();},200);
+
+  // Load message history
+  dmLoadHistory(userId);
+}
+
+async function dmLoadHistory(userId){
+  var list=document.getElementById('dm-msg-list');
+  try{
+    var r=await api('/api/messages/conversation/'+userId+'?limit=50');
+    if(!r.ok){list.innerHTML='<div style="text-align:center;color:var(--tx3);font-size:.82rem;padding:24px">Start the conversation!</div>';return;}
+    var d=await r.json();
+    var msgs=Array.isArray(d)?d:(d.messages||[]);
+    dmMessages=msgs;
+    dmRenderMessages();
+    // Scroll to bottom
+    setTimeout(function(){list.scrollTop=list.scrollHeight;},100);
+  }catch(e){
+    list.innerHTML='<div style="text-align:center;color:var(--tx3);font-size:.82rem;padding:24px">Say hello! 👋</div>';
+  }
+}
+
+function dmRenderMessages(){
+  var list=document.getElementById('dm-msg-list');
+  if(!list)return;
+  if(!dmMessages.length){
+    list.innerHTML='<div style="text-align:center;color:var(--tx3);font-size:.82rem;padding:24px">No messages yet. Say hello! 👋</div>';
+    return;
+  }
+  list.innerHTML='';
+  dmMessages.forEach(function(msg){
+    var isMe=msg.senderId===user?._id||msg.isMe;
+    var el=document.createElement('div');
+    el.setAttribute('style','display:flex;justify-content:'+(isMe?'flex-end':'flex-start'));
+    var bubble=document.createElement('div');
+    bubble.setAttribute('style','max-width:75%;padding:9px 14px;border-radius:'+(isMe?'16px 16px 4px 16px':'16px 16px 16px 4px')+';background:'+(isMe?'var(--v)':'var(--bg2)')+';color:'+(isMe?'#fff':'var(--tx)')+';font-size:.875rem;line-height:1.5;word-break:break-word');
+    bubble.textContent=msg.text||msg.content||'';
+    var time=document.createElement('div');
+    time.setAttribute('style','font-size:.65rem;color:'+(isMe?'rgba(255,255,255,.55)':'var(--tx3)')+';margin-top:3px;text-align:right');
+    time.textContent=msg.createdAt?timeAgo(msg.createdAt):'';
+    bubble.appendChild(time);
+    el.appendChild(bubble);
+    list.appendChild(el);
+  });
+  list.scrollTop=list.scrollHeight;
+}
+
+async function dmSend(){
+  var inp=document.getElementById('dm-inp');
+  if(!inp)return;
+  var txt=inp.value.trim();
+  if(!txt||!dmRecipient)return;
+  inp.value='';
+
+  // Optimistic insert
+  var now=new Date().toISOString();
+  dmMessages.push({text:txt,senderId:user?._id,isMe:true,createdAt:now});
+  dmRenderMessages();
+
+  try{
+    var r=await api('/api/messages/send',{
+      method:'POST',
+      body:JSON.stringify({recipientId:dmRecipient._id,text:txt})
+    });
+    if(!r.ok){
+      dmMessages.pop();
+      dmRenderMessages();
+      toast('Failed to send message ❌');
+    }
+  }catch(e){
+    dmMessages.pop();
+    dmRenderMessages();
+    toast('Network error');
+  }
+}
+
+function closeInlineDM(){
+  if(dmOverlay){dmOverlay.remove();dmOverlay=null;}
+  dmRecipient=null;
+  dmMessages=[];
+}
+
 
 async function main(){
   await initSession();

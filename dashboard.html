@@ -1894,6 +1894,10 @@ async function initSession(){
 }
 function applyUser(){
   if(!user)return;
+  // Cache following IDs for follow button rendering
+  if(!user._following && user.following){
+    user._following = (user.following||[]).map(String);
+  }
   // ── null-safe DOM writer — never crashes on missing elements ──
   function set(id,val,prop='textContent'){
     const el=document.getElementById(id);
@@ -2107,7 +2111,10 @@ function renderPost(p){
     <div class="ph">
       <div class="pav">${esc(av)}</div>
       <div style="flex:1;min-width:0">
-        <div class="pn">${esc(author)}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="pn">${esc(author)}</div>
+          ${!isOwn&&p.authorId?`<button class="follow-btn" data-uid="${p.authorId}" onclick="toggleFollow(this,'${p.authorId}')" style="padding:2px 10px;border-radius:100px;border:1px solid rgba(196,168,255,.4);background:rgba(123,94,167,.12);color:rgba(196,168,255,.85);font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s">${(user?._following||[]).includes(String(p.authorId))?'✓ Following':'+ Follow'}</button>`:''}
+        </div>
         <div style="display:flex;align-items:center;gap:4px;margin-top:2px;flex-wrap:wrap">
           <span class="pt">${timeAgo(p.createdAt)}</span>
           ${epill}${stbdg}${mnbdg}${ubdg}${pbdg}${vbdg}
@@ -6544,6 +6551,49 @@ function closeInlineDM(){
   dmMessages=[];
 }
 
+
+// ── FOLLOW / UNFOLLOW ─────────────────────────────────────────
+async function toggleFollow(btn, userId){
+  if(!userId||!user)return;
+  const isFollowing=btn.textContent.includes('Following');
+  // Optimistic UI
+  btn.disabled=true;
+  btn.textContent=isFollowing?'+ Follow':'✓ Following';
+  btn.style.background=isFollowing?'rgba(123,94,167,.12)':'rgba(0,201,167,.15)';
+  btn.style.color=isFollowing?'rgba(196,168,255,.85)':'var(--tl)';
+  btn.style.borderColor=isFollowing?'rgba(196,168,255,.4)':'rgba(0,201,167,.4)';
+
+  try{
+    const r=await api('/api/users/'+userId+'/follow',{method:'POST'});
+    if(!r.ok){
+      // Revert on failure
+      btn.textContent=isFollowing?'✓ Following':'+ Follow';
+    } else {
+      const d=await r.json();
+      // Update local user's following list
+      if(!user._following) user._following=[];
+      if(d.following){
+        if(!user._following.includes(String(userId))) user._following.push(String(userId));
+        toast('✅ Following!');
+      } else {
+        user._following=user._following.filter(id=>id!==String(userId));
+        toast('Unfollowed');
+      }
+      // Update ALL follow buttons for this user across feed
+      document.querySelectorAll('.follow-btn[data-uid="'+userId+'"]').forEach(b=>{
+        b.disabled=false;
+        b.textContent=d.following?'✓ Following':'+ Follow';
+        b.style.background=d.following?'rgba(0,201,167,.15)':'rgba(123,94,167,.12)';
+        b.style.color=d.following?'var(--tl)':'rgba(196,168,255,.85)';
+        b.style.borderColor=d.following?'rgba(0,201,167,.4)':'rgba(196,168,255,.4)';
+      });
+    }
+  }catch(e){
+    btn.disabled=false;
+    btn.textContent=isFollowing?'✓ Following':'+ Follow';
+    toast('Network error');
+  }
+}
 
 async function main(){
   await initSession();

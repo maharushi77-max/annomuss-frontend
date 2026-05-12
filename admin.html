@@ -855,6 +855,20 @@ async function dlEmotionExport(){
 function logExport(type){exportLog.push({type,time:new Date().toLocaleTimeString()});const el=q('export-log');if(el)el.innerHTML=exportLog.map(e=>'<div>'+e.time+' — exported <strong>'+e.type+'</strong></div>').reverse().join('');}
 
 // ── SECURITY TAB FUNCTIONS ──────────────────────────────────
+async 
+function copyPostId(id, btn){
+  navigator.clipboard.writeText(id).then(()=>{
+    var orig=btn.textContent;
+    btn.textContent='✓ Copied';
+    btn.style.color='var(--tl)';
+    setTimeout(()=>{btn.textContent=orig;btn.style.color='';},2000);
+    // Auto-fill the security tab input
+    var secInput=document.getElementById('sec-post-id');
+    if(secInput) secInput.value=id;
+    toast('Post ID copied — open Security tab to track location');
+  });
+}
+
 async function loadPostLocation(){
   const postId=document.getElementById('sec-post-id').value.trim();
   const el=document.getElementById('post-location-result');
@@ -932,6 +946,10 @@ async function loadUserChats(){
     if(!r.ok){el.textContent='Error: '+d.message;return;}
     const sessions=d.sessions||[];
     if(!sessions.length){el.textContent='No chat sessions for this user.';return;}
+    if(!sessions.length){
+      el.innerHTML='<div style="padding:12px;color:var(--tx3);font-size:.82rem">No chat sessions found for this user. Sessions are logged when users do anonymous random chats or 3AM room chats.</div>';
+      return;
+    }
     var sessContainer=document.createElement('div');
     sessContainer.setAttribute('style','display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto');
     sessions.forEach(function(s){

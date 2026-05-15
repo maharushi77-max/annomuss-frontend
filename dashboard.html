@@ -372,6 +372,14 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   max-height:90vh;display:flex;flex-direction:column;
   padding-bottom:calc(32px + var(--safe));animation:shUp .25s cubic-bezier(.32,1,.4,1)}
 #comments-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 18px;min-height:60px}
+
+@keyframes xpFloat{
+  0%{transform:translateY(0) scale(1);opacity:1}
+  50%{transform:translateY(-40px) scale(1.1);opacity:1}
+  100%{transform:translateY(-80px) scale(.8);opacity:0}
+}
+@keyframes moonFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
 /* skeleton */
 .skel{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
   background-size:200%;animation:shim 1.5s infinite;border-radius:6px}
@@ -761,6 +769,59 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 .deep-talk-banner.on{display:flex;align-items:center;gap:8px}
 .deep-q{margin:8px 18px;padding:14px 16px;background:var(--bg2);border-left:3px solid var(--bl);border-radius:0 12px 12px 0;font-size:.88rem;color:var(--tx);line-height:1.65;font-style:italic;display:none;animation:pgIn .3s ease}
 .deep-q.on{display:block}
+
+/* ══════════════════════════════════════════════════════════════
+   ANNOMUSS MICRO-INTERACTIONS — dopamine-driven animations
+   ══════════════════════════════════════════════════════════════ */
+
+/* 1. Heart burst particles */
+.ann-particle{position:absolute;pointer-events:none;animation:ann-burst 0.9s ease-out forwards}
+@keyframes ann-burst{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}}
+
+/* 2. XP bar spring animation */
+.xp-bar-inner{transition:width 0.55s cubic-bezier(.34,1.56,.64,1) !important}
+
+/* 3. Streak pop */
+@keyframes ann-pop{0%{transform:scale(1)}50%{transform:scale(1.45)}100%{transform:scale(1)}}
+.ann-pop{animation:ann-pop 0.4s cubic-bezier(.34,1.56,.64,1)}
+
+/* 4. Send ripple */
+.ann-ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.35);transform:scale(0);animation:ann-rip 0.5s linear;pointer-events:none}
+@keyframes ann-rip{to{transform:scale(5);opacity:0}}
+
+/* 5. Slide-up message */
+@keyframes ann-slide-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ann-slide-up{animation:ann-slide-up 0.22s ease}
+
+/* 6. Level up confetti */
+.ann-conf{position:absolute;width:6px;height:6px;opacity:0;border-radius:1px;animation:ann-fall 1.2s ease-in forwards;pointer-events:none}
+@keyframes ann-fall{0%{opacity:1;transform:translateY(-8px) rotate(0deg)}100%{opacity:0;transform:translateY(80px) rotate(360deg)}}
+
+/* 7. Toast notification */
+@keyframes ann-toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes ann-toast-out{to{opacity:0;transform:translateX(20px)}}
+.ann-toast{animation:ann-toast-in 0.28s ease}
+.ann-toast-out{animation:ann-toast-out 0.25s ease forwards}
+
+/* 8. Skeleton shimmer */
+@keyframes ann-shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.ann-shimmer::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(196,168,255,.07),transparent);animation:ann-shimmer 1.4s ease-in-out infinite}
+
+/* Like button heartbeat */
+@keyframes ann-heartbeat{0%{transform:scale(1)}15%{transform:scale(1.35)}30%{transform:scale(1)}45%{transform:scale(1.2)}60%{transform:scale(1)}}
+.ann-heartbeat{animation:ann-heartbeat 0.6s ease}
+
+/* Mood pill select ripple */
+@keyframes ann-mood-rip{to{transform:scale(6);opacity:0}}
+.ann-mood-ripple{position:absolute;border-radius:50%;background:rgba(196,168,255,.25);transform:scale(0);animation:ann-mood-rip 0.55s ease;pointer-events:none}
+
+/* Card entrance */
+@keyframes ann-card-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.ann-card-in{animation:ann-card-in 0.3s ease both}
+
+/* XP gain flash */
+@keyframes ann-xp-flash{0%{background:rgba(0,201,167,.3)}100%{background:transparent}}
+.ann-xp-flash{animation:ann-xp-flash 0.8s ease}
 </style>
 </head>
 
@@ -2508,18 +2569,130 @@ const DAILY_PROMPTS_INDIA=[
    DIARY — private local journal
 ═══════════════════════════════════════════════ */
 function loadDiaryInProfile(){
-  const diaries=JSON.parse(localStorage.getItem('ann_diary')||'[]');
   const el=document.getElementById('diary-entries');
   if(!el)return;
+  renderDiaryList();
+}
+
+function getDiaries(){
+  return JSON.parse(localStorage.getItem('ann_diary')||'[]').sort((a,b)=>b.ts-a.ts);
+}
+function saveDiaries(arr){
+  localStorage.setItem('ann_diary',JSON.stringify(arr));
+}
+
+function renderDiaryList(){
+  const el=document.getElementById('diary-entries');
+  if(!el)return;
+  const diaries=getDiaries();
   if(!diaries.length){
     el.innerHTML='<div class="empty"><div style="font-size:2.5rem">📖</div><div style="font-family:var(--fD);font-weight:700;margin-top:8px">Your diary is empty</div><div style="font-size:.82rem;color:var(--tx3);margin-top:4px">Write your first entry — only you will ever see it</div></div>';
     return;
   }
-  el.innerHTML=diaries.map(d=>`
-    <div style="padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;margin-bottom:10px;cursor:pointer" onclick="expandDiary('${d.id}')">
-      <div style="font-size:.7rem;color:var(--tx3);font-family:var(--fM);margin-bottom:6px">${new Date(d.ts).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
-      <div style="font-size:.87rem;color:var(--tx2);line-height:1.6">${esc((d.text||'').substring(0,120))}${(d.text||'').length>120?'...':''}</div>
-    </div>`).join('');
+  el.innerHTML='';
+  diaries.forEach(d=>{
+    const card=document.createElement('div');
+    card.style.cssText='padding:16px;background:var(--bg2);border:1px solid var(--bd);border-radius:16px;margin-bottom:10px;transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(196,168,255,.3)';
+    card.onmouseleave=()=>card.style.borderColor='var(--bd)';
+
+    const dateStr=new Date(d.ts).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const preview=(d.text||'').substring(0,140)+(d.text||'').length>140?'...':'';
+
+    const header=document.createElement('div');
+    header.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:8px';
+    const dateEl=document.createElement('div');
+    dateEl.style.cssText='font-size:.7rem;color:var(--tx3);font-family:var(--fM)';
+    dateEl.textContent=dateStr;
+
+    const actions=document.createElement('div');
+    actions.style.cssText='display:flex;gap:8px';
+
+    // View button
+    const viewBtn=document.createElement('button');
+    viewBtn.style.cssText='background:none;border:none;font-size:.72rem;color:var(--tx3);cursor:pointer;padding:3px 8px;border-radius:6px;transition:all .15s';
+    viewBtn.textContent='👁 View';
+    viewBtn.onmouseenter=()=>{viewBtn.style.background='rgba(196,168,255,.1)';viewBtn.style.color='var(--v3)';};
+    viewBtn.onmouseleave=()=>{viewBtn.style.background='none';viewBtn.style.color='var(--tx3)';};
+    viewBtn.onclick=()=>viewDiaryEntry(d);
+
+    // Edit button
+    const editBtn=document.createElement('button');
+    editBtn.style.cssText='background:none;border:none;font-size:.72rem;color:var(--tx3);cursor:pointer;padding:3px 8px;border-radius:6px;transition:all .15s';
+    editBtn.textContent='✏️ Edit';
+    editBtn.onmouseenter=()=>{editBtn.style.background='rgba(196,168,255,.1)';editBtn.style.color='var(--v3)';};
+    editBtn.onmouseleave=()=>{editBtn.style.background='none';editBtn.style.color='var(--tx3)';};
+    editBtn.onclick=()=>editDiaryEntry(d);
+
+    // Delete button
+    const delBtn=document.createElement('button');
+    delBtn.style.cssText='background:none;border:none;font-size:.72rem;color:var(--cr);cursor:pointer;padding:3px 8px;border-radius:6px;transition:all .15s;opacity:.6';
+    delBtn.textContent='🗑';
+    delBtn.onmouseenter=()=>delBtn.style.opacity='1';
+    delBtn.onmouseleave=()=>delBtn.style.opacity='.6';
+    delBtn.onclick=()=>deleteDiaryEntry(d.id);
+
+    actions.appendChild(viewBtn);
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+    header.appendChild(dateEl);
+    header.appendChild(actions);
+
+    const body=document.createElement('div');
+    body.style.cssText='font-size:.87rem;color:var(--tx2);line-height:1.7;white-space:pre-wrap;cursor:pointer';
+    body.textContent=preview;
+    body.onclick=()=>viewDiaryEntry(d);
+
+    card.appendChild(header);
+    card.appendChild(body);
+    el.appendChild(card);
+  });
+}
+
+function viewDiaryEntry(d){
+  const ov=_makeOverlay('📖 '+new Date(d.ts).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),'');
+  const body=ov.querySelector('#inline-overlay-body');
+  const content=document.createElement('div');
+  content.style.cssText='font-size:.93rem;color:var(--tx);line-height:1.85;white-space:pre-wrap;padding:4px 0 24px';
+  content.textContent=d.text||'';
+  const editRowBtn=document.createElement('button');
+  editRowBtn.className='btn btn-g';
+  editRowBtn.style.cssText='width:100%;padding:12px;border-radius:12px;margin-top:8px';
+  editRowBtn.textContent='✏️ Edit this entry';
+  editRowBtn.onclick=()=>{ov.remove();editDiaryEntry(d);};
+  body.appendChild(content);
+  body.appendChild(editRowBtn);
+}
+
+function editDiaryEntry(d){
+  const ov=_makeOverlay('✏️ Edit Diary Entry','');
+  const body=ov.querySelector('#inline-overlay-body');
+  const ta=document.createElement('textarea');
+  ta.value=d.text||'';
+  ta.style.cssText='width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:14px;color:var(--tx);font-size:.93rem;line-height:1.7;outline:none;resize:vertical;min-height:200px;font-family:inherit';
+  const saveBtn=document.createElement('button');
+  saveBtn.className='btn btn-v';
+  saveBtn.style.cssText='width:100%;padding:13px;border-radius:12px;margin-top:12px;font-size:.9rem;font-weight:700';
+  saveBtn.textContent='Save changes';
+  saveBtn.onclick=()=>{
+    const diaries=getDiaries();
+    const idx=diaries.findIndex(x=>x.id===d.id);
+    if(idx>-1){diaries[idx].text=ta.value.trim();diaries[idx].edited=Date.now();saveDiaries(diaries);}
+    ov.remove();
+    renderDiaryList();
+    toast('✅ Diary entry updated');
+  };
+  body.appendChild(ta);
+  body.appendChild(saveBtn);
+  setTimeout(()=>ta.focus(),100);
+}
+
+function deleteDiaryEntry(id){
+  if(!confirm('Delete this diary entry? This cannot be undone.'))return;
+  const diaries=getDiaries().filter(d=>d.id!==id);
+  saveDiaries(diaries);
+  renderDiaryList();
+  toast('Entry deleted');
 }
 
 // ── removePostCard — instantly removes post from ALL views ────
@@ -5871,35 +6044,96 @@ function checkStreakReminder(){
    XP + LEVEL UP ANIMATIONS
    Award XP for actions, show level up when milestone hit
 ═══════════════════════════════════════════════ */
-async function awardXP(amount,reason='action'){
-  if(!user)return;
-  const oldXp=user.xp||0;const oldLevel=Math.floor(oldXp/100)+1;
-  user.xp=(user.xp||0)+amount;
-  const newLevel=Math.floor(user.xp/100)+1;
-  // Update XP bar smoothly
+async // XP milestones with special messages
+const XP_MILESTONES={
+  10:'First steps! 🌱',100:'Level up! ⭐',
+  200:'You\u0027re glowing 💫',500:'On fire! 🔥',
+  1000:'Top contributor ✨',2000:'Legend status 🏆',
+};
+
+function awardXP(amount, reason='action'){
+  if(!user) return;
+  const oldXp   = user.xp||0;
+  const oldLevel = Math.floor(oldXp/100)+1;
+  user.xp = (user.xp||0)+amount;
+  const newLevel = Math.floor(user.xp/100)+1;
+  const xpIn     = user.xp%100;
+
+  // ── Animated XP bar ──────────────────────────────────────
   const fill=document.getElementById('xp-fill');
-  const lbl=document.getElementById('xp-lbl');
-  const nxt=document.getElementById('xp-next');
-  if(fill)fill.style.width=`${user.xp%100}%`;
-  if(lbl)lbl.textContent=`${user.xp} XP`;
-  if(nxt)nxt.textContent=`${100-(user.xp%100)} XP to level up`;
-  // ── Save to backend (non-blocking) ──────────────────────────
+  const lbl =document.getElementById('xp-lbl');
+  const nxt =document.getElementById('xp-next');
+  if(fill){
+    fill.style.transition='width 1.4s cubic-bezier(.34,1.56,.64,1)';
+    fill.style.width=xpIn+'%';
+  }
+  if(lbl) lbl.textContent=user.xp+' XP';
+  if(nxt) nxt.textContent=(100-xpIn)+' XP to level up';
+
+  // ── Float XP badge from action ────────────────────────────
+  showXPFloat(amount, reason);
+
+  // ── Check milestone ────────────────────────────────────────
+  const milestone=Object.keys(XP_MILESTONES).map(Number).find(m=>oldXp<m&&user.xp>=m);
+  if(milestone) setTimeout(()=>showMilestone(milestone,XP_MILESTONES[milestone]),300);
+
+  // ── Save to backend ────────────────────────────────────────
   api('/api/posts/xp',{method:'POST',body:JSON.stringify({amount,reason})})
     .then(r=>r.json()).then(d=>{
       if(d.xp!=null){user.xp=d.xp;user.level=d.level||newLevel;}
-      if(d.streak!=null){user.streak=d.streak;}
+      if(d.streak!=null) user.streak=d.streak;
       localStorage.setItem('user',JSON.stringify(user));
     }).catch(()=>{});
-  // Level up!
+
+  // ── Level up celebration ───────────────────────────────────
   if(newLevel>oldLevel){
-    document.getElementById('levelup-title').textContent=`Level ${newLevel} 🎊`;
     const overlay=document.getElementById('levelup-overlay');
-    overlay.style.display='flex';
-    overlay.classList.add('on');
-    setTimeout(()=>{overlay.classList.remove('on');overlay.style.display='none';},4000);
-    document.getElementById('lvl-badge').textContent=`⭐ Level ${newLevel}`;
-    toast(`🎊 Level ${newLevel}! You're growing.`);
+    const title  =document.getElementById('levelup-title');
+    if(title)   title.textContent='Level '+newLevel+' 🎊';
+    if(overlay){
+      overlay.style.display='flex';
+      overlay.classList.add('on');
+      setTimeout(()=>{overlay.classList.remove('on');overlay.style.display='none';},4500);
+    }
+    const badge=document.getElementById('lvl-badge');
+    if(badge) badge.textContent='⭐ Level '+newLevel;
+    // Spring animation on XP bar
+    if(fill){
+      fill.style.background='linear-gradient(90deg,var(--v),var(--warm))';
+      setTimeout(()=>fill.style.background='',2000);
+    }
+    toast('🎊 Level '+newLevel+'! Tum badh rahe ho.');
+    haptic('celebration');
   }
+}
+
+// Floating +XP badge that rises from the button
+function showXPFloat(amount, reason){
+  const badge=document.createElement('div');
+  badge.textContent='+'+amount+' XP';
+  badge.style.cssText='position:fixed;bottom:80px;right:20px;z-index:9998;'
+    +'background:linear-gradient(135deg,var(--v),#4A2B8A);color:#fff;'
+    +'font-family:var(--fD);font-weight:700;font-size:.8rem;'
+    +'padding:6px 14px;border-radius:100px;pointer-events:none;'
+    +'animation:xpFloat 1.8s cubic-bezier(.4,0,.2,1) forwards;'
+    +'box-shadow:0 4px 16px rgba(123,94,167,.5)';
+  document.body.appendChild(badge);
+  setTimeout(()=>badge.remove(),1800);
+}
+
+// Milestone popup
+function showMilestone(xp, message){
+  const m=document.createElement('div');
+  m.style.cssText='position:fixed;inset:0;z-index:9000;'
+    +'background:rgba(3,0,10,.88);backdrop-filter:blur(16px);'
+    +'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;'
+    +'animation:pgIn .4s cubic-bezier(.34,1.56,.64,1)';
+  m.innerHTML='<div style="font-size:52px;animation:moonFloat 2s ease-in-out infinite">🏆</div>'
+    +'<div style="font-family:var(--fD);font-weight:700;font-size:1.3rem;color:var(--go)">'+xp+' XP Milestone!</div>'
+    +'<div style="font-size:.95rem;color:var(--tx2)">'+message+'</div>'
+    +'<button class="btn btn-v" style="margin-top:8px;padding:12px 28px;border-radius:100px" onclick="this.parentElement.remove()">Keep going! ✨</button>';
+  document.body.appendChild(m);
+  setTimeout(()=>{if(m.parentNode)m.style.opacity='0';setTimeout(()=>m.remove(),400);},4000);
 }
 
 /* ═══════════════════════════════════════════════
@@ -6787,6 +7021,187 @@ document.addEventListener('click',(e)=>{
 
 // ── BOOT — must be last ──
 document.addEventListener('DOMContentLoaded', main);
+
+
+// ══════════════════════════════════════════════════════════════
+//  ANNOMUSS MICRO-INTERACTIONS
+// ══════════════════════════════════════════════════════════════
+
+// 1. HEART BURST — call after like action
+function animLikeBurst(el){
+  const emojis=['💜','💫','✨','🌙','💕','⭐'];
+  const rect=el.getBoundingClientRect();
+  const zone=el.closest('.card')||el.parentElement;
+  el.classList.add('ann-heartbeat');
+  setTimeout(()=>el.classList.remove('ann-heartbeat'),700);
+  for(let i=0;i<8;i++){
+    const p=document.createElement('span');
+    p.className='ann-particle';
+    p.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    p.style.cssText='position:absolute;left:50%;top:50%;font-size:'+(11+Math.random()*8)+'px;z-index:999;pointer-events:none';
+    const a=Math.random()*360, d=30+Math.random()*50;
+    p.style.setProperty('--dx',Math.cos(a*Math.PI/180)*d+'px');
+    p.style.setProperty('--dy',(Math.sin(a*Math.PI/180)*d-20)+'px');
+    p.style.animationDelay=(Math.random()*0.08)+'s';
+    p.style.animationDuration=(0.5+Math.random()*0.4)+'s';
+    zone.style.position='relative';
+    zone.appendChild(p);
+    setTimeout(()=>p.remove(),1000);
+  }
+}
+
+// 2. XP BAR — smooth spring fill
+function animXPBar(fillEl, percent){
+  fillEl.style.transition='width 0.55s cubic-bezier(.34,1.56,.64,1)';
+  fillEl.style.width=percent+'%';
+  // Flash the bar on gain
+  fillEl.classList.add('ann-xp-flash');
+  setTimeout(()=>fillEl.classList.remove('ann-xp-flash'),900);
+}
+
+// 3. STREAK POP
+function animStreakPop(el){
+  el.classList.remove('ann-pop');
+  void el.offsetWidth; // force reflow
+  el.classList.add('ann-pop');
+  setTimeout(()=>el.classList.remove('ann-pop'),450);
+}
+
+// 4. SEND RIPPLE — call on message send button
+function animSendRipple(btnEl){
+  const r=document.createElement('div');
+  r.className='ann-ripple';
+  r.style.cssText='width:100px;height:100px;left:-32px;top:-32px;';
+  btnEl.style.position='relative';
+  btnEl.style.overflow='hidden';
+  btnEl.appendChild(r);
+  setTimeout(()=>r.remove(),550);
+}
+
+// 5. CARD ENTRANCE — stagger feed cards on load
+function animCardEntrance(cards){
+  cards.forEach((card,i)=>{
+    card.style.opacity='0';
+    card.style.animationDelay=(i*0.05)+'s';
+    card.classList.add('ann-card-in');
+    card.style.opacity='';
+  });
+}
+
+// 6. LEVEL UP CONFETTI
+function animLevelUp(containerEl, levelText){
+  const colors=['#7B5EA7','#C4A8FF','#00C9A7','#F4A261','#FF6B9D','#FFFFFF'];
+  containerEl.style.position='relative';
+  containerEl.style.overflow='hidden';
+  for(let i=0;i<24;i++){
+    const c=document.createElement('div');
+    c.className='ann-conf';
+    c.style.left=Math.random()*100+'%';
+    c.style.top='0px';
+    c.style.background=colors[i%colors.length];
+    c.style.animationDelay=(Math.random()*0.5)+'s';
+    c.style.transform='rotate('+Math.random()*360+'deg)';
+    containerEl.appendChild(c);
+    setTimeout(()=>c.remove(),1700);
+  }
+  if(levelText){
+    levelText.style.transform='scale(1.3)';
+    levelText.style.color='#00C9A7';
+    levelText.style.transition='all 0.4s cubic-bezier(.34,1.56,.64,1)';
+    setTimeout(()=>{levelText.style.transform='scale(1)';},500);
+    setTimeout(()=>{levelText.style.color='';levelText.style.transition='';},2000);
+  }
+}
+
+// 7. TOAST NOTIFICATION — show a notification toast
+let _toastList=null;
+function animToast(emoji, message, duration=3000){
+  if(!_toastList){
+    _toastList=document.createElement('div');
+    _toastList.id='ann-toast-list';
+    _toastList.style.cssText='position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:280px';
+    document.body.appendChild(_toastList);
+  }
+  const t=document.createElement('div');
+  t.className='ann-toast';
+  t.style.cssText='padding:10px 14px;background:rgba(6,2,18,.92);border:.5px solid rgba(196,168,255,.25);border-radius:12px;font-size:12px;color:rgba(238,234,255,.92);display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+  t.innerHTML='<span style="font-size:16px">'+emoji+'</span><span>'+esc(message)+'</span>';
+  _toastList.appendChild(t);
+  if(_toastList.children.length>4){
+    _toastList.children[0].classList.add('ann-toast-out');
+    setTimeout(()=>_toastList.children[0]?.remove(),280);
+  }
+  setTimeout(()=>{t.classList.add('ann-toast-out');setTimeout(()=>t.remove(),280);},duration);
+}
+
+// 8. SKELETON SHIMMER — apply to any element during load
+function animSkeleton(el, isLoading){
+  if(isLoading){
+    el.classList.add('ann-shimmer');
+    el.style.position='relative';
+    el.style.overflow='hidden';
+  } else {
+    el.classList.remove('ann-shimmer');
+  }
+}
+
+// ── Wire animations into existing functions ──────────────────
+// Override toast() to use animToast
+const _origToast = window.toast;
+window.toast = function(msg, dur=2500){
+  const emoji = msg.startsWith('✅')?'✅':msg.startsWith('❌')?'❌':msg.startsWith('🎊')?'🎊':msg.startsWith('💜')?'💜':msg.startsWith('🔔')?'🔔':msg.startsWith('🎁')?'🎁':'💜';
+  animToast(emoji, msg.replace(/^[✅❌🎊💜🔔🎁⚠️]\s*/,''), dur);
+};
+
+// Wire like button burst into pak click
+const _origToggleLike = window.toggleLike;
+if(typeof _origToggleLike === 'function'){
+  window.toggleLike = function(postId, btn){
+    animLikeBurst(btn);
+    return _origToggleLike(postId, btn);
+  };
+}
+
+// Wire XP bar animation
+const _origAwardXP = window.awardXP;
+if(typeof _origAwardXP === 'function'){
+  window.awardXP = async function(amount, reason){
+    const fill=document.getElementById('xp-fill');
+    if(fill) animXPBar(fill, Math.min(((user?.xp||0)+amount)%100, 100));
+    return _origAwardXP(amount, reason);
+  };
+}
+
+// Card entrance on feed load
+const _origLoadFeed = window.loadFeed;
+if(typeof _origLoadFeed === 'function'){
+  window.loadFeed = async function(reset){
+    const result = await _origLoadFeed(reset);
+    const newCards = document.querySelectorAll('#feed-list .card:not(.ann-entered)');
+    animCardEntrance([...newCards]);
+    newCards.forEach(c=>c.classList.add('ann-entered'));
+    return result;
+  };
+}
+
+// Level up confetti on level-up overlay
+const _origLevelUpOverlay = window.awardXP;
+document.addEventListener('DOMContentLoaded', ()=>{
+  const lvOverlay = document.getElementById('levelup-overlay');
+  if(lvOverlay){
+    const observer = new MutationObserver((muts)=>{
+      muts.forEach(m=>{
+        if(m.type==='attributes' && lvOverlay.classList.contains('on')){
+          animLevelUp(lvOverlay, lvOverlay.querySelector('#levelup-title'));
+        }
+      });
+    });
+    observer.observe(lvOverlay, {attributes:true, attributeFilter:['class']});
+  }
+});
+
+console.log('✅ Annomuss micro-interactions loaded');
+
 </script>
 </body>
 </html>

@@ -608,6 +608,7 @@ function renderUsers(users){
   users.forEach(u=>{
     const status=u.isBanned?'<span class="badge badge-cr">Banned</span>':u.isPremium?'<span class="badge badge-go">Premium</span>':'<span class="badge badge-lm">Active</span>';
     const banBtn=u.isBanned?'<button class="ab ab-unban" onclick="unbanUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Unban</button>':'<button class="ab ab-ban" onclick="banUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Ban</button>';
+    const ipBtn='<button class="ab" style="background:rgba(0,201,167,.15);color:#5DCAA5;border-color:rgba(0,201,167,.3)" onclick="viewUserIP(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">🔍 IP</button>';
     // ── Location: use ipCity from User document (saved on every login) ──
     const hasLoc = !!(u.ipCity);
     const hasDev = !!(u.deviceInfo || u.deviceHash);
@@ -870,7 +871,6 @@ async function dlEmotionExport(){
 function logExport(type){exportLog.push({type,time:new Date().toLocaleTimeString()});const el=q('export-log');if(el)el.innerHTML=exportLog.map(e=>'<div>'+e.time+' — exported <strong>'+e.type+'</strong></div>').reverse().join('');}
 
 // ── SECURITY TAB FUNCTIONS ──────────────────────────────────
-async 
 function copyPostId(id, btn){
   navigator.clipboard.writeText(id).then(()=>{
     var orig=btn.textContent;
@@ -1001,4 +1001,3 @@ async function loadTranscript(sessionId){
 </script>
 </body>
 </html>
-  

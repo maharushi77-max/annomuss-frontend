@@ -6044,7 +6044,7 @@ function checkStreakReminder(){
    XP + LEVEL UP ANIMATIONS
    Award XP for actions, show level up when milestone hit
 ═══════════════════════════════════════════════ */
-async // XP milestones with special messages
+// XP milestones with special messages
 const XP_MILESTONES={
   10:'First steps! 🌱',100:'Level up! ⭐',
   200:'You\u0027re glowing 💫',500:'On fire! 🔥',
@@ -6651,7 +6651,7 @@ window.addEventListener('offline', updateOnlineStatus);
 //  INLINE DM CHAT — replaces messages.html redirect
 //  Called from friends list + inbox. No page navigation needed.
 // ══════════════════════════════════════════════════════════════
-let dmOverlay=null, dmRecipient=null, dmSocket=null, dmMessages=[];
+var dmOverlay=null, dmRecipient=null, dmSocket=null, dmMessages=[];
 
 function openInlineDM(userId, name, emoji){
   emoji=emoji||'🎭'; name=name||'Anonymous';

@@ -3,928 +3,1001 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Annomuss — Live Admin Control Center</title>
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<title>Annomuss Admin</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#06020F;--bg2:#0D0726;--bg3:#130D36;
-  --bd:rgba(196,168,255,.1);--v:#7B5EA7;--v2:#C4A8FF;
-  --tl:#00C9A7;--warm:#F4A261;--cr:#EF4444;--pink:#FF6B9D;
-  --tx:rgba(238,233,255,.9);--tx2:rgba(238,233,255,.55);--tx3:rgba(238,233,255,.28);
-  --fw:220px;
-}
-body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hidden}
-
-/* ── SIDEBAR ── */
-.sidebar{width:var(--fw);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;height:100vh;overflow-y:auto}
-.brand{padding:20px 18px 14px;border-bottom:1px solid var(--bd)}
-.brand-logo{font-size:15px;font-weight:300;letter-spacing:.1em;color:var(--tx)}
-.brand-sub{font-size:9px;color:var(--tx3);margin-top:2px;letter-spacing:.08em;text-transform:uppercase}
-.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--tl);animation:livePulse 2s ease-in-out infinite;margin-right:5px}
-@keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,201,167,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,201,167,0)}}
-.nav-section{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);padding:16px 18px 6px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--tx2);cursor:pointer;transition:all .18s;border-left:3px solid transparent;position:relative}
-.nav-item:hover{background:rgba(196,168,255,.05);color:var(--tx)}
-.nav-item.active{background:rgba(123,94,167,.12);color:var(--v2);border-left-color:var(--v2)}
-.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
-.nav-badge{margin-left:auto;background:var(--cr);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:100px}
-.nav-badge.green{background:var(--tl)}
-.sidebar-footer{margin-top:auto;padding:14px 18px;border-top:1px solid var(--bd);font-size:11px;color:var(--tx3)}
-
-/* ── MAIN ── */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{height:54px;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 22px;gap:14px;flex-shrink:0}
-.topbar-title{font-size:16px;font-weight:400;color:var(--tx);flex:1}
-.topbar-right{display:flex;align-items:center;gap:12px}
-.status-pill{display:flex;align-items:center;gap:6px;background:rgba(0,201,167,.08);border:1px solid rgba(0,201,167,.2);border-radius:100px;padding:4px 12px;font-size:12px;color:var(--tl)}
-.online-num{font-weight:700;font-size:14px;color:var(--tl)}
-.content{flex:1;overflow-y:auto;padding:20px 22px;scrollbar-width:thin}
-
-/* ── STATS GRID ── */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.stat-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:16px;position:relative;overflow:hidden;transition:border-color .2s}
-.stat-card:hover{border-color:rgba(196,168,255,.25)}
-.stat-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,var(--accent,.18) 0%,transparent 70%)}
-.stat-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px}
-.stat-value{font-size:28px;font-weight:300;color:var(--tx);line-height:1}
-.stat-delta{font-size:11px;margin-top:6px;color:var(--tx3)}
-.stat-delta.up{color:var(--tl)}.stat-delta.down{color:var(--cr)}
-.stat-bar{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:10px;overflow:hidden}
-.stat-bar-fill{height:100%;border-radius:2px;background:var(--accent);transition:width 1s ease}
-
-/* ── LIVE FEED ── */
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.section-title{font-size:13px;font-weight:600;color:var(--tx);display:flex;align-items:center;gap:8px}
-.table-wrap{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:18px}
+:root{--bg:#09090f;--bg1:#0f0f1a;--bg2:#141424;--bg3:#1a1a2e;--bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);--tx:#f0eeff;--tx2:#9896b8;--tx3:#4e4c6a;--v:#7B5EA7;--v2:#6044a0;--vl:#c4a8ff;--cr:#FF4D6D;--tl:#00C9A7;--go:#F4A261;--lm:#52B788;--fD:'Trebuchet MS',sans-serif;--fM:'JetBrains Mono',monospace;--r:12px;--r2:8px}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-size:14px}
+input,select,textarea,button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;outline:none}
+button{cursor:pointer}
 table{width:100%;border-collapse:collapse}
-th{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.2)}
-td{padding:10px 14px;font-size:12px;color:var(--tx2);border-bottom:1px solid rgba(196,168,255,.04)}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(196,168,255,.03)}
-.badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:9px;font-weight:700}
-.badge-g{background:rgba(0,201,167,.15);color:var(--tl);border:1px solid rgba(0,201,167,.25)}
-.badge-r{background:rgba(239,68,68,.15);color:#F87171;border:1px solid rgba(239,68,68,.25)}
-.badge-y{background:rgba(244,162,97,.15);color:var(--warm);border:1px solid rgba(244,162,97,.25)}
-.badge-v{background:rgba(123,94,167,.2);color:var(--v2);border:1px solid rgba(196,168,255,.2)}
-
-/* ── LIVE EVENTS ── */
-.events-stream{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;height:240px;overflow-y:auto;scrollbar-width:thin}
-.event-item{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(196,168,255,.04);animation:evIn .3s ease}
-@keyframes evIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
-.event-icon{font-size:14px;flex-shrink:0;margin-top:1px}
-.event-body{flex:1;min-width:0}
-.event-title{font-size:12px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.event-sub{font-size:10px;color:var(--tx3);margin-top:1px}
-.event-time{font-size:9px;color:var(--tx3);flex-shrink:0}
-
-/* ── TWO-COL ── */
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
-
-/* ── TABS ── */
-.tabs{display:flex;gap:2px;background:rgba(0,0,0,.3);border-radius:10px;padding:3px;margin-bottom:16px;width:fit-content}
-.tab{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;color:var(--tx3);transition:all .2s}
-.tab.active{background:var(--bg2);color:var(--tx)}
-
-/* ── ACTION BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;border:none;font-family:inherit}
-.btn-primary{background:var(--v);color:#fff}.btn-primary:hover{background:#6B4F95}
-.btn-danger{background:rgba(239,68,68,.15);color:#F87171;border:1px solid rgba(239,68,68,.2)}.btn-danger:hover{background:rgba(239,68,68,.25)}
-.btn-ghost{background:rgba(196,168,255,.08);color:var(--v2);border:1px solid var(--bd)}.btn-ghost:hover{background:rgba(196,168,255,.14)}
-.btn-sm{padding:4px 10px;font-size:11px;border-radius:8px}
-
-/* ── SEARCH ── */
-.search-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.search-input{flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:9px 14px;font-size:13px;color:var(--tx);outline:none;font-family:inherit}
-.search-input:focus{border-color:rgba(196,168,255,.3)}
-.search-input::placeholder{color:var(--tx3)}
-
-/* ── SECURITY TAB ── */
-.security-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
-.sec-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:16px}
-.sec-card-title{font-size:12px;font-weight:600;color:var(--tx);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.input-field{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:9px;padding:8px 12px;font-size:12px;color:var(--tx);outline:none;font-family:monospace;margin-bottom:8px}
-.input-field:focus{border-color:rgba(196,168,255,.3)}
-.result-box{background:rgba(0,0,0,.25);border-radius:9px;padding:12px;font-size:11px;color:var(--tx2);line-height:1.7;min-height:60px;font-family:monospace;white-space:pre-wrap;word-break:break-all}
-
-/* ── NOTIFICATION BUILDER ── */
-.notif-builder{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:18px}
-.notif-targets{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.target-chip{padding:5px 12px;border-radius:100px;border:1px solid var(--bd);font-size:11px;cursor:pointer;color:var(--tx3);transition:all .2s}
-.target-chip.selected{background:rgba(123,94,167,.2);border-color:rgba(196,168,255,.3);color:var(--v2)}
-
-/* ── LOADING ── */
-.spin{width:20px;height:20px;border:2px solid rgba(196,168,255,.2);border-top-color:var(--v2);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--bd);font-size:.82rem;vertical-align:middle}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);font-weight:600;background:var(--bg2)}
+tr:hover td{background:rgba(255,255,255,.02)}
+.crisis-row td{background:rgba(255,77,109,.04)!important;border-left:3px solid var(--cr)}
+.hidden-row td{opacity:.5}
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:220px;flex-shrink:0;background:var(--bg1);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow-y:auto}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#topbar{padding:14px 20px;background:var(--bg1);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;flex-shrink:0}
+#content{flex:1;overflow-y:auto;padding:20px}
+.sidebar-logo{padding:20px 16px 14px;border-bottom:1px solid var(--bd)}
+.sidebar-logo-text{font-size:1.1rem;font-weight:700;color:var(--vl)}
+.sidebar-logo-sub{font-size:.7rem;color:var(--tx3);margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;transition:background .15s;color:var(--tx2);font-size:.85rem}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--tx)}
+.nav-item.active{background:rgba(123,94,167,.15);color:var(--vl);border-right:2px solid var(--v)}
+.nav-ico{font-size:1rem;width:20px}
+.nav-badge{background:var(--cr);color:#fff;font-size:.62rem;padding:1px 6px;border-radius:100px;font-weight:700;margin-left:auto}
+.nav-section{padding:12px 16px 6px;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)}
+.tb-title{font-weight:700;font-size:.95rem;color:var(--tx)}
+.tb-sub{font-size:.75rem;color:var(--tx3);margin-left:8px}
+.tb-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.purple::before{background:var(--v)}.stat-card.red::before{background:var(--cr)}.stat-card.teal::before{background:var(--tl)}.stat-card.orange::before{background:var(--go)}.stat-card.green::before{background:var(--lm)}
+.stat-val{font-size:1.6rem;font-weight:700;color:var(--tx);line-height:1;margin-bottom:4px}
+.stat-label{font-size:.72rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
+.stat-change{font-size:.7rem;margin-top:4px;color:var(--tx3)}
+.btn{padding:7px 14px;border-radius:var(--r2);font-size:.8rem;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:var(--v);color:#fff}.btn-primary:hover{background:var(--v2)}
+.btn-danger{background:rgba(255,77,109,.15);color:var(--cr);border:1px solid rgba(255,77,109,.3)}.btn-danger:hover{background:rgba(255,77,109,.25)}
+.btn-ghost{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}.btn-ghost:hover{background:var(--bg2);color:var(--tx)}
+.btn-success{background:rgba(82,183,136,.15);color:var(--lm);border:1px solid rgba(82,183,136,.3)}
+.btn-sm{padding:5px 10px;font-size:.75rem}.btn-xs{padding:3px 8px;font-size:.7rem}
+.ab{padding:4px 10px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;white-space:nowrap}
+.ab-ban{background:rgba(255,77,109,.12);color:var(--cr)}.ab-ban:hover{background:rgba(255,77,109,.2)}
+.ab-unban{background:rgba(82,183,136,.12);color:var(--lm)}.ab-unban:hover{background:rgba(82,183,136,.2)}
+.ab-del{background:rgba(255,77,109,.2);color:var(--cr);border:1px solid rgba(255,77,109,.3)}.ab-del:hover{background:rgba(255,77,109,.35)}
+.ab-hide{background:rgba(123,94,167,.12);color:var(--vl)}.ab-hide:hover{background:rgba(123,94,167,.22)}
+.ab-show{background:rgba(0,201,167,.12);color:var(--tl)}.ab-show:hover{background:rgba(0,201,167,.22)}
+.ab-view{background:var(--bg3);color:var(--tx2)}.ab-view:hover{background:var(--bg2)}
+.actions{display:flex;gap:5px;flex-wrap:wrap}
+.badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:.68rem;font-weight:600}
+.badge-cr{background:rgba(255,77,109,.15);color:var(--cr)}.badge-g{background:rgba(123,94,167,.15);color:var(--vl)}.badge-v{background:rgba(0,201,167,.1);color:var(--tl)}.badge-go{background:rgba(244,162,97,.1);color:var(--go)}.badge-lm{background:rgba(82,183,136,.1);color:var(--lm)}
+.search-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-inp{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r2);padding:8px 14px;color:var(--tx);flex:1;min-width:200px}
+.search-inp:focus{border-color:var(--v)}
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap}
+.fpill{padding:5px 12px;border-radius:100px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--bd2);color:var(--tx2);transition:all .15s}
+.fpill:hover{border-color:var(--v);color:var(--vl)}.fpill.active{background:var(--v);color:#fff;border-color:var(--v)}
+.export-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+.export-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.export-card:hover{border-color:var(--v);transform:translateY(-2px)}.export-card.gold{border-color:rgba(244,162,97,.4);background:rgba(244,162,97,.04)}
+.export-card .ec-ico{font-size:1.8rem;margin-bottom:8px}.export-card .ec-title{font-size:.9rem;font-weight:700;margin-bottom:4px}.export-card .ec-desc{font-size:.75rem;color:var(--tx3);line-height:1.5}
+.export-card .ec-badge{position:absolute;top:10px;right:10px;background:var(--go);color:#000;font-size:.62rem;padding:2px 7px;border-radius:100px;font-weight:700}
+#confirm-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:999;display:none;align-items:center;justify-content:center;padding:20px}
+#confirm-modal.on{display:flex}
+#confirm-box{background:var(--bg1);border:1px solid var(--bd2);border-radius:16px;padding:28px;max-width:360px;width:100%;text-align:center}
+.confirm-ico{font-size:2.5rem;margin-bottom:12px}.confirm-title{font-size:1.1rem;font-weight:700;margin-bottom:8px}.confirm-msg{font-size:.85rem;color:var(--tx3);line-height:1.6;margin-bottom:22px}
+.confirm-btns{display:flex;gap:10px}
+#toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast-item{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r2);padding:10px 16px;font-size:.83rem;color:var(--tx);animation:toastIn .2s ease;max-width:300px;pointer-events:all}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-box{background:var(--bg1);border:1px solid var(--bd2);border-radius:20px;padding:32px 28px;width:100%;max-width:340px;text-align:center}
+.login-logo{font-size:2.5rem;margin-bottom:12px}.login-title{font-size:1.1rem;font-weight:700;margin-bottom:4px;color:var(--vl)}.login-sub{font-size:.8rem;color:var(--tx3);margin-bottom:22px}
+.login-inp{width:100%;background:var(--bg2);border:1px solid var(--bd2);border-radius:10px;padding:12px 16px;margin-bottom:12px;color:var(--tx);text-align:center;letter-spacing:2px}
+.login-inp:focus{border-color:var(--v)}.login-err{color:var(--cr);font-size:.78rem;margin-top:8px;display:none}
+.page-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.page-title{font-size:1rem;font-weight:700;color:var(--tx)}.page-sub{font-size:.78rem;color:var(--tx3)}
+.mini-chart{display:flex;align-items:flex-end;gap:3px;height:50px}
+.empty{padding:40px;text-align:center;color:var(--tx3);font-size:.85rem;line-height:1.8}
+.spin{width:24px;height:24px;border:2.5px solid var(--bd2);border-top-color:var(--v);border-radius:50%;animation:spin .7s linear infinite;margin:auto}
 @keyframes spin{to{transform:rotate(360deg)}}
-.skel{background:linear-gradient(90deg,rgba(196,168,255,.06) 25%,rgba(196,168,255,.12) 50%,rgba(196,168,255,.06) 75%);background-size:200% 100%;animation:shim 1.8s ease-in-out infinite;border-radius:6px}
-@keyframes shim{0%{background-position:-200% 0}100%{background-position:200% 0}}
-
-/* ── CHART ── */
-.mini-chart{display:flex;align-items:flex-end;gap:3px;height:50px;padding:0 2px}
-.mini-bar{flex:1;border-radius:3px 3px 0 0;min-width:8px;transition:height .5s ease,opacity .2s}
-.mini-bar:hover{opacity:.8}
-
-/* ── MODALS ── */
-.modal-backdrop{position:fixed;inset:0;z-index:800;background:rgba(3,0,10,.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px}
-.modal{background:var(--bg2);border:1px solid rgba(196,168,255,.15);border-radius:18px;padding:24px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto}
-.modal-title{font-size:16px;font-weight:500;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
-.close-btn{background:none;border:none;color:var(--tx3);font-size:18px;cursor:pointer;padding:4px}
-
-/* ── SCREEN HIDDEN ── */
-.screen{display:none}.screen.active{display:block}
-
-/* ── TOASTS ── */
-#toast-area{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:7px}
-.toast{background:rgba(13,7,38,.95);border:1px solid rgba(196,168,255,.2);border-radius:12px;padding:11px 16px;font-size:12px;color:var(--tx);backdrop-filter:blur(16px);animation:toastIn .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 6px 24px rgba(0,0,0,.5)}
-@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+.emo-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.emo-label{width:80px;font-size:.75rem;color:var(--tx2);text-transform:capitalize}
+.emo-track{flex:1;height:8px;background:var(--bg3);border-radius:100px;overflow:hidden}
+.emo-fill{height:100%;border-radius:100px;transition:width 1s ease}
+.emo-pct{width:36px;font-size:.72rem;color:var(--tx3);text-align:right;font-family:var(--fM)}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--tl);animation:pdot 2s ease-in-out infinite;display:inline-block}
+@keyframes pdot{0%,100%{opacity:.4}50%{opacity:1}}
+@media(max-width:640px){#sidebar{display:none}}
 </style>
 </head>
 <body>
-
-<!-- TOAST AREA -->
-<div id="toast-area"></div>
-
-<!-- LOGIN GATE -->
-<div id="login-screen" style="position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center">
-  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:18px;padding:32px;width:360px">
-    <div style="font-size:22px;font-weight:200;letter-spacing:.1em;margin-bottom:4px">🌙 annomuss</div>
-    <div style="font-size:12px;color:var(--tx3);margin-bottom:24px">Admin Control Center</div>
-    <input id="admin-pw" type="password" placeholder="Admin password" style="width:100%;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;color:var(--tx);font-size:14px;outline:none;font-family:inherit;margin-bottom:12px" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="btn btn-primary" style="width:100%;padding:12px;justify-content:center;font-size:14px" onclick="doLogin()">Sign In →</button>
-    <div id="login-err" style="color:#F87171;font-size:11px;margin-top:8px;min-height:16px"></div>
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">🛡️</div>
+    <div class="login-title">Annomuss Admin</div>
+    <div class="login-sub">Enter your admin password</div>
+    <input class="login-inp" type="password" id="admin-pass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="btn btn-primary" style="width:100%;padding:11px;justify-content:center" onclick="doLogin()" id="login-btn">Enter →</button>
+    <div class="login-err" id="login-err">Wrong password. Try again.</div>
   </div>
 </div>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="brand">
-    <div class="brand-logo"><span class="live-dot"></span>annomuss</div>
-    <div class="brand-sub">Admin Control Center</div>
-  </div>
-
-  <div class="nav-section">Live</div>
-  <div class="nav-item active" onclick="showScreen('overview',this)"><span class="nav-icon">📊</span>Overview<span class="nav-badge green" id="online-badge">0</span></div>
-  <div class="nav-item" onclick="showScreen('events',this)"><span class="nav-icon">⚡</span>Live Events<span class="nav-badge" id="events-badge">0</span></div>
-
-  <div class="nav-section">Moderation</div>
-  <div class="nav-item" onclick="showScreen('users',this)"><span class="nav-icon">👥</span>Users</div>
-  <div class="nav-item" onclick="showScreen('posts',this)"><span class="nav-icon">📝</span>Posts<span class="nav-badge" id="crisis-badge" style="display:none"></span></div>
-  <div class="nav-item" onclick="showScreen('reports',this)"><span class="nav-icon">⚠️</span>Reports<span class="nav-badge" id="reports-badge">0</span></div>
-  <div class="nav-item" onclick="showScreen('crisis',this)"><span class="nav-icon">🚨</span>Crisis<span class="nav-badge" id="crisis-badge2" style="display:none"></span></div>
-
-  <div class="nav-section">Security</div>
-  <div class="nav-item" onclick="showScreen('security',this)" style="color:#FF6B9D"><span class="nav-icon">🔒</span>Security</div>
-  <div class="nav-item" onclick="showScreen('broadcast',this)"><span class="nav-icon">📣</span>Broadcast</div>
-
-  <div class="nav-section">Data</div>
-  <div class="nav-item" onclick="showScreen('analytics',this)"><span class="nav-icon">📈</span>Analytics</div>
-  <div class="nav-item" onclick="showScreen('export',this)"><span class="nav-icon">📥</span>Export</div>
-
-  <div class="sidebar-footer">
-    <div id="server-status" style="display:flex;align-items:center;gap:6px">
-      <div class="live-dot" style="width:6px;height:6px"></div>
-      <span>Connecting...</span>
+<div id="confirm-modal">
+  <div id="confirm-box">
+    <div class="confirm-ico" id="c-ico">⚠️</div>
+    <div class="confirm-title" id="c-title">Are you sure?</div>
+    <div class="confirm-msg" id="c-msg"></div>
+    <div class="confirm-btns">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" style="flex:1;justify-content:center" id="c-ok" onclick="execConfirm()">Confirm</button>
     </div>
-    <div style="margin-top:6px" id="last-refresh-time">--</div>
   </div>
 </div>
 
-<!-- MAIN AREA -->
-<div class="main">
-  <div class="topbar">
-    <div class="topbar-title" id="screen-title">Overview</div>
-    <div class="topbar-right">
-      <div class="status-pill"><span class="live-dot" style="width:7px;height:7px"></span><span class="online-num" id="live-online">—</span>&nbsp;online now</div>
-      <button class="btn btn-ghost btn-sm" onclick="refreshAll()">↻ Refresh</button>
-      <button class="btn btn-danger btn-sm" onclick="doLogout()">Logout</button>
+<div id="toast-wrap"></div>
+
+<div id="app" style="display:none">
+  <div id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-text">🎭 annomuss</div>
+      <div class="sidebar-logo-sub">Admin Dashboard</div>
+    </div>
+    <div class="nav-section">Analytics</div>
+    <div class="nav-item active" id="nav-overview" onclick="showTab('overview',this)"><span class="nav-ico">📊</span>Overview</div>
+    <div class="nav-item" id="nav-emotion" onclick="showTab('emotion',this)"><span class="nav-ico">🧠</span>Emotion Intel</div>
+    <div class="nav-section">Moderation</div>
+    <div class="nav-item" id="nav-users" onclick="showTab('users',this)"><span class="nav-ico">👥</span>Users</div>
+    <div class="nav-item" id="nav-posts" onclick="showTab('posts',this)"><span class="nav-ico">📢</span>Posts</div>
+    <div class="nav-item" id="nav-stories" onclick="showTab('stories',this)"><span class="nav-ico">📸</span>Stories</div>
+    <div class="nav-item" id="nav-vents" onclick="showTab('vents',this)"><span class="nav-ico">💭</span>Vents</div>
+    <div class="nav-item" id="nav-reports" onclick="showTab('reports',this)"><span class="nav-ico">⚠️</span>Reports <span class="nav-badge" id="reports-badge" style="display:none">!</span></div>
+    <div class="nav-item" id="nav-crisis" onclick="showTab('crisis',this)"><span class="nav-ico">🆘</span>Crisis</div>
+    <div class="nav-section">Special Features</div>
+    <div class="nav-item" id="nav-whisper" onclick="showTab('whisper',this)"><span class="nav-ico">🌀</span>Whisper Chains</div>
+    <div class="nav-item" id="nav-gratitude" onclick="showTab('gratitude',this)"><span class="nav-ico">💛</span>Gratitude Bombs</div>
+    <div class="nav-section">Data</div>
+    <div class="nav-item" id="nav-moods" onclick="showTab('moods',this)"><span class="nav-ico">🌊</span>Mood Data</div>
+    <div class="nav-item" id="nav-export" onclick="showTab('export',this)"><span class="nav-ico">📥</span>Export & Ads</div>
+    <div class="nav-section">Security</div>
+    <div class="nav-item" id="nav-security" onclick="showTab('security',this)" style="color:#FF4D6D"><span class="nav-ico">🔒</span>Security & Tracking</div>
+    <div style="margin-top:auto;padding:16px">
+      <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center" onclick="doLogout()">Logout</button>
     </div>
   </div>
-  <div class="content">
 
-    <!-- ── OVERVIEW ── -->
-    <div class="screen active" id="screen-overview">
-      <div class="stats-grid">
-        <div class="stat-card" style="--accent:rgba(123,94,167,.2)">
-          <div class="stat-label">Total Users</div>
-          <div class="stat-value" id="stat-users">—</div>
-          <div class="stat-delta" id="stat-users-d">Loading...</div>
-          <div class="stat-bar"><div class="stat-bar-fill" id="sb-users" style="width:0%;background:#7B5EA7"></div></div>
-        </div>
-        <div class="stat-card" style="--accent:rgba(244,162,97,.2)">
-          <div class="stat-label">Total Posts</div>
-          <div class="stat-value" id="stat-posts">—</div>
-          <div class="stat-delta" id="stat-posts-d">Loading...</div>
-          <div class="stat-bar"><div class="stat-bar-fill" id="sb-posts" style="width:0%;background:#F4A261"></div></div>
-        </div>
-        <div class="stat-card" style="--accent:rgba(0,201,167,.2)">
-          <div class="stat-label">Online Now</div>
-          <div class="stat-value" id="stat-online">—</div>
-          <div class="stat-delta up">↑ Real-time</div>
-          <div class="stat-bar"><div class="stat-bar-fill" id="sb-online" style="width:0%;background:#00C9A7"></div></div>
-        </div>
-        <div class="stat-card" style="--accent:rgba(255,107,157,.2)">
-          <div class="stat-label">Mood Logs</div>
-          <div class="stat-value" id="stat-moods">—</div>
-          <div class="stat-delta" id="stat-moods-d">Loading...</div>
-          <div class="stat-bar"><div class="stat-bar-fill" id="sb-moods" style="width:0%;background:#FF6B9D"></div></div>
-        </div>
-      </div>
-
-      <div class="two-col">
-        <div>
-          <div class="section-header">
-            <div class="section-title">⚡ Live Activity Stream</div>
-            <button class="btn btn-ghost btn-sm" onclick="clearEvents()">Clear</button>
-          </div>
-          <div class="events-stream" id="event-stream">
-            <div style="padding:20px;text-align:center;color:var(--tx3);font-size:12px">Connecting to live feed...</div>
-          </div>
-        </div>
-        <div>
-          <div class="section-header">
-            <div class="section-title">🗺️ Top Cities</div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>#</th><th>City</th><th>Users</th><th>Posts</th></tr></thead>
-              <tbody id="cities-table"><tr><td colspan="4" style="text-align:center;padding:20px"><div class="spin"></div></td></tr></tbody>
-            </table>
-          </div>
-          <div class="section-header" style="margin-top:14px">
-            <div class="section-title">💜 Emotion Pulse (7d)</div>
-          </div>
-          <div class="table-wrap" style="padding:14px">
-            <div id="emotion-bars"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-header">
-        <div class="section-title">👥 Recent Signups</div>
-        <button class="btn btn-ghost btn-sm" onclick="showScreen('users',document.querySelector('.nav-item:nth-child(5)'))">View all</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Avatar</th><th>Name</th><th>Level</th><th>Location</th><th>Device</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="recent-users"><tr><td colspan="8" style="text-align:center;padding:20px"><div class="spin"></div></td></tr></tbody>
-        </table>
+  <div id="main">
+    <div id="topbar">
+      <div><div class="tb-title" id="tb-title">Overview</div><div class="tb-sub" id="tb-sub">Live platform data</div></div>
+      <div class="tb-actions">
+        <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--tx3)"><div class="pdot"></div><span id="online-num">— online</span></div>
+        <button class="btn btn-ghost btn-sm" onclick="refreshCurrent()">↻ Refresh</button>
       </div>
     </div>
+    <div id="content">
 
-    <!-- ── LIVE EVENTS ── -->
-    <div class="screen" id="screen-events">
-      <div class="section-header">
-        <div class="section-title">⚡ All Live Events</div>
-        <div style="display:flex;gap:8px">
-          <select id="event-filter" style="background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:5px 10px;color:var(--tx);font-size:12px;outline:none" onchange="filterEvents()">
-            <option value="all">All events</option>
-            <option value="post">Posts</option>
-            <option value="login">Logins</option>
-            <option value="chat">Chats</option>
-            <option value="report">Reports</option>
-          </select>
-          <button class="btn btn-ghost btn-sm" onclick="clearEvents()">Clear</button>
+      <!-- OVERVIEW -->
+      <div id="tab-overview" class="tab-content" style="display:block">
+        <div class="stats-grid" id="stats-grid"><div class="empty" style="grid-column:1/-1"><div class="spin"></div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Emotion Distribution (7d)</div>
+            <div id="emo-bars"></div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Top Cities by Mood Logs</div>
+            <div id="city-list"></div>
+          </div>
         </div>
-      </div>
-      <div class="events-stream" style="height:calc(100vh - 200px)" id="all-events">
-        <div style="padding:20px;text-align:center;color:var(--tx3);font-size:12px">Waiting for events...</div>
-      </div>
-    </div>
-
-    <!-- ── USERS ── -->
-    <div class="screen" id="screen-users">
-      <div class="search-bar">
-        <input class="search-input" id="user-search" placeholder="Search by name or email..." oninput="searchUsers(this.value)">
-        <div class="tabs" style="margin:0">
-          <div class="tab active" onclick="filterUsers('all',this)">All</div>
-          <div class="tab" onclick="filterUsers('banned',this)">Banned</div>
-          <div class="tab" onclick="filterUsers('premium',this)">Premium</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Avatar</th><th>Name / Email</th><th>Lv/XP</th><th>Location</th><th>Device</th><th>Last Seen</th><th>Logins</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="users-table"><tr><td colspan="9" style="text-align:center;padding:24px"><div class="spin"></div></td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ── SECURITY ── -->
-    <div class="screen" id="screen-security">
-      <div style="font-size:12px;color:var(--tx3);margin-bottom:16px;padding:10px 14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:10px">⚠️ Admin-only. All data encrypted. For legal investigations only.</div>
-      <div class="security-grid">
-        <div class="sec-card">
-          <div class="sec-card-title">📍 Post Location</div>
-          <input class="input-field" id="sec-post-id" placeholder="Post ID (from Posts tab)...">
-          <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center" onclick="trackPost()">🔍 Track Location</button>
-          <div class="result-box" id="post-loc-result" style="margin-top:10px">Enter Post ID above</div>
-        </div>
-        <div class="sec-card">
-          <div class="sec-card-title">👤 User Location History</div>
-          <input class="input-field" id="sec-user-id" placeholder="User ID...">
-          <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center" onclick="trackUser()">📍 Load History</button>
-          <div class="result-box" id="user-loc-result" style="margin-top:10px;max-height:180px;overflow-y:auto">Enter User ID above</div>
-        </div>
-        <div class="sec-card">
-          <div class="sec-card-title">💬 Chat Transcripts</div>
-          <input class="input-field" id="sec-chat-uid" placeholder="User ID...">
-          <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center" onclick="loadChats()">📂 Load Sessions</button>
-          <div class="result-box" id="chat-sessions-result" style="margin-top:10px;max-height:180px;overflow-y:auto">Enter User ID above</div>
-        </div>
-      </div>
-      <div id="chat-transcript-box" style="display:none;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:16px;max-height:300px;overflow-y:auto;margin-top:4px">
-        <div id="chat-transcript-inner" style="font-size:12px;color:var(--tx2);line-height:1.8"></div>
-      </div>
-    </div>
-
-    <!-- ── BROADCAST ── -->
-    <div class="screen" id="screen-broadcast">
-      <div class="notif-builder">
-        <div style="font-size:14px;font-weight:500;margin-bottom:16px">📣 Send Push Notification to Users</div>
-        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Target</div>
-        <div class="notif-targets">
-          <div class="target-chip selected" onclick="selectTarget(this,'all')">All Users</div>
-          <div class="target-chip" onclick="selectTarget(this,'premium')">Premium Only</div>
-          <div class="target-chip" onclick="selectTarget(this,'active')">Active Today</div>
-          <div class="target-chip" onclick="selectTarget(this,'new')">New (7 days)</div>
-          <div class="target-chip" onclick="selectTarget(this,'city')">By City</div>
-        </div>
-        <input class="search-input" id="bc-city" placeholder="City name..." style="display:none;margin-bottom:10px">
-        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px;margin-top:14px">Message</div>
-        <input class="search-input" id="bc-title" placeholder="Notification title..." style="margin-bottom:8px">
-        <textarea class="search-input" id="bc-body" placeholder="Message body..." rows="3" style="resize:vertical"></textarea>
-        <div style="display:flex;gap:10px;margin-top:12px">
-          <button class="btn btn-ghost" onclick="previewBroadcast()">👁 Preview</button>
-          <button class="btn btn-primary" onclick="sendBroadcast()">📣 Send Now</button>
-        </div>
-        <div id="bc-preview" style="margin-top:12px;display:none;background:rgba(0,0,0,.3);border-radius:10px;padding:12px;font-size:12px;color:var(--tx2)"></div>
-      </div>
-    </div>
-
-    <!-- ── ANALYTICS ── -->
-    <div class="screen" id="screen-analytics">
-      <div class="two-col">
-        <div class="table-wrap" style="padding:16px">
-          <div style="font-size:13px;font-weight:600;margin-bottom:14px">📊 Signups — Last 14 Days</div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:16px">
+          <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">New Signups — Last 14 Days</div>
           <div id="signup-chart" class="mini-chart"></div>
-          <div id="signup-labels" style="display:flex;gap:3px;margin-top:4px"></div>
         </div>
-        <div class="table-wrap" style="padding:16px">
-          <div style="font-size:13px;font-weight:600;margin-bottom:14px">💜 Top Emotions This Week</div>
-          <div id="emotion-chart"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Post Types (7d)</div>
+            <div id="post-types"></div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Trending Hashtags (7d)</div>
+            <div id="hashtag-list"></div>
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Live Activity</div>
+            <div style="display:flex;align-items:center;gap:6px"><div class="pdot"></div><span style="font-size:.72rem;color:var(--tx3)">last 5 min</span></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:500;color:var(--vl)" id="live-users">—</div><div style="font-size:.7rem;color:var(--tx3)">new users</div></div>
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:500;color:var(--tl)" id="live-posts">—</div><div style="font-size:.7rem;color:var(--tx3)">posts</div></div>
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:500;color:var(--go)" id="live-moods">—</div><div style="font-size:.7rem;color:var(--tx3)">moods</div></div>
+            <div style="flex:1;min-width:80px;background:var(--bg3);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:500;color:var(--lm)" id="live-vents">—</div><div style="font-size:.7rem;color:var(--tx3)">vents</div></div>
+          </div>
+          <div id="activity-feed"><div class="spin"></div></div>
         </div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Metric</th><th>Today</th><th>7d</th><th>30d</th><th>All Time</th></tr></thead>
-          <tbody id="metrics-table"><tr><td colspan="5" style="text-align:center;padding:20px"><div class="spin"></div></td></tr></tbody>
-        </table>
+
+      <!-- EMOTION INTEL -->
+      <div id="tab-emotion" class="tab-content" style="display:none">
+        <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" id="ebtn-pulse"    onclick="switchEmotionView('pulse',this)">Live Pulse</button>
+          <button class="btn btn-ghost btn-sm"  id="ebtn-hourly"   onclick="switchEmotionView('hourly',this)">Hourly Breakdown</button>
+          <button class="btn btn-ghost btn-sm"  id="ebtn-admatrix" onclick="switchEmotionView('admatrix',this)">Ad Matrix</button>
+          <button class="btn btn-ghost btn-sm"  id="ebtn-segments" onclick="switchEmotionView('segments',this)">Ad Segments</button>
+          <button class="btn btn-ghost btn-sm"  id="ebtn-quality"  onclick="switchEmotionView('quality',this)">Data Quality</button>
+          <a href="https://api.annomuss.in/api/emotion/export" target="_blank" class="btn btn-ghost btn-sm">&#11015; Export CSV</a>
+        </div>
+        <div id="emotion-content"><div class="spin"></div></div>
       </div>
+
+      <!-- USERS -->
+      <div id="tab-users" class="tab-content" style="display:none">
+        <div class="search-bar">
+          <input class="search-inp" type="text" placeholder="Search by name or email..." id="user-search" oninput="searchUsers(this.value)"/>
+          <div class="filter-pills">
+            <span class="fpill active" onclick="filterUsers('all',this)">All</span>
+            <span class="fpill" onclick="filterUsers('banned',this)">Banned</span>
+            <span class="fpill" onclick="filterUsers('premium',this)">Premium</span>
+          </div>
+        </div>
+        <div style="overflow-x:auto"><div id="users-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- POSTS -->
+      <div id="tab-posts" class="tab-content" style="display:none">
+        <div class="search-bar">
+          <input class="search-inp" type="text" placeholder="Search posts..." id="post-search" oninput="filterPostsLive(this.value)"/>
+          <div class="filter-pills">
+            <span class="fpill active" id="pf-all"      onclick="loadPosts(false,false,false,this)">All Posts</span>
+            <span class="fpill"        id="pf-crisis"   onclick="loadPosts(true,false,false,this)">&#128682; Crisis</span>
+            <span class="fpill"        id="pf-hidden"   onclick="loadPosts(false,true,false,this)">Hidden</span>
+            <span class="fpill"        id="pf-reported" onclick="loadPosts(false,false,true,this)">Reported</span>
+          </div>
+        </div>
+        <div style="overflow-x:auto"><div id="posts-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- STORIES -->
+      <div id="tab-stories" class="tab-content" style="display:none">
+        <div class="page-head">
+          <div class="page-title">Active Stories</div>
+          <div class="page-sub">Stories expire after 24h · 👁 view counts · Delete if harmful</div>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="loadStories()">↻ Refresh</button>
+        </div>
+        <div style="overflow-x:auto"><div id="stories-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- VENTS -->
+      <div id="tab-vents" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title">Vents Board</div><div class="page-sub">Anonymous vents — delete if harmful</div></div>
+        <div style="overflow-x:auto"><div id="vents-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- REPORTS -->
+      <div id="tab-reports" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title">Open Reports</div><div class="page-sub">User-submitted reports awaiting action</div></div>
+        <div style="overflow-x:auto"><div id="reports-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- CRISIS -->
+      <div id="tab-crisis" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title" style="color:var(--cr)">&#128682; Crisis Posts</div><div class="page-sub">Self-harm content — review immediately</div></div>
+        <div style="overflow-x:auto"><div id="crisis-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- WHISPER -->
+      <div id="tab-whisper" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title">Whisper Chains</div><div class="page-sub">Anonymous collaborative poems</div></div>
+        <div id="whisper-content"><div class="spin"></div></div>
+      </div>
+
+      <!-- GRATITUDE -->
+      <div id="tab-gratitude" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title">Gratitude Bombs</div><div class="page-sub">Anonymous kindness between users</div></div>
+        <div id="gratitude-content"><div class="spin"></div></div>
+      </div>
+
+      <!-- MOODS -->
+      <div id="tab-moods" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title">Mood Data</div><div class="page-sub">City-level emotion aggregation</div></div>
+        <div id="moods-content"><div class="spin"></div></div>
+      </div>
+
+      <!-- EXPORT -->
+      
+<div id="tab-security" class="tab-content" style="display:none">
+  <div class="page-head"><div class="page-title">🔒 Security & Location Tracking</div></div>
+  <div style="font-size:.8rem;color:var(--tx3);margin-bottom:20px;padding:0 24px">Admin-only. Encrypted. Legal compliance tool for investigations.</div>
+
+  <div style="padding:0 24px;display:flex;flex-direction:column;gap:16px">
+
+    <div class="card" style="padding:20px">
+      <div style="font-weight:700;font-size:.95rem;margin-bottom:4px">📍 Track Post / Story Location</div>
+      <div style="font-size:.78rem;color:var(--tx3);margin-bottom:14px">Shows exact IP, city, GPS coords, ISP, device of whoever created the post or story.</div>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <input id="sec-post-id" placeholder="Paste Post ID..." style="flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;color:var(--tx);font-size:.85rem;outline:none"/>
+        <button class="btn btn-v" onclick="loadPostLocation()" style="padding:10px 20px;white-space:nowrap">🔍 Track</button>
+      </div>
+      <div id="post-location-result" style="font-size:.82rem;color:var(--tx3)">Enter a Post ID from the Posts tab above.</div>
     </div>
 
-    <!-- ── REPORTS ── -->
-    <div class="screen" id="screen-reports">
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Type</th><th>Reported Content</th><th>Reporter</th><th>Reported At</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="reports-table"><tr><td colspan="6" style="text-align:center;padding:20px"><div class="spin"></div></td></tr></tbody>
-        </table>
+    <div class="card" style="padding:20px">
+      <div style="font-weight:700;font-size:.95rem;margin-bottom:4px">👤 User Location History</div>
+      <div style="font-size:.78rem;color:var(--tx3);margin-bottom:14px">Every login, post, and chat action — with IP, city, GPS if granted, and Google Maps link.</div>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <input id="sec-user-id" placeholder="Paste User ID..." style="flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;color:var(--tx);font-size:.85rem;outline:none"/>
+        <button class="btn btn-v" onclick="loadUserLocation()" style="padding:10px 20px;white-space:nowrap">📍 Load</button>
       </div>
+      <div id="user-location-result" style="font-size:.82rem;color:var(--tx3)">Copy User ID from the Users tab.</div>
     </div>
 
-    <!-- ── POSTS ── -->
-    <div class="screen" id="screen-posts">
-      <div class="search-bar">
-        <input class="search-input" id="post-search" placeholder="Search posts..." oninput="searchPosts(this.value)">
-        <select id="post-type-filter" style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:9px 14px;color:var(--tx);font-size:12px;outline:none" onchange="loadPosts()">
-          <option value="">All types</option>
-          <option value="post">Posts</option>
-          <option value="confession">Confessions</option>
-          <option value="story">Stories</option>
-          <option value="poll">Polls</option>
-        </select>
+    <div class="card" style="padding:20px">
+      <div style="font-weight:700;font-size:.95rem;margin-bottom:4px">💬 Chat Transcripts</div>
+      <div style="font-size:.78rem;color:var(--tx3);margin-bottom:14px">Full encrypted chat logs. Enter User ID to see all sessions — click any session to read the full transcript.</div>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <input id="sec-user-id-chat" placeholder="Paste User ID..." style="flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;color:var(--tx);font-size:.85rem;outline:none"/>
+        <button class="btn btn-v" onclick="loadUserChats()" style="padding:10px 20px;white-space:nowrap">📂 Load</button>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Author</th><th>Content</th><th>Type</th><th>Emotion</th><th>Likes</th><th>Posted</th><th>Actions</th></tr></thead>
-          <tbody id="posts-table"><tr><td colspan="7" style="text-align:center;padding:20px"><div class="spin"></div></td></tr></tbody>
-        </table>
-      </div>
+      <div id="chat-sessions-result" style="font-size:.82rem;color:var(--tx3)">Enter a User ID to see all their chat sessions.</div>
+      <div id="chat-transcript-result" style="margin-top:12px"></div>
     </div>
 
-    <!-- ── EXPORT ── -->
-    <div class="screen" id="screen-export">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="sec-card">
-          <div class="sec-card-title">📊 Export Users CSV</div>
-          <div style="font-size:11px;color:var(--tx3);margin-bottom:12px">All user data with location and device info</div>
-          <button class="btn btn-primary" onclick="exportUsers()">⬇ Download Users CSV</button>
+  </div>
+</div>
+<div id="tab-export" class="tab-content" style="display:none">
+        <div class="page-head"><div class="page-title">Export & Advertiser Intelligence</div><div class="page-sub">Download CSV reports</div></div>
+        <div class="export-grid">
+          <div class="export-card" onclick="dlExport('users')"><div class="ec-ico">👥</div><div class="ec-title">Users + Emotion Profile</div><div class="ec-desc">All users with top emotions, city, ad segment</div></div>
+          <div class="export-card" onclick="dlExport('moods')"><div class="ec-ico">🌊</div><div class="ec-title">Mood Data</div><div class="ec-desc">Every mood log with city, time of day, intensity</div></div>
+          <div class="export-card" onclick="dlExport('posts')"><div class="ec-ico">📢</div><div class="ec-title">Posts Data</div><div class="ec-desc">All posts with engagement metrics</div></div>
+          <div class="export-card gold" onclick="dlExport('ad-targeting')"><div class="ec-badge">★ KEY</div><div class="ec-ico">🎯</div><div class="ec-title">Ad Targeting Intelligence</div><div class="ec-desc">Emotion × city × hour × day</div></div>
+          <div class="export-card" onclick="dlExport('analytics')"><div class="ec-ico">📊</div><div class="ec-title">Full Analytics</div><div class="ec-desc">DAU, emotion distribution, top cities</div></div>
+          <div class="export-card" onclick="dlEmotionExport()"><div class="ec-ico">🧠</div><div class="ec-title">Emotion Intelligence</div><div class="ec-desc">Behavioral signals, snapshots, ad segments</div></div>
         </div>
-        <div class="sec-card">
-          <div class="sec-card-title">📝 Export Posts CSV</div>
-          <div style="font-size:11px;color:var(--tx3);margin-bottom:12px">All posts with emotion, city, engagement data</div>
-          <button class="btn btn-primary" onclick="exportPosts()">⬇ Download Posts CSV</button>
-        </div>
-        <div class="sec-card">
-          <div class="sec-card-title">💭 Export Mood Data</div>
-          <div style="font-size:11px;color:var(--tx3);margin-bottom:12px">City-wise anonymized mood trends</div>
-          <button class="btn btn-primary" onclick="exportMoods()">⬇ Download Mood CSV</button>
-        </div>
-        <div class="sec-card">
-          <div class="sec-card-title">📈 Export Analytics</div>
-          <div style="font-size:11px;color:var(--tx3);margin-bottom:12px">Daily signups, posts, engagement metrics</div>
-          <button class="btn btn-primary" onclick="exportAnalytics()">⬇ Download Report</button>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px">
+          <div style="font-size:.82rem;font-weight:700;margin-bottom:8px">Export Log</div>
+          <div id="export-log" style="font-size:.78rem;color:var(--tx3);line-height:1.8">No exports yet this session.</div>
         </div>
       </div>
-    </div>
 
-    <!-- ── CRISIS ── -->
-    <div class="screen" id="screen-crisis">
-      <div style="padding:12px 16px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;margin-bottom:16px;font-size:12px;color:#F87171">
-        🚨 Crisis posts require immediate review. These users may be at risk.
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>User</th><th>Content</th><th>Crisis Level</th><th>Posted</th><th>Location</th><th>Actions</th></tr></thead>
-          <tbody id="crisis-table"><tr><td colspan="6" style="text-align:center;padding:20px"><div class="spin"></div></td></tr></tbody>
-        </table>
-      </div>
     </div>
-
   </div>
 </div>
 
 <script>
-const API = 'https://api.annomuss.in';
-let adminPass = '', allUsers = [], allEvents = [], socket = null;
-let currentScreen = 'overview', liveOnline = 0;
+const API='https://api.annomuss.in';
+let adminPass='',confirmCb=null,currentTab='overview';
+let allUsers=[],allPostsCache=[],currentUserFilter='all';
+let exportLog=[],liveTimer=null;
+const EMO_COLORS={happy:'#52B788',sad:'#7B5EA7',anxious:'#FF4D6D',lonely:'#C4A8FF',grateful:'#00C9A7',inspired:'#F4A261',hopeful:'#5CB8E4',angry:'#FF6B6B',confused:'#A8D8EA',proud:'#FFD700',excited:'#FF85A1',neutral:'#666'};
+
+function q(id){return document.getElementById(id);}
+function esc(t){return(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function num(n){return(n||0).toLocaleString('en-IN');}
+function timeAgo(d){if(!d)return'';const s=Math.floor((Date.now()-new Date(d))/1000);if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+function toast(msg,dur=3000){const w=q('toast-wrap'),el=document.createElement('div');el.className='toast-item';el.textContent=msg;w.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='.3s';setTimeout(()=>el.remove(),300);},dur);}
+
+async function af(path,opts={}){
+  return fetch(API+path,{...opts,headers:{'Content-Type':'application/json','x-admin-password':adminPass,...(opts.headers||{})}});
+}
 
 // ── LOGIN ──────────────────────────────────────────────────────
-function doLogin(){
-  const pw = document.getElementById('admin-pw').value;
-  if(!pw){ document.getElementById('login-err').textContent='Enter password'; return; }
-  adminPass = pw;
-  document.getElementById('login-err').textContent='Checking...';
-  af('/api/admin/overview').then(r=>{
-    if(r.ok){
-      document.getElementById('login-screen').style.display='none';
-      init();
-    } else {
-      document.getElementById('login-err').textContent='Wrong password';
-      adminPass='';
-    }
-  }).catch(e=>{ document.getElementById('login-err').textContent='Connection error: '+e.message; adminPass=''; });
+async function doLogin(){
+  const pass=q('admin-pass').value.trim();if(!pass)return;
+  const btn=q('login-btn');btn.textContent='Checking...';btn.disabled=true;
+  adminPass=pass;
+  try{
+    const r=await af('/api/admin/stats');
+    if(r.ok){q('login-screen').style.display='none';q('app').style.display='flex';loadAll();setInterval(()=>{if(currentTab==='overview')fetchLiveData();},15000);}
+    else{q('login-err').style.display='block';adminPass='';}
+  }catch(e){q('login-err').textContent='Connection error: '+e.message;q('login-err').style.display='block';adminPass='';}
+  finally{btn.textContent='Enter →';btn.disabled=false;}
 }
-function doLogout(){ adminPass=''; location.reload(); }
+function doLogout(){adminPass='';location.reload();}
 
-// ── API HELPER ────────────────────────────────────────────────
-function af(path, opts={}){
-  return fetch(API+path, { ...opts, headers:{ 'Content-Type':'application/json', 'x-admin-password':adminPass, ...(opts.headers||{}) } });
+// ── CONFIRM MODAL ──────────────────────────────────────────────
+function showConfirm(ico,title,msg,cb,danger=true){
+  q('c-ico').textContent=ico;q('c-title').textContent=title;q('c-msg').textContent=msg;
+  const ok=q('c-ok');ok.textContent='Confirm';ok.className='btn '+(danger?'btn-danger':'btn-success')+' btn-sm';ok.style='flex:1;justify-content:center';
+  confirmCb=cb;q('confirm-modal').classList.add('on');
 }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function timeAgo(d){
-  const s=Math.floor((Date.now()-new Date(d))/1000);
-  if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';
-  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+function closeConfirm(){q('confirm-modal').classList.remove('on');confirmCb=null;}
+async function execConfirm(){
+  if(!confirmCb)return;
+  const ok=q('c-ok');ok.textContent='...';ok.disabled=true;
+  try{await confirmCb();}catch(e){toast('Error: '+e.message);}
+  ok.disabled=false;closeConfirm();
 }
-function toast(msg, type='info'){
-  const t=document.createElement('div');
-  t.className='toast';
-  t.style.borderColor=type==='error'?'rgba(239,68,68,.3)':type==='success'?'rgba(0,201,167,.3)':'rgba(196,168,255,.2)';
-  t.textContent=msg;
-  document.getElementById('toast-area').appendChild(t);
-  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3500);
-}
+document.addEventListener('click',e=>{if(e.target===q('confirm-modal'))closeConfirm();});
 
-// ── INIT ──────────────────────────────────────────────────────
-function init(){
-  connectSocket();
-  loadOverview();
-  setInterval(refreshLive, 8000);   // refresh stats every 8s
-  setInterval(loadOverview, 30000); // full refresh every 30s
-  document.getElementById('server-status').innerHTML='<div class="live-dot" style="width:6px;height:6px"></div><span>Connected</span>';
-}
-
-// ── REAL-TIME SOCKET ──────────────────────────────────────────
-function connectSocket(){
-  try {
-    socket = io(API, { auth:{ adminPassword: adminPass }, transports:['websocket','polling'] });
-    socket.on('connect', ()=>{ addEvent('🟢','Admin connected','Real-time feed active','system'); toast('Real-time connected','success'); });
-    socket.on('disconnect', ()=>addEvent('🔴','Disconnected','Reconnecting...','system'));
-    socket.on('online-count', n=>{ liveOnline=n; updateOnlineCount(n); });
-    socket.on('new-post', d=>{ addEvent('📝','New post',esc(d.emotion||'')+ ' · '+(d.city||'?'),'post'); bumpStat('stat-posts'); });
-    socket.on('new-signup', d=>{ addEvent('👤','New user signed up',esc(d.anonymousName||'Anonymous'),'login'); bumpStat('stat-users'); });
-    socket.on('report-received', d=>{ addEvent('⚠️','New report',esc(d.reason||''),'report'); bumpBadge('reports-badge'); });
-    socket.on('crisis-post', d=>{ addEvent('🚨','CRISIS POST',esc((d.caption||'').slice(0,60)),'report'); toast('🚨 Crisis post detected!','error'); });
-    socket.on('am3-count', n=>addEvent('🌙','3AM room',n+' people inside','chat'));
-    socket.on('rchat-matched', ()=>addEvent('💬','Random chat','Two users matched','chat'));
-  } catch(e){ console.warn('Socket failed:', e.message); }
+// ── TAB SWITCHING — single definition, no overrides ───────────
+function showTab(tab, navEl){
+  if(tab!=='overview'&&liveTimer){clearInterval(liveTimer);liveTimer=null;}
+  document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el=q('tab-'+tab);if(el)el.style.display='block';
+  if(navEl)navEl.classList.add('active');
+  else{const n=q('nav-'+tab);if(n)n.classList.add('active');}
+  currentTab=tab;
+  const TITLES={overview:'Overview',emotion:'Emotion Intelligence',users:'User Management',posts:'Post Moderation',stories:'Stories',vents:'Vents Board',reports:'Reports Queue',crisis:'Crisis Posts',whisper:'Whisper Chains',gratitude:'Gratitude Bombs',moods:'Mood Data',export:'Export & Ads'};
+  const SUBS={overview:'Live platform statistics',emotion:'Behavioral signal analysis & ad targeting',users:'Ban, unban, delete users',posts:'Hide, delete, review flagged content',stories:'Active stories — view counts & delete',vents:'Anonymous vents — delete if harmful',reports:'User-submitted reports awaiting action',crisis:'Posts flagged for self-harm — review immediately',whisper:'Anonymous collaborative poems',gratitude:'Anonymous kindness between users',moods:'City-level emotion aggregation',export:'Download CSV reports for analysis & advertising'};
+  q('tb-title').textContent=TITLES[tab]||tab;
+  q('tb-sub').textContent=SUBS[tab]||'';
+  if(tab==='users')    loadUsers();
+  if(tab==='posts')    loadPosts();
+  if(tab==='stories')  loadStories();
+  if(tab==='vents')    loadVents();
+  if(tab==='reports')  loadReports();
+  if(tab==='crisis')   loadCrisis();
+  if(tab==='moods')    loadMoods();
+  if(tab==='whisper')  loadWhisperChains();
+  if(tab==='gratitude')loadGratitude();
+  if(tab==='emotion')  switchEmotionView('pulse',q('ebtn-pulse'));
+  if(tab==='overview') loadOverview();
 }
 
-// ── LIVE EVENT STREAM ─────────────────────────────────────────
-function addEvent(icon, title, sub, type='info'){
-  const ev = { icon, title, sub, type, time: new Date() };
-  allEvents.unshift(ev);
-  if(allEvents.length > 200) allEvents.pop();
-  const count = parseInt(document.getElementById('events-badge').textContent)||0;
-  if(currentScreen !== 'events') document.getElementById('events-badge').textContent = count+1;
-  renderEventItem(document.getElementById('event-stream'), ev, true);
-  renderEventItem(document.getElementById('all-events'), ev, true);
-}
-function renderEventItem(container, ev, prepend=false){
-  if(!container) return;
-  const el = document.createElement('div');
-  el.className = 'event-item';
-  el.setAttribute('data-type', ev.type);
-  el.innerHTML = `<div class="event-icon">${ev.icon}</div>
-    <div class="event-body"><div class="event-title">${esc(ev.title)}</div><div class="event-sub">${esc(ev.sub)}</div></div>
-    <div class="event-time">${ev.time.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</div>`;
-  if(prepend) container.insertBefore(el, container.firstChild);
-  else container.appendChild(el);
-  // Keep max 50 items in stream
-  while(container.children.length > 50) container.removeChild(container.lastChild);
-}
-function clearEvents(){ allEvents=[]; document.getElementById('event-stream').innerHTML=''; document.getElementById('all-events').innerHTML=''; document.getElementById('events-badge').textContent='0'; }
-function filterEvents(){
-  const f = document.getElementById('event-filter').value;
-  const items = document.getElementById('all-events').querySelectorAll('.event-item');
-  items.forEach(i=>i.style.display=(f==='all'||i.getAttribute('data-type')===f)?'flex':'none');
-}
+function refreshCurrent(){showTab(currentTab,null);}
+function loadAll(){loadOverview();updateOnline();}
 
-// ── STATS ─────────────────────────────────────────────────────
-function bumpStat(id){ const el=document.getElementById(id); if(el){ const n=parseInt(el.textContent)||0; el.textContent=n+1; el.style.animation='none'; requestAnimationFrame(()=>el.style.animation='evIn .4s ease'); } }
-function bumpBadge(id){ const el=document.getElementById(id); if(el){ el.style.display='inline'; el.textContent=(parseInt(el.textContent)||0)+1; } }
-function updateOnlineCount(n){ document.getElementById('live-online').textContent=n; document.getElementById('online-badge').textContent=n; document.getElementById('stat-online').textContent=n; document.getElementById('sb-online').style.width=Math.min(n/100*100,100)+'%'; }
-
+// ── OVERVIEW ──────────────────────────────────────────────────
 async function loadOverview(){
-  try {
-    const r = await af('/api/admin/overview');
-    if(!r.ok) return;
-    const d = await r.json();
-    document.getElementById('stat-users').textContent=(d.totalUsers||0).toLocaleString();
-    document.getElementById('stat-posts').textContent=(d.totalPosts||0).toLocaleString();
-    document.getElementById('stat-moods').textContent=(d.totalMoods||0).toLocaleString();
-    if(d.onlineNow) updateOnlineCount(d.onlineNow);
-    document.getElementById('sb-users').style.width=Math.min((d.totalUsers||0)/500*100,100)+'%';
-    document.getElementById('sb-posts').style.width=Math.min((d.totalPosts||0)/1000*100,100)+'%';
-    document.getElementById('sb-moods').style.width=Math.min((d.totalMoods||0)/2000*100,100)+'%';
-    document.getElementById('stat-users-d').textContent='+'+( d.newUsersToday||0)+' today';
-    document.getElementById('stat-posts-d').textContent='+'+( d.newPostsToday||0)+' today';
-    document.getElementById('stat-moods-d').textContent='+'+( d.newMoodsToday||0)+' today';
-    if(d.topCities) renderCities(d.topCities);
-    if(d.emotionDist) renderEmotions(d.emotionDist);
-    document.getElementById('last-refresh-time').textContent='Updated '+new Date().toLocaleTimeString('en-IN');
-    loadRecentUsers();
-  } catch(e){ console.warn('overview error:', e.message); }
+  try{
+    const [statsR,overviewR]=await Promise.all([af('/api/admin/stats'),af('/api/admin/overview').catch(()=>null)]);
+    if(!statsR.ok)throw new Error(statsR.status===403?'Wrong password':'Server error '+statsR.status);
+    const d=await statsR.json();
+    const grid=q('stats-grid');
+    grid.innerHTML=[
+      {color:'purple',val:num(d.users),     label:'Total Users',    sub:'+'+num(d.todayUsers)+' today'},
+      {color:'teal',  val:num(d.posts),     label:'Total Posts',    sub:'All time'},
+      {color:'orange',val:num(d.moods),     label:'Mood Logs',      sub:'Emotion data points'},
+      {color:'green', val:num(d.vents),     label:'Vents',          sub:'Anonymous vents'},
+      {color:'red',   val:num(d.crisis),    label:'Crisis Posts',   sub:'Need review'},
+      {color:'red',   val:num(d.reports),   label:'Open Reports',   sub:d.reports>0?'Action needed':'All clear'},
+      {color:'purple',val:num(d.banned),    label:'Banned Users',   sub:'Blocked accounts'},
+      {color:'teal',  val:num(d.whisperChains||0),label:'Whisper Chains',sub:num(d.gratitudeBombs||0)+' gratitude bombs'},
+    ].map(s=>'<div class="stat-card '+s.color+'"><div class="stat-val">'+s.val+'</div><div class="stat-label">'+s.label+'</div><div class="stat-change">'+s.sub+'</div></div>').join('');
+    const b=q('reports-badge');if(b)b.style.display=d.reports>0?'inline':'none';
+    if(overviewR&&overviewR.ok){
+      try{const ov=await overviewR.json();renderEmoBar(ov.emotionDistribution||{});renderCityList(ov.topCities||[]);renderSignupChart(ov.dailySignups||[]);renderHashtags(ov.topHashtags||[]);renderPostTypes(ov.postTypes||{});renderActivity(d,ov);}
+      catch(_){renderActivity(d,{});}
+    }else{renderActivity(d,{});}
+    fetchLiveData();
+    liveTimer=setInterval(fetchLiveData,15000);
+  }catch(e){
+    q('stats-grid').innerHTML='<div class="empty" style="grid-column:1/-1"><div style="font-size:1.5rem;margin-bottom:8px">🔐</div><div>'+e.message+'</div><div style="font-size:.75rem;opacity:.6;margin-top:4px">Check ADMIN_PASSWORD env var on Render</div></div>';
+  }
 }
 
-async function refreshLive(){
-  try {
-    const r = await af('/api/admin/overview');
-    if(!r.ok) return;
-    const d = await r.json();
-    if(d.onlineNow !== undefined) updateOnlineCount(d.onlineNow);
-    document.getElementById('last-refresh-time').textContent='Updated '+new Date().toLocaleTimeString('en-IN');
-  } catch(_){}
+function renderEmoBar(dist){
+  const el=q('emo-bars');if(!el)return;
+  const entries=Object.entries(dist).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(!entries.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem">No mood data yet</div>';return;}
+  const total=entries.reduce((s,[,v])=>s+v,0)||1;
+  el.innerHTML=entries.map(([emo,count])=>'<div class="emo-row"><div class="emo-label">'+esc(emo)+'</div><div class="emo-track"><div class="emo-fill" style="width:'+Math.round(count/total*100)+'%;background:'+(EMO_COLORS[emo]||'#888')+'"></div></div><div class="emo-pct">'+Math.round(count/total*100)+'%</div></div>').join('');
 }
-
-function refreshAll(){ loadOverview(); if(currentScreen==='users') loadUsers(); if(currentScreen==='posts') loadPosts(); toast('Refreshed','success'); }
-
-function renderCities(cities){
-  const tbody = document.getElementById('cities-table');
-  if(!cities.length){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--tx3);padding:14px">No data yet</td></tr>'; return; }
-  tbody.innerHTML = cities.slice(0,8).map((c,i)=>`<tr>
-    <td style="color:var(--tx3)">${i+1}</td>
-    <td style="font-weight:500">${esc(c._id||c.city||'Unknown')}</td>
-    <td><span class="badge badge-v">${c.users||c.count||0}</span></td>
-    <td>${c.posts||0}</td>
-  </tr>`).join('');
+function renderCityList(cities){
+  const el=q('city-list');if(!el)return;
+  if(!cities.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem">No city data yet</div>';return;}
+  el.innerHTML=cities.slice(0,8).map((c,i)=>'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bd)"><span style="width:22px;font-size:.72rem;color:var(--tx3)">'+(i+1)+'</span><span style="flex:1;font-size:.83rem">'+esc(c.city||'Unknown')+'</span><span style="font-size:.78rem;color:var(--tx3)">'+num(c.count)+'</span></div>').join('');
 }
+function renderSignupChart(signups){
+  const el=q('signup-chart');if(!el)return;
+  if(!signups.length){el.innerHTML='<div style="color:var(--tx3);font-size:.8rem">No signup data</div>';return;}
+  const max=Math.max(...signups.map(s=>s.count),1);
+  el.innerHTML=signups.slice(-14).map(s=>'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" title="'+s.date+': '+s.count+'"><span style="font-size:.55rem;color:var(--tx3)">'+s.count+'</span><div style="height:'+Math.max(4,Math.round(s.count/max*44))+'px;background:var(--v);width:100%;border-radius:3px 3px 0 0"></div></div>').join('');
+}
+function renderHashtags(hashtags){
+  const el=q('hashtag-list');if(!el||!hashtags.length)return;
+  el.innerHTML=hashtags.slice(0,10).map(h=>'<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--bg3);border-radius:100px;font-size:.75rem;margin:3px;color:var(--vl)">#'+esc(h.tag)+'<span style="color:var(--tx3)">'+h.count+'</span></span>').join('');
+}
+function renderPostTypes(types){
+  const el=q('post-types');if(!el)return;
+  const ICONS={post:'📢',story:'📸',confession:'🤫',unsent:'💌',diary:'📖',poll:'📊',voice:'🎙️',vent:'💭',challenge:'🎯'};
+  const entries=Object.entries(types).sort((a,b)=>b[1]-a[1]);if(!entries.length)return;
+  const total=entries.reduce((s,[,v])=>s+v,0)||1;
+  el.innerHTML=entries.map(([type,count])=>'<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)"><span>'+(ICONS[type]||'📝')+'</span><span style="flex:1;font-size:.82rem;text-transform:capitalize">'+esc(type)+'</span><span style="font-size:.78rem;color:var(--tx3)">'+num(count)+'</span><span style="font-size:.7rem;color:var(--tx3);width:32px;text-align:right">'+Math.round(count/total*100)+'%</span></div>').join('');
+}
+function renderActivity(stats,overview){
+  const el=q('activity-feed');if(!el)return;
+  const items=[];
+  if(stats.todayUsers>0)items.push({ico:'👤',c:'var(--tl)',text:num(stats.todayUsers)+' new users today'});
+  if(stats.crisis>0)items.push({ico:'🆘',c:'var(--cr)',text:stats.crisis+' crisis post'+(stats.crisis===1?'':'s')+' need review'});
+  if(stats.reports>0)items.push({ico:'⚠️',c:'var(--go)',text:stats.reports+' open report'+(stats.reports===1?'':'s')});
+  const emo=Object.entries(overview.emotionDistribution||{}).sort((a,b)=>b[1]-a[1])[0];
+  if(emo)items.push({ico:'😊',c:'var(--tx2)',text:'Top mood this week: '+emo[0]+' ('+num(emo[1])+' logs)'});
+  if(!items.length){el.innerHTML='<div class="empty">Platform is quiet — share annomuss to get users!</div>';return;}
+  el.innerHTML=items.map(i=>'<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd)"><span style="font-size:1.1rem;width:24px;text-align:center">'+i.ico+'</span><span style="font-size:.83rem;color:'+i.c+'">'+i.text+'</span></div>').join('');
+}
+async function fetchLiveData(){
+  try{
+    const r=await af('/api/admin/live');if(!r.ok)return;
+    const d=await r.json();
+    const set=(id,v)=>{const e=q(id);if(e)e.textContent=v;};
+    set('live-users',d.newUsers);set('live-posts',d.newPosts);set('live-moods',d.newMoods);set('live-vents',d.newVents);
+    const el=q('activity-feed');
+    if(el&&d.recentActivity&&d.recentActivity.length){
+      const EICO={happy:'😊',sad:'😢',anxious:'😰',lonely:'💙',grateful:'🙏',inspired:'✨',hopeful:'🌱',angry:'😤',neutral:'😶',excited:'⚡',proud:'💪',confused:'😕'};
+      el.innerHTML=d.recentActivity.map(a=>'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--bd)"><span style="font-size:1rem;width:22px;text-align:center">'+(EICO[a.emotion]||'📝')+'</span><div style="flex:1;min-width:0"><div style="font-size:.8rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(a.text||(a.type+' posted'))+'</div><div style="font-size:.7rem;color:var(--tx3);margin-top:1px">'+(a.city?esc(a.city)+' · ':'')+esc(a.type||'post')+' · '+timeAgo(a.time)+'</div></div>'+(a.emotion?'<span style="padding:2px 8px;border-radius:100px;font-size:.68rem;background:rgba(123,94,167,.12);color:var(--vl)">'+esc(a.emotion)+'</span>':'')+'</div>').join('');
+    }
+  }catch(_){}
+}
+async function updateOnline(){try{const r=await fetch(API+'/health');const d=await r.json();if(d.ok)q('online-num').textContent='API OK';}catch(_){}}
 
-function renderEmotions(dist){
-  const el = document.getElementById('emotion-bars');
-  const colors={'happy':'#F4A261','sad':'#7B5EA7','anxious':'#FF6B9D','grateful':'#00C9A7','lonely':'#4A90D9','inspired':'#C4A8FF','angry':'#EF4444'};
-  const total = Object.values(dist).reduce((a,b)=>a+b,0)||1;
-  el.innerHTML = Object.entries(dist).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([emo,cnt])=>{
-    const pct = Math.round(cnt/total*100);
-    return `<div style="margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-bottom:3px">
-        <span>${emo}</span><span>${pct}%</span>
-      </div>
-      <div style="background:rgba(255,255,255,.06);border-radius:100px;height:5px;overflow:hidden">
-        <div style="height:100%;border-radius:100px;background:${colors[emo]||'#7B5EA7'};width:${pct}%;transition:width 1s ease"></div>
-      </div>
-    </div>`;
-  }).join('');
+// ── EMOTION INTELLIGENCE ──────────────────────────────────────
+function switchEmotionView(view,btn){
+  document.querySelectorAll('[id^="ebtn-"]').forEach(b=>{b.className='btn btn-ghost btn-sm';});
+  if(btn)btn.className='btn btn-primary btn-sm';
+  if(view==='pulse')     loadEmotionPulse();
+  else if(view==='hourly')    loadEmotionHourly();
+  else if(view==='admatrix')  loadAdMatrix();
+  else if(view==='segments')  loadSegments();
+  else if(view==='quality')   loadDataQuality();
+}
+async function loadEmotionPulse(){
+  const el=q('emotion-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/pulse');if(!r.ok)throw new Error('Emotion API not responding ('+r.status+')');
+    const data=await r.json();if(!data.length){el.innerHTML='<div class="empty">No emotion signals yet</div>';return;}
+    const total=data.reduce((s,e)=>s+e.count,0)||1;
+    el.innerHTML='<div style="margin-bottom:12px;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Live Emotion Pulse — Last 30 Minutes</div>'+
+      data.map(e=>{const pct=Math.round(e.count/total*100);const col=EMO_COLORS[e.emotion]||'#888';
+        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:80px;font-size:.82rem;text-transform:capitalize;color:var(--tx2)">'+esc(e.emotion)+'</div><div style="flex:1;height:10px;background:var(--bg3);border-radius:100px;overflow:hidden"><div style="height:100%;border-radius:100px;background:'+col+';width:'+pct+'%;transition:width .8s ease"></div></div><div style="width:36px;font-size:.75rem;font-family:var(--fM);color:var(--tx3)">'+pct+'%</div><div style="width:48px;font-size:.72rem;color:var(--tx3)">'+num(e.count)+'</div></div>';
+      }).join('')+'<div style="font-size:.75rem;color:var(--tx3);margin-top:8px">Total signals: '+num(total)+'</div>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+async function loadEmotionHourly(){
+  const el=q('emotion-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/hourly-breakdown');if(!r.ok)throw new Error('Hourly data not available ('+r.status+')');
+    const data=await r.json();if(!data.length){el.innerHTML='<div class="empty">No hourly data yet</div>';return;}
+    const maxCount=Math.max(...data.map(d=>d.userCount),1);
+    el.innerHTML='<div style="margin-bottom:12px;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">24h Emotion Activity</div>'+
+      '<div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:8px">'+
+      Array.from({length:24},(_,h)=>{const d=data.find(x=>x.hour===h);const count=d?.userCount||0;const barH=Math.max(4,Math.round(count/maxCount*76));const topEmo=d?Object.entries(d.emotions||{}).sort((a,b)=>b[1]-a[1])[0]:null;const col=topEmo?EMO_COLORS[topEmo[0]]||'#7B5EA7':'#1e1e2e';return'<div style="flex:1;display:flex;flex-direction:column;align-items:center" title="'+h+':00 — '+count+'"><div style="width:100%;border-radius:2px 2px 0 0;background:'+col+';height:'+barH+'px;opacity:.85"></div></div>';}).join('')+
+      '</div><div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--tx3);margin-bottom:14px">'+Array.from({length:7},(_,i)=>'<span>'+String(i*4).padStart(2,'0')+'h</span>').join('')+'</div>'+
+      '<div style="overflow-x:auto"><table><thead><tr><th>Hour</th><th>Signals</th><th>Anxious</th><th>Happy</th><th>Sad</th><th>Lonely</th><th>Grateful</th><th>Conf%</th></tr></thead><tbody>'+
+      data.map(d=>'<tr><td style="font-family:var(--fM)">'+String(d.hour).padStart(2,'0')+':00</td><td>'+num(d.userCount)+'</td>'+['anxious','happy','sad','lonely','grateful'].map(e=>'<td style="color:'+(EMO_COLORS[e]||'#888')+'">'+d.emotions[e]+'</td>').join('')+'<td>'+d.confidence+'%</td></tr>').join('')+'</tbody></table></div>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+async function loadAdMatrix(){
+  const el=q('emotion-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/ad-matrix');if(!r.ok)throw new Error('Ad matrix not available ('+r.status+')');
+    const data=await r.json();if(!data.length){el.innerHTML='<div class="empty">No ad targeting data yet</div>';return;}
+    const bySegment={};
+    data.forEach(row=>{const seg=row._id?.segment||'unknown';if(!bySegment[seg])bySegment[seg]=[];bySegment[seg].push(row);});
+    el.innerHTML='<div style="margin-bottom:12px;font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Ad Targeting Matrix</div>'+
+      Object.entries(bySegment).slice(0,8).map(([seg,rows])=>{
+        const topHour=rows.sort((a,b)=>b.userCount-a.userCount)[0];
+        const cities=[...new Set(rows.flatMap(r=>r.cities||[]))].filter(Boolean).slice(0,4);
+        const totalUsers=rows.reduce((s,r)=>s+r.userCount,0);
+        return '<div style="background:var(--bg2);border:0.5px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="padding:3px 10px;background:rgba(123,94,167,.15);border-radius:100px;font-size:.72rem;font-weight:700;color:var(--vl)">'+esc(seg)+'</div><div style="font-size:.75rem;color:var(--tx3)">'+num(totalUsers)+' users</div>'+(topHour?'<div style="font-size:.75rem;color:var(--tx3)">Peak: '+String(topHour._id?.hour||0).padStart(2,'0')+':00</div>':'')+'</div><div style="font-size:.75rem;color:var(--tx3)">Cities: '+cities.map(c=>esc(c)).join(' · ')+'</div></div>';
+      }).join('')+'<div style="font-size:.72rem;color:var(--tx3);margin-top:8px">'+num(data.length)+' data points</div>';
+}catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+async function loadSegments(){
+  const el=q('emotion-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/segments');if(!r.ok)throw new Error('Segments not available ('+r.status+')');
+    const data=await r.json();if(!data.length){el.innerHTML='<div class="empty">No segment data yet</div>';return;}
+    el.innerHTML='<div style="font-size:.78rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Ad Segments (7d)</div>'+
+      data.slice(0,12).map(seg=>'<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--bd)"><div style="width:140px;font-size:.82rem;color:var(--tx2);text-transform:capitalize">'+esc(seg._id||'unknown')+'</div><div style="flex:1;height:8px;background:var(--bg3);border-radius:100px"><div style="height:100%;border-radius:100px;background:var(--v);width:'+Math.min(100,Math.round((seg.userCount||0)/Math.max(...data.map(s=>s.userCount),1)*100))+'%"></div></div><div style="width:40px;font-size:.75rem;font-family:var(--fM);color:var(--tx3);text-align:right">'+num(seg.userCount||0)+'</div></div>').join('');
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+async function loadDataQuality(){
+  const el=q('emotion-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/emotion/quality');if(!r.ok)throw new Error('Data quality endpoint not available ('+r.status+')');
+    const d=await r.json();
+    const score=d.dataQualityScore||0;const scoreCol=score>=70?'var(--lm)':score>=40?'var(--go)':'var(--cr)';
+    el.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'+
+      [{label:'Total Signals',val:num(d.totalSignals||0),col:'var(--vl)'},{label:'Unique Users',val:num(d.uniqueUsers||0),col:'var(--tl)'},{label:'Avg Signals/User',val:d.avgSignalsPerUser||0,col:'var(--go)'},{label:'High Confidence',val:(d.highConfidencePct||0)+'%',col:'var(--lm)'}]
+      .map(s=>'<div style="background:var(--bg2);border-radius:10px;padding:12px;border:0.5px solid var(--bd)"><div style="font-size:.7rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">'+s.label+'</div><div style="font-size:1.4rem;font-weight:500;color:'+s.col+'">'+s.val+'</div></div>').join('')+
+      '</div><div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:.75rem;color:var(--tx3);margin-bottom:8px">Data Quality Score</div><div style="display:flex;align-items:center;gap:12px"><div style="font-size:2rem;font-weight:500;color:'+scoreCol+'">'+score+'</div><div style="flex:1;height:8px;background:var(--bg3);border-radius:100px"><div style="height:100%;border-radius:100px;background:'+scoreCol+';width:'+score+'%;transition:width .8s ease"></div></div><div style="font-size:.75rem;color:var(--tx3)">/ 100</div></div></div>'+
+      '<div style="margin-bottom:14px"><div style="font-size:.75rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Signal Breakdown</div>'+(d.signalBreakdown||[]).map(s=>'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--bd)"><div style="flex:1;font-size:.82rem;text-transform:capitalize">'+esc(s._id||'unknown')+'</div><div style="font-size:.78rem;font-family:var(--fM);color:var(--tx3)">'+num(s.count)+'</div><div style="font-size:.72rem;color:var(--tx3)">'+Math.round((s.avgConfidence||0)*100)+'% conf</div></div>').join('')+'</div>'+
+      '<div><div style="font-size:.75rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Top Cities</div>'+(d.cityBreakdown||[]).slice(0,10).map((c,i)=>'<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--bd)"><div style="width:18px;font-size:.72rem;color:var(--tx3)">'+(i+1)+'</div><div style="flex:1;font-size:.82rem">'+esc(c._id||'Unknown')+'</div><div style="font-size:.78rem;font-family:var(--fM);color:var(--tx3)">'+num(c.count)+'</div></div>').join('')+'</div>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
 
 // ── USERS ─────────────────────────────────────────────────────
-let userFilter='all', userSearch='';
-function filterUsers(f, el){ userFilter=f; document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); loadUsers(); }
-function searchUsers(q){ userSearch=q; clearTimeout(window._userSearchT); window._userSearchT=setTimeout(loadUsers,350); }
-
-async function loadUsers(){
-  document.getElementById('users-table').innerHTML='<tr><td colspan="9" style="text-align:center;padding:24px"><div class="spin"></div></td></tr>';
-  try {
-    const r = await af('/api/admin/users?limit=200'+(userSearch?'&search='+encodeURIComponent(userSearch):''));
-    if(!r.ok) throw new Error('Failed');
-    const d = await r.json();
-    let users = d.users||d||[];
-    if(userFilter==='banned') users=users.filter(u=>u.isBanned);
-    if(userFilter==='premium') users=users.filter(u=>u.isPremium);
-    allUsers=users;
-    renderUsers(users);
-  } catch(e){ document.getElementById('users-table').innerHTML='<tr><td colspan="9" style="color:var(--cr);padding:24px;text-align:center">'+e.message+'</td></tr>'; }
+async function loadUsers(search=''){
+  const el=q('users-table');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/admin/users?limit=300'+(search?'&search='+encodeURIComponent(search):''));
+    if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();allUsers=d.users||d||[];renderUsers(filterUsersList(allUsers));
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
-
-async function loadRecentUsers(){
-  try {
-    const r = await af('/api/admin/users?limit=8');
-    if(!r.ok) return;
-    const d = await r.json();
-    renderRecentUsers((d.users||d||[]).slice(0,8));
-  } catch(_){}
+function filterUsersList(users){
+  if(currentUserFilter==='banned')return users.filter(u=>u.isBanned);
+  if(currentUserFilter==='premium')return users.filter(u=>u.isPremium);
+  return users;
 }
-
+function filterUsers(f,el){currentUserFilter=f;document.querySelectorAll('#tab-users .fpill').forEach(p=>p.classList.remove('active'));if(el)el.classList.add('active');renderUsers(filterUsersList(allUsers));}
+function searchUsers(q2){renderUsers(filterUsersList(allUsers.filter(u=>(u.anonymousName||'').toLowerCase().includes(q2.toLowerCase())||(u.email||'').toLowerCase().includes(q2.toLowerCase()))));}
 function renderUsers(users){
-  const tbody=document.getElementById('users-table');
-  if(!users.length){ tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--tx3);padding:24px">No users found</td></tr>'; return; }
-  tbody.innerHTML=users.map(u=>{
-    const loc = u.ipCity ? `<div style="font-size:.8rem;font-weight:600">${esc(u.ipCity)}</div><div style="font-size:.68rem;color:var(--tx3)">${esc(u.ipState||'')}${u.ipState?', ':''}${u.ipCountry||'IN'}</div>` : '<span style="color:var(--tx3);font-size:.72rem">—</span>';
-    const dev = u.deviceInfo ? `<div style="font-size:.75rem">${esc(u.deviceInfo)}</div>` : '<span style="color:var(--tx3)">—</span>';
-    const status = u.isBanned ? '<span class="badge badge-r">Banned</span>' : '<span class="badge badge-g">Active</span>';
-    return `<tr>
-      <td style="font-size:1.1rem">${esc(u.avatarEmoji||'🎭')}</td>
-      <td><div style="font-weight:600;font-size:.82rem">${esc(u.anonymousName||'—')}</div><div style="font-size:.68rem;color:var(--tx3)">${esc(u.email||'')}</div></td>
-      <td><span class="badge badge-v">Lv ${u.level||1}</span><div style="font-size:.68rem;color:var(--tx3)">${u.xp||0} XP</div></td>
-      <td>${loc}</td>
-      <td>${dev}</td>
-      <td style="font-size:.72rem;color:var(--tx3)">${u.lastSeenAt?timeAgo(u.lastSeenAt):'—'}</td>
-      <td style="text-align:center">${u.loginCount||0}</td>
-      <td>${status}</td>
-      <td>
-        <div style="display:flex;gap:5px">
-          ${u.isBanned?`<button class="btn btn-ghost btn-sm" onclick="unbanUser('${u._id}','${esc(u.anonymousName)}')">Unban</button>`:`<button class="btn btn-danger btn-sm" onclick="banUser('${u._id}','${esc(u.anonymousName)}')">Ban</button>`}
-          <button class="btn btn-ghost btn-sm" onclick="viewUserSecurity('${u._id}','${esc(u.anonymousName)}')">🔍</button>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
+  const el=q('users-table');if(!users.length){el.innerHTML='<div class="empty">No users found</div>';return;}
+  let html='<table><thead><tr><th>Avatar</th><th>Name</th><th>Level/XP</th><th>Streak</th><th>IP Address</th><th>Location</th><th>Device</th><th>Last Seen</th><th>Logins</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
+  users.forEach(u=>{
+    const status=u.isBanned?'<span class="badge badge-cr">Banned</span>':u.isPremium?'<span class="badge badge-go">Premium</span>':'<span class="badge badge-lm">Active</span>';
+    const banBtn=u.isBanned?'<button class="ab ab-unban" onclick="unbanUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Unban</button>':'<button class="ab ab-ban" onclick="banUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Ban</button>';
+    const ipBtn='<button class="ab" style="background:rgba(0,201,167,.15);color:#5DCAA5;border-color:rgba(0,201,167,.3)" onclick="viewUserIP(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">🔍 IP</button>';
+    // ── Location: use ipCity from User document (saved on every login) ──
+    const hasLoc = !!(u.ipCity);
+    const hasDev = !!(u.deviceInfo || u.deviceHash);
+
+    const ipDisplay = '<span style="font-family:monospace;font-size:.72rem;color:#5DCAA5">'
+      + (hasLoc ? '🌐 Tracked' : '<span style="color:var(--tx3)">Login to capture</span>')
+      + '</span>';
+
+    const locDisplay = hasLoc
+      ? '<div style="font-size:.8rem;font-weight:600;color:var(--tx)">' + esc(u.ipCity) + '</div>'
+        + '<div style="font-size:.68rem;color:var(--tx3)">' + esc((u.ipState||'') + (u.ipState&&u.ipCountry?', ':'') + (u.ipCountry||'IN')) + '</div>'
+        + (u.ipISP ? '<div style="font-size:.65rem;color:var(--tx3)">'+esc(u.ipISP)+'</div>' : '')
+      : '<span style="color:var(--tx3);font-size:.72rem">—</span>';
+
+    const deviceDisplay = hasDev
+      ? '<div style="font-size:.78rem;color:var(--tx)">' + esc(u.deviceInfo||'Unknown') + '</div>'
+        + '<div style="font-size:.65rem;color:var(--tx3)">' + (u.isMobile ? '📱 Mobile' : '💻 Desktop') + '</div>'
+      : '<span style="color:var(--tx3)">—</span>';
+
+    const lastSeen=u.lastSeenAt?timeAgo(u.lastSeenAt):'—';
+    html+='<tr><td style="font-size:1.2rem">'+esc(u.avatarEmoji||'🎭')+'</td>'
+      +'<td><div style="font-weight:600;font-size:.82rem">'+esc(u.anonymousName||'—')+'</div><div style="font-size:.68rem;color:var(--tx3)">'+esc(u.email||'')+'</div></td>'
+      +'<td><span class="badge badge-g">Lv '+(u.level||1)+'</span><div style="font-size:.68rem;color:var(--tx3);font-family:var(--fM)">'+(u.xp||0)+' XP</div></td>'
+      +'<td style="font-family:var(--fM)">'+(u.streak||0)+' 🔥</td>'
+      +'<td>'+ipDisplay+'</td>'
+      +'<td>'+locDisplay+'</td>'
+      +'<td>'+deviceDisplay+'</td>'
+      +'<td style="font-size:.72rem;color:var(--tx3)">'+lastSeen+'</td>'
+      +'<td style="font-family:var(--fM);font-size:.8rem;text-align:center">'+(u.loginCount||0)+'</td>'
+      +'<td>'+status+'</td>'
+      +'<td style="font-size:.7rem;color:var(--tx3)">'+(u.createdAt?new Date(u.createdAt).toLocaleDateString('en-IN'):'—')+'</td>'
+      +'<td><div class="actions">'+banBtn+ipBtn+'<button class="ab ab-del" onclick="deleteUser(\''+u._id+'\',\''+esc(u.anonymousName)+'\')">Delete</button></div></td></tr>';
+  });
+  html+='</tbody></table>';el.innerHTML=html;
 }
 
-function renderRecentUsers(users){
-  const tbody=document.getElementById('recent-users');
-  if(!users.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:14px">No users yet</td></tr>'; return; }
-  tbody.innerHTML=users.map(u=>`<tr>
-    <td style="font-size:1.1rem">${esc(u.avatarEmoji||'🎭')}</td>
-    <td><div style="font-weight:600;font-size:.82rem">${esc(u.anonymousName||'—')}</div><div style="font-size:.68rem;color:var(--tx3)">${esc(u.email||'')}</div></td>
-    <td><span class="badge badge-v">Lv ${u.level||1}</span></td>
-    <td>${u.ipCity?`<b>${esc(u.ipCity)}</b>, ${esc(u.ipState||'')}` : '<span style="color:var(--tx3)">—</span>'}</td>
-    <td style="font-size:.72rem">${u.deviceInfo?esc(u.deviceInfo):'—'}</td>
-    <td style="font-size:.72rem;color:var(--tx3)">${u.createdAt?new Date(u.createdAt).toLocaleDateString('en-IN'):'—'}</td>
-    <td>${u.isBanned?'<span class="badge badge-r">Banned</span>':'<span class="badge badge-g">Active</span>'}</td>
-    <td><button class="btn btn-ghost btn-sm" onclick="viewUserSecurity('${u._id}','${esc(u.anonymousName)}')">🔍 Track</button></td>
-  </tr>`).join('');
+function viewUserIP(userId, name){
+  var modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.onclick=function(e){if(e.target===modal)modal.remove();};
+
+  var inner=document.createElement('div');
+  inner.setAttribute('style','background:var(--bg);border-radius:16px;padding:24px;width:100%;max-width:500px;max-height:80vh;overflow-y:auto');
+
+  var header=document.createElement('div');
+  header.setAttribute('style','display:flex;justify-content:space-between;margin-bottom:16px;align-items:center');
+
+  var title=document.createElement('b');
+  title.textContent='🔍 IP Logs — '+name;
+
+  var closeBtn=document.createElement('button');
+  closeBtn.setAttribute('style','background:none;border:none;color:var(--tx3);font-size:1.1rem;cursor:pointer');
+  closeBtn.textContent='✕';
+  closeBtn.onclick=function(){modal.remove();};
+
+  var ipBody=document.createElement('div');
+  ipBody.id='ip-modal-inner';
+  ipBody.innerHTML='<div class="spin"></div>';
+
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+  inner.appendChild(header);
+  inner.appendChild(ipBody);
+  modal.appendChild(inner);
+  document.body.appendChild(modal);
+
+  af('/api/compliance/admin/user-ip/'+userId,{headers:{'x-admin-password':adminPass}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var logs=d.ipLogs||[];
+      if(!logs.length){
+        ipBody.innerHTML='<div style="color:var(--tx3);text-align:center;padding:20px">No IP logs found for this user yet.<br><small>Logs are captured on login. User may not have logged in since IP logging was deployed.</small></div>';
+        return;
+      }
+      ipBody.innerHTML='';
+      logs.forEach(function(l){
+        var entry=document.createElement('div');
+        entry.setAttribute('style','padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)');
+        var ip=l.ipFull||l.ipMasked||'—';
+        var loc=(l.city||'?')+(l.state?', '+l.state:'');
+        var device=(l.isMobile?'📱 Mobile':'💻 Desktop');
+        var ts=l.timestamp?new Date(l.timestamp).toLocaleString('en-IN'):'—';
+        entry.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+          +'<span style="font-family:monospace;font-size:.8rem;color:#5DCAA5">'+ip+'</span>'
+          +'<span style="font-size:.7rem;color:var(--tx3)">'+esc(l.eventType||'')+'</span>'
+          +'</div>'
+          +'<div style="font-size:.75rem;color:var(--tx2)">📍 '+esc(loc)+'</div>'
+          +'<div style="font-size:.68rem;color:var(--tx3)">'+device+'</div>'
+          +'<div style="font-size:.68rem;color:var(--tx3)">'+ts+'</div>';
+        ipBody.appendChild(entry);
+      });
+    })
+    .catch(function(e){
+      ipBody.innerHTML='<div style="color:var(--cr)">Error: '+e.message+'</div>';
+    });
 }
+
+function banUser(id,name){showConfirm('🚫','Ban '+name+'?','Blocked from all activity. Can be unbanned later.',async()=>{const r=await af('/api/admin/ban/'+id,{method:'POST',body:JSON.stringify({reason:'Admin action'})});toast(r.ok?'🚫 '+name+' banned':'❌ Failed: '+r.status);if(r.ok)loadUsers();});}
+function unbanUser(id,name){showConfirm('✅','Unban '+name+'?','They will regain full access.',async()=>{const r=await af('/api/admin/unban/'+id,{method:'POST'});toast(r.ok?'✅ '+name+' unbanned':'❌ Failed: '+r.status);if(r.ok)loadUsers();},false);}
+function deleteUser(id,name){showConfirm('⚠️','PERMANENTLY DELETE '+name+'?','Deletes user AND all their posts, vents, messages, moods. CANNOT be undone.',async()=>{const r=await af('/api/admin/users/'+id,{method:'DELETE'});toast(r.ok?'🗑️ '+name+' deleted':'❌ Failed: '+r.status);if(r.ok)loadUsers();});}
 
 // ── POSTS ─────────────────────────────────────────────────────
-let postSearch='';
-function searchPosts(q){ postSearch=q; clearTimeout(window._postT); window._postT=setTimeout(loadPosts,350); }
-async function loadPosts(){
-  document.getElementById('posts-table').innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px"><div class="spin"></div></td></tr>';
-  try {
-    const type=document.getElementById('post-type-filter').value;
-    const r=await af('/api/admin/posts?limit=100'+(type?'&type='+type:'')+(postSearch?'&search='+encodeURIComponent(postSearch):''));
-    if(!r.ok) throw new Error('Failed');
+async function loadPosts(crisis=false,hidden=false,reported=false,pillEl=null){
+  const el=q('posts-table');el.innerHTML='<div class="spin"></div>';
+  if(pillEl){document.querySelectorAll('#tab-posts .fpill').forEach(p=>p.classList.remove('active'));pillEl.classList.add('active');}
+  let url='/api/admin/posts?limit=200';
+  if(crisis)url+='&crisis=true';if(hidden)url+='&hidden=true';
+  try{
+    const r=await af(url);if(!r.ok)throw new Error('Failed: '+r.status);
     const d=await r.json();
-    const posts=d.posts||d||[];
-    const tbody=document.getElementById('posts-table');
-    if(!posts.length){ tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:24px">No posts</td></tr>'; return; }
-    tbody.innerHTML=posts.map(p=>`<tr>
-      <td>${esc(p.authorEmoji||'🎭')}&nbsp;${esc(p.authorName||'Anon')}</td>
-      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.caption||'')}">${esc((p.caption||'').slice(0,80))}</td>
-      <td><span class="badge badge-v">${p.type||'post'}</span></td>
-      <td><span class="badge badge-g">${p.emotion||'—'}</span></td>
-      <td>${(p.likes||[]).length||p.likeCount||0}</td>
-      <td style="font-size:.72rem;color:var(--tx3)">${p.createdAt?timeAgo(p.createdAt):'—'}</td>
-      <td><div style="display:flex;gap:5px">
-        <button class="btn btn-ghost btn-sm" onclick="trackPostId('${p._id}')">📍</button>
-        <button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">🗑</button>
-      </div></td>
-    </tr>`).join('');
-  } catch(e){ document.getElementById('posts-table').innerHTML='<tr><td colspan="7" style="color:var(--cr);padding:24px;text-align:center">'+e.message+'</td></tr>'; }
+    allPostsCache=(d.posts||d||[]).filter(p=>p.type!=='story');
+    if(reported)allPostsCache=allPostsCache.filter(p=>(p.reportCount||0)>0);
+    renderPosts(allPostsCache);
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+function filterPostsLive(q2){renderPosts(allPostsCache.filter(p=>(p.caption||'').toLowerCase().includes(q2.toLowerCase())||(p.authorName||'').toLowerCase().includes(q2.toLowerCase())));}
+function renderPosts(posts){
+  const el=q('posts-table');if(!posts.length){el.innerHTML='<div class="empty">No posts found</div>';return;}
+  let html='<table><thead><tr><th>Author</th><th>Caption</th><th>Type</th><th>Emotion</th><th>Likes</th><th>Reports</th><th>Flags</th><th>Date</th><th>Actions</th></tr></thead><tbody>';
+  posts.forEach(p=>{
+    const flags=[];
+    if(p.isCrisis)flags.push('<span class="badge badge-cr">🆘 Crisis</span>');
+    if(p.isHidden)flags.push('<span class="badge badge-g">Hidden</span>');
+    if((p.reportCount||0)>0)flags.push('<span class="badge badge-go">⚠️ '+p.reportCount+'</span>');
+    const showHideBtn=p.isHidden?'<button class="ab ab-show" onclick="unhidePost(\''+p._id+'\')">Show</button>':'<button class="ab ab-hide" onclick="hidePost(\''+p._id+'\')">Hide</button>';
+    html+='<tr class="'+(p.isCrisis?'crisis-row':p.isHidden?'hidden-row':'')+'"><td style="font-size:.78rem;font-weight:600">'+esc(p.authorName||'Anonymous')+'</td><td style="max-width:220px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((p.caption||'(no caption)').substring(0,70))+'</div></td><td><span class="badge badge-g">'+esc(p.type||'post')+'</span></td><td>'+(p.emotion?'<span class="badge badge-v">'+esc(p.emotion)+'</span>':'—')+'</td><td style="font-family:var(--fM)">'+(p.likes?.length||0)+'</td><td style="font-family:var(--fM)">'+(p.reportCount||0)+'</td><td>'+flags.join(' ')+'</td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(p.createdAt)+'</td><td><div class="actions">'+showHideBtn+'<button class="ab ab-del" onclick="deletePost(\''+p._id+'\')">Delete</button></div></td></tr>';
+  });
+  html+='</tbody></table>';el.innerHTML=html;
+}
+async function hidePost(id){const r=await af('/api/admin/posts/'+id+'/hide',{method:'POST'});toast(r.ok?'🚫 Hidden':'❌ Failed: '+r.status);if(r.ok){const p=allPostsCache.find(x=>x._id===id);if(p)p.isHidden=true;renderPosts(allPostsCache);}}
+async function unhidePost(id){const r=await af('/api/admin/posts/'+id+'/unhide',{method:'POST'});toast(r.ok?'✅ Visible':'❌ Failed: '+r.status);if(r.ok){const p=allPostsCache.find(x=>x._id===id);if(p)p.isHidden=false;renderPosts(allPostsCache);}}
+function deletePost(id){showConfirm('🗑️','Delete this post?','Permanently removes the post. Cannot be undone.',async()=>{const r=await af('/api/admin/posts/'+id,{method:'DELETE'});toast(r.ok?'🗑️ Deleted':'❌ Failed: '+r.status);if(r.ok){allPostsCache=allPostsCache.filter(p=>p._id!==id);renderPosts(allPostsCache);}});}
+
+// ── STORIES ───────────────────────────────────────────────────
+async function loadStories(){
+  const el=q('stories-table');if(!el)return;el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/admin/posts?type=story&limit=100');
+    if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();
+    const stories=(d.posts||d||[]).filter(p=>p.type==='story');
+    if(!stories.length){el.innerHTML='<div class="empty">No active stories right now</div>';return;}
+    let html='<table><thead><tr><th>Author</th><th>Preview</th><th>Emotion</th><th>City</th><th>👁 Views</th><th>Posted</th><th>Expires</th><th>Flags</th><th>Actions</th></tr></thead><tbody>';
+    stories.forEach(s=>{
+      const flags=[];
+      if(s.isCrisis)flags.push('<span class="badge badge-cr">🆘 Crisis</span>');
+      if(s.isHidden)flags.push('<span class="badge badge-g">Hidden</span>');
+      const expiresAt=s.expiresAt?new Date(s.expiresAt):new Date(new Date(s.createdAt).getTime()+86400000);
+      const msLeft=expiresAt-Date.now();
+      const hLeft=Math.max(0,Math.floor(msLeft/3600000));
+      const mLeft=Math.max(0,Math.floor((msLeft%3600000)/60000));
+      const expiryStr=msLeft<=0?'<span style="color:var(--cr)">Expired</span>':hLeft>0?'<span style="color:var(--go)">'+hLeft+'h '+mLeft+'m</span>':'<span style="color:var(--cr)">'+mLeft+'m</span>';
+      const preview=s.mediaUrl?'[Media] '+esc((s.caption||'').substring(0,30)):esc((s.caption||'').substring(0,50));
+      const showHideBtn=s.isHidden?'<button class="ab ab-show" onclick="unhideStory(\''+s._id+'\')">Show</button>':'<button class="ab ab-hide" onclick="hideStory(\''+s._id+'\')">Hide</button>';
+      html+='<tr class="'+(s.isCrisis?'crisis-row':s.isHidden?'hidden-row':'')+'"><td><div style="font-weight:600;font-size:.82rem">'+esc(s.authorName||'Anonymous')+'</div><div style="font-size:.7rem;color:var(--tx3)">'+esc(s.authorEmoji||'🎭')+'</div></td><td style="max-width:200px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2);font-size:.82rem">'+preview+'</div></td><td>'+(s.emotion?'<span class="badge badge-v">'+esc(s.emotion)+'</span>':'—')+'</td><td style="font-size:.75rem;color:var(--tx3)">'+esc(s.city||'—')+'</td><td style="font-family:var(--fM);font-weight:600;color:var(--vl)">'+(s.storyViews||0)+'</td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(s.createdAt)+'</td><td>'+expiryStr+'</td><td>'+flags.join(' ')+'</td><td><div class="actions">'+showHideBtn+'<button class="ab ab-del" onclick="deleteStory(\''+s._id+'\',\''+esc(s.authorName||'Anonymous')+'\')">Delete</button></div></td></tr>';
+    });
+    html+='</tbody></table>';el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+async function hideStory(id){const r=await af('/api/admin/posts/'+id+'/hide',{method:'POST'});toast(r.ok?'🚫 Story hidden':'❌ Failed: '+r.status);if(r.ok)loadStories();}
+async function unhideStory(id){const r=await af('/api/admin/posts/'+id+'/unhide',{method:'POST'});toast(r.ok?'✅ Story visible':'❌ Failed: '+r.status);if(r.ok)loadStories();}
+function deleteStory(id,author){showConfirm('🗑️','Delete '+author+"'s story?",'Permanently removes the story.',async()=>{const r=await af('/api/admin/posts/'+id,{method:'DELETE'});toast(r.ok?'🗑️ Story deleted':'❌ Failed: '+r.status);if(r.ok)loadStories();});}
+
+// ── VENTS ─────────────────────────────────────────────────────
+async function loadVents(){
+  const el=q('vents-table');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/vents?limit=100');if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();const vents=Array.isArray(d)?d:(d.vents||[]);
+    if(!vents.length){el.innerHTML='<div class="empty">No vents</div>';return;}
+    let html='<table><thead><tr><th>Author</th><th>Text</th><th>Emotion</th><th>Hugs</th><th>Crisis</th><th>City</th><th>Posted</th><th>Action</th></tr></thead><tbody>';
+    vents.forEach(v=>{html+='<tr class="'+(v.isCrisis?'crisis-row':'')+'"><td style="font-weight:600">'+esc(v.authorName||'Anonymous')+'</td><td style="max-width:280px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((v.text||'').substring(0,100))+'</div></td><td>'+(v.emotion?'<span class="badge badge-v">'+esc(v.emotion)+'</span>':'—')+'</td><td style="font-family:var(--fM)">'+(v.hugs?.length||0)+'</td><td>'+(v.isCrisis?'<span class="badge badge-cr">Crisis</span>':'')+'</td><td style="font-size:.75rem;color:var(--tx3)">'+esc(v.city||'—')+'</td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(v.createdAt)+'</td><td><button class="ab ab-del" onclick="deleteVent(\''+v._id+'\')">Delete</button></td></tr>';});
+    html+='</tbody></table>';el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+function deleteVent(id){showConfirm('🗑️','Delete this vent?','Cannot be undone.',async()=>{const r=await af('/api/vents/'+id,{method:'DELETE'});toast(r.ok?'🗑️ Vent deleted':'❌ Failed: '+r.status);if(r.ok)loadVents();});}
+
+// ── REPORTS ───────────────────────────────────────────────────
+async function loadReports(){
+  const el=q('reports-table');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/admin/reports');if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();const reports=d.reports||d||[];
+    const badge=q('reports-badge');if(badge)badge.style.display=reports.length>0?'inline':'none';
+    if(!reports.length){el.innerHTML='<div class="empty">No open reports ✅</div>';return;}
+    let html='<table><thead><tr><th>Type</th><th>Reason</th><th>Reporter</th><th>Content</th><th>Time</th><th>Action</th></tr></thead><tbody>';
+    reports.forEach(rep=>{html+='<tr><td><span class="badge badge-g">'+esc(rep.type||'post')+'</span></td><td style="color:var(--tx2)">'+esc(rep.reason||'—')+'</td><td style="font-size:.75rem;color:var(--tx3)">'+esc(rep.reporterName||'Anonymous')+'</td><td style="max-width:200px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)">'+esc((rep.content||'').substring(0,60))+'</div></td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(rep.createdAt)+'</td><td><div class="actions"><button class="ab ab-show" onclick="resolveReport(\''+rep._id+'\')">Resolve</button>'+(rep.postId?'<button class="ab ab-del" onclick="deletePost(\''+rep.postId+'\')">Del Post</button>':'')+'</div></td></tr>';});
+    html+='</tbody></table>';el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+async function resolveReport(id){const r=await af('/api/admin/reports/'+id+'/resolve',{method:'POST'});toast(r.ok?'✅ Resolved':'❌ Failed');if(r.ok)loadReports();}
+
+// ── CRISIS ────────────────────────────────────────────────────
+async function loadCrisis(){
+  const el=q('crisis-table');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/admin/posts?crisis=true&limit=50');if(!r.ok)throw new Error('Failed: '+r.status);
+    const d=await r.json();const posts=d.posts||d||[];
+    if(!posts.length){el.innerHTML='<div class="empty" style="color:var(--tl)">✓ No crisis posts right now</div>';return;}
+    let html='<table><thead><tr><th>Author</th><th>Caption</th><th>Emotion</th><th>Posted</th><th>Actions</th></tr></thead><tbody>';
+    posts.forEach(p=>{html+='<tr class="crisis-row"><td style="font-weight:600">'+esc(p.authorName||'Anonymous')+'</td><td><div style="max-width:350px;color:var(--tx2);white-space:pre-wrap;font-size:.82rem;line-height:1.5">'+esc((p.caption||'').substring(0,200))+'</div></td><td><span class="badge badge-v">'+esc(p.emotion||'—')+'</span></td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(p.createdAt)+'</td><td><div class="actions"><button class="ab ab-hide" onclick="hidePost(\''+p._id+'\')">Hide</button><button class="ab ab-del" onclick="deletePost(\''+p._id+'\')">Delete</button></div></td></tr>';});
+    html+='</tbody></table>';el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
 }
 
-// ── SECURITY FUNCTIONS ────────────────────────────────────────
-async function trackPost(){
-  const id=document.getElementById('sec-post-id').value.trim();
-  const el=document.getElementById('post-loc-result');
-  if(!id){el.textContent='Enter a Post ID';return;}
-  el.textContent='Loading...';
-  try {
-    const r=await af('/api/admin/posts/'+id+'/location');
+// ── WHISPER CHAINS ────────────────────────────────────────────
+async function loadWhisperChains(){
+  const el=q('whisper-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/special/admin/whisper');if(!r.ok)throw new Error('Special routes not loaded ('+r.status+')');
+    const chains=await r.json();if(!chains.length){el.innerHTML='<div class="empty">No whisper chains yet</div>';return;}
+    el.innerHTML=chains.map(c=>'<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span class="badge '+(c.isComplete?'badge-lm':'badge-g')+'">'+(c.isComplete?'Complete':'In Progress')+'</span><span style="font-size:.75rem;color:var(--tx3)">'+(c.lines||[]).length+'/5 lines · '+timeAgo(c.createdAt)+'</span><button class="ab ab-del" style="margin-left:auto" onclick="hideWhisperChain(\''+c._id+'\')">Remove</button></div>'+(c.lines||[]).map((l,i)=>'<div style="padding:8px 12px;background:var(--bg3);border-radius:8px;margin-bottom:6px;font-size:.85rem;color:var(--tx2)"><span style="color:var(--tx3);font-size:.7rem;margin-right:8px">Line '+(i+1)+'</span>'+esc(l.text)+'</div>').join('')+'</div>').join('');
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+function hideWhisperChain(id){showConfirm('🗑️','Remove this chain?','It will be hidden from all users.',async()=>{const r=await af('/api/special/admin/whisper/'+id,{method:'DELETE'});toast(r.ok?'Removed':'Failed');if(r.ok)loadWhisperChains();});}
+
+// ── GRATITUDE BOMBS ───────────────────────────────────────────
+async function loadGratitude(){
+  const el=q('gratitude-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/special/admin/gratitude');if(!r.ok)throw new Error('Special routes not loaded ('+r.status+')');
+    const d=await r.json();const bombs=d.bombs||[];
+    if(!bombs.length){el.innerHTML='<div class="empty">No gratitude bombs sent yet</div>';return;}
+    el.innerHTML='<div style="margin-bottom:12px;color:var(--tx3);font-size:.82rem">'+num(d.total||bombs.length)+' total gratitude bombs sent</div>'+
+      '<table><thead><tr><th>From</th><th>To Post</th><th>Message</th><th>When</th></tr></thead><tbody>'+
+      bombs.map(b=>'<tr><td style="font-size:.75rem;color:var(--tx3)">'+esc(b.fromUserId?.toString()?.slice(-6)||'anon')+'</td><td style="font-size:.75rem;color:var(--tx3)">'+esc(b.postId?.toString()?.slice(-6)||'—')+'</td><td style="color:var(--tx2)">'+esc(b.message||'—')+'</td><td style="font-size:.7rem;color:var(--tx3)">'+timeAgo(b.createdAt)+'</td></tr>').join('')+
+      '</tbody></table>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+
+// ── MOODS ─────────────────────────────────────────────────────
+async function loadMoods(){
+  const el=q('moods-content');el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/moods/pulse');if(!r.ok)throw new Error('Failed: '+r.status);
+    const cities=await r.json();
+    el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">'+
+      cities.map(c=>'<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px"><div style="font-size:.85rem;font-weight:700;margin-bottom:10px">'+esc(c.city||'Unknown')+'</div>'+(c.breakdown||[]).slice(0,5).map(e=>'<div class="emo-row"><div class="emo-label">'+esc(e.emotion)+'</div><div class="emo-track"><div class="emo-fill" style="width:'+Math.round(e.count/(c.total||1)*100)+'%;background:'+(EMO_COLORS[e.emotion]||'#888')+'"></div></div><div class="emo-pct">'+e.count+'</div></div>').join('')+'</div>').join('')+
+      '</div>';
+  }catch(e){el.innerHTML='<div class="empty">'+e.message+'</div>';}
+}
+
+// ── EXPORTS ───────────────────────────────────────────────────
+async function dlExport(type){
+  try{
+    const r=await af('/api/admin/export/'+type);if(!r.ok)throw new Error('Failed: '+r.status);
+    const blob=await r.blob();const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='annomuss_'+type+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(url);
+    logExport(type);toast('⬇️ Downloading '+type+'...');
+  }catch(e){toast('Export failed: '+e.message);}
+}
+async function dlEmotionExport(){
+  try{
+    const r=await af('/api/emotion/export');if(!r.ok){toast('Emotion export not available');return;}
+    const blob=await r.blob();const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='annomuss_emotion_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(url);
+    logExport('emotion-intel');toast('⬇️ Downloading emotion intelligence...');
+  }catch(e){toast('Failed: '+e.message);}
+}
+function logExport(type){exportLog.push({type,time:new Date().toLocaleTimeString()});const el=q('export-log');if(el)el.innerHTML=exportLog.map(e=>'<div>'+e.time+' — exported <strong>'+e.type+'</strong></div>').reverse().join('');}
+
+// ── SECURITY TAB FUNCTIONS ──────────────────────────────────
+function copyPostId(id, btn){
+  navigator.clipboard.writeText(id).then(()=>{
+    var orig=btn.textContent;
+    btn.textContent='✓ Copied';
+    btn.style.color='var(--tl)';
+    setTimeout(()=>{btn.textContent=orig;btn.style.color='';},2000);
+    // Auto-fill the security tab input
+    var secInput=document.getElementById('sec-post-id');
+    if(secInput) secInput.value=id;
+    toast('Post ID copied — open Security tab to track location');
+  });
+}
+
+async function loadPostLocation(){
+  const postId=document.getElementById('sec-post-id').value.trim();
+  const el=document.getElementById('post-location-result');
+  if(!postId){el.textContent='Enter a post ID';return;}
+  el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/admin/posts/'+postId+'/location',{headers:{'x-admin-password':adminPass}});
     const d=await r.json();
     if(!r.ok){el.textContent='Error: '+d.message;return;}
     const loc=d.location||{};
-    el.textContent=[
-      '👤 '+d.authorName+' ('+d.authorEmail+')',
-      '📝 '+d.type+': '+(d.caption||'').slice(0,50),
-      '🕐 '+new Date(d.createdAt).toLocaleString('en-IN'),
-      '',
-      '🌐 IP: '+(loc.ip||'Not captured'),
-      '📍 City: '+(loc.city||'?')+', '+(loc.state||'?'),
-      '🛜 ISP: '+(loc.isp||'?'),
-      '🗺 GPS: '+(loc.lat&&loc.lng?loc.lat.toFixed(5)+', '+loc.lng.toFixed(5):'Not available'),
-      loc.mapsLink?'🔗 '+loc.mapsLink:'',
-      '',
-      '💻 Device: '+(d.device||'Not captured'),
-      d.note?'\n⚠️ '+d.note:'',
-    ].filter(Boolean).join('\n');
-  } catch(e){el.textContent='Error: '+e.message;}
+    el.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +'<div style="padding:10px;background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);border-radius:10px">'
+        +'<div style="font-size:.7rem;color:var(--tx3);margin-bottom:4px">POST BY</div>'
+        +'<div style="font-weight:700">'+esc(d.authorName||'?')+'</div>'
+        +'<div style="font-size:.75rem;color:var(--tx3)">'+esc(d.authorEmail||'?')+'</div>'
+        +'<div style="font-size:.72rem;color:var(--tx3);margin-top:4px">'+new Date(d.createdAt).toLocaleString('en-IN')+'</div>'
+      +'</div>'
+      +'<div style="padding:10px;background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);border-radius:10px">'
+        +'<div style="font-size:.7rem;color:var(--tx3);margin-bottom:4px">IP ADDRESS</div>'
+        +'<div style="font-family:monospace;font-weight:700;color:#5DCAA5">'+esc(loc.ip||'Not captured')+'</div>'
+        +'<div style="font-size:.75rem;color:var(--tx3)">'+esc(loc.isp||'')+'</div>'
+      +'</div>'
+      +'<div style="padding:10px;background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);border-radius:10px">'
+        +'<div style="font-size:.7rem;color:var(--tx3);margin-bottom:4px">LOCATION</div>'
+        +'<div style="font-weight:700">'+esc((loc.city||'?')+', '+(loc.state||'?'))+'</div>'
+        +(loc.lat?'<div style="font-size:.72rem;color:var(--tx3)">'+loc.lat.toFixed(4)+', '+loc.lng.toFixed(4)+'</div>':'')
+        +(loc.mapsLink?'<a href="'+loc.mapsLink+'" target="_blank" style="font-size:.72rem;color:#5DCAA5;text-decoration:none">📍 Open in Maps →</a>':'')
+      +'</div>'
+      +'<div style="padding:10px;background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);border-radius:10px">'
+        +'<div style="font-size:.7rem;color:var(--tx3);margin-bottom:4px">DEVICE</div>'
+        +'<div style="font-size:.72rem;color:var(--tx2);word-break:break-all">'+esc((d.device||'?').slice(0,100))+'</div>'
+      +'</div>'
+    +'</div>';
+  }catch(e){el.textContent='Error: '+e.message;}
 }
-function trackPostId(id){ showScreen('security',null); document.getElementById('sec-post-id').value=id; setTimeout(trackPost,100); }
 
-async function trackUser(){
-  const id=document.getElementById('sec-user-id').value.trim();
-  const el=document.getElementById('user-loc-result');
-  if(!id){el.textContent='Enter a User ID';return;}
-  el.textContent='Loading...';
-  try {
-    const r=await af('/api/admin/users/'+id+'/location?gps=true');
+async function loadUserLocation(){
+  const userId=document.getElementById('sec-user-id').value.trim();
+  const el=document.getElementById('user-location-result');
+  if(!userId){el.textContent='Enter a user ID';return;}
+  el.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/admin/users/'+userId+'/location?gps=true',{headers:{'x-admin-password':adminPass}});
     const d=await r.json();
+    if(!r.ok){el.textContent='Error: '+d.message;return;}
     const logs=d.logs||[];
-    if(!logs.length){el.textContent='No location logs yet.\nLocation is captured on next login.';return;}
-    el.textContent=logs.slice(0,10).map(l=>[
-      '📍 '+( l.city||'?')+', '+(l.state||'?'),
-      '🌐 IP: '+(l.ip||l.ipMasked||'?'),
-      l.lat&&l.lng?'🗺 GPS: '+l.lat.toFixed(5)+', '+l.lng.toFixed(5):'',
-      '⏰ '+new Date(l.timestamp).toLocaleString('en-IN'),
-      '---',
-    ].filter(Boolean).join('\n')).join('\n');
-  } catch(e){el.textContent='Error: '+e.message;}
+    if(!logs.length){el.textContent='No location logs for this user yet.';return;}
+    el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto">'
+      +logs.slice(0,20).map(function(l){
+        const hasGPS=l.lat&&l.lng;
+        return '<div style="padding:8px 12px;background:rgba(0,0,0,.2);border-radius:8px;border-left:3px solid '+(hasGPS?'#5DCAA5':'var(--bd)')+'">'
+          +'<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+            +'<span style="font-weight:700;font-size:.8rem">'+esc((l.city||'?')+', '+(l.state||'?'))+'</span>'
+            +'<span style="font-size:.7rem;color:var(--tx3)">'+l.eventType+'</span>'
+          +'</div>'
+          +'<div style="font-family:monospace;font-size:.72rem;color:#5DCAA5">'+esc(l.ip||l.ipMasked||'?')+'</div>'
+          +(hasGPS?'<a href="https://www.google.com/maps?q='+l.lat+','+l.lng+'" target="_blank" style="font-size:.7rem;color:#5DCAA5">📍 Exact GPS: '+l.lat.toFixed(5)+', '+l.lng.toFixed(5)+' →</a>':'')
+          +'<div style="font-size:.68rem;color:var(--tx3);margin-top:2px">'+new Date(l.timestamp).toLocaleString('en-IN')+'</div>'
+        +'</div>';
+      }).join('')
+    +'</div>';
+  }catch(e){el.textContent='Error: '+e.message;}
 }
 
-async function loadChats(){
-  const id=document.getElementById('sec-chat-uid').value.trim();
+async function loadUserChats(){
+  const userId=document.getElementById('sec-user-id-chat').value.trim();
   const el=document.getElementById('chat-sessions-result');
-  if(!id){el.textContent='Enter a User ID';return;}
-  el.textContent='Loading...';
-  try {
-    const r=await af('/api/admin/users/'+id+'/sessions');
+  const tEl=document.getElementById('chat-transcript-result');
+  if(!userId){el.textContent='Enter a user ID';return;}
+  el.innerHTML='<div class="spin"></div>';
+  tEl.innerHTML='';
+  try{
+    const r=await af('/api/admin/users/'+userId+'/sessions',{headers:{'x-admin-password':adminPass}});
     const d=await r.json();
-    const sess=d.sessions||[];
-    if(!sess.length){el.textContent='No chat sessions found for this user.';return;}
-    el.innerHTML='';
-    sess.forEach(s=>{
-      const div=document.createElement('div');
-      div.style.cssText='padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer';
-      div.textContent='💬 '+s.roomType+' · '+(s.messageCount||0)+' msgs · '+new Date(s.startedAt).toLocaleString('en-IN');
-      div.onclick=()=>loadTranscript(s.sessionId);
-      el.appendChild(div);
+    if(!r.ok){el.textContent='Error: '+d.message;return;}
+    const sessions=d.sessions||[];
+    if(!sessions.length){el.textContent='No chat sessions for this user.';return;}
+    if(!sessions.length){
+      el.innerHTML='<div style="padding:12px;color:var(--tx3);font-size:.82rem">No chat sessions found for this user. Sessions are logged when users do anonymous random chats or 3AM room chats.</div>';
+      return;
+    }
+    var sessContainer=document.createElement('div');
+    sessContainer.setAttribute('style','display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto');
+    sessions.forEach(function(s){
+      var sd=document.createElement('div');
+      sd.setAttribute('style','padding:8px 12px;background:rgba(0,0,0,.2);border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center');
+      sd.innerHTML='<div><div style="font-size:.8rem;font-weight:700">'+esc(s.roomType||'chat')+' session</div><div style="font-size:.7rem;color:var(--tx3)">'+new Date(s.startedAt).toLocaleString('en-IN')+' · '+(s.messageCount||0)+' messages</div></div><span style="font-size:.72rem;color:var(--v3)">View →</span>';
+      sd.onclick=(function(sid){return function(){loadTranscript(sid);};})(s.sessionId);
+      sessContainer.appendChild(sd);
     });
-  } catch(e){el.textContent='Error: '+e.message;}
+    el.innerHTML='';
+    el.appendChild(sessContainer);
+  }catch(e){el.textContent='Error: '+e.message;}
 }
 
-async function loadTranscript(sid){
-  const box=document.getElementById('chat-transcript-box');
-  const inner=document.getElementById('chat-transcript-inner');
-  box.style.display='block';
-  inner.textContent='Loading transcript...';
-  try {
-    const r=await af('/api/admin/sessions/'+sid+'/transcript');
+async function loadTranscript(sessionId){
+  const tEl=document.getElementById('chat-transcript-result');
+  tEl.innerHTML='<div class="spin"></div>';
+  try{
+    const r=await af('/api/admin/sessions/'+sessionId+'/transcript',{headers:{'x-admin-password':adminPass}});
     const d=await r.json();
     const msgs=d.messages||[];
-    inner.innerHTML=msgs.map(m=>`<div style="margin-bottom:6px"><span style="color:var(--tx3);font-size:10px">${new Date(m.ts).toLocaleTimeString('en-IN')} </span><span>${esc(m.text||'')}</span></div>`).join('');
-  } catch(e){inner.textContent='Error: '+e.message;}
+    tEl.innerHTML='<div style="margin-top:10px;background:rgba(0,0,0,.3);border-radius:10px;padding:12px;max-height:300px;overflow-y:auto">'
+      +'<div style="font-size:.75rem;font-weight:700;margin-bottom:8px;color:var(--v3)">Transcript: '+msgs.length+' messages</div>'
+      +msgs.map(function(m){
+        return '<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+          +'<span style="font-size:.68rem;color:var(--tx3)">'+new Date(m.ts).toLocaleTimeString('en-IN')+' </span>'
+          +'<span style="font-size:.78rem;color:var(--tx)">'+esc(m.text||'')+'</span>'
+        +'</div>';
+      }).join('')
+    +'</div>';
+  }catch(e){tEl.textContent='Error: '+e.message;}
 }
 
-function viewUserSecurity(userId, name){
-  document.getElementById('sec-user-id').value=userId;
-  document.getElementById('sec-chat-uid').value=userId;
-  showScreen('security',null);
-  setTimeout(()=>{trackUser();loadChats();},100);
-}
-
-// ── USER ACTIONS ───────────────────────────────────────────────
-async function banUser(id, name){
-  if(!confirm('Ban '+name+'?')) return;
-  const r=await af('/api/admin/users/'+id+'/ban',{method:'POST',body:'{}'});
-  if(r.ok){toast('Banned: '+name,'success');loadUsers();}else toast('Failed','error');
-}
-async function unbanUser(id, name){
-  const r=await af('/api/admin/users/'+id+'/unban',{method:'POST',body:'{}'});
-  if(r.ok){toast('Unbanned: '+name,'success');loadUsers();}else toast('Failed','error');
-}
-async function deletePost(id){
-  if(!confirm('Delete this post? Cannot be undone.')) return;
-  const r=await af('/api/admin/posts/'+id,{method:'DELETE'});
-  if(r.ok){toast('Post deleted','success');loadPosts();}else toast('Failed','error');
-}
-
-// ── BROADCAST ─────────────────────────────────────────────────
-let broadcastTarget='all';
-function selectTarget(el, target){ document.querySelectorAll('.target-chip').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); broadcastTarget=target; document.getElementById('bc-city').style.display=target==='city'?'block':'none'; }
-function previewBroadcast(){
-  const el=document.getElementById('bc-preview');
-  el.style.display='block';
-  el.innerHTML='<div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Preview</div>'
-    +'<div style="font-weight:600">'+(document.getElementById('bc-title').value||'(no title)')+'</div>'
-    +'<div style="color:var(--tx2);margin-top:4px">'+(document.getElementById('bc-body').value||'(no body)')+'</div>'
-    +'<div style="color:var(--tx3);margin-top:6px;font-size:10px">Target: '+broadcastTarget+'</div>';
-}
-async function sendBroadcast(){
-  const title=document.getElementById('bc-title').value.trim();
-  const body=document.getElementById('bc-body').value.trim();
-  if(!title||!body){toast('Fill in title and message','error');return;}
-  const r=await af('/api/admin/broadcast',{method:'POST',body:JSON.stringify({title,body,target:broadcastTarget,city:document.getElementById('bc-city').value})});
-  if(r.ok){toast('📣 Broadcast sent!','success');document.getElementById('bc-title').value='';document.getElementById('bc-body').value='';}
-  else toast('Broadcast failed','error');
-}
-
-// ── REPORTS + CRISIS ──────────────────────────────────────────
-async function loadReports(){
-  try {
-    const r=await af('/api/admin/reports');
-    if(!r.ok) return;
-    const d=await r.json();
-    const reports=d.reports||d||[];
-    document.getElementById('reports-badge').textContent=reports.filter(r=>r.status==='open').length;
-    const tbody=document.getElementById('reports-table');
-    if(!reports.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">No reports</td></tr>';return;}
-    tbody.innerHTML=reports.map(r=>`<tr>
-      <td><span class="badge badge-y">${r.reason||'?'}</span></td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${esc((r.postCaption||r.content||'').slice(0,60))}</td>
-      <td style="font-size:.72rem;color:var(--tx3)">${r.reporterName||'Anon'}</td>
-      <td style="font-size:.72rem;color:var(--tx3)">${r.createdAt?timeAgo(r.createdAt):'—'}</td>
-      <td>${r.status==='open'?'<span class="badge badge-r">Open</span>':'<span class="badge badge-g">Resolved</span>'}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="resolveReport('${r._id}')">✓ Resolve</button></td>
-    </tr>`).join('');
-  } catch(_){}
-}
-async function resolveReport(id){ await af('/api/admin/reports/'+id+'/resolve',{method:'POST',body:'{}'}); loadReports(); toast('Resolved','success'); }
-
-async function loadCrisis(){
-  try {
-    const r=await af('/api/admin/posts?crisis=true&limit=50');
-    if(!r.ok) return;
-    const d=await r.json();
-    const posts=d.posts||d||[];
-    const crisisPosts=posts.filter(p=>p.isCrisis||p.crisisLevel);
-    const badge=document.getElementById('crisis-badge2');
-    if(crisisPosts.length){badge.style.display='inline';badge.textContent=crisisPosts.length;}
-    const tbody=document.getElementById('crisis-table');
-    if(!crisisPosts.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">No crisis posts 👍</td></tr>';return;}
-    tbody.innerHTML=crisisPosts.map(p=>`<tr>
-      <td>${esc(p.authorEmoji||'🎭')}&nbsp;${esc(p.authorName||'?')}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#F87171">${esc((p.caption||'').slice(0,80))}</td>
-      <td><span class="badge badge-r">${p.crisisLevel||'HIGH'}</span></td>
-      <td style="font-size:.72rem;color:var(--tx3)">${p.createdAt?timeAgo(p.createdAt):'—'}</td>
-      <td><span class="badge badge-v">${p.city||'?'}</span></td>
-      <td><button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Remove</button></td>
-    </tr>`).join('');
-  } catch(_){}
-}
-
-// ── EXPORT ────────────────────────────────────────────────────
-async function exportUsers(){
-  const r=await af('/api/admin/export/users');
-  if(r.ok){const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='annomuss_users_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('Downloaded','success');}
-  else toast('Export failed','error');
-}
-async function exportPosts(){const r=await af('/api/admin/export/posts');if(r.ok){const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='annomuss_posts_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('Downloaded','success');}else toast('Failed','error');}
-async function exportMoods(){const r=await af('/api/admin/export/moods');if(r.ok){const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='annomuss_moods_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('Downloaded','success');}else toast('Failed','error');}
-async function exportAnalytics(){toast('Generating report...','info');}
-
-// ── SCREEN NAVIGATION ─────────────────────────────────────────
-function showScreen(name, navEl){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('screen-'+name).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  if(navEl) navEl.classList.add('active');
-  const titles={overview:'Overview',events:'Live Events',users:'User Management',posts:'Posts',reports:'Reports',crisis:'Crisis Posts',security:'Security & Tracking',broadcast:'Broadcast',analytics:'Analytics',export:'Export'};
-  document.getElementById('screen-title').textContent=titles[name]||name;
-  currentScreen=name;
-  if(name==='events') document.getElementById('events-badge').textContent='0';
-  if(name==='users') loadUsers();
-  if(name==='posts') loadPosts();
-  if(name==='reports') loadReports();
-  if(name==='crisis') loadCrisis();
-  if(name==='analytics') loadAnalytics();
-}
-
-async function loadAnalytics(){
-  try{
-    const r=await af('/api/admin/analytics');
-    if(!r.ok)return;
-    const d=await r.json();
-    const tbody=document.getElementById('metrics-table');
-    tbody.innerHTML=`<tr><td>Signups</td><td>${d.signupsToday||0}</td><td>${d.signups7d||0}</td><td>${d.signups30d||0}</td><td>${d.totalUsers||0}</td></tr>
-    <tr><td>Posts</td><td>${d.postsToday||0}</td><td>${d.posts7d||0}</td><td>${d.posts30d||0}</td><td>${d.totalPosts||0}</td></tr>
-    <tr><td>Active Users</td><td>${d.activeToday||0}</td><td>${d.active7d||0}</td><td>${d.active30d||0}</td><td>—</td></tr>`;
-  }catch(_){}
-}
-
-document.getElementById('admin-pw').focus();
 </script>
 </body>
 </html>

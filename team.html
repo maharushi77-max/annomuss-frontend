@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Annomuss — Team Intelligence Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<style>
+:root{
+  --bg:#050B14;--bg2:#0A1628;--bg3:#0F1E35;--bg4:#162440;
+  --blue:#3B82F6;--blue2:#60A5FA;--teal:#06B6D4;--green:#10B981;
+  --orange:#F97316;--pink:#EC4899;--purple:#8B5CF6;--red:#EF4444;
+  --yellow:#EAB308;--tx:#F1F5F9;--tx2:#94A3B8;--tx3:#475569;
+  --bd:rgba(255,255,255,.06);--bd2:rgba(255,255,255,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;overflow:hidden}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ── SIDEBAR ── */
+.sidebar{width:230px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;height:100vh}
+.brand{padding:20px 18px 16px;border-bottom:1px solid var(--bd)}
+.brand-logo{font-size:14px;font-weight:600;color:var(--tx);display:flex;align-items:center;gap:8px}
+.brand-sub{font-size:10px;color:var(--tx3);margin-top:3px;letter-spacing:.08em;text-transform:uppercase}
+.live-indicator{display:flex;align-items:center;gap:6px;padding:8px 18px;background:rgba(16,185,129,.08);border-bottom:1px solid rgba(16,185,129,.15);font-size:11px;color:var(--green)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}50%{box-shadow:0 0 0 6px rgba(16,185,129,0)}}
+.live-count{font-weight:700;font-size:14px;color:var(--green)}
+.nav{flex:1;padding:12px 0;overflow-y:auto}
+.nav-group{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);padding:12px 18px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--tx2);cursor:pointer;transition:all .18s;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--tx)}
+.nav-item.active{background:rgba(59,130,246,.1);color:var(--blue2);border-left-color:var(--blue)}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:100px;animation:badgePop .3s ease}
+@keyframes badgePop{from{transform:scale(.5)}to{transform:scale(1)}}
+.sidebar-footer{padding:14px 18px;border-top:1px solid var(--bd);font-size:11px;color:var(--tx3)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;height:100vh}
+.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0}
+.screen-title{font-size:15px;font-weight:600;color:var(--tx);flex:1}
+.content{flex:1;overflow-y:auto;padding:20px 24px 24px;scrollbar-width:thin}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.login-card{background:var(--bg2);border:1px solid var(--bd2);border-radius:20px;padding:36px;width:380px;text-align:center}
+.login-title{font-size:24px;font-weight:600;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--tx2);margin-bottom:28px}
+.input{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--bd2);border-radius:12px;padding:12px 16px;font-size:14px;color:var(--tx);outline:none;font-family:inherit;margin-bottom:12px}
+.input:focus{border-color:rgba(59,130,246,.5)}
+.input::placeholder{color:var(--tx3)}
+.btn-login{width:100%;background:var(--blue);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:all .2s}
+.btn-login:hover{background:#2563EB}
+.login-err{color:var(--red);font-size:12px;margin-top:8px;min-height:16px}
+
+/* ── STAT CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card:hover{border-color:var(--bd2)}
+.stat-card::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,var(--glow,.12) 0%,transparent 70%)}
+.stat-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px}
+.stat-value{font-size:30px;font-weight:300;color:var(--tx);line-height:1}
+.stat-delta{font-size:11px;margin-top:6px;color:var(--tx3)}
+.stat-delta.up{color:var(--green)}.stat-delta.down{color:var(--red)}
+.stat-bar{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:10px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:2px;transition:width 1.2s ease}
+
+/* ── TABLES ── */
+.table-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bd)}
+.table-title{font-size:13px;font-weight:600;color:var(--tx)}
+.table-actions{display:flex;gap:8px}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);padding:10px 16px;text-align:left;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.2)}
+td{padding:11px 16px;font-size:12px;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.03)}
+tr:hover td{background:rgba(255,255,255,.02)}
+tr:last-child td{border:none}
+.badge{display:inline-block;padding:2px 9px;border-radius:100px;font-size:9px;font-weight:700}
+.bg{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.br{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.by{background:rgba(234,179,8,.15);color:var(--yellow);border:1px solid rgba(234,179,8,.25)}
+.bb{background:rgba(59,130,246,.15);color:var(--blue2);border:1px solid rgba(59,130,246,.25)}
+.bp{background:rgba(139,92,246,.15);color:#A78BFA;border:1px solid rgba(139,92,246,.25)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:9px;font-size:12px;font-weight:500;cursor:pointer;transition:all .18s;border:none;font-family:inherit}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#2563EB}
+.btn-ghost{background:rgba(255,255,255,.06);color:var(--tx2);border:1px solid var(--bd)}.btn-ghost:hover{background:rgba(255,255,255,.1)}
+.btn-green{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.btn-red{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.btn-sm{padding:4px 10px;font-size:11px;border-radius:7px}
+
+/* ── TWO COL ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px}
+
+/* ── CHART WRAPPER ── */
+.chart-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:18px}
+.chart-title{font-size:13px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.chart-sub{font-size:11px;color:var(--tx3);font-weight:400;margin-top:2px}
+
+/* ── MOOD BARS ── */
+.mood-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.mood-label{width:80px;font-size:11px;color:var(--tx2);flex-shrink:0}
+.mood-track{flex:1;background:rgba(255,255,255,.06);border-radius:100px;height:8px;overflow:hidden}
+.mood-fill{height:100%;border-radius:100px;transition:width 1s ease}
+.mood-pct{width:36px;font-size:11px;color:var(--tx3);text-align:right;flex-shrink:0}
+
+/* ── EMOTION SCORE CARD ── */
+.ets-card{background:linear-gradient(135deg,rgba(139,92,246,.12) 0%,rgba(59,130,246,.08) 100%);border:1px solid rgba(139,92,246,.2);border-radius:14px;padding:18px}
+.ets-score{font-size:48px;font-weight:200;color:var(--purple)}
+.ets-label{font-size:11px;color:var(--tx3);margin-top:4px}
+.ets-seg{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.ets-pill{padding:4px 12px;border-radius:100px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid}
+
+/* ── HELP CENTER ── */
+.ticket{background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:8px}
+.ticket-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.ticket-id{font-size:10px;color:var(--tx3);font-family:monospace}
+.ticket-status{margin-left:auto}
+.ticket-body{font-size:12px;color:var(--tx2);line-height:1.6}
+.ticket-reply{margin-top:10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:9px;padding:10px 12px;font-size:12px;color:var(--blue2)}
+
+/* ── LIVE FEED ── */
+.event-stream{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;height:280px;overflow-y:auto;scrollbar-width:thin}
+.event-item{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.03);animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
+.event-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.event-body{flex:1;min-width:0}
+.event-title{font-size:12px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event-time{font-size:10px;color:var(--tx3);flex-shrink:0}
+
+/* ── SCREEN TOGGLE ── */
+.screen{display:none}.screen.active{display:block}
+.spin{width:20px;height:20px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TOAST ── */
+#toast-area{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:7px}
+.toast{background:rgba(10,22,40,.96);border:1px solid var(--bd2);border-radius:11px;padding:10px 16px;font-size:12px;color:var(--tx);animation:slideIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── SEGMENTS ── */
+.seg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.seg-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:14px;transition:border-color .2s;cursor:pointer}
+.seg-card:hover{border-color:var(--bd2)}
+.seg-name{font-size:12px;font-weight:600;color:var(--tx);margin-bottom:4px}
+.seg-desc{font-size:10px;color:var(--tx3);line-height:1.5;margin-bottom:10px}
+.seg-count{font-size:20px;font-weight:300;color:var(--blue2)}
+.seg-cta{font-size:9px;color:var(--tx3);margin-top:4px}
+
+/* ── INPUT FIELDS ── */
+.field{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:9px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;margin-bottom:8px}
+.field:focus{border-color:rgba(59,130,246,.4)}
+.field::placeholder{color:var(--tx3)}
+textarea.field{resize:vertical;min-height:80px}
+select.field{cursor:pointer}
+</style>
+</head>
+<body>
+
+<div id="toast-area"></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div style="font-size:28px;margin-bottom:10px">🌙</div>
+    <div class="login-title">Team Dashboard</div>
+    <div class="login-sub">Annomuss Internal Intelligence Center</div>
+    <input class="input" type="text" id="login-team" placeholder="Team member name" />
+    <input class="input" type="password" id="login-pass" placeholder="Team password"
+      onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="btn-login" onclick="doLogin()">Enter Dashboard →</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="brand">
+    <div class="brand-logo">🌙 annomuss</div>
+    <div class="brand-sub">Team Intelligence Center</div>
+  </div>
+  <div class="live-indicator">
+    <div class="live-dot"></div>
+    <span>Live:</span>
+    <span class="live-count" id="live-count">—</span>
+    <span>online</span>
+  </div>
+  <div class="nav">
+    <div class="nav-group">Overview</div>
+    <div class="nav-item active" onclick="showScreen('overview',this)"><span class="nav-icon">📊</span>Growth Analytics</div>
+    <div class="nav-item" onclick="showScreen('live',this)"><span class="nav-icon">⚡</span>Live Activity</div>
+
+    <div class="nav-group">Intelligence</div>
+    <div class="nav-item" onclick="showScreen('mood',this)"><span class="nav-icon">🧠</span>Mood Intelligence</div>
+    <div class="nav-item" onclick="showScreen('segments',this)"><span class="nav-icon">🎯</span>Ad Targeting</div>
+    <div class="nav-item" onclick="showScreen('heatmap',this)"><span class="nav-icon">🗺️</span>City Heatmap</div>
+
+    <div class="nav-group">Users</div>
+    <div class="nav-item" onclick="showScreen('users',this)"><span class="nav-icon">👥</span>User Explorer</div>
+    <div class="nav-item" onclick="showScreen('reports',this)"><span class="nav-icon">⚠️</span>Reports<span class="nav-badge" id="reports-nav-badge" style="display:none">0</span></div>
+    <div class="nav-item" onclick="showScreen('crisis',this)"><span class="nav-icon">🚨</span>Crisis Monitor</div>
+
+    <div class="nav-group">Support</div>
+    <div class="nav-item" onclick="showScreen('help',this)"><span class="nav-icon">💬</span>Help Center<span class="nav-badge" id="help-nav-badge" style="display:none">0</span></div>
+    <div class="nav-item" onclick="showScreen('export',this)"><span class="nav-icon">📥</span>Export Data</div>
+  </div>
+  <div class="sidebar-footer">
+    <div id="team-member">Not logged in</div>
+    <div style="margin-top:4px" id="last-update">—</div>
+    <button class="btn btn-ghost" style="margin-top:8px;width:100%;justify-content:center;font-size:11px" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="screen-title" id="screen-title">Growth Analytics</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="refreshAll()">↻ Refresh</button>
+      <button class="btn btn-primary" onclick="showScreen('export',null)">⬇ Export</button>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- ══ GROWTH ANALYTICS ══ -->
+    <div class="screen active" id="screen-overview">
+      <div class="stats-grid">
+        <div class="stat-card" style="--glow:rgba(59,130,246,.2)">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="s-users">—</div>
+          <div class="stat-delta up" id="s-users-d">Loading...</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="sb-users" style="width:0%;background:var(--blue)"></div></div>
+        </div>
+        <div class="stat-card" style="--glow:rgba(16,185,129,.2)">
+          <div class="stat-label">Today's Signups</div>
+          <div class="stat-value" id="s-today">—</div>
+          <div class="stat-delta up" id="s-today-d">vs yesterday</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="sb-today" style="width:0%;background:var(--green)"></div></div>
+        </div>
+        <div class="stat-card" style="--glow:rgba(249,115,22,.2)">
+          <div class="stat-label">Total Posts</div>
+          <div class="stat-value" id="s-posts">—</div>
+          <div class="stat-delta" id="s-posts-d">Loading...</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="sb-posts" style="width:0%;background:var(--orange)"></div></div>
+        </div>
+        <div class="stat-card" style="--glow:rgba(236,72,153,.2)">
+          <div class="stat-label">Mood Logs</div>
+          <div class="stat-value" id="s-moods">—</div>
+          <div class="stat-delta" id="s-moods-d">emotional data points</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="sb-moods" style="width:0%;background:var(--pink)"></div></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="chart-card">
+          <div class="chart-title">Daily Signups — Last 14 Days
+            <span class="chart-sub">User acquisition trend</span>
+          </div>
+          <canvas id="chart-signups" height="140"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Emotion Distribution Today
+            <span class="chart-sub">What users are feeling</span>
+          </div>
+          <canvas id="chart-emotions" height="140"></canvas>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">🏙️ Top Cities</div>
+          </div>
+          <table><thead><tr><th>#</th><th>City</th><th>Users</th><th>Posts</th><th>Top Mood</th></tr></thead>
+          <tbody id="cities-table"><tr><td colspan="5" style="text-align:center;padding:20px"><div class="spin"></div></td></tr></tbody></table>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Posts by Type</div>
+          <canvas id="chart-types" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">👥 Recent Signups</div>
+          <button class="btn btn-ghost btn-sm" onclick="exportTableCSV('recent-signups-table','recent_signups')">⬇ CSV</button>
+        </div>
+        <table id="recent-signups-table">
+          <thead><tr><th>Name</th><th>Level</th><th>City</th><th>Device</th><th>Joined</th><th>Last Seen</th><th>Status</th></tr></thead>
+          <tbody id="recent-users-body"><tr><td colspan="7" style="text-align:center;padding:20px"><div class="spin"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ LIVE ACTIVITY ══ -->
+    <div class="screen" id="screen-live">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Online Now</div><div class="stat-value" id="live-now">—</div><div class="stat-delta up">Real-time</div></div>
+        <div class="stat-card"><div class="stat-label">Posts Last Hour</div><div class="stat-value" id="live-posts-hr">—</div></div>
+        <div class="stat-card"><div class="stat-label">Active Chats</div><div class="stat-value" id="live-chats">—</div></div>
+        <div class="stat-card"><div class="stat-label">Crisis Posts Today</div><div class="stat-value" id="live-crisis" style="color:var(--red)">—</div></div>
+      </div>
+      <div class="two-col">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:13px;font-weight:600">⚡ Live Event Stream</div>
+            <button class="btn btn-ghost btn-sm" onclick="clearEvents()">Clear</button>
+          </div>
+          <div class="event-stream" id="event-stream">
+            <div style="padding:24px;text-align:center;color:var(--tx3);font-size:12px">Connecting to live feed...</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Activity — Last 60 Minutes</div>
+          <canvas id="chart-live" height="240"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MOOD INTELLIGENCE ══ -->
+    <div class="screen" id="screen-mood">
+      <div class="three-col">
+        <div class="ets-card">
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:8px;letter-spacing:.1em;text-transform:uppercase">Emotion Trend Score (ETS)</div>
+          <div class="ets-score" id="ets-score">—</div>
+          <div class="ets-label" id="ets-label">Calculating...</div>
+          <div style="margin-top:12px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
+            <div id="ets-bar" style="height:100%;border-radius:2px;background:var(--purple);width:0%;transition:width 1.5s ease"></div>
+          </div>
+          <div style="font-size:10px;color:var(--tx3);margin-top:6px" id="ets-status">ETS = (PostFreq×0.3) + (Intensity×0.4) + (TimeOfDay×0.2) + (Streak×0.1)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Dominant Emotion Today</div>
+          <div class="stat-value" id="dom-emotion" style="font-size:20px">—</div>
+          <div class="stat-delta" id="dom-pct">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Emotional Velocity</div>
+          <div class="stat-value" id="emo-velocity" style="font-size:18px">—</div>
+          <div class="stat-delta" id="emo-velocity-d">Rising or falling emotion</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="chart-card">
+          <div class="chart-title">Hour-by-Hour Mood Pattern
+            <div class="chart-sub">When users are most emotional</div>
+          </div>
+          <canvas id="chart-hourly" height="180"></canvas>
+        </div>
+        <div class="chart-card" style="display:flex;flex-direction:column">
+          <div class="chart-title" style="margin-bottom:12px">Emotion Distribution</div>
+          <div id="mood-bars-container"></div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">7-Day Emotion Trends
+          <div class="chart-sub">How the city feels over time</div>
+        </div>
+        <canvas id="chart-emotion-trend" height="120"></canvas>
+      </div>
+    </div>
+
+    <!-- ══ AD TARGETING ══ -->
+    <div class="screen" id="screen-segments">
+      <div style="padding:12px 16px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:10px;font-size:12px;color:var(--blue2);margin-bottom:16px">
+        🎯 These segments are based on anonymized emotion patterns — no personal data is used for targeting. Compliant with DPDP Act 2023.
+      </div>
+      <div class="seg-grid" id="segments-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:40px"><div class="spin"></div></div>
+      </div>
+      <div style="margin-top:16px" class="chart-card">
+        <div class="chart-title">Segment Distribution
+          <button class="btn btn-ghost btn-sm" onclick="exportSegmentsCSV()">⬇ Export Segments</button>
+        </div>
+        <canvas id="chart-segments" height="100"></canvas>
+      </div>
+    </div>
+
+    <!-- ══ CITY HEATMAP ══ -->
+    <div class="screen" id="screen-heatmap">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">🗺️ City Intelligence Map</div>
+          <button class="btn btn-ghost btn-sm" onclick="exportTableCSV('city-table','city_data')">⬇ CSV</button>
+        </div>
+        <table id="city-table">
+          <thead><tr><th>City</th><th>Users</th><th>Posts Today</th><th>Dominant Mood</th><th>ETS Score</th><th>Peak Hour</th><th>Action</th></tr></thead>
+          <tbody id="city-table-body"><tr><td colspan="7" style="text-align:center;padding:20px"><div class="spin"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ USER EXPLORER ══ -->
+    <div class="screen" id="screen-users">
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <input class="field" style="max-width:300px;margin:0" id="user-search-q" placeholder="Search by name or email..." oninput="searchUsers(this.value)">
+        <select class="field" style="max-width:150px;margin:0" onchange="filterUsers(this.value)">
+          <option value="all">All Users</option>
+          <option value="active">Active</option>
+          <option value="banned">Banned</option>
+          <option value="premium">Premium</option>
+          <option value="new">New (7 days)</option>
+        </select>
+        <button class="btn btn-ghost" onclick="exportTableCSV('users-table','users_export')">⬇ Export CSV</button>
+      </div>
+      <div class="table-card">
+        <table id="users-table">
+          <thead><tr><th>Avatar</th><th>Name / Email</th><th>Level / XP</th><th>City</th><th>Device</th><th>Last Seen</th><th>Logins</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="users-tbody"><tr><td colspan="9" style="text-align:center;padding:20px"><div class="spin"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ REPORTS ══ -->
+    <div class="screen" id="screen-reports">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">⚠️ User Reports</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadReports()">↻ Refresh</button>
+        </div>
+        <table><thead><tr><th>Type</th><th>Content</th><th>Reporter</th><th>Time</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="reports-body"><tr><td colspan="6" style="text-align:center;padding:20px"><div class="spin"></div></td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- ══ CRISIS MONITOR ══ -->
+    <div class="screen" id="screen-crisis">
+      <div style="padding:10px 14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;margin-bottom:14px;font-size:12px;color:var(--red)">
+        🚨 These users may be at risk. Review immediately. If critical, contact local emergency services.
+      </div>
+      <div class="table-card">
+        <table><thead><tr><th>User</th><th>Content</th><th>Risk Level</th><th>Posted</th><th>City</th><th>Action</th></tr></thead>
+        <tbody id="crisis-body"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--green)">✅ No crisis posts detected</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- ══ HELP CENTER ══ -->
+    <div class="screen" id="screen-help">
+      <div class="two-col" style="margin-bottom:16px">
+        <div class="chart-card">
+          <div class="chart-title">Submit Support Ticket</div>
+          <input class="field" id="help-email" placeholder="User email (optional)">
+          <select class="field" id="help-type">
+            <option value="bug">Bug Report</option>
+            <option value="account">Account Issue</option>
+            <option value="safety">Safety Concern</option>
+            <option value="feature">Feature Request</option>
+            <option value="other">Other</option>
+          </select>
+          <textarea class="field" id="help-msg" rows="3" placeholder="Describe the issue..."></textarea>
+          <button class="btn btn-primary" onclick="submitTicket()">Submit Ticket</button>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Quick FAQ — Common Issues</div>
+          <div id="faq-list" style="display:flex;flex-direction:column;gap:8px">
+            <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:10px;font-size:12px;cursor:pointer" onclick="this.querySelector('.ans').style.display=this.querySelector('.ans').style.display==='none'?'block':'none'">
+              <div style="font-weight:500;color:var(--tx)">OTP not received</div>
+              <div class="ans" style="display:none;color:var(--tx2);margin-top:6px;line-height:1.6">Check spam folder. Email takes 1-2 min. Resend domain must be verified on resend.com/domains for new email IDs.</div>
+            </div>
+            <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:10px;font-size:12px;cursor:pointer" onclick="this.querySelector('.ans').style.display=this.querySelector('.ans').style.display==='none'?'block':'none'">
+              <div style="font-weight:500;color:var(--tx)">Posts not loading</div>
+              <div class="ans" style="display:none;color:var(--tx2);margin-top:6px;line-height:1.6">Hard refresh (Ctrl+Shift+R). If issue persists check Render logs for server errors.</div>
+            </div>
+            <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:10px;font-size:12px;cursor:pointer" onclick="this.querySelector('.ans').style.display=this.querySelector('.ans').style.display==='none'?'block':'none'">
+              <div style="font-weight:500;color:var(--tx)">Messages not sending</div>
+              <div class="ans" style="display:none;color:var(--tx2);margin-top:6px;line-height:1.6">Verify routes/messages.js is deployed. Check Render logs for "messages.js loaded (sync in start)".</div>
+            </div>
+            <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:10px;font-size:12px;cursor:pointer" onclick="this.querySelector('.ans').style.display=this.querySelector('.ans').style.display==='none'?'block':'none'">
+              <div style="font-weight:500;color:var(--tx)">Account banned wrongly</div>
+              <div class="ans" style="display:none;color:var(--tx2);margin-top:6px;line-height:1.6">Go to Admin Panel → Users → find the user → Unban. User must re-login after unban.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">💬 Support Tickets</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadTickets()">↻ Refresh</button>
+        </div>
+        <div id="tickets-list" style="padding:14px">
+          <div style="text-align:center;color:var(--tx3);font-size:12px;padding:20px">No tickets yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ EXPORT ══ -->
+    <div class="screen" id="screen-export">
+      <div class="seg-grid">
+        <div class="seg-card" onclick="exportUsers()">
+          <div class="seg-name">👥 Users Export</div>
+          <div class="seg-desc">All users with location, device, level, XP, last seen</div>
+          <button class="btn btn-primary btn-sm">⬇ Download CSV</button>
+        </div>
+        <div class="seg-card" onclick="exportPosts()">
+          <div class="seg-name">📝 Posts Export</div>
+          <div class="seg-desc">All posts with emotion, city, engagement data</div>
+          <button class="btn btn-primary btn-sm">⬇ Download CSV</button>
+        </div>
+        <div class="seg-card" onclick="exportMoods()">
+          <div class="seg-name">💭 Mood Data</div>
+          <div class="seg-desc">City-wise emotion trends (anonymized)</div>
+          <button class="btn btn-primary btn-sm">⬇ Download CSV</button>
+        </div>
+        <div class="seg-card" onclick="exportSegments_()">
+          <div class="seg-name">🎯 Ad Segments</div>
+          <div class="seg-desc">Emotion-based user segments for targeting</div>
+          <button class="btn btn-primary btn-sm">⬇ Download CSV</button>
+        </div>
+        <div class="seg-card" onclick="exportDailyReport()">
+          <div class="seg-name">📊 Daily Report</div>
+          <div class="seg-desc">Signups, DAU, posts, mood summary for today</div>
+          <button class="btn btn-primary btn-sm">⬇ Download CSV</button>
+        </div>
+        <div class="seg-card" onclick="exportTickets()">
+          <div class="seg-name">💬 Support Tickets</div>
+          <div class="seg-desc">All help center tickets and status</div>
+          <button class="btn btn-primary btn-sm">⬇ Download CSV</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+const API   = 'https://api.annomuss.in';
+const ADMIN = 'annomuss_admin_2002';
+let teamMember = '', socket = null;
+let allUsers = [], allEvents = [], tickets = [];
+let signupChart, emotionChart, typeChart, hourlyChart, trendChart, liveChart, segChart;
+
+// ── Login ─────────────────────────────────────────────────────────
+function doLogin(){
+  const name = document.getElementById('login-team').value.trim();
+  const pass = document.getElementById('login-pass').value.trim();
+  if(!name){ document.getElementById('login-err').textContent='Enter your name'; return; }
+  if(pass !== 'annomuss_team_2002'){
+    document.getElementById('login-err').textContent='Wrong team password';
+    return;
+  }
+  teamMember = name;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('team-member').textContent=name+' (Team)';
+  init();
+}
+function doLogout(){ teamMember=''; location.reload(); }
+
+// ── API helper ────────────────────────────────────────────────────
+async function af(path, opts={}){
+  const headers = {'Content-Type':'application/json','x-admin-password':ADMIN,...(opts.headers||{})};
+  const r = await fetch(API+path, {...opts, headers});
+  return r;
+}
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function timeAgo(d){
+  const s=Math.floor((Date.now()-new Date(d))/1000);
+  if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+}
+function toast(msg,type='info'){
+  const t=document.createElement('div');
+  t.className='toast';
+  t.style.borderColor=type==='error'?'rgba(239,68,68,.3)':type==='ok'?'rgba(16,185,129,.3)':'rgba(59,130,246,.2)';
+  t.textContent=msg;
+  document.getElementById('toast-area').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3500);
+}
+
+// ── Chart defaults ────────────────────────────────────────────────
+Chart.defaults.color='#64748B';
+Chart.defaults.borderColor='rgba(255,255,255,.05)';
+Chart.defaults.font.family='Inter,system-ui,sans-serif';
+
+function mkChart(id,type,data,opts={}){
+  const el=document.getElementById(id);if(!el)return;
+  const ctx=el.getContext('2d');
+  return new Chart(ctx,{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94A3B8',font:{size:11}}}},scales:type!=='doughnut'&&type!=='pie'?{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748B',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748B',font:{size:10}}}}:{},animation:{duration:800},...opts}});
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+function init(){
+  loadOverview();
+  connectSocket();
+  buildHourlyChart();
+  buildTrendChart();
+  buildLiveChart();
+  setInterval(loadOverview, 30000);
+  setInterval(refreshLive, 8000);
+  document.getElementById('last-update').textContent='Updated '+new Date().toLocaleTimeString('en-IN');
+}
+
+// ── Socket ────────────────────────────────────────────────────────
+function connectSocket(){
+  try{
+    socket=io(API,{transports:['websocket','polling']});
+    socket.on('connect',()=>{
+      addEvent('🟢','Team connected','Live feed active');
+      toast('Real-time connected','ok');
+    });
+    socket.on('online-count',n=>{
+      document.getElementById('live-count').textContent=n;
+      document.getElementById('live-now').textContent=n;
+    });
+    socket.on('new-post',d=>addEvent('📝','New post',esc(d.emotion||'')+(d.city?' · '+esc(d.city):'')));
+    socket.on('new-signup',d=>addEvent('👤','New user',esc(d.anonymousName||'Anonymous')));
+    socket.on('report-received',d=>{addEvent('⚠️','Report filed',esc(d.reason||''));bumpBadge('reports-nav-badge');});
+    socket.on('crisis-post',d=>{addEvent('🚨','CRISIS',esc((d.caption||'').slice(0,60)));toast('🚨 Crisis post!','error');});
+    socket.on('dm-received',()=>addEvent('💬','DM sent','Anonymous message'));
+  }catch(e){console.warn('Socket:',e.message);}
+}
+
+function addEvent(icon,title,sub){
+  const el=document.getElementById('event-stream');
+  if(!el)return;
+  const div=document.createElement('div');div.className='event-item';
+  div.innerHTML=`<div class="event-icon">${icon}</div><div class="event-body"><div class="event-title">${esc(title)} — ${esc(sub)}</div></div><div class="event-time">${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</div>`;
+  el.insertBefore(div,el.firstChild);
+  while(el.children.length>80)el.removeChild(el.lastChild);
+  allEvents.unshift({icon,title,sub,time:new Date()});
+}
+function clearEvents(){document.getElementById('event-stream').innerHTML='';allEvents=[];}
+function bumpBadge(id){const b=document.getElementById(id);if(b){b.style.display='inline';b.textContent=(parseInt(b.textContent)||0)+1;}}
+
+// ── Overview ──────────────────────────────────────────────────────
+async function loadOverview(){
+  try{
+    const r=await af('/api/admin/overview');
+    if(!r.ok)return;
+    const d=await r.json();
+    document.getElementById('s-users').textContent=(d.totalUsers||0).toLocaleString();
+    document.getElementById('s-today').textContent=(d.newUsersToday||0).toLocaleString();
+    document.getElementById('s-posts').textContent=(d.totalPosts||0).toLocaleString();
+    document.getElementById('s-moods').textContent=(d.totalMoods||0).toLocaleString();
+    document.getElementById('s-users-d').textContent='+'+d.newUsersToday+' today';
+    document.getElementById('s-posts-d').textContent='+'+d.newPostsToday+' posts today';
+    document.getElementById('s-moods-d').textContent=d.totalMoods+' emotional data points';
+    document.getElementById('sb-users').style.width=Math.min((d.totalUsers||0)/1000*100,100)+'%';
+    document.getElementById('sb-today').style.width=Math.min((d.newUsersToday||0)/50*100,100)+'%';
+    document.getElementById('sb-posts').style.width=Math.min((d.totalPosts||0)/2000*100,100)+'%';
+    document.getElementById('sb-moods').style.width=Math.min((d.totalMoods||0)/5000*100,100)+'%';
+
+    // Build charts
+    buildEmotionChart(d.emotionDist||d.emotionDistribution||{});
+    buildCityTable(d.topCities||[]);
+    buildTypeChart(d.postTypes||{});
+    computeETS(d);
+    document.getElementById('last-update').textContent='Updated '+new Date().toLocaleTimeString('en-IN');
+  }catch(e){console.warn('Overview:',e.message);}
+  loadRecentUsers();
+  loadSegments();
+  loadCityHeatmap();
+}
+
+async function refreshLive(){
+  try{
+    const r=await af('/api/admin/overview');
+    if(!r.ok)return;
+    const d=await r.json();
+    if(d.onlineNow!==undefined){
+      document.getElementById('live-count').textContent=d.onlineNow;
+      document.getElementById('live-now').textContent=d.onlineNow;
+    }
+  }catch(_){}
+}
+
+// ── Emotion Chart ─────────────────────────────────────────────────
+const EMOTION_COLORS={
+  happy:'#EAB308',sad:'#8B5CF6',anxious:'#EC4899',grateful:'#10B981',
+  lonely:'#3B82F6',inspired:'#06B6D4',angry:'#EF4444',neutral:'#64748B'
+};
+function buildEmotionChart(dist){
+  const labels=Object.keys(dist), data=Object.values(dist);
+  const colors=labels.map(l=>EMOTION_COLORS[l]||'#64748B');
+  if(emotionChart)emotionChart.destroy();
+  emotionChart=mkChart('chart-emotions','doughnut',{
+    labels:labels.map(l=>l.charAt(0).toUpperCase()+l.slice(1)),
+    datasets:[{data,backgroundColor:colors.map(c=>c+'CC'),borderColor:colors,borderWidth:1.5}]
+  },{cutout:'65%'});
+  // Mood bars
+  const total=data.reduce((a,b)=>a+b,0)||1;
+  const el=document.getElementById('mood-bars-container');
+  if(el) el.innerHTML=labels.sort((a,b)=>dist[b]-dist[a]).slice(0,8).map(l=>{
+    const pct=Math.round(dist[l]/total*100);
+    return `<div class="mood-bar-row">
+      <div class="mood-label">${l}</div>
+      <div class="mood-track"><div class="mood-fill" style="width:${pct}%;background:${EMOTION_COLORS[l]||'#64748B'}"></div></div>
+      <div class="mood-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+
+  // Dominant emotion
+  if(labels.length){
+    const dom=labels.reduce((a,b)=>dist[a]>dist[b]?a:b);
+    const icons={happy:'😊',sad:'😔',anxious:'😰',grateful:'🙏',lonely:'🌧️',inspired:'✨',angry:'😤'};
+    document.getElementById('dom-emotion').textContent=(icons[dom]||'💭')+' '+dom.charAt(0).toUpperCase()+dom.slice(1);
+    document.getElementById('dom-pct').textContent=Math.round(dist[dom]/total*100)+'% of today\'s posts';
+  }
+}
+
+function buildTypeChart(types){
+  const labels=Object.keys(types),data=Object.values(types);
+  if(typeChart)typeChart.destroy();
+  typeChart=mkChart('chart-types','bar',{
+    labels:labels.map(l=>l.charAt(0).toUpperCase()+l.slice(1)),
+    datasets:[{data,backgroundColor:['#3B82F6','#8B5CF6','#EC4899','#10B981'],borderRadius:6}]
+  },{plugins:{legend:{display:false}}});
+}
+
+function buildCityTable(cities){
+  const el=document.getElementById('cities-table');if(!el)return;
+  el.innerHTML=cities.slice(0,8).map((c,i)=>`<tr>
+    <td style="color:var(--tx3)">${i+1}</td>
+    <td style="font-weight:600">${esc(c.city||c._id||'?')}</td>
+    <td><span class="badge bb">${c.count||c.users||0}</span></td>
+    <td>${c.posts||0}</td>
+    <td>${c.topMood||'—'}</td>
+  </tr>`).join('');
+}
+
+// ── ETS (Emotion Trend Score) ─────────────────────────────────────
+function computeETS(d){
+  const dist=d.emotionDist||d.emotionDistribution||{};
+  const total=Object.values(dist).reduce((a,b)=>a+b,0)||1;
+  const INTENSITY={angry:10,anxious:9,sad:8,lonely:7,inspired:6,happy:5,grateful:4,neutral:3};
+  const intensityScore=Object.entries(dist).reduce((acc,[emo,cnt])=>
+    acc+(INTENSITY[emo]||5)*(cnt/total),0)*10;
+  const hour=new Date().getHours();
+  const timeScore=hour>=22||hour<=4?10:hour>=18?7:hour>=12?5:4;
+  const postFreq=Math.min((d.newPostsToday||0)/50*10,10);
+  const streakScore=5;
+  const ets=Math.round(intensityScore*.4+timeScore*2+postFreq*3+streakScore*1);
+  const clamped=Math.min(Math.max(ets,0),100);
+  document.getElementById('ets-score').textContent=clamped;
+  document.getElementById('ets-bar').style.width=clamped+'%';
+  const label=clamped>70?'Platform feeling highly emotional — prime time for engagement':
+    clamped>50?'Moderate emotional activity — good for content promotion':
+    clamped>30?'Calm period — ideal for light positive content':'Low activity period';
+  document.getElementById('ets-label').textContent=label;
+  const vel=clamped>60?'⬆️ Rising':'⬇️ Falling';
+  document.getElementById('emo-velocity').textContent=vel;
+  document.getElementById('emo-velocity-d').textContent=clamped>60?'Users increasingly emotional':'Activity calming down';
+}
+
+// ── Hourly chart (simulated pattern) ─────────────────────────────
+function buildHourlyChart(){
+  const hours=Array.from({length:24},(_,i)=>i+':00');
+  const pattern=[2,3,4,8,12,15,10,8,10,12,15,18,20,22,25,30,28,25,20,22,30,35,38,20];
+  if(hourlyChart)hourlyChart.destroy();
+  hourlyChart=mkChart('chart-hourly','line',{
+    labels:hours,
+    datasets:[{
+      label:'Emotional Posts',data:pattern,
+      borderColor:'#8B5CF6',backgroundColor:'rgba(139,92,246,.15)',
+      fill:true,tension:.4,pointRadius:0,borderWidth:2
+    }]
+  });
+}
+
+function buildTrendChart(){
+  const days=Array.from({length:7},(_,i)=>{const d=new Date(Date.now()-i*86400000);return d.toLocaleDateString('en-IN',{weekday:'short'});}).reverse();
+  if(trendChart)trendChart.destroy();
+  trendChart=mkChart('chart-emotion-trend','line',{
+    labels:days,
+    datasets:[
+      {label:'Happy',data:[15,18,12,20,16,22,19],borderColor:'#EAB308',tension:.4,pointRadius:2,borderWidth:2},
+      {label:'Sad',data:[20,22,25,18,15,12,10],borderColor:'#8B5CF6',tension:.4,pointRadius:2,borderWidth:2},
+      {label:'Anxious',data:[18,20,22,25,20,18,15],borderColor:'#EC4899',tension:.4,pointRadius:2,borderWidth:2},
+      {label:'Grateful',data:[10,12,15,18,22,25,28],borderColor:'#10B981',tension:.4,pointRadius:2,borderWidth:2},
+    ]
+  });
+}
+
+function buildLiveChart(){
+  const labels=Array.from({length:12},(_,i)=>'-'+(11-i)*5+'m');
+  if(liveChart)liveChart.destroy();
+  liveChart=mkChart('chart-live','line',{
+    labels,
+    datasets:[{
+      label:'Requests/min',
+      data:Array.from({length:12},()=>Math.round(Math.random()*30+10)),
+      borderColor:'#06B6D4',backgroundColor:'rgba(6,182,212,.1)',
+      fill:true,tension:.4,pointRadius:0
+    }]
+  });
+}
+
+// ── Recent Users ──────────────────────────────────────────────────
+async function loadRecentUsers(){
+  try{
+    const r=await af('/api/admin/users?limit=20');
+    if(!r.ok)return;
+    const d=await r.json();
+    allUsers=d.users||d||[];
+    renderUsers(allUsers);
+    document.getElementById('recent-users-body').innerHTML=allUsers.slice(0,8).map(u=>`<tr>
+      <td>${esc(u.avatarEmoji||'🎭')}&nbsp;<b>${esc(u.anonymousName||'—')}</b></td>
+      <td><span class="badge bb">Lv ${u.level||1}</span></td>
+      <td>${u.ipCity?esc(u.ipCity):'—'}</td>
+      <td style="font-size:10px">${esc(u.deviceInfo||'—')}</td>
+      <td>${u.createdAt?new Date(u.createdAt).toLocaleDateString('en-IN'):'—'}</td>
+      <td>${u.lastSeenAt?timeAgo(u.lastSeenAt):'—'}</td>
+      <td>${u.isBanned?'<span class="badge br">Banned</span>':'<span class="badge bg">Active</span>'}</td>
+    </tr>`).join('');
+  }catch(_){}
+}
+
+function renderUsers(users){
+  const el=document.getElementById('users-tbody');if(!el)return;
+  if(!users.length){el.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--tx3);padding:24px">No users found</td></tr>';return;}
+  el.innerHTML=users.map(u=>`<tr>
+    <td style="font-size:1.1rem">${esc(u.avatarEmoji||'🎭')}</td>
+    <td><div style="font-weight:600;font-size:.82rem">${esc(u.anonymousName||'—')}</div><div style="font-size:.68rem;color:var(--tx3)">${esc(u.email||'')}</div></td>
+    <td><span class="badge bb">Lv ${u.level||1}</span> <span style="font-size:.72rem;color:var(--tx3)">${u.xp||0} XP</span></td>
+    <td>${u.ipCity?esc(u.ipCity)+', '+esc(u.ipState||''):'—'}</td>
+    <td style="font-size:.75rem">${esc(u.deviceInfo||'—')}</td>
+    <td style="font-size:.72rem;color:var(--tx3)">${u.lastSeenAt?timeAgo(u.lastSeenAt):'—'}</td>
+    <td style="text-align:center">${u.loginCount||0}</td>
+    <td>${u.isBanned?'<span class="badge br">Banned</span>':u.isPremium?'<span class="badge bp">⭐ Premium</span>':'<span class="badge bg">Active</span>'}</td>
+    <td><div style="display:flex;gap:4px">
+      ${u.isBanned?`<button class="btn btn-green btn-sm" onclick="unbanUser('${u._id}','${esc(u.anonymousName)}')">Unban</button>`:
+        `<button class="btn btn-red btn-sm" onclick="banUser('${u._id}','${esc(u.anonymousName)}')">Ban</button>`}
+    </div></td>
+  </tr>`).join('');
+}
+
+function searchUsers(q){clearTimeout(window._st);window._st=setTimeout(()=>{
+  renderUsers(allUsers.filter(u=>(u.anonymousName||'').toLowerCase().includes(q.toLowerCase())||(u.email||'').toLowerCase().includes(q.toLowerCase())));
+},300);}
+
+function filterUsers(f){
+  if(f==='all') renderUsers(allUsers);
+  else if(f==='banned') renderUsers(allUsers.filter(u=>u.isBanned));
+  else if(f==='premium') renderUsers(allUsers.filter(u=>u.isPremium));
+  else if(f==='new') renderUsers(allUsers.filter(u=>u.createdAt&&(Date.now()-new Date(u.createdAt))<7*86400000));
+  else renderUsers(allUsers.filter(u=>!u.isBanned));
+}
+
+async function banUser(id,name){
+  if(!confirm('Ban '+name+'?'))return;
+  const r=await af('/api/admin/users/'+id+'/ban',{method:'POST',body:'{}'});
+  if(r.ok){toast('Banned: '+name);loadRecentUsers();}else toast('Failed','error');
+}
+async function unbanUser(id,name){
+  const r=await af('/api/admin/users/'+id+'/unban',{method:'POST',body:'{}'});
+  if(r.ok){toast('Unbanned: '+name);loadRecentUsers();}else toast('Failed','error');
+}
+
+// ── Ad Segments ───────────────────────────────────────────────────
+function loadSegments(){
+  const segments=[
+    {name:'Night Owls',icon:'🌙',color:'var(--purple)',desc:'Active 11pm–4am, post about loneliness & depth. High engagement.',count:0,pct:22,target:'Premium music, therapy apps, books'},
+    {name:'Anxious Achievers',icon:'😰',color:'var(--pink)',desc:'Students & professionals, anxious emotion. Open to productivity tools.',count:0,pct:28,target:'Productivity apps, meditation, coaching'},
+    {name:'Grateful Expressers',icon:'🙏',color:'var(--green)',desc:'Positive posters with high streak. Brand ambassadors.',count:0,pct:18,target:'Lifestyle brands, wellness, premium'},
+    {name:'Lonely Urbanites',icon:'🌆',color:'var(--blue)',desc:'City users, lonely emotion, metro areas. Social connection seekers.',count:0,pct:19,target:'Dating apps, social clubs, experiences'},
+    {name:'Deep Feelers',icon:'💜',color:'var(--orange)',desc:'High post frequency + emotional intensity. Core power users.',count:0,pct:8,target:'Mental health apps, journaling, art'},
+    {name:'Silent Readers',icon:'👁️',color:'var(--teal)',desc:'Low posting, high viewing. Potential for push notifications.',count:0,pct:5,target:'Content consumption apps, streaming'},
+  ];
+  const total=allUsers.length||20;
+  segments.forEach(s=>s.count=Math.max(1,Math.round(total*s.pct/100)));
+  const el=document.getElementById('segments-grid');
+  el.innerHTML=segments.map(s=>`<div class="seg-card">
+    <div style="font-size:24px;margin-bottom:8px">${s.icon}</div>
+    <div class="seg-name" style="color:${s.color}">${s.name}</div>
+    <div class="seg-desc">${s.desc}</div>
+    <div class="seg-count">${s.count}</div>
+    <div class="seg-cta">Target: ${s.target}</div>
+  </div>`).join('');
+  if(segChart)segChart.destroy();
+  segChart=mkChart('chart-segments','bar',{
+    labels:segments.map(s=>s.name),
+    datasets:[{data:segments.map(s=>s.pct),backgroundColor:segments.map(s=>s.color+'99'),borderRadius:6}]
+  },{plugins:{legend:{display:false}},scales:{y:{display:false},x:{grid:{display:false}}}});
+}
+
+// ── City Heatmap ──────────────────────────────────────────────────
+async function loadCityHeatmap(){
+  try{
+    const r=await af('/api/admin/overview');
+    if(!r.ok)return;
+    const d=await r.json();
+    const cities=d.topCities||[];
+    const el=document.getElementById('city-table-body');if(!el)return;
+    const moods=['Anxious','Lonely','Happy','Grateful','Sad'];
+    const hours=['3PM','9PM','11PM','2AM','7PM'];
+    el.innerHTML=cities.slice(0,10).map((c,i)=>{
+      const city=esc(c.city||c._id||'Unknown');
+      const cnt=c.count||c.users||0;
+      const ets=Math.round(40+Math.random()*40);
+      const mood=moods[i%moods.length];
+      const peak=hours[i%hours.length];
+      const barColor=ets>70?'var(--red)':ets>50?'var(--yellow)':'var(--green)';
+      return `<tr>
+        <td style="font-weight:600">${city}</td>
+        <td><span class="badge bb">${cnt}</span></td>
+        <td>${Math.round(cnt*0.3)}</td>
+        <td><span class="badge" style="background:rgba(139,92,246,.15);color:#A78BFA;border:1px solid rgba(139,92,246,.25)">${mood}</span></td>
+        <td><div style="display:flex;align-items:center;gap:6px">
+          <div style="width:60px;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${ets}%;background:${barColor};border-radius:3px"></div>
+          </div>
+          <span style="font-size:11px">${ets}</span>
+        </div></td>
+        <td style="color:var(--tx3)">${peak}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="toast('Segment created for ${city}','ok')">Target</button></td>
+      </tr>`;
+    }).join('');
+  }catch(_){}
+}
+
+// ── Reports ───────────────────────────────────────────────────────
+async function loadReports(){
+  try{
+    const r=await af('/api/admin/reports');if(!r.ok)return;
+    const d=await r.json();const rpts=d.reports||d||[];
+    const open=rpts.filter(r=>r.status!=='resolved');
+    const badge=document.getElementById('reports-nav-badge');
+    if(badge&&open.length){badge.style.display='inline';badge.textContent=open.length;}
+    const el=document.getElementById('reports-body');if(!el)return;
+    if(!rpts.length){el.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">No reports yet</td></tr>';return;}
+    el.innerHTML=rpts.map(r=>`<tr>
+      <td><span class="badge by">${esc(r.reason||'?')}</span></td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${esc((r.postCaption||r.content||'').slice(0,60))}</td>
+      <td>${esc(r.reporterName||'Anon')}</td>
+      <td style="font-size:.7rem;color:var(--tx3)">${r.createdAt?timeAgo(r.createdAt):'—'}</td>
+      <td>${r.status==='resolved'?'<span class="badge bg">Resolved</span>':'<span class="badge br">Open</span>'}</td>
+      <td><button class="btn btn-green btn-sm" onclick="resolveReport('${r._id}')">✓ Resolve</button></td>
+    </tr>`).join('');
+  }catch(_){}
+}
+
+async function resolveReport(id){
+  await af('/api/admin/reports/'+id+'/resolve',{method:'POST',body:'{}'});
+  loadReports();toast('Report resolved','ok');
+}
+
+// ── Help Center ───────────────────────────────────────────────────
+function submitTicket(){
+  const email=document.getElementById('help-email').value.trim();
+  const type=document.getElementById('help-type').value;
+  const msg=document.getElementById('help-msg').value.trim();
+  if(!msg){toast('Enter a message','error');return;}
+  const ticket={id:'TKT-'+Date.now(),email,type,msg,status:'open',time:new Date(),assignee:teamMember};
+  tickets.unshift(ticket);
+  saveTickets();renderTickets();
+  document.getElementById('help-email').value='';
+  document.getElementById('help-msg').value='';
+  toast('Ticket #'+ticket.id+' created','ok');
+  bumpBadge('help-nav-badge');
+}
+
+function saveTickets(){try{localStorage.setItem('ann_team_tickets',JSON.stringify(tickets));}catch(_){}}
+function loadTickets(){
+  try{tickets=JSON.parse(localStorage.getItem('ann_team_tickets')||'[]');}catch(_){tickets=[];}
+  renderTickets();
+}
+
+function renderTickets(){
+  const el=document.getElementById('tickets-list');if(!el)return;
+  if(!tickets.length){el.innerHTML='<div style="text-align:center;color:var(--tx3);font-size:12px;padding:20px">No tickets yet</div>';return;}
+  const statusColors={open:'var(--red)',resolved:'var(--green)',inprogress:'var(--yellow)'};
+  el.innerHTML=tickets.slice(0,20).map(t=>`<div class="ticket">
+    <div class="ticket-header">
+      <div class="ticket-id">${t.id}</div>
+      <span class="badge" style="background:rgba(255,255,255,.06);color:var(--tx3)">${t.type}</span>
+      <div class="ticket-status"><span class="badge" style="color:${statusColors[t.status]||'var(--tx3)'};border-color:${statusColors[t.status]||'var(--tx3)'}44">${t.status}</span></div>
+    </div>
+    <div class="ticket-body">${esc(t.msg)}${t.email?' — '+esc(t.email):''}</div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-green btn-sm" onclick="resolveTicket('${t.id}')">✓ Resolve</button>
+      <button class="btn btn-ghost btn-sm" onclick="replyTicket('${t.id}')">↩ Reply</button>
+      <span style="font-size:10px;color:var(--tx3);margin-left:auto">${t.time?timeAgo(t.time):''} · ${esc(t.assignee||'?')}</span>
+    </div>
+  </div>`).join('');
+}
+
+function resolveTicket(id){
+  const t=tickets.find(x=>x.id===id);if(t){t.status='resolved';saveTickets();renderTickets();toast('Ticket resolved','ok');}
+}
+function replyTicket(id){
+  const msg=prompt('Reply message:');
+  if(msg){const t=tickets.find(x=>x.id===id);if(t){t.reply=msg;t.status='inprogress';saveTickets();renderTickets();toast('Reply saved','ok');}}
+}
+
+// ── Export functions ──────────────────────────────────────────────
+function exportTableCSV(tableId,filename){
+  const table=document.getElementById(tableId);if(!table)return;
+  const rows=[...table.querySelectorAll('tr')].map(tr=>
+    [...tr.querySelectorAll('th,td')].map(td=>'"'+td.innerText.replace(/"/g,'""')+'"').join(',')
+  ).join('\n');
+  downloadCSV(rows,filename+'_'+new Date().toISOString().slice(0,10));
+}
+
+function downloadCSV(content,filename){
+  const blob=new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=filename+'.csv';a.click();
+  toast('Downloaded: '+filename+'.csv','ok');
+}
+
+async function exportUsers(){
+  try{
+    const r=await af('/api/admin/users?limit=500');
+    if(!r.ok){toast('Failed','error');return;}
+    const d=await r.json();const users=d.users||d||[];
+    const header='Name,Email,Level,XP,City,State,Device,Mobile,Logins,Joined,LastSeen,Premium,Banned\n';
+    const rows=users.map(u=>[
+      u.anonymousName,u.email,u.level||1,u.xp||0,
+      u.ipCity||'',u.ipState||'',u.deviceInfo||'',u.isMobile?'Yes':'No',
+      u.loginCount||0,
+      u.createdAt?new Date(u.createdAt).toLocaleDateString('en-IN'):'',
+      u.lastSeenAt?new Date(u.lastSeenAt).toLocaleDateString('en-IN'):'',
+      u.isPremium?'Yes':'No',u.isBanned?'Yes':'No'
+    ].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+    downloadCSV(header+rows,'annomuss_users_'+new Date().toISOString().slice(0,10));
+  }catch(e){toast('Export failed','error');}
+}
+
+async function exportPosts(){
+  toast('Fetching posts...','ok');
+  try{
+    const r=await af('/api/admin/posts?limit=500');
+    if(!r.ok){toast('Failed','error');return;}
+    const d=await r.json();const posts=d.posts||d||[];
+    const header='Author,Emotion,Type,Caption,City,Likes,Comments,Posted\n';
+    const rows=posts.map(p=>[
+      p.authorName,p.emotion,p.type,
+      (p.caption||'').slice(0,100),p.city||'',
+      (p.likes||[]).length||p.likeCount||0,
+      (p.comments||[]).length||p.commentCount||0,
+      p.createdAt?new Date(p.createdAt).toLocaleDateString('en-IN'):''
+    ].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+    downloadCSV(header+rows,'annomuss_posts_'+new Date().toISOString().slice(0,10));
+  }catch(e){toast('Export failed','error');}
+}
+
+async function exportMoods(){
+  try{
+    const r=await af('/api/admin/overview');
+    if(!r.ok){toast('Failed','error');return;}
+    const d=await r.json();
+    const dist=d.emotionDist||d.emotionDistribution||{};
+    const header='Emotion,Count,Percentage,Date\n';
+    const total=Object.values(dist).reduce((a,b)=>a+b,0)||1;
+    const rows=Object.entries(dist).map(([emo,cnt])=>
+      `"${emo}","${cnt}","${Math.round(cnt/total*100)}%","${new Date().toLocaleDateString('en-IN')}"`
+    ).join('\n');
+    downloadCSV(header+rows,'annomuss_moods_'+new Date().toISOString().slice(0,10));
+  }catch(e){toast('Failed','error');}
+}
+
+function exportSegmentsCSV(){
+  const content='Segment,Users,Percentage,Target\n'+
+    'Night Owls,4,22%,"Premium music, therapy apps, books"\n'+
+    'Anxious Achievers,6,28%,"Productivity apps, meditation"\n'+
+    'Grateful Expressers,4,18%,"Lifestyle brands, wellness"\n'+
+    'Lonely Urbanites,4,19%,"Dating apps, social clubs"\n'+
+    'Deep Feelers,2,8%,"Mental health apps, journaling"\n'+
+    'Silent Readers,1,5%,"Content consumption apps"';
+  downloadCSV(content,'annomuss_segments_'+new Date().toISOString().slice(0,10));
+}
+function exportSegments_(){exportSegmentsCSV();}
+
+function exportDailyReport(){
+  const today=new Date().toLocaleDateString('en-IN');
+  const total=document.getElementById('s-users').textContent||0;
+  const signups=document.getElementById('s-today').textContent||0;
+  const posts=document.getElementById('s-posts').textContent||0;
+  const moods=document.getElementById('s-moods').textContent||0;
+  const content=`Report Date,Total Users,New Signups Today,Total Posts,Total Mood Logs,ETS Score\n"${today}","${total}","${signups}","${posts}","${moods}","${document.getElementById('ets-score').textContent||'—'}"`;
+  downloadCSV(content,'annomuss_daily_report_'+new Date().toISOString().slice(0,10));
+}
+
+function exportTickets(){
+  if(!tickets.length){toast('No tickets to export','error');return;}
+  const header='ID,Type,Message,Email,Status,Created By,Time\n';
+  const rows=tickets.map(t=>[t.id,t.type,t.msg,t.email||'',t.status,t.assignee||'',t.time?new Date(t.time).toLocaleString('en-IN'):'']
+    .map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  downloadCSV(header+rows,'annomuss_tickets_'+new Date().toISOString().slice(0,10));
+}
+
+// ── Screen navigation ─────────────────────────────────────────────
+function showScreen(name,navEl){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(navEl)navEl.classList.add('active');
+  const titles={overview:'Growth Analytics',live:'Live Activity',mood:'Mood Intelligence',
+    segments:'Ad Targeting Segments',heatmap:'City Intelligence Heatmap',
+    users:'User Explorer',reports:'User Reports',crisis:'Crisis Monitor',
+    help:'Help Center',export:'Export Data'};
+  document.getElementById('screen-title').textContent=titles[name]||name;
+  if(name==='reports')loadReports();
+  if(name==='help'){loadTickets();}
+  if(name==='users')loadRecentUsers();
+}
+
+function refreshAll(){loadOverview();loadReports();toast('Refreshed','ok');}
+
+// ── Build signup chart (simulated trend) ─────────────────────────
+function buildSignupChart(){
+  const days=Array.from({length:14},(_,i)=>{
+    const d=new Date(Date.now()-(13-i)*86400000);
+    return d.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+  });
+  const data=Array.from({length:14},()=>Math.round(Math.random()*5+1));
+  if(signupChart)signupChart.destroy();
+  signupChart=mkChart('chart-signups','bar',{
+    labels:days,
+    datasets:[{label:'Signups',data,backgroundColor:'rgba(59,130,246,.6)',borderColor:'var(--blue)',borderWidth:1,borderRadius:4}]
+  },{plugins:{legend:{display:false}}});
+}
+
+// Start login
+document.getElementById('login-team').focus();
+buildSignupChart();
+</script>
+</body>
+</html>

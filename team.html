@@ -151,6 +151,49 @@ tr:last-child td{border:none}
 .seg-count{font-size:20px;font-weight:300;color:var(--blue2)}
 .seg-cta{font-size:9px;color:var(--tx3);margin-top:4px}
 
+/* ── TEAM CHAT ── */
+.chat-container{display:flex;height:calc(100vh - 100px);background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden}
+.chat-sidebar{width:220px;border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
+.chat-sidebar-header{padding:14px 16px;border-bottom:1px solid var(--bd);font-size:13px;font-weight:600;color:var(--tx)}
+.channel-list{flex:1;overflow-y:auto;padding:8px}
+.channel-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;cursor:pointer;font-size:13px;color:var(--tx2);transition:all .15s}
+.channel-item:hover{background:rgba(255,255,255,.05);color:var(--tx)}
+.channel-item.active{background:rgba(59,130,246,.12);color:var(--blue2)}
+.channel-hash{font-size:16px;opacity:.6;width:20px;flex-shrink:0}
+.channel-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:100px}
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chat-header{padding:12px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.chat-channel-name{font-size:14px;font-weight:600;color:var(--tx)}
+.chat-channel-desc{font-size:11px;color:var(--tx3)}
+.online-members{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--tx3)}
+.messages-area{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:2px;scrollbar-width:thin}
+.msg-group{display:flex;gap:10px;margin-bottom:12px;animation:msgSlide .3s ease}
+@keyframes msgSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg-avatar{width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px}
+.msg-content{flex:1;min-width:0}
+.msg-meta{display:flex;align-items:baseline;gap:8px;margin-bottom:3px}
+.msg-sender{font-size:13px;font-weight:600;color:var(--tx)}
+.msg-time{font-size:10px;color:var(--tx3)}
+.msg-text{font-size:13px;color:var(--tx2);line-height:1.55;word-break:break-word}
+.msg-text.mention{color:var(--blue2)}
+.msg-text code{background:rgba(255,255,255,.08);padding:1px 6px;border-radius:5px;font-family:monospace;font-size:12px}
+.msg-ticket-ref{display:inline-flex;align-items:center;gap:5px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--blue2);cursor:pointer;margin-top:4px}
+.msg-reaction{display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:100px;padding:2px 8px;font-size:11px;cursor:pointer;margin-top:4px;transition:all .15s}
+.msg-reaction:hover{background:rgba(255,255,255,.1)}
+.typing-bar{padding:4px 18px;font-size:11px;color:var(--tx3);min-height:20px}
+.chat-input-area{padding:10px 16px 14px;border-top:1px solid var(--bd)}
+.chat-input-box{background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;display:flex;align-items:flex-end;gap:10px}
+.chat-textarea{flex:1;background:transparent;border:none;outline:none;font-size:13px;color:var(--tx);font-family:inherit;resize:none;max-height:120px;line-height:1.5}
+.chat-textarea::placeholder{color:var(--tx3)}
+.chat-send-btn{background:var(--blue);border:none;border-radius:8px;width:34px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0;transition:all .15s}
+.chat-send-btn:hover{background:#2563EB}
+.chat-send-btn:active{transform:scale(.9)}
+.chat-tools{display:flex;gap:6px;margin-bottom:8px}
+.chat-tool{background:none;border:none;font-size:16px;cursor:pointer;opacity:.5;transition:opacity .15s;padding:2px 4px;border-radius:5px}
+.chat-tool:hover{opacity:1;background:rgba(255,255,255,.06)}
+.member-online{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px}
+.member-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.member-name{font-size:12px;color:var(--tx2)}
 /* ── INPUT FIELDS ── */
 .field{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:9px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;font-family:inherit;margin-bottom:8px}
 .field:focus{border-color:rgba(59,130,246,.4)}
@@ -207,6 +250,7 @@ select.field{cursor:pointer}
     <div class="nav-group">Support</div>
     <div class="nav-item" onclick="showScreen('help',this)"><span class="nav-icon">💬</span>Help Center<span class="nav-badge" id="help-nav-badge" style="display:none">0</span></div>
     <div class="nav-item" onclick="showScreen('export',this)"><span class="nav-icon">📥</span>Export Data</div>
+    <div class="nav-item" onclick="showScreen('teamchat',this)"><span class="nav-icon">💬</span>Team Chat<span class="nav-badge" id="chat-nav-badge" style="display:none">0</span></div>
   </div>
   <div class="sidebar-footer">
     <div id="team-member">Not logged in</div>
@@ -489,6 +533,59 @@ select.field{cursor:pointer}
       </div>
     </div>
 
+    <!-- ══ TEAM CHAT ══ -->
+    <div class="screen" id="screen-teamchat">
+      <div class="chat-container">
+        <!-- Channel sidebar -->
+        <div class="chat-sidebar">
+          <div class="chat-sidebar-header">💬 Team Channels</div>
+          <div class="channel-list">
+            <div style="font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);padding:8px 10px 4px">Channels</div>
+            <div class="channel-item active" onclick="switchChannel('general',this)"><span class="channel-hash">#</span>general</div>
+            <div class="channel-item" onclick="switchChannel('tickets',this)"><span class="channel-hash">#</span>tickets<span class="channel-badge" id="ch-badge-tickets" style="display:none">0</span></div>
+            <div class="channel-item" onclick="switchChannel('bugs',this)"><span class="channel-hash">#</span>bugs</div>
+            <div class="channel-item" onclick="switchChannel('features',this)"><span class="channel-hash">#</span>features</div>
+            <div class="channel-item" onclick="switchChannel('crisis',this)"><span class="channel-hash">#</span>crisis-alerts</div>
+            <div style="font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);padding:12px 10px 4px">Online Now</div>
+            <div id="online-members-list"></div>
+          </div>
+        </div>
+        <!-- Chat main -->
+        <div class="chat-main">
+          <div class="chat-header">
+            <div>
+              <div class="chat-channel-name" id="current-channel-name">#general</div>
+              <div class="chat-channel-desc" id="current-channel-desc">General team discussion</div>
+            </div>
+            <div class="online-members">
+              <div class="live-dot"></div>
+              <span id="online-member-count">1</span> online
+            </div>
+          </div>
+          <div class="messages-area" id="messages-area"></div>
+          <div class="typing-bar" id="typing-bar"></div>
+          <div class="chat-input-area">
+            <div class="chat-tools">
+              <button class="chat-tool" onclick="insertEmoji('👍')" title="Thumbs up">👍</button>
+              <button class="chat-tool" onclick="insertEmoji('✅')" title="Done">✅</button>
+              <button class="chat-tool" onclick="insertEmoji('🚨')" title="Alert">🚨</button>
+              <button class="chat-tool" onclick="insertEmoji('💡')" title="Idea">💡</button>
+              <button class="chat-tool" onclick="insertEmoji('🔥')" title="Fire">🔥</button>
+              <button class="chat-tool" onclick="pasteTicketRef()" title="Reference ticket">🎫 Ticket</button>
+              <button class="chat-tool" onclick="clearChatHistory()" title="Clear history" style="margin-left:auto;font-size:12px">🗑</button>
+            </div>
+            <div class="chat-input-box">
+              <textarea class="chat-textarea" id="chat-input" rows="1"
+                placeholder="Message #general..."
+                onkeydown="handleChatKey(event)"
+                oninput="autoResize(this);sendTyping()"></textarea>
+              <button class="chat-send-btn" onclick="sendChatMessage()">↑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ EXPORT ══ -->
     <div class="screen" id="screen-export">
       <div class="seg-grid">
@@ -540,7 +637,7 @@ function doLogin(){
   const name = document.getElementById('login-team').value.trim();
   const pass = document.getElementById('login-pass').value.trim();
   if(!name){ document.getElementById('login-err').textContent='Enter your name'; return; }
-  if(pass !== 'annomuss_team_2002'){
+  if(pass !== 'annomuss_team_2026'){
     document.getElementById('login-err').textContent='Wrong team password';
     return;
   }
@@ -1115,6 +1212,399 @@ function buildSignupChart(){
     datasets:[{label:'Signups',data,backgroundColor:'rgba(59,130,246,.6)',borderColor:'var(--blue)',borderWidth:1,borderRadius:4}]
   },{plugins:{legend:{display:false}}});
 }
+
+// ════════════════════════════════════════════════════════════
+//  TEAM GROUP CHAT
+//  Persistent via localStorage + real-time via Socket.io
+// ════════════════════════════════════════════════════════════
+
+const CHANNELS = {
+  general:  { name: '#general',       desc: 'General team discussion',             icon: '💬' },
+  tickets:  { name: '#tickets',       desc: 'Support ticket discussions',          icon: '🎫' },
+  bugs:     { name: '#bugs',          desc: 'Bug reports and fixes',               icon: '🐛' },
+  features: { name: '#features',      desc: 'Feature ideas and roadmap',           icon: '💡' },
+  crisis:   { name: '#crisis-alerts', desc: 'Crisis posts and urgent matters',     icon: '🚨' },
+};
+
+let currentChannel = 'general';
+let allMessages    = {};   // { channel: [{...}] }
+let typingTimeout  = null;
+let onlineMembers  = [];
+let unreadCounts   = {};
+
+// Member avatars
+const MEMBER_AVATARS = {
+  'Rushikesh':'🦁','Maharushi':'🐯','Admin':'🛡️','Team':'⚡','default':'🎭'
+};
+
+function getMemberAvatar(name){
+  return MEMBER_AVATARS[name] || MEMBER_AVATARS[Object.keys(MEMBER_AVATARS).find(k=>name&&name.includes(k))] || MEMBER_AVATARS.default;
+}
+
+// ── Init chat ──────────────────────────────────────────────
+function initChat(){
+  loadAllMessages();
+  joinOnline();
+  listenChatSocket();
+  renderMessages();
+  updateOnlineList();
+
+  // Broadcast join
+  broadcastMessage('system', currentChannel,
+    getMemberAvatar(teamMember)+' **'+teamMember+'** joined the team dashboard', true);
+}
+
+// ── Persist messages ───────────────────────────────────────
+function loadAllMessages(){
+  try{ allMessages=JSON.parse(localStorage.getItem('ann_team_chat')||'{}'); }
+  catch(_){ allMessages={}; }
+  Object.keys(CHANNELS).forEach(ch=>{ if(!allMessages[ch]) allMessages[ch]=[]; });
+}
+
+function saveMessages(){
+  // Keep last 200 messages per channel
+  Object.keys(allMessages).forEach(ch=>{
+    if(allMessages[ch].length>200) allMessages[ch]=allMessages[ch].slice(-200);
+  });
+  try{ localStorage.setItem('ann_team_chat', JSON.stringify(allMessages)); }catch(_){}
+}
+
+// ── Online members ─────────────────────────────────────────
+function joinOnline(){
+  try{
+    const stored=JSON.parse(localStorage.getItem('ann_team_online')||'[]');
+    if(!stored.find(m=>m.name===teamMember)){
+      stored.push({name:teamMember,avatar:getMemberAvatar(teamMember),joinedAt:Date.now()});
+    }
+    // Remove members offline >30min
+    const active=stored.filter(m=>Date.now()-m.joinedAt<1800000);
+    localStorage.setItem('ann_team_online',JSON.stringify(active));
+    onlineMembers=active;
+  }catch(_){ onlineMembers=[{name:teamMember,avatar:getMemberAvatar(teamMember),joinedAt:Date.now()}]; }
+}
+
+function updateOnlineList(){
+  joinOnline();
+  const el=document.getElementById('online-members-list');
+  if(!el) return;
+  el.innerHTML=onlineMembers.map(m=>`
+    <div class="member-online">
+      <div style="font-size:18px">${m.avatar}</div>
+      <div class="member-name">${esc(m.name)}${m.name===teamMember?' (you)':''}</div>
+      <div class="member-dot" style="margin-left:auto"></div>
+    </div>`).join('');
+  const cnt=document.getElementById('online-member-count');
+  if(cnt) cnt.textContent=onlineMembers.length;
+  setInterval(updateOnlineList, 30000);
+}
+
+// ── Socket chat listeners ──────────────────────────────────
+function listenChatSocket(){
+  if(!socket) return;
+  socket.on('team-message', function(msg){
+    if(msg.sender===teamMember) return; // don't double-render own messages
+    if(!allMessages[msg.channel]) allMessages[msg.channel]=[];
+    allMessages[msg.channel].push(msg);
+    saveMessages();
+    if(msg.channel===currentChannel){
+      appendMessage(msg);
+    } else {
+      // Unread badge
+      unreadCounts[msg.channel]=(unreadCounts[msg.channel]||0)+1;
+      const badge=document.getElementById('ch-badge-'+msg.channel);
+      if(badge){ badge.style.display='inline'; badge.textContent=unreadCounts[msg.channel]; }
+      if(msg.channel==='tickets'){
+        const nb=document.getElementById('chat-nav-badge');
+        if(nb){ nb.style.display='inline'; nb.textContent=(parseInt(nb.textContent)||0)+1; }
+      }
+    }
+    // Trigger typing clear
+    clearTypingIndicator();
+  });
+
+  socket.on('team-typing', function(d){
+    if(d.sender===teamMember||d.channel!==currentChannel) return;
+    const el=document.getElementById('typing-bar');
+    if(el) el.textContent=esc(d.sender)+' is typing...';
+    clearTimeout(window._typingClear);
+    window._typingClear=setTimeout(clearTypingIndicator, 3000);
+  });
+}
+
+function clearTypingIndicator(){
+  const el=document.getElementById('typing-bar');
+  if(el) el.textContent='';
+}
+
+// ── Send message ───────────────────────────────────────────
+function sendChatMessage(){
+  const inp=document.getElementById('chat-input');
+  if(!inp) return;
+  const text=inp.value.trim();
+  if(!text) return;
+  inp.value='';
+  autoResize(inp);
+
+  const msg={
+    id:        'msg-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),
+    channel:   currentChannel,
+    sender:    teamMember,
+    avatar:    getMemberAvatar(teamMember),
+    text:      text,
+    time:      Date.now(),
+    reactions: {},
+  };
+
+  // Save locally
+  if(!allMessages[currentChannel]) allMessages[currentChannel]=[];
+  allMessages[currentChannel].push(msg);
+  saveMessages();
+  appendMessage(msg);
+  scrollToBottom();
+
+  // Broadcast via Socket.io admin room if available
+  if(socket && socket.connected){
+    socket.emit('team-message', msg);
+  }
+}
+
+function broadcastMessage(type, channel, text, system=false){
+  if(!system) return;
+  const msg={
+    id:      'sys-'+Date.now(),
+    channel,
+    sender:  'System',
+    avatar:  '🔔',
+    text,
+    time:    Date.now(),
+    system:  true,
+    reactions:{},
+  };
+  if(!allMessages[channel]) allMessages[channel]=[];
+  // Only add if not duplicate
+  const last=allMessages[channel][allMessages[channel].length-1];
+  if(last&&last.text===text) return;
+  allMessages[channel].push(msg);
+  saveMessages();
+  if(channel===currentChannel) appendMessage(msg);
+}
+
+// ── Render messages ────────────────────────────────────────
+function renderMessages(){
+  const el=document.getElementById('messages-area');
+  if(!el) return;
+  el.innerHTML='';
+  const msgs=allMessages[currentChannel]||[];
+  if(!msgs.length){
+    el.innerHTML='<div style="text-align:center;color:var(--tx3);padding:40px;font-size:13px">'+
+      '<div style="font-size:32px;margin-bottom:10px">'+CHANNELS[currentChannel]?.icon+'</div>'+
+      'No messages yet. Start the conversation!</div>';
+    return;
+  }
+  msgs.slice(-80).forEach(m=>appendMessage(m, false));
+  scrollToBottom();
+}
+
+function appendMessage(msg, scroll=true){
+  const el=document.getElementById('messages-area');
+  if(!el) return;
+  if(document.getElementById(msg.id)) return; // deduplicate
+
+  const isSystem = msg.system;
+  const timeStr  = new Date(msg.time).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const text     = formatMessageText(msg.text);
+
+  if(isSystem){
+    const div=document.createElement('div');
+    div.id=msg.id;
+    div.style.cssText='text-align:center;padding:4px 0;font-size:11px;color:var(--tx3)';
+    div.innerHTML=text;
+    el.appendChild(div);
+  } else {
+    // Check if same sender as previous message (within 5 min)
+    const prev=el.lastElementChild;
+    const sameSender=prev&&prev.dataset.sender===msg.sender&&
+      (msg.time - (parseInt(prev.dataset.time)||0)) < 300000;
+
+    const div=document.createElement('div');
+    div.id=msg.id;
+    div.className='msg-group';
+    div.dataset.sender=msg.sender;
+    div.dataset.time=msg.time;
+    div.dataset.msgId=msg.id;
+
+    if(sameSender){
+      div.style.cssText='display:flex;gap:10px;margin-bottom:2px;padding-left:42px';
+      div.innerHTML='<div class="msg-text">'+text+'</div>';
+    } else {
+      const isMe=msg.sender===teamMember;
+      div.innerHTML=`
+        <div class="msg-avatar">${msg.avatar||'🎭'}</div>
+        <div class="msg-content">
+          <div class="msg-meta">
+            <span class="msg-sender" style="${isMe?'color:var(--blue2)':''}">${esc(msg.sender)}</span>
+            <span class="msg-time">${timeStr}</span>
+          </div>
+          <div class="msg-text">${text}</div>
+          <div class="msg-reactions" id="reactions-${msg.id}" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px"></div>
+        </div>`;
+    }
+
+    // Right-click context menu
+    div.oncontextmenu=function(e){
+      e.preventDefault();
+      showMsgMenu(e, msg);
+    };
+
+    el.appendChild(div);
+    renderReactions(msg);
+  }
+
+  if(scroll) scrollToBottom();
+}
+
+function formatMessageText(text){
+  var s = esc(text)
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/@(\w+)/g,'<span class="msg-text mention">@$1</span>')
+    .replace(/#TKT-(\d+)/g, function(m,id){ return '<span class="msg-ticket-ref">\uD83C\uDF9F TKT-'+id+'</span>'; })
+    .replace(/\n/g,'<br>');
+  return s;
+}
+
+// ── Reactions ──────────────────────────────────────────────
+function renderReactions(msg){
+  const el=document.getElementById('reactions-'+msg.id);
+  if(!el||!msg.reactions) return;
+  el.innerHTML=Object.entries(msg.reactions).map(([emoji,users])=>
+    users.length?`<div class="msg-reaction" onclick="addReaction('${msg.id}','${emoji}')">
+      ${emoji} <span style="font-size:10px">${users.length}</span>
+    </div>`:''
+  ).join('');
+}
+
+function addReaction(msgId, emoji){
+  const msgs=allMessages[currentChannel]||[];
+  const msg=msgs.find(m=>m.id===msgId);
+  if(!msg) return;
+  if(!msg.reactions) msg.reactions={};
+  if(!msg.reactions[emoji]) msg.reactions[emoji]=[];
+  const idx=msg.reactions[emoji].indexOf(teamMember);
+  if(idx>-1) msg.reactions[emoji].splice(idx,1);
+  else msg.reactions[emoji].push(teamMember);
+  saveMessages();
+  renderReactions(msg);
+}
+
+function showMsgMenu(e, msg){
+  document.querySelectorAll('.ctx-menu').forEach(m=>m.remove());
+  const menu=document.createElement('div');
+  menu.className='ctx-menu';
+  menu.style.cssText=`position:fixed;left:${e.clientX}px;top:${e.clientY}px;z-index:9999;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:6px;min-width:160px`;
+  menu.innerHTML=[
+    ['👍 React: 👍', ()=>addReaction(msg.id,'👍')],
+    ['❤️ React: ❤️', ()=>addReaction(msg.id,'❤️')],
+    ['✅ React: ✅', ()=>addReaction(msg.id,'✅')],
+    ['🚨 React: 🚨', ()=>addReaction(msg.id,'🚨')],
+    msg.sender===teamMember?['🗑️ Delete',()=>deleteMessage(msg.id)]:null,
+  ].filter(Boolean).map(([label,fn])=>`<div style="padding:7px 10px;border-radius:7px;cursor:pointer;font-size:12px;color:var(--tx2)" onmouseenter="this.style.background='rgba(255,255,255,.06)'" onmouseleave="this.style.background=''" onclick="(${fn.toString()})();this.parentElement.remove()">${label}</div>`).join('');
+  document.body.appendChild(menu);
+  setTimeout(()=>document.addEventListener('click',function h(){menu.remove();document.removeEventListener('click',h);}),100);
+}
+
+function deleteMessage(msgId){
+  const msgs=allMessages[currentChannel]||[];
+  const idx=msgs.findIndex(m=>m.id===msgId);
+  if(idx>-1&&msgs[idx].sender===teamMember){
+    msgs[idx].text='*This message was deleted*';
+    msgs[idx].deleted=true;
+    saveMessages();
+    renderMessages();
+  }
+}
+
+// ── Typing indicator ───────────────────────────────────────
+function sendTyping(){
+  if(!socket||!socket.connected) return;
+  clearTimeout(typingTimeout);
+  socket.emit('team-typing',{sender:teamMember,channel:currentChannel});
+  typingTimeout=setTimeout(()=>{},2000);
+}
+
+// ── Channel switch ─────────────────────────────────────────
+function switchChannel(ch, navEl){
+  currentChannel=ch;
+  // Update active state
+  document.querySelectorAll('.channel-item').forEach(el=>el.classList.remove('active'));
+  if(navEl) navEl.classList.add('active');
+  // Update header
+  const info=CHANNELS[ch]||{name:'#'+ch,desc:''};
+  const nm=document.getElementById('current-channel-name');
+  const desc=document.getElementById('current-channel-desc');
+  const inp=document.getElementById('chat-input');
+  if(nm) nm.textContent=info.name;
+  if(desc) desc.textContent=info.desc;
+  if(inp) inp.placeholder='Message '+info.name+'...';
+  // Clear unread
+  unreadCounts[ch]=0;
+  const badge=document.getElementById('ch-badge-'+ch);
+  if(badge) badge.style.display='none';
+  renderMessages();
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────────
+function handleChatKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    sendChatMessage();
+  }
+}
+
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
+}
+
+function scrollToBottom(){
+  const el=document.getElementById('messages-area');
+  if(el) setTimeout(()=>el.scrollTop=el.scrollHeight, 50);
+}
+
+function insertEmoji(emoji){
+  const inp=document.getElementById('chat-input');
+  if(!inp) return;
+  const pos=inp.selectionStart;
+  inp.value=inp.value.slice(0,pos)+emoji+inp.value.slice(pos);
+  inp.selectionStart=inp.selectionEnd=pos+emoji.length;
+  inp.focus();
+}
+
+function pasteTicketRef(){
+  const id=prompt('Enter ticket ID (e.g. TKT-1748123456789):');
+  if(id){insertEmoji(' #'+id+' ');}
+}
+
+function clearChatHistory(){
+  if(!confirm('Clear all messages in '+currentChannel+'? This cannot be undone.')) return;
+  allMessages[currentChannel]=[];
+  saveMessages();
+  renderMessages();
+  toast('Chat cleared','ok');
+}
+
+// ── Wire chat to showScreen ────────────────────────────────
+const _origShowScreen=showScreen;
+showScreen=function(name,navEl){
+  _origShowScreen(name,navEl);
+  if(name==='teamchat'&&teamMember){
+    if(!allMessages||Object.keys(allMessages).length===0) initChat();
+    else renderMessages();
+  }
+};
+
+// Expose initChat to be called after login
+window._initChat=initChat;
 
 // Start login
 document.getElementById('login-team').focus();

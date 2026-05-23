@@ -1997,12 +1997,16 @@ function applyUser(){
 
 /* nav */
 function goPage(n){
-  // Tap feed while on feed = full refresh (stories + posts)
+  // Tap feed icon while already on feed = full refresh (stories + posts)
+  if(currentPage===n && n==='feed'){
     const pg2=q('pg-feed');if(pg2)pg2.scrollTop=0;
     window.scrollTo({top:0,behavior:'smooth'});
+    toast('🔄 Refreshing feed...');
     loadStories();
     setTimeout(()=>loadFeed(true),200);
     return;
+  }
+  if(currentPage===n)return;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   const pg=q(`pg-${n}`),nb=q(`nb-${n}`);

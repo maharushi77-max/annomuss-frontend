@@ -1105,11 +1105,17 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 <div id="search-overlay">
   <div class="so-header">
     <button class="ico-btn" onclick="closeSearch()">←</button>
-    <input class="so-inp" id="so-inp" placeholder="Search posts, #hashtags..." oninput="doPostSearch(this.value)" autocomplete="off"/>
+    <input class="so-inp" id="so-inp" placeholder="Search users, posts, #hashtags, moods..." oninput="doGlobalSearch(this.value)" autocomplete="off"/>
     <button style="font-size:.8rem;color:var(--tx3);padding:6px;cursor:pointer;font-family:var(--fB)" onclick="closeSearch()">Cancel</button>
   </div>
+  <div style="display:flex;gap:0;border-bottom:1px solid var(--bd);overflow:hidden">
+    <button class="so-tab on" id="so-tab-all"    onclick="setSearchTab('all')"   style="flex:1;padding:10px 0;font-size:.78rem;font-weight:600;border:none;background:none;color:var(--v3);border-bottom:2px solid var(--v);cursor:pointer">All</button>
+    <button class="so-tab"    id="so-tab-posts"  onclick="setSearchTab('posts')" style="flex:1;padding:10px 0;font-size:.78rem;font-weight:600;border:none;background:none;color:var(--tx3);cursor:pointer">Posts</button>
+    <button class="so-tab"    id="so-tab-users"  onclick="setSearchTab('users')" style="flex:1;padding:10px 0;font-size:.78rem;font-weight:600;border:none;background:none;color:var(--tx3);cursor:pointer">Users</button>
+    <button class="so-tab"    id="so-tab-moods"  onclick="setSearchTab('moods')" style="flex:1;padding:10px 0;font-size:.78rem;font-weight:600;border:none;background:none;color:var(--tx3);cursor:pointer">By Mood</button>
+  </div>
   <div id="so-results">
-    <div style="padding:40px 24px;text-align:center;color:var(--tx3);font-size:.88rem">Search for posts, confessions, or #hashtags</div>
+    <div style="padding:40px 24px;text-align:center;color:var(--tx3);font-size:.88rem">🔍 Search anything — posts, users, #hashtags or feelings</div>
   </div>
 </div>
 
@@ -1991,20 +1997,12 @@ function applyUser(){
 
 /* nav */
 function goPage(n){
-  // Tap feed while on feed = scroll to top + refresh
-  if(currentPage===n&&n==='feed'){
-    // Scroll both the page wrapper and inner list to top
-    const pg=q('pg-feed');if(pg)pg.scrollTop=0;
-    const fl=q('feed-list');
-    if(fl){
-      fl.scrollTo({top:0,behavior:'smooth'});
-      // Also scroll the window in case page uses body scroll
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
-    setTimeout(()=>loadFeed(true),350);
+  // Tap feed while on feed = full refresh (stories + posts)
+    const pg2=q('pg-feed');if(pg2)pg2.scrollTop=0;
+    window.scrollTo({top:0,behavior:'smooth'});
+    loadStories();
+    setTimeout(()=>loadFeed(true),200);
     return;
-  }
-  if(currentPage===n)return;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   const pg=q(`pg-${n}`),nb=q(`nb-${n}`);
@@ -2022,6 +2020,40 @@ function goPage(n){
 }
 
 /* ═══════════ FEED ═══════════ */
+
+// ── Silent feed refresh — appends new posts at top without scroll disruption ──
+var _lastSeenPostId = null;
+async function silentFeedRefresh(){
+  try{
+    const r=await api('/api/posts?limit=5&page=1');
+    const d=await r.json();
+    const posts=Array.isArray(d)?d:(d.posts||[]);
+    if(!posts.length) return;
+    const newest=posts[0]._id;
+    if(!_lastSeenPostId){ _lastSeenPostId=newest; return; }
+    if(newest===_lastSeenPostId) return;
+    // New posts exist — show banner instead of disrupting scroll
+    const el=q('feed-list');
+    if(!el) return;
+    const banner=document.createElement('div');
+    banner.id='new-posts-banner';
+    banner.style.cssText='position:sticky;top:0;z-index:100;background:var(--v);color:#fff;'+
+      'text-align:center;padding:10px;font-size:.85rem;font-weight:600;cursor:pointer;'+
+      'border-radius:12px;margin:0 0 8px;animation:fadeUp .3s ease';
+    banner.textContent='✨ New posts — tap to see';
+    banner.onclick=function(){
+      _lastSeenPostId=null;
+      loadFeed(true);
+      this.remove();
+    };
+    // Remove old banner if exists
+    const old=document.getElementById('new-posts-banner');
+    if(old) old.remove();
+    el.insertBefore(banner,el.firstChild);
+    _lastSeenPostId=newest;
+  }catch(_){}
+}
+
 async function loadFeed(reset=true){
   if(feedLoading)return;
   if(reset){feedPage=1;feedDone=false;}
@@ -4062,6 +4094,20 @@ function initSocket(){
   socket.emit('register');
   // Join personal user room for private notifications (compliments, DMs)
   if(user&&user._id) socket.emit('join-user-room', user._id);
+
+  // ── Track online users for status indicators ──────────────
+  window._onlineUsers = new Set();
+  socket.on('user-online',  function(uid){ window._onlineUsers.add(uid); updateOnlineUI(uid,'online'); });
+  socket.on('user-offline', function(uid){ window._onlineUsers.delete(uid); updateOnlineUI(uid,'offline'); });
+  socket.on('online-users-list', function(list){
+    window._onlineUsers = new Set(list);
+    // Update all user cards on the page
+    document.querySelectorAll('[data-uid]').forEach(el=>{
+      var uid = el.getAttribute('data-uid');
+      var dot = el.querySelector('.online-status-dot');
+      if(dot) dot.style.background = window._onlineUsers.has(uid)?'var(--tl)':'rgba(255,255,255,.2)';
+    });
+  });
   // If we were in a chat room, rejoin
   if(rcRoom && rcState==='active'){
     socket.emit('rejoin-room',{roomId:rcRoom});
@@ -5325,7 +5371,116 @@ function showSearchSuggestions(){
       '</div>'+
     '</div>';
 }
+// ── GLOBAL SEARCH — searches users AND posts simultaneously ──
+var _searchTab = 'all';
+var _lastGlobalQuery = '';
+
+function setSearchTab(tab){
+  _searchTab = tab;
+  document.querySelectorAll('.so-tab').forEach(t=>{
+    t.style.color='var(--tx3)';
+    t.style.borderBottom='2px solid transparent';
+  });
+  var active = document.getElementById('so-tab-'+tab);
+  if(active){ active.style.color='var(--v3)'; active.style.borderBottom='2px solid var(--v)'; }
+  if(_lastGlobalQuery) doGlobalSearch(_lastGlobalQuery);
+  else showSearchSuggestions();
+}
+
+async function doGlobalSearch(raw){
+  const q2 = raw.trim();
+  _lastGlobalQuery = q2;
+  clearTimeout(window._globalSearchDeb);
+  if(!q2){ showSearchSuggestions(); return; }
+  q('so-results').innerHTML='<div style="padding:24px;text-align:center"><div class="spin"></div></div>';
+
+  window._globalSearchDeb = setTimeout(async()=>{
+    try{
+      const res = q('so-results');
+      if(!res) return;
+      let html = '';
+
+      // ── Search posts (unless users-only tab) ──
+      let postResults = [];
+      if(_searchTab === 'all' || _searchTab === 'posts' || _searchTab === 'moods'){
+        const isTag = q2.startsWith('#');
+        const isMood = ['happy','sad','anxious','grateful','lonely','inspired','angry','numb','excited'].includes(q2.toLowerCase());
+        let param;
+        if(isTag)         param = 'hashtag='+encodeURIComponent(q2.slice(1));
+        else if(isMood)   param = 'emotion='+encodeURIComponent(q2.toLowerCase())+'&limit=15';
+        else              param = 'q='+encodeURIComponent(q2);
+        try{
+          const r = await api('/api/posts/search?'+param+'&limit=15');
+          const d = await r.json();
+          postResults = Array.isArray(d)?d:(d.posts||[]);
+        }catch(_){}
+      }
+
+      // ── Search users (unless posts-only tab) ──
+      let userResults = [];
+      if(_searchTab === 'all' || _searchTab === 'users'){
+        try{
+          const r = await api('/api/users/search?q='+encodeURIComponent(q2)+'&limit=8');
+          const d = await r.json();
+          userResults = Array.isArray(d)?d:(d.users||d.results||[]);
+        }catch(_){}
+      }
+
+      // ── Render results ──
+      if(!postResults.length && !userResults.length){
+        res.innerHTML='<div class="empty"><div style="font-size:2.5rem">🔍</div>'+
+          '<div style="font-family:var(--fD);font-weight:700;font-size:.9rem;margin-top:8px">No results for "'+esc(q2)+'"</div>'+
+          '<div style="font-size:.8rem;color:var(--tx3);margin-top:6px">Try a different word, #hashtag or mood</div></div>';
+        return;
+      }
+
+      // Users section
+      if(userResults.length){
+        html += '<div style="padding:14px 16px 8px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)">👥 Users ('+userResults.length+')</div>';
+        html += '<div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px">';
+        userResults.forEach(function(uu){
+          var uCard=document.createElement('div');
+          uCard.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:12px;border:1px solid var(--bd)';
+          uCard.innerHTML='<div style="font-size:1.3rem;flex-shrink:0">'+esc(uu.avatarEmoji||'🎭')+'</div>'
+            +'<div style="flex:1;min-width:0">'
+              +'<div style="font-weight:700;font-size:.875rem">'+esc(uu.anonymousName||'Anonymous')+'</div>'
+              +'<div style="font-size:.72rem;color:var(--tx3);margin-top:1px">Level '+(Math.floor((uu.xp||0)/100)+1)+(uu.city?' · '+esc(uu.city):'')+(uu.streak?' · 🔥'+uu.streak:'')+'</div>'
+            +'</div>';
+          var frBtn=document.createElement('button');
+          frBtn.style.cssText='background:var(--vg);color:var(--v3);border:1px solid var(--vb);border-radius:9px;padding:5px 12px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit';
+          frBtn.textContent='+ Connect';
+          (function(id,nm){frBtn.onclick=function(){sendFR(id,nm);};})(uu._id,uu.anonymousName||'');
+          uCard.appendChild(frBtn);
+          html += uCard.outerHTML;
+        });
+        html += '</div>';
+      }
+
+      // Posts section
+      if(postResults.length){
+        html += '<div style="padding:14px 16px 8px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)">📝 Posts ('+postResults.length+')</div>';
+        html += '<div style="padding:0 12px 12px">';
+        postResults.forEach(function(p){
+          html += renderPost(p);
+        });
+        html += '</div>';
+      }
+
+      res.innerHTML = html;
+      setTimeout(addComplimentBtns, 100);
+    }catch(e){
+      q('so-results').innerHTML='<div class="empty"><div style="font-size:.85rem;color:var(--tx3)">Search unavailable right now</div></div>';
+    }
+  }, 350);
+}
+
 function doPostSearch(raw){
+  // Legacy — now routes through global search
+  doGlobalSearch(raw);
+}
+
+function doPostSearch_LEGACY(raw){
+
   clearTimeout(searchPostDeb2);
   const q2=raw.trim();
   if(!q2){showSearchSuggestions();return;}

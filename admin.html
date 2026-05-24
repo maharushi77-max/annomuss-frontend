@@ -890,7 +890,7 @@ async function loadPostLocation(){
   if(!postId){el.textContent='Enter a post ID';return;}
   el.innerHTML='<div class="spin"></div>';
   try{
-    const r=await af('/api/admin/posts/'+postId+'/location',{headers:{'x-admin-password':adminPass}});
+    const r=await af('/api/admin/posts/'+postId+'/location');
     const d=await r.json();
     if(!r.ok){el.textContent='Error: '+d.message;return;}
     const loc=d.location||{};
@@ -956,7 +956,7 @@ async function loadUserChats(){
   el.innerHTML='<div class="spin"></div>';
   tEl.innerHTML='';
   try{
-    const r=await af('/api/admin/users/'+userId+'/sessions',{headers:{'x-admin-password':adminPass}});
+    const r=await af('/api/admin/users/'+userId+'/sessions');
     const d=await r.json();
     if(!r.ok){el.textContent='Error: '+d.message;return;}
     const sessions=d.sessions||[];

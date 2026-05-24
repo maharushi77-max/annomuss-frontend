@@ -304,13 +304,17 @@ select.field{cursor:pointer}
           <div class="chart-title">Daily Signups — Last 14 Days
             <span class="chart-sub">User acquisition trend</span>
           </div>
-          <canvas id="chart-signups" height="140"></canvas>
+          <div style="position:relative;height:160px">
+            <canvas id="chart-signups"></canvas>
+          </div>
         </div>
         <div class="chart-card">
           <div class="chart-title">Emotion Distribution Today
             <span class="chart-sub">What users are feeling</span>
           </div>
-          <canvas id="chart-emotions" height="140"></canvas>
+          <div style="position:relative;height:160px">
+            <canvas id="chart-emotions"></canvas>
+          </div>
         </div>
       </div>
 
@@ -324,7 +328,7 @@ select.field{cursor:pointer}
         </div>
         <div class="chart-card">
           <div class="chart-title">Posts by Type</div>
-          <canvas id="chart-types" height="200"></canvas>
+          <div style="position:relative;height:200px"><canvas id="chart-types"></canvas></div>
         </div>
       </div>
 
@@ -360,7 +364,7 @@ select.field{cursor:pointer}
         </div>
         <div class="chart-card">
           <div class="chart-title">Activity — Last 60 Minutes</div>
-          <canvas id="chart-live" height="240"></canvas>
+          <div style="position:relative;height:240px"><canvas id="chart-live"></canvas></div>
         </div>
       </div>
     </div>
@@ -394,7 +398,7 @@ select.field{cursor:pointer}
           <div class="chart-title">Hour-by-Hour Mood Pattern
             <div class="chart-sub">When users are most emotional</div>
           </div>
-          <canvas id="chart-hourly" height="180"></canvas>
+          <div style="position:relative;height:180px"><canvas id="chart-hourly"></canvas></div>
         </div>
         <div class="chart-card" style="display:flex;flex-direction:column">
           <div class="chart-title" style="margin-bottom:12px">Emotion Distribution</div>
@@ -406,7 +410,7 @@ select.field{cursor:pointer}
         <div class="chart-title">7-Day Emotion Trends
           <div class="chart-sub">How the city feels over time</div>
         </div>
-        <canvas id="chart-emotion-trend" height="120"></canvas>
+        <div style="position:relative;height:150px"><canvas id="chart-emotion-trend"></canvas></div>
       </div>
     </div>
 
@@ -422,7 +426,7 @@ select.field{cursor:pointer}
         <div class="chart-title">Segment Distribution
           <button class="btn btn-ghost btn-sm" onclick="exportSegmentsCSV()">⬇ Export Segments</button>
         </div>
-        <canvas id="chart-segments" height="100"></canvas>
+        <div style="position:relative;height:120px"><canvas id="chart-segments"></canvas></div>
       </div>
     </div>
 
@@ -677,7 +681,26 @@ Chart.defaults.font.family='Inter,system-ui,sans-serif';
 function mkChart(id,type,data,opts={}){
   const el=document.getElementById(id);if(!el)return;
   const ctx=el.getContext('2d');
-  return new Chart(ctx,{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94A3B8',font:{size:11}}}},scales:type!=='doughnut'&&type!=='pie'?{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748B',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748B',font:{size:10}}}}:{},animation:{duration:800},...opts}});
+  // Set explicit height to prevent overflow
+  if(el.style.maxHeight){
+    const h=parseInt(el.style.maxHeight)||200;
+    el.parentElement.style.position='relative';
+    el.parentElement.style.height=h+'px';
+  }
+  return new Chart(ctx,{type,data,options:{
+    responsive:true,
+    maintainAspectRatio:false,
+    plugins:{
+      legend:{labels:{color:'#94A3B8',font:{size:11},boxWidth:12}},
+      tooltip:{backgroundColor:'rgba(10,22,40,.95)',titleColor:'#F1F5F9',bodyColor:'#94A3B8',borderColor:'rgba(255,255,255,.1)',borderWidth:1}
+    },
+    scales:type!=='doughnut'&&type!=='pie'?{
+      x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748B',font:{size:10}}},
+      y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748B',font:{size:10}},beginAtZero:true}
+    }:{},
+    animation:{duration:600},
+    ...opts
+  }});
 }
 
 // ── Init ──────────────────────────────────────────────────────────

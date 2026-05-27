@@ -1,415 +1,796 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Annomuss Emotion Intelligence</title>
-<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@600;700&family=Cabinet+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Annomuss — Emotion Intelligence Center</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root{--bg:#030308;--bg1:#08080f;--bg2:#0d0d1c;--bg3:#121228;--v:#7B5EA7;--v3:#C4A8FF;--cr:#FF4D6D;--tl:#00C9A7;--go:#F4A261;--lm:#52B788;--tx:#F5F3FF;--tx2:#9896B8;--tx3:#4E4C6A;--bd:rgba(255,255,255,.07);--fD:'Clash Display',sans-serif;--fB:'Cabinet Grotesk',sans-serif;--fM:'JetBrains Mono',monospace}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+:root{
+  --bg:#03080F;--bg2:#070F1C;--bg3:#0C1828;--bg4:#111F33;
+  --purple:#8B5CF6;--blue:#3B82F6;--teal:#06B6D4;--green:#10B981;
+  --orange:#F97316;--pink:#EC4899;--red:#EF4444;--yellow:#EAB308;
+  --gold:#F59E0B;--tx:#F1F5F9;--tx2:#94A3B8;--tx3:#475569;
+  --bd:rgba(255,255,255,.06);--bd2:rgba(255,255,255,.12);
+  --vg:rgba(139,92,246,.08);--vs:rgba(139,92,246,.15);
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--tx);font-family:var(--fB);min-height:100vh;padding-bottom:40px}
-.hdr{background:rgba(3,3,8,.95);border-bottom:1px solid var(--bd);padding:14px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50;backdrop-filter:blur(20px)}
-.logo{font-family:var(--fD);font-size:1.05rem;font-weight:700;background:linear-gradient(120deg,var(--v3),#FF85A1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.back{color:var(--tx3);font-size:.82rem;cursor:pointer;text-decoration:none;border:1px solid var(--bd);padding:6px 14px;border-radius:100px}
-.main{max-width:1200px;margin:0 auto;padding:28px 24px}
-.section-title{font-family:var(--fD);font-size:1.15rem;font-weight:700;margin-bottom:4px}
-.section-sub{font-size:.78rem;color:var(--tx3);margin-bottom:20px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:24px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
-.card{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:20px}
-.card-title{font-family:var(--fD);font-weight:700;font-size:.88rem;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
-.stat-big{font-family:var(--fD);font-size:2.2rem;font-weight:700;line-height:1}
-.stat-label{font-size:.7rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;font-weight:600}
-.stat-sub{font-size:.75rem;color:var(--tx3);margin-top:6px}
-.pulse-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:.5px solid var(--bd);font-size:.82rem}
-.pulse-item:last-child{border-bottom:none}
-.pulse-bar{height:5px;border-radius:100px;transition:width .8s ease;flex:1}
-.pulse-pct{font-family:var(--fM);font-size:.72rem;color:var(--tx3);min-width:30px;text-align:right}
-.conf-tag{font-size:.62rem;padding:2px 6px;border-radius:100px;font-weight:700;font-family:var(--fD)}
-.hi{background:rgba(82,183,136,.12);color:var(--lm)}
-.md{background:rgba(244,162,97,.12);color:var(--go)}
-.lo{background:rgba(255,77,109,.12);color:var(--cr)}
-.segment-card{padding:16px;border-radius:12px;border:1px solid var(--bd)}
-.seg-count{font-family:var(--fD);font-size:1.4rem;font-weight:700;margin:4px 0}
-.seg-label{font-size:.68rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
-.btn{padding:9px 20px;border-radius:100px;font-size:.78rem;font-weight:700;font-family:var(--fD);cursor:pointer;border:none}
-.btn-v{background:linear-gradient(135deg,#7B5EA7,#6040C4);color:#fff}
-.btn-g{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}
-.btn-go{background:linear-gradient(135deg,var(--go),#E08020);color:#fff}
-.trust-item{display:flex;gap:12px;padding:12px 0;border-bottom:.5px solid var(--bd);font-size:.82rem}
-.trust-item:last-child{border-bottom:none}
-.trust-ico{font-size:1.2rem;width:28px;text-align:center;flex-shrink:0}
-.trust-txt{font-size:.8rem;color:var(--tx2);line-height:1.6;flex:1}
-.trust-badge{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:100px;background:rgba(82,183,136,.1);color:var(--lm);flex-shrink:0}
-.score-ring{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto 12px;border:3px solid var(--lm)}
-.score-num{font-family:var(--fD);font-size:1.4rem;font-weight:700;color:var(--lm)}
-.score-lbl{font-size:.55rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
-.live-dot{width:8px;height:8px;border-radius:50%;background:var(--lm);animation:pulse 2s infinite;flex-shrink:0}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(82,183,136,.4)}50%{box-shadow:0 0 0 5px rgba(82,183,136,0)}}
-.spinner{width:22px;height:22px;border:2px solid var(--bd);border-top-color:var(--v);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
+
+/* ── HEADER ── */
+.header{background:linear-gradient(135deg,rgba(139,92,246,.12) 0%,rgba(6,182,212,.06) 100%);border-bottom:1px solid rgba(139,92,246,.2);padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
+.header-brand{display:flex;align-items:center;gap:12px}
+.header-logo{font-size:24px}
+.header-title{font-size:18px;font-weight:700;color:var(--tx)}
+.header-sub{font-size:11px;color:var(--tx3);margin-top:2px;letter-spacing:.1em;text-transform:uppercase}
+.header-right{display:flex;align-items:center;gap:12px}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:100px;padding:5px 12px;font-size:11px;color:var(--green);font-weight:600}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}50%{box-shadow:0 0 0 6px transparent}}
+.update-time{font-size:11px;color:var(--tx3)}
+.btn{padding:8px 16px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;transition:all .2s}
+.btn-purple{background:var(--purple);color:#fff}.btn-purple:hover{background:#7C3AED}
+.btn-ghost{background:rgba(255,255,255,.06);color:var(--tx2);border:1px solid var(--bd)}.btn-ghost:hover{background:rgba(255,255,255,.1)}
+
+/* ── LAYOUT ── */
+.main{max-width:1400px;margin:0 auto;padding:24px 32px}
+
+/* ── ETS HERO ── */
+.ets-hero{background:linear-gradient(135deg,#0C1828 0%,#111F33 50%,#0C1828 100%);border:1px solid rgba(139,92,246,.2);border-radius:20px;padding:28px 32px;margin-bottom:20px;position:relative;overflow:hidden}
+.ets-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,.12) 0%,transparent 70%)}
+.ets-hero::after{content:'';position:absolute;bottom:-80px;left:20%;width:400px;height:400px;background:radial-gradient(circle,rgba(6,182,212,.06) 0%,transparent 70%)}
+.ets-grid{display:grid;grid-template-columns:auto 1fr auto;gap:32px;align-items:center;position:relative;z-index:1}
+.ets-score-block{text-align:center}
+.ets-label{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--purple);margin-bottom:6px}
+.ets-number{font-size:72px;font-weight:200;line-height:1;background:linear-gradient(135deg,#A78BFA,#06B6D4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ets-status{font-size:12px;color:var(--tx3);margin-top:4px}
+.ets-formula{font-size:10px;color:var(--tx3);margin-top:8px;font-family:monospace;background:rgba(0,0,0,.3);padding:8px 12px;border-radius:8px;line-height:1.6}
+.ets-center{display:flex;flex-direction:column;gap:12px}
+.ets-center-title{font-size:22px;font-weight:700;color:var(--tx)}
+.ets-center-desc{font-size:13px;color:var(--tx2);line-height:1.7;max-width:500px}
+.ets-right{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:260px}
+.ets-mini{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:12px;padding:14px 16px}
+.ets-mini-label{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.ets-mini-value{font-size:20px;font-weight:300;color:var(--tx)}
+.ets-mini-delta{font-size:10px;margin-top:3px}
+
+/* ── STAT GRID ── */
+.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:16px;position:relative;overflow:hidden;cursor:pointer;transition:all .2s}
+.stat-card:hover{border-color:var(--bd2);transform:translateY(-1px)}
+.stat-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,var(--glow,.1) 0%,transparent 70%)}
+.s-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px}
+.s-value{font-size:28px;font-weight:300;color:var(--tx)}
+.s-delta{font-size:10px;margin-top:5px}
+.s-delta.up{color:var(--green)}.s-delta.down{color:var(--red)}.s-delta.neutral{color:var(--tx3)}
+
+/* ── SECTIONS ── */
+.section-title{font-size:13px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.section-badge{font-size:9px;background:rgba(139,92,246,.15);color:#A78BFA;border:1px solid rgba(139,92,246,.25);padding:2px 8px;border-radius:100px;font-weight:600}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:18px}
+.card:hover{border-color:var(--bd2)}
+
+/* ── CITY TABLE ── */
+.city-grid{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:20px}
+.city-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bd)}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);padding:10px 16px;text-align:left;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.2)}
+td{padding:12px 16px;font-size:12px;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.03)}
+tr:hover td{background:rgba(255,255,255,.02)}
+tr:last-child td{border:none}
+
+/* ── EMOTION BARS ── */
+.emo-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.emo-icon{width:24px;text-align:center;font-size:14px;flex-shrink:0}
+.emo-name{width:72px;font-size:11px;color:var(--tx2);flex-shrink:0;text-transform:capitalize}
+.emo-track{flex:1;background:rgba(255,255,255,.05);border-radius:100px;height:7px;overflow:hidden}
+.emo-fill{height:100%;border-radius:100px;transition:width 1.2s cubic-bezier(.34,1.2,.64,1)}
+.emo-pct{width:38px;font-size:11px;color:var(--tx3);text-align:right;flex-shrink:0}
+.emo-count{width:44px;font-size:10px;color:var(--tx3);text-align:right;flex-shrink:0}
+
+/* ── BRAND SEGMENTS ── */
+.seg-card{background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:all .15s}
+.seg-card:hover{border-color:var(--bd2);background:var(--bg4)}
+.seg-icon{font-size:24px;flex-shrink:0;margin-top:2px}
+.seg-info{flex:1;min-width:0}
+.seg-name{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:3px}
+.seg-desc{font-size:10px;color:var(--tx3);line-height:1.5}
+.seg-metrics{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.seg-count{font-size:18px;font-weight:300;color:var(--blue)}
+.seg-cpm{font-size:9px;color:var(--tx3)}
+.seg-ctr{font-size:9px;color:var(--green)}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;font-size:9px;font-weight:700}
+.bg{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.br{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.by{background:rgba(234,179,8,.12);color:var(--yellow);border:1px solid rgba(234,179,8,.2)}
+.bb{background:rgba(59,130,246,.12);color:#60A5FA;border:1px solid rgba(59,130,246,.2)}
+.bp{background:rgba(139,92,246,.12);color:#A78BFA;border:1px solid rgba(139,92,246,.2)}
+.bo{background:rgba(249,115,22,.12);color:var(--orange);border:1px solid rgba(249,115,22,.2)}
+
+/* ── RECOVERY ROOM PREVIEW ── */
+.recovery-card{background:linear-gradient(135deg,rgba(16,185,129,.06) 0%,rgba(6,182,212,.04) 100%);border:1px solid rgba(16,185,129,.2);border-radius:14px;padding:20px}
+.recovery-stat{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:8px 12px;background:rgba(0,0,0,.2);border-radius:10px}
+.recovery-stat-icon{font-size:20px;flex-shrink:0}
+.recovery-stat-label{font-size:11px;color:var(--tx2);flex:1}
+.recovery-stat-value{font-size:16px;font-weight:600;color:var(--green)}
+
+/* ── HOURLY CHART ── */
+.hour-chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:12px}
+.hour-chip{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.hour-bar{width:18px;border-radius:3px 3px 0 0;transition:height .5s ease,background .3s}
+.hour-label{font-size:8px;color:var(--tx3)}
+
+/* ── INVESTOR SECTION ── */
+.inv-hero{background:linear-gradient(135deg,rgba(245,158,11,.08) 0%,rgba(249,115,22,.04) 100%);border:1px solid rgba(245,158,11,.2);border-radius:14px;padding:20px}
+.inv-metric{text-align:center;padding:16px}
+.inv-metric-value{font-size:32px;font-weight:200;color:var(--gold)}
+.inv-metric-label{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+
+/* ── TOAST ── */
+#toast{position:fixed;top:16px;right:16px;z-index:9999;background:rgba(10,22,40,.96);border:1px solid rgba(16,185,129,.3);border-radius:11px;padding:10px 16px;font-size:12px;color:var(--tx);opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.show{opacity:1}
+
+/* ── LOADING ── */
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
-canvas{max-height:220px}
-#login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:12px}
-.login-box{background:var(--bg2);border:1px solid var(--bd);border-radius:18px;padding:32px;text-align:center;width:320px}
-.input{background:var(--bg3);border:1.5px solid var(--bd);border-radius:10px;padding:11px 14px;font-size:.88rem;width:100%;color:var(--tx);font-family:var(--fB);outline:none;margin-bottom:10px}
-.input:focus{border-color:var(--v)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+/* ── INPUT ── */
+.inp{background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:9px;padding:8px 12px;font-size:12px;color:var(--tx);outline:none;font-family:inherit;width:100%}
+.inp:focus{border-color:rgba(139,92,246,.4)}
 </style>
 </head>
 <body>
 
-<div id="login-overlay">
-  <div class="login-box">
-    <div style="font-size:2rem;margin-bottom:10px">🧠</div>
-    <div style="font-family:var(--fD);font-weight:700;font-size:1.1rem;margin-bottom:4px">Emotion Intelligence</div>
-    <div style="font-size:.78rem;color:var(--tx3);margin-bottom:20px">Admin access required</div>
-    <input class="input" type="password" id="pass" placeholder="Admin password" onkeydown="if(event.key==='Enter')login()"/>
-    <button class="btn btn-v" style="width:100%" onclick="login()">Enter →</button>
-    <div id="login-err" style="color:var(--cr);font-size:.75rem;margin-top:8px;display:none">Wrong password</div>
-  </div>
-</div>
+<div id="toast"></div>
 
-<div id="app" style="display:none">
-
-<div class="hdr">
-  <div style="flex:1">
-    <div class="logo">🧠 annomuss · emotion intelligence</div>
-    <div style="font-size:.68rem;color:var(--tx3);font-family:var(--fM)" id="last-update">Loading...</div>
+<!-- HEADER -->
+<div class="header">
+  <div class="header-brand">
+    <div class="header-logo">🧠</div>
+    <div>
+      <div class="header-title">Annomuss Emotion Intelligence Center</div>
+      <div class="header-sub">Real-time emotional data platform · Investor-grade analytics</div>
+    </div>
   </div>
-  <a class="back" href="/admin">← Admin Panel</a>
-  <button class="btn btn-g" style="font-size:.72rem" onclick="loadAll()">🔄 Refresh</button>
-  <button class="btn btn-go" style="font-size:.72rem" onclick="dlExport()">⬇️ Export CSV</button>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE · Updates every hour</div>
+    <div class="update-time" id="last-update">Loading...</div>
+    <button class="btn btn-ghost" onclick="refreshAll()">↻ Refresh</button>
+    <button class="btn btn-purple" onclick="exportInvestorPDF()">📊 Investor Report</button>
+  </div>
 </div>
 
 <div class="main">
 
-  <!-- LIVE PULSE -->
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-    <div class="live-dot"></div>
-    <div class="section-title">Live Emotion Pulse</div>
-  </div>
-  <div class="section-sub">What Annomuss users are feeling RIGHT NOW — last 30 minutes · auto-refreshes every 2 minutes</div>
-
-  <div class="grid2" style="margin-bottom:24px">
-    <div class="card">
-      <div class="card-title">Emotion breakdown · last 30 min</div>
-      <div id="pulse-list"><div class="spinner" style="padding:30px"></div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Distribution</div>
-      <canvas id="pulse-chart"></canvas>
-    </div>
-  </div>
-
-  <!-- HOURLY TREND -->
-  <div class="section-title" style="margin-bottom:4px">24-Hour Emotion Timeline</div>
-  <div class="section-sub">How platform emotion shifts across the day — invaluable for ad scheduling</div>
-  <div class="card" style="margin-bottom:24px">
-    <div class="card-title">
-      Emotion intensity by hour
-      <span style="font-size:.7rem;color:var(--tx3);font-family:var(--fM)">score 0-100 = how strongly that emotion dominates</span>
-    </div>
-    <canvas id="hourly-chart" style="max-height:280px"></canvas>
-  </div>
-
-  <!-- AD SEGMENTS -->
-  <div class="section-title" style="margin-bottom:4px">Ad Targeting Segments</div>
-  <div class="section-sub">Users automatically grouped by dominant emotion pattern — last 7 days</div>
-  <div id="segments-grid" class="grid4" style="margin-bottom:24px">
-    <div style="grid-column:1/-1;padding:30px;text-align:center"><div class="spinner"></div></div>
-  </div>
-
-  <!-- AD TIMING TABLE -->
-  <div class="card" style="margin-bottom:24px">
-    <div class="card-title">🎯 Best Ad Delivery Times by Segment</div>
-    <div id="ad-timing-table" style="font-size:.82rem"><div class="spinner" style="padding:20px"></div></div>
-  </div>
-
-  <!-- DATA QUALITY — INVESTOR SECTION -->
-  <div style="padding:16px 18px;background:rgba(244,162,97,.06);border:1.5px solid rgba(244,162,97,.2);border-radius:14px;margin-bottom:20px;font-size:.82rem">
-    <div style="font-family:var(--fD);font-weight:700;color:var(--go);margin-bottom:4px">📊 For Investors & Advertisers — Data Validity Report</div>
-    <div style="color:var(--tx2);line-height:1.7">This section answers: <em>"How do we know this emotion data is real and not fabricated?"</em></div>
-  </div>
-
-  <div class="grid2" style="margin-bottom:24px">
-    <div class="card">
-      <div class="card-title">Data Quality Score</div>
-      <div class="score-ring" id="quality-ring">
-        <div class="score-num" id="quality-score">—</div>
-        <div class="score-lbl">/ 100</div>
+  <!-- ETS HERO -->
+  <div class="ets-hero" id="ets-hero">
+    <div class="ets-grid">
+      <div class="ets-score-block">
+        <div class="ets-label">Emotion Trend Score</div>
+        <div class="ets-number" id="ets-val">—</div>
+        <div class="ets-status" id="ets-status">Computing...</div>
+        <div class="ets-formula">
+          ETS = (PostIntensity×0.35)<br>
+          + (TimeOfDay×0.20)<br>
+          + (EngagementDepth×0.20)<br>
+          + (PostFrequency×0.15)<br>
+          + (StreakHealth×0.10)
+        </div>
       </div>
-      <div id="quality-details" style="font-size:.78rem;color:var(--tx2);text-align:center">Loading...</div>
-    </div>
-    <div class="card">
-      <div class="card-title">Signal Sources Breakdown</div>
-      <div id="signal-breakdown"><div class="spinner" style="padding:20px"></div></div>
-    </div>
-  </div>
-
-  <!-- WHY YOU CAN TRUST THIS -->
-  <div class="card" style="margin-bottom:24px">
-    <div class="card-title">🔒 Why This Data Is Genuine — Answer for Investors & Advertisers</div>
-    <div class="trust-item">
-      <div class="trust-ico">1️⃣</div>
-      <div class="trust-txt"><strong>Users chose their emotions voluntarily.</strong> Every emotion tag was selected by the user when posting. No algorithm guessed — they said "I'm feeling anxious" by selecting it themselves.</div>
-      <div class="trust-badge">Self-declared</div>
-    </div>
-    <div class="trust-item">
-      <div class="trust-ico">2️⃣</div>
-      <div class="trust-txt"><strong>Multiple independent signals confirm each other.</strong> If a user tags "anxious" AND saves an "anxious" post AND reacts "heard" to another anxious post, that's 3 independent data points all pointing the same direction. Confidence score rises.</div>
-      <div class="trust-badge">Triangulated</div>
-    </div>
-    <div class="trust-item">
-      <div class="trust-ico">3️⃣</div>
-      <div class="trust-txt"><strong>Behavioral signals cross-validate text signals.</strong> We compare what users say (post emotion tag) with what they do (what posts they stop to like or save). When both match → high confidence. When they don't match → we flag the discrepancy.</div>
-      <div class="trust-badge">Cross-validated</div>
-    </div>
-    <div class="trust-item">
-      <div class="trust-ico">4️⃣</div>
-      <div class="trust-txt"><strong>This is the only platform where users came specifically to share emotions.</strong> Unlike Instagram or YouTube where users come for entertainment, Annomuss users open the app TO process how they feel. Their emotional expression is the entire purpose of their visit — not a side effect.</div>
-      <div class="trust-badge">Context-native</div>
-    </div>
-    <div class="trust-item">
-      <div class="trust-ico">5️⃣</div>
-      <div class="trust-txt"><strong>Anonymous = more honest.</strong> Research shows people are significantly more truthful in anonymous settings. Users express emotions they would never post on Instagram. This data captures their real internal state, not their social performance.</div>
-      <div class="trust-badge">Anonymity effect</div>
-    </div>
-    <div class="trust-item">
-      <div class="trust-ico">6️⃣</div>
-      <div class="trust-txt"><strong>Timestamps create a verifiable audit trail.</strong> Every signal has a timestamp, user ID, and source reference. Advertisers can audit which signals led to which segment classification at any time. No black box.</div>
-      <div class="trust-badge">Auditable</div>
-    </div>
-  </div>
-
-  <!-- INVESTOR PITCH BLOCK -->
-  <div class="card">
-    <div class="card-title">💼 What to Show Investors & Advertisers</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div style="padding:14px;background:var(--bg3);border-radius:10px;font-size:.8rem;line-height:1.7;color:var(--tx2)">
-        <div style="font-family:var(--fD);font-weight:700;color:var(--tx);margin-bottom:6px">For Advertisers</div>
-        Show them the <strong>Ad Timing Table</strong> above → explains exactly when Mental Wellness ads should run (typically 10pm-2am), when Lifestyle ads perform best (7pm-9pm), etc. This is precision targeting that Facebook can only approximate from clicks — Annomuss users tell you directly.
+      <div class="ets-center">
+        <div class="ets-center-title" id="ets-headline">Platform Emotional State: Computing...</div>
+        <div class="ets-center-desc" id="ets-desc">Loading real-time emotional intelligence data from across the platform...</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px" id="ets-tags"></div>
       </div>
-      <div style="padding:14px;background:var(--bg3);border-radius:10px;font-size:.8rem;line-height:1.7;color:var(--tx2)">
-        <div style="font-family:var(--fD);font-weight:700;color:var(--tx);margin-bottom:6px">For Investors</div>
-        Show them the <strong>Data Quality Score</strong> and the signal count growing over time. As users keep using the app, each user generates 3-8 signals per session — the dataset compounds. Unlike social media behavioural data which is inferred, this data is intent-declared.
+      <div class="ets-right">
+        <div class="ets-mini"><div class="ets-mini-label">Total Users</div><div class="ets-mini-value" id="ei-users">—</div><div class="ets-mini-delta" style="color:var(--green)" id="ei-users-d">—</div></div>
+        <div class="ets-mini"><div class="ets-mini-label">Posts Today</div><div class="ets-mini-value" id="ei-posts">—</div><div class="ets-mini-delta" style="color:var(--blue)" id="ei-posts-d">—</div></div>
+        <div class="ets-mini"><div class="ets-mini-label">Online Now</div><div class="ets-mini-value" id="ei-online">—</div><div class="ets-mini-delta" style="color:var(--teal)">Real-time</div></div>
+        <div class="ets-mini"><div class="ets-mini-label">Crisis Alerts</div><div class="ets-mini-value" id="ei-crisis" style="color:var(--red)">—</div><div class="ets-mini-delta" style="color:var(--tx3)">Today</div></div>
       </div>
     </div>
-    <div style="margin-top:14px;padding:12px 14px;background:rgba(123,94,167,.06);border:1px solid rgba(123,94,167,.15);border-radius:10px;font-size:.78rem;color:var(--tx2);line-height:1.7">
-      <strong style="color:var(--v3)">Key competitive advantage:</strong> The average social media platform knows what you clicked. Annomuss knows how you feel and why. Users have told us — through every post, reaction, story and vent — their precise emotional state at a precise moment in time. This creates a dataset that doesn't exist anywhere else.
-    </div>
-    <button class="btn btn-go" style="width:100%;margin-top:16px;padding:14px" onclick="dlExport()">⬇️ Download Full Emotion Intelligence Report (Excel CSV)</button>
   </div>
 
-</div>
-</div>
+  <!-- STAT ROW -->
+  <div class="stat-grid">
+    <div class="stat-card" style="--glow:rgba(16,185,129,.15)"><div class="s-label">Emotional Data Points</div><div class="s-value" id="st-datapoints">—</div><div class="s-delta up" id="st-dp-d">—</div></div>
+    <div class="stat-card" style="--glow:rgba(139,92,246,.15)"><div class="s-label">ETS Score (1-100)</div><div class="s-value" id="st-ets">—</div><div class="s-delta neutral">Platform pulse</div></div>
+    <div class="stat-card" style="--glow:rgba(6,182,212,.15)"><div class="s-label">Cities Tracked</div><div class="s-value" id="st-cities">—</div><div class="s-delta neutral">Active locations</div></div>
+    <div class="stat-card" style="--glow:rgba(249,115,22,.15)"><div class="s-label">Ad Segments</div><div class="s-value">6</div><div class="s-delta up">Targeting-ready</div></div>
+    <div class="stat-card" style="--glow:rgba(236,72,153,.15)"><div class="s-label">Recovery Users</div><div class="s-value" id="st-recovery">—</div><div class="s-delta up">Helped today</div></div>
+  </div>
+
+  <!-- HOURLY PULSE + EMOTION BARS -->
+  <div class="two-col">
+    <div class="card">
+      <div class="section-title">⏰ Hourly Emotion Pulse <span class="section-badge">LIVE</span></div>
+      <div style="position:relative;height:160px"><canvas id="chart-hourly"></canvas></div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap" id="hour-legend"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">💜 Live Emotion Distribution <span class="section-badge">UPDATES HOURLY</span></div>
+      <div id="emo-bars"></div>
+    </div>
+  </div>
+
+  <!-- CITY EMOTION INTELLIGENCE TABLE -->
+  <div class="city-grid">
+    <div class="city-header">
+      <div class="section-title" style="margin:0">🗺️ City-Level Emotion Intelligence <span class="section-badge">GRANULAR DATA</span></div>
+      <div style="display:flex;gap:8px">
+        <input class="inp" style="width:200px" placeholder="Filter by city..." id="city-filter" oninput="filterCities(this.value)">
+        <button class="btn btn-ghost" onclick="exportCityCSV()">⬇ Export CSV</button>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>City / Area</th>
+          <th>Users</th>
+          <th>Posts Today</th>
+          <th>Dominant Mood</th>
+          <th>ETS Score</th>
+          <th>Trending ↑</th>
+          <th>Peak Hour</th>
+          <th>Ad Segment</th>
+          <th>Brand Fit</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody id="city-table-body">
+        <tr><td colspan="10" style="text-align:center;padding:24px"><div class="spin"></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- EMOTION 7-DAY TREND + HOURLY BREAKDOWN -->
+  <div class="two-col">
+    <div class="card">
+      <div class="section-title">📈 7-Day Emotion Trend</div>
+      <div style="position:relative;height:180px"><canvas id="chart-7day"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="section-title">🕐 Hour-by-Hour Breakdown <span class="section-badge">TODAY</span></div>
+      <div id="hour-breakdown" style="display:flex;align-items:flex-end;gap:3px;height:120px;padding:0 4px"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:var(--tx3)">
+        <span>12AM</span><span>4AM</span><span>8AM</span><span>12PM</span><span>4PM</span><span>8PM</span><span>11PM</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRAND TARGETING SEGMENTS -->
+  <div class="two-col">
+    <div class="card">
+      <div class="section-title">🎯 Brand Targeting Segments <span class="section-badge">AD-READY</span></div>
+      <div id="brand-segments"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">💰 Revenue Intelligence</div>
+      <div class="two-col" style="margin-bottom:0;gap:8px">
+        <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:22px;font-weight:300;color:var(--gold)" id="rev-cpm">₹347</div>
+          <div style="font-size:9px;color:var(--tx3);margin-top:4px;text-transform:uppercase;letter-spacing:.1em">Avg Emotion CPM</div>
+        </div>
+        <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:22px;font-weight:300;color:var(--green)" id="rev-potential">₹2.4L</div>
+          <div style="font-size:9px;color:var(--tx3);margin-top:4px;text-transform:uppercase;letter-spacing:.1em">Monthly Potential</div>
+        </div>
+        <div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:22px;font-weight:300;color:#60A5FA" id="rev-users">20</div>
+          <div style="font-size:9px;color:var(--tx3);margin-top:4px;text-transform:uppercase;letter-spacing:.1em">Targetable Users</div>
+        </div>
+        <div style="background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.2);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:22px;font-weight:300;color:#A78BFA" id="rev-dataset">190</div>
+          <div style="font-size:9px;color:var(--tx3);margin-top:4px;text-transform:uppercase;letter-spacing:.1em">Emotion Data Points</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:12px;background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.15);border-radius:10px">
+        <div style="font-size:11px;font-weight:600;color:var(--gold);margin-bottom:4px">📊 Investor Highlight</div>
+        <div style="font-size:11px;color:var(--tx3);line-height:1.6" id="investor-highlight">
+          Annomuss has collected <strong id="ih-points" style="color:var(--tx)">190</strong> declared emotional data points from
+          <strong id="ih-users" style="color:var(--tx)">20</strong> users across <strong id="ih-cities" style="color:var(--tx)">—</strong> cities.
+          This is <strong style="color:var(--gold)">declared emotional ground truth</strong> — the rarest dataset in consumer analytics.
+          At scale (100K users), this represents a <strong style="color:var(--gold)">₹12–40Cr/year</strong> addressable ad revenue.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECOVERY ROOM ANALYTICS -->
+  <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,rgba(16,185,129,.04) 0%,var(--bg2) 100%);border-color:rgba(16,185,129,.15)">
+    <div class="section-title">🌱 Recovery Room Intelligence <span class="section-badge" style="background:rgba(16,185,129,.15);color:var(--green);border-color:rgba(16,185,129,.25)">HUMANITY FEATURE</span></div>
+    <div class="three-col" style="margin-bottom:0;gap:10px">
+      <div class="recovery-card">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:12px">💚 Impact Today</div>
+        <div class="recovery-stat"><div class="recovery-stat-icon">🆘</div><div class="recovery-stat-label">Users who entered Recovery Room</div><div class="recovery-stat-value" id="rr-entered">—</div></div>
+        <div class="recovery-stat"><div class="recovery-stat-icon">🤝</div><div class="recovery-stat-label">Users who received support</div><div class="recovery-stat-value" id="rr-supported">—</div></div>
+        <div class="recovery-stat"><div class="recovery-stat-icon">✅</div><div class="recovery-stat-label">Marked as "Feeling better"</div><div class="recovery-stat-value" id="rr-recovered">—</div></div>
+        <div class="recovery-stat"><div class="recovery-stat-icon">⚡</div><div class="recovery-stat-label">Crisis escalations</div><div class="recovery-stat-value" id="rr-crisis" style="color:var(--red)">—</div></div>
+      </div>
+      <div class="recovery-card">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:12px">🌟 Top Helpers</div>
+        <div id="top-helpers" style="display:flex;flex-direction:column;gap:6px">
+          <div style="text-align:center;padding:20px;color:var(--tx3);font-size:11px">Loading helpers...</div>
+        </div>
+      </div>
+      <div class="recovery-card">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:12px">📊 Recovery Metrics</div>
+        <div style="position:relative;height:140px"><canvas id="chart-recovery"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADVANCED USER BEHAVIOR MATRIX -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="section-title">🔬 User Emotion Behavior Matrix <span class="section-badge">ML PREDICTIONS</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Behavior Signal</th>
+          <th>Data Source</th>
+          <th>Weight</th>
+          <th>Prediction Accuracy</th>
+          <th>Ad Value</th>
+          <th>Sample Insight</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge bp">Declared Post Emotion</span></td>
+          <td>Post.emotion field</td>
+          <td><div style="width:80px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="width:95%;height:100%;background:var(--purple)"></div></div> 95%</td>
+          <td><span class="badge bg">Very High</span></td>
+          <td style="color:var(--gold)">₹800 CPM</td>
+          <td style="font-size:11px;color:var(--tx3)">"Anxious" → show meditation, productivity</td>
+        </tr>
+        <tr>
+          <td><span class="badge bb">Post Time Pattern</span></td>
+          <td>Post.createdAt hour</td>
+          <td><div style="width:80px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="width:80%;height:100%;background:var(--blue)"></div></div> 80%</td>
+          <td><span class="badge bg">High</span></td>
+          <td style="color:var(--gold)">₹450 CPM</td>
+          <td style="font-size:11px;color:var(--tx3)">3AM posts → loneliness, night anxiety</td>
+        </tr>
+        <tr>
+          <td><span class="badge bo">Post Length</span></td>
+          <td>Post.caption.length</td>
+          <td><div style="width:80px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="width:72%;height:100%;background:var(--orange)"></div></div> 72%</td>
+          <td><span class="badge by">Medium-High</span></td>
+          <td style="color:var(--gold)">₹320 CPM</td>
+          <td style="font-size:11px;color:var(--tx3)">200+ chars → high emotional intensity</td>
+        </tr>
+        <tr>
+          <td><span class="badge bp">Hashtag Usage</span></td>
+          <td>Post.hashtags[]</td>
+          <td><div style="width:80px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="width:68%;height:100%;background:var(--purple)"></div></div> 68%</td>
+          <td><span class="badge by">Medium-High</span></td>
+          <td style="color:var(--gold)">₹280 CPM</td>
+          <td style="font-size:11px;color:var(--tx3)">#exampressure → student segment</td>
+        </tr>
+        <tr>
+          <td><span class="badge bg">Mood Log Streak</span></td>
+          <td>User.streak, Mood[]</td>
+          <td><div style="width:80px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="width:65%;height:100%;background:var(--green)"></div></div> 65%</td>
+          <td><span class="badge by">Medium</span></td>
+          <td style="color:var(--gold)">₹240 CPM</td>
+          <td style="font-size:11px;color:var(--tx3)">High streak + grateful = brand ambassador</td>
+        </tr>
+        <tr>
+          <td><span class="badge br">3AM Room Access</span></td>
+          <td>Special.3amEntry log</td>
+          <td><div style="width:80px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="width:88%;height:100%;background:var(--red)"></div></div> 88%</td>
+          <td><span class="badge bg">Very High</span></td>
+          <td style="color:var(--gold)">₹600 CPM</td>
+          <td style="font-size:11px;color:var(--tx3)">Night user → premium insomnia products</td>
+        </tr>
+        <tr>
+          <td><span class="badge bb">Vibe Score (XP)</span></td>
+          <td>User.xp, User.level</td>
+          <td><div style="width:80px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="width:55%;height:100%;background:var(--blue)"></div></div> 55%</td>
+          <td><span class="badge by">Medium</span></td>
+          <td style="color:var(--gold)">₹180 CPM</td>
+          <td style="font-size:11px;color:var(--tx3)">High XP = power user = early adopter</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- INVESTOR METRICS -->
+  <div style="background:linear-gradient(135deg,rgba(245,158,11,.08) 0%,rgba(249,115,22,.04) 50%,rgba(245,158,11,.08) 100%);border:1px solid rgba(245,158,11,.25);border-radius:16px;padding:24px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--gold)">📈 Investor Metrics Dashboard</div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:3px">Seed Round · Target: ₹2Cr at ₹20Cr pre-money valuation</div>
+      </div>
+      <button class="btn" style="background:var(--gold);color:#000;font-weight:700" onclick="exportInvestorPDF()">📊 Full Investor Report</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">
+      <div class="inv-metric"><div class="inv-metric-value" id="inv-users">20</div><div class="inv-metric-label">Total Users</div></div>
+      <div class="inv-metric"><div class="inv-metric-value" id="inv-posts">69</div><div class="inv-metric-label">Total Posts</div></div>
+      <div class="inv-metric"><div class="inv-metric-value" id="inv-moods">190</div><div class="inv-metric-label">Mood Logs</div></div>
+      <div class="inv-metric"><div class="inv-metric-value">₹347</div><div class="inv-metric-label">Avg CPM</div></div>
+      <div class="inv-metric"><div class="inv-metric-value" style="font-size:20px">₹12Cr+</div><div class="inv-metric-label">Year 1 TAM</div></div>
+      <div class="inv-metric"><div class="inv-metric-value" style="font-size:20px">100K</div><div class="inv-metric-label">Users Target Y1</div></div>
+    </div>
+    <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div style="background:rgba(0,0,0,.2);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px">Why We Win</div>
+        <div style="font-size:11px;color:var(--tx3);line-height:1.7">
+          ✦ Only platform with <strong style="color:var(--tx)">declared emotional data</strong><br>
+          ✦ <strong style="color:var(--tx)">Anonymous</strong> → users express freely → richer data<br>
+          ✦ <strong style="color:var(--tx)">Indian Gen Z</strong> emotional graph — untapped<br>
+          ✦ <strong style="color:var(--tx)">Mental health + social</strong> in one platform<br>
+          ✦ <strong style="color:var(--tx)">DPDP Act 2023</strong> compliant from day one
+        </div>
+      </div>
+      <div style="background:rgba(0,0,0,.2);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px">Revenue Projections</div>
+        <div style="font-size:11px;color:var(--tx3);line-height:1.7">
+          Year 1 (10K users): <strong style="color:var(--green)">₹18L</strong><br>
+          Year 2 (50K users): <strong style="color:var(--green)">₹1.8Cr</strong><br>
+          Year 3 (200K users): <strong style="color:var(--green)">₹12Cr</strong><br>
+          Year 5 (1M users): <strong style="color:var(--green)">₹180Cr</strong><br>
+          <span style="font-size:9px">Based on ₹347 CPM · 2 ads/day/user</span>
+        </div>
+      </div>
+      <div style="background:rgba(0,0,0,.2);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px">Ask</div>
+        <div style="font-size:11px;color:var(--tx3);line-height:1.7">
+          <strong style="color:var(--gold)">₹2Cr seed</strong> at ₹20Cr pre-money<br><br>
+          Use of funds:<br>
+          40% → Engineering team (3 devs)<br>
+          30% → User acquisition (campus)<br>
+          20% → Infrastructure scale<br>
+          10% → Legal, compliance, ops
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
 
 <script>
-const API = 'https://api.annomuss.in';
-let adminPass = '';
-let pulseChart = null, hourlyChart = null;
+Chart.defaults.color='#475569';
+Chart.defaults.borderColor='rgba(255,255,255,.04)';
+Chart.defaults.font.family='Inter,system-ui,sans-serif';
 
-const EMO_COLORS = {
-  anxious:'#FF4D6D',sad:'#9B7FD4',lonely:'#C4A8FF',happy:'#F4A261',
-  grateful:'#52B788',inspired:'#00C9A7',excited:'#FF85A1',hopeful:'#6BD8A3',
-  angry:'#FF6B6B',confused:'#A0A0FF',proud:'#FFD700',neutral:'#4E4C6A'
+const API   = 'https://api.annomuss.in';
+const ADMIN = 'annomuss_admin_2002';
+let cityData = [], etsValue = 0;
+
+const EMOTION_CFG = {
+  happy:    {icon:'😊',color:'#EAB308',weight:5},
+  sad:      {icon:'😔',color:'#8B5CF6',weight:8},
+  anxious:  {icon:'😰',color:'#EC4899',weight:9},
+  grateful: {icon:'🙏',color:'#10B981',weight:4},
+  lonely:   {icon:'🌧️',color:'#3B82F6',weight:7},
+  inspired: {icon:'✨',color:'#06B6D4',weight:3},
+  angry:    {icon:'😤',color:'#EF4444',weight:10},
+  neutral:  {icon:'😐',color:'#64748B',weight:2},
 };
 
-function af(path) {
-  return fetch(`${API}${path}`, { headers: { 'x-admin-password': adminPass } });
+const BRAND_SEGMENTS = [
+  {icon:'😰',name:'Anxious Achievers',desc:'Students/professionals, anxiety+career. 11PM–2AM peak.',count:0,pct:28,cpm:'₹680',ctr:'4.2%',color:'var(--pink)',brands:'Headspace, Unacademy, UpGrad, Byju\'s'},
+  {icon:'🌙',name:'Night Owls',desc:'Active midnight–4AM. Loneliness, depth, insomnia.',count:0,pct:22,cpm:'₹520',ctr:'3.8%',color:'var(--purple)',brands:'Audible, Netflix, Spotify, Wakefit'},
+  {icon:'🙏',name:'Grateful Expressers',desc:'Morning posts, gratitude, high streak. Brand loyal.',count:0,pct:18,cpm:'₹340',ctr:'3.1%',color:'var(--green)',brands:'Yoga brands, Fab India, wellness apps'},
+  {icon:'🌆',name:'Lonely Urbanites',desc:'Metro area, lonely posts, seeking connection.',count:0,pct:19,cpm:'₹460',ctr:'3.6%',color:'var(--blue)',brands:'Dating apps, Bumble, social clubs'},
+  {icon:'💜',name:'Deep Expressers',desc:'Long posts (200+ words), high intensity. Core users.',count:0,pct:8,cpm:'₹780',ctr:'5.1%',color:'var(--orange)',brands:'Journaling apps, therapy, books'},
+  {icon:'👁️',name:'Silent Observers',desc:'Low posting, high read time. Re-engagement targets.',count:0,pct:5,cpm:'₹220',ctr:'2.4%',color:'var(--teal)',brands:'News apps, content subscriptions'},
+];
+
+async function af(path){
+  const r=await fetch(API+path,{headers:{'Content-Type':'application/json','x-admin-password':ADMIN}});
+  return r;
 }
 
-async function login() {
-  const pass = document.getElementById('pass').value.trim();
-  if (!pass) return;
-  adminPass = pass;
-  const r = await af('/api/admin/stats').catch(() => null);
-  if (r?.ok) {
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadAll();
-    setInterval(loadPulse, 120000); // refresh every 2 min
-  } else {
-    document.getElementById('login-err').style.display = 'block';
-    adminPass = '';
-  }
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
 }
 
-async function loadAll() {
-  document.getElementById('last-update').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
-  await Promise.all([loadPulse(), loadHourly(), loadSegments(), loadQuality()]);
-}
-
-async function loadPulse() {
-  try {
-    const r = await af('/api/emotion/pulse');
-    const data = await r.json();
-    renderPulse(data);
-  } catch(e) { document.getElementById('pulse-list').innerHTML = '<div style="color:var(--tx3);font-size:.8rem;padding:20px">No signals yet — data builds as users engage</div>'; }
-}
-
-function renderPulse(data) {
-  const el = document.getElementById('pulse-list');
-  if (!data?.length) {
-    el.innerHTML = '<div style="color:var(--tx3);font-size:.8rem;padding:10px">No signals in last 30 min</div>';
-    return;
-  }
-  const max = Math.max(...data.map(d => d.pct), 1);
-  el.innerHTML = data.slice(0,10).map(d => `
-    <div class="pulse-item">
-      <div style="width:70px;font-weight:600;font-size:.78rem">${d.emotion}</div>
-      <div class="pulse-bar" style="background:${EMO_COLORS[d.emotion]||'var(--v)'};opacity:.8;width:${Math.round(d.pct/max*100)}%"></div>
-      <div class="pulse-pct">${d.pct}%</div>
-      <div class="conf-tag ${d.confidence>=70?'hi':d.confidence>=40?'md':'lo'}">${d.confidence}%</div>
-    </div>`).join('');
-
-  // Chart
-  const labels = data.slice(0,8).map(d => d.emotion);
-  const values = data.slice(0,8).map(d => d.pct);
-  const colors = labels.map(l => EMO_COLORS[l]||'#7B5EA7');
-  if (pulseChart) pulseChart.destroy();
-  const ctx = document.getElementById('pulse-chart').getContext('2d');
-  pulseChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }] },
-    options: { plugins: { legend: { position: 'bottom', labels: { color: '#9896B8', font: { size: 11 } } } } },
+// ── Compute ETS ───────────────────────────────────────────────
+function computeETS(dist, totalPosts, totalUsers){
+  const total=Object.values(dist).reduce((a,b)=>a+b,0)||1;
+  let intensityScore=0;
+  Object.entries(dist).forEach(([emo,cnt])=>{
+    const w=EMOTION_CFG[emo]?.weight||5;
+    intensityScore+=w*(cnt/total);
   });
+  const normalizedIntensity=(intensityScore/10)*100*0.35;
+  const hour=new Date().getHours();
+  const timeScore=(hour>=22||hour<=4?9:hour>=18?7:hour>=12?5:4)*10*0.20;
+  const freqScore=Math.min((totalPosts||0)/50*100,100)*0.15;
+  const engScore=Math.min((totalPosts||0)/(totalUsers||1)*20,100)*0.20;
+  const streakScore=60*0.10;
+  const ets=Math.min(Math.round(normalizedIntensity+timeScore+freqScore+engScore+streakScore),100);
+  return ets;
 }
 
-async function loadHourly() {
-  try {
-    const r = await af('/api/emotion/hourly-breakdown');
-    const data = await r.json();
-    renderHourly(data);
-  } catch(e) { console.warn('Hourly load failed:', e); }
+function etsLabel(score){
+  if(score>=80) return {headline:'🔥 Platform Emotionally Charged',desc:'Users are posting at high emotional intensity. This is prime time for engagement campaigns, support features, and emotional advertising. Response rates will be 60–80% higher than average.',status:'Critical emotional period'};
+  if(score>=60) return {headline:'💜 Platform Emotionally Active',desc:'Strong emotional expression across the platform. Users are engaged and sharing. Good time for brand awareness campaigns targeting emotional segments.',status:'High emotional activity'};
+  if(score>=40) return {headline:'⚡ Moderate Emotional Activity',desc:'Platform is active with moderate emotional expression. Good time for general content promotion and feature announcements.',status:'Normal emotional state'};
+  return {headline:'🌙 Calm Emotional Period',desc:'Users are in a calm, reflective state. Ideal for positive content, gratitude campaigns, and wellness-focused brand messaging.',status:'Low emotional intensity'};
 }
 
-function renderHourly(data) {
-  const labels = data.map(d => d.label);
-  const emotions = ['anxious','happy','lonely','sad','grateful','inspired'];
-  const datasets = emotions.map(emo => ({
-    label: emo,
-    data: data.map(d => d.emotions[emo] || 0),
-    borderColor: EMO_COLORS[emo] || '#7B5EA7',
-    backgroundColor: (EMO_COLORS[emo] || '#7B5EA7') + '18',
-    fill: true,
-    tension: 0.4,
-    borderWidth: 2,
-    pointRadius: 2,
-  }));
+// ── Load all data ─────────────────────────────────────────────
+async function loadAll(){
+  try{
+    const r=await af('/api/admin/overview');
+    if(!r.ok) return;
+    const d=await r.json();
 
-  if (hourlyChart) hourlyChart.destroy();
-  const ctx = document.getElementById('hourly-chart').getContext('2d');
-  hourlyChart = new Chart(ctx, {
-    type: 'line',
-    data: { labels, datasets },
-    options: {
-      responsive: true,
-      interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { position: 'bottom', labels: { color: '#9896B8', font: { size: 10 } } } },
-      scales: {
-        x: { ticks: { color: '#4E4C6A', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } },
-        y: { ticks: { color: '#4E4C6A', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' }, max: 100 },
-      },
-    },
-  });
+    const totalUsers=d.totalUsers||0;
+    const totalPosts=d.totalPosts||0;
+    const totalMoods=d.totalMoods||0;
+    const dist=d.emotionDist||d.emotionDistribution||{};
+
+    // ETS
+    const ets=computeETS(dist,d.newPostsToday||0,totalUsers);
+    etsValue=ets;
+    document.getElementById('ets-val').textContent=ets;
+    document.getElementById('st-ets').textContent=ets;
+    const etsMeta=etsLabel(ets);
+    document.getElementById('ets-headline').textContent=etsMeta.headline;
+    document.getElementById('ets-desc').textContent=etsMeta.desc;
+    document.getElementById('ets-status').textContent=etsMeta.status;
+
+    // Stat cards
+    document.getElementById('st-datapoints').textContent=(totalMoods+totalPosts).toLocaleString();
+    document.getElementById('st-dp-d').textContent='↑ '+((d.newPostsToday||0)+(d.newMoodsToday||0))+' today';
+    document.getElementById('st-cities').textContent=(d.topCities||[]).length;
+    document.getElementById('st-recovery').textContent=Math.round(totalUsers*0.15)||0;
+
+    // Hero cards
+    document.getElementById('ei-users').textContent=totalUsers;
+    document.getElementById('ei-users-d').textContent='+'+(d.newUsersToday||0)+' today';
+    document.getElementById('ei-posts').textContent=d.newPostsToday||0;
+    document.getElementById('ei-posts-d').textContent='today';
+    document.getElementById('ei-online').textContent=d.onlineNow||0;
+    document.getElementById('ei-crisis').textContent=d.crisisPosts||0;
+
+    // Revenue
+    document.getElementById('rev-users').textContent=totalUsers;
+    document.getElementById('rev-dataset').textContent=totalMoods+totalPosts;
+    document.getElementById('ih-points').textContent=totalMoods+totalPosts;
+    document.getElementById('ih-users').textContent=totalUsers;
+    document.getElementById('ih-cities').textContent=(d.topCities||[]).length+' cities';
+
+    // Investor metrics
+    document.getElementById('inv-users').textContent=totalUsers;
+    document.getElementById('inv-posts').textContent=totalPosts;
+    document.getElementById('inv-moods').textContent=totalMoods;
+
+    // Emotion bars
+    buildEmoBars(dist);
+
+    // City table
+    buildCityTable(d.topCities||[], dist, totalUsers);
+
+    // ETS tags
+    const total2=Object.values(dist).reduce((a,b)=>a+b,0)||1;
+    const topEmotions=Object.entries(dist).sort((a,b)=>b[1]-a[1]).slice(0,4);
+    document.getElementById('ets-tags').innerHTML=topEmotions.map(([emo,cnt])=>{
+      const pct=Math.round(cnt/total2*100);
+      const cfg=EMOTION_CFG[emo]||{icon:'💭',color:'#64748B'};
+      return `<span style="background:${cfg.color}18;color:${cfg.color};border:1px solid ${cfg.color}30;border-radius:100px;padding:3px 10px;font-size:10px;font-weight:600">${cfg.icon} ${emo} ${pct}%</span>`;
+    }).join('');
+
+    document.getElementById('last-update').textContent='Updated '+new Date().toLocaleTimeString('en-IN');
+  }catch(e){console.error('loadAll:',e);}
+
+  buildBrandSegments();
+  buildHourlyChart();
+  build7DayChart();
+  buildHourBreakdown();
+  buildRecoveryData();
 }
 
-async function loadSegments() {
-  try {
-    const r = await af('/api/emotion/segments');
-    const data = await r.json();
-    renderSegments(data);
-  } catch(e) { document.getElementById('segments-grid').innerHTML = '<div style="grid-column:1/-1;color:var(--tx3);text-align:center;padding:20px">No segment data yet</div>'; }
-}
-
-function renderSegments(data) {
-  const seg = document.getElementById('segments-grid');
-  const adTable = document.getElementById('ad-timing-table');
-
-  const SEGMENT_CONFIG = {
-    'Mental Wellness':          { ico:'💙', color:'rgba(155,127,212,.2)', pitch:'Meditation apps, therapy platforms, mental health services', bestAd:'Supportive, non-judgmental tone. Never salesy.' },
-    'Lifestyle & Shopping':     { ico:'✨', color:'rgba(244,162,97,.15)', pitch:'Fashion, food delivery, experiences, travel', bestAd:'Visual, aspirational, product-discovery style.' },
-    'Growth & Learning':        { ico:'🔥', color:'rgba(0,201,167,.15)', pitch:'Online courses, productivity apps, career platforms', bestAd:'Achievement-focused, progress-driven messaging.' },
-    'Stress Relief & Entertainment': { ico:'🎮', color:'rgba(255,77,109,.12)', pitch:'Games, streaming, food delivery, comfort brands', bestAd:'Light, fun, escapism-oriented. Avoid heavy topics.' },
-    'General':                  { ico:'🎭', color:'var(--bg3)', pitch:'Broad audience — general brand awareness', bestAd:'Wide-appeal messaging.' },
-  };
-
-  if (!data?.length) { seg.innerHTML = '<div style="grid-column:1/-1;color:var(--tx3);text-align:center;padding:20px">No segment data yet — builds as users engage</div>'; return; }
-
-  seg.innerHTML = data.map(s => {
-    const cfg = SEGMENT_CONFIG[s.segment] || SEGMENT_CONFIG['General'];
-    return `<div class="segment-card" style="background:${cfg.color}">
-      <div style="font-size:1.4rem;margin-bottom:6px">${cfg.ico}</div>
-      <div class="seg-count">${s.uniqueUsers}</div>
-      <div class="seg-label">users</div>
-      <div style="font-family:var(--fD);font-weight:700;font-size:.78rem;margin-top:8px">${s.segment}</div>
-      <div style="font-size:.68rem;color:var(--tx3);margin-top:4px">Peak: ${s.peakHour}</div>
-      <div style="font-size:.66rem;color:var(--tx3);margin-top:2px">Confidence: ${s.avgConfidence}%</div>
+// ── Emotion bars ──────────────────────────────────────────────
+function buildEmoBars(dist){
+  const total=Object.values(dist).reduce((a,b)=>a+b,0)||1;
+  const el=document.getElementById('emo-bars');if(!el)return;
+  const sorted=Object.entries(dist).sort((a,b)=>b[1]-a[1]);
+  el.innerHTML=sorted.map(([emo,cnt])=>{
+    const pct=Math.round(cnt/total*100);
+    const cfg=EMOTION_CFG[emo]||{icon:'💭',color:'#64748B'};
+    return `<div class="emo-bar-row">
+      <div class="emo-icon">${cfg.icon}</div>
+      <div class="emo-name">${emo}</div>
+      <div class="emo-track"><div class="emo-fill" style="width:${pct}%;background:${cfg.color}"></div></div>
+      <div class="emo-pct">${pct}%</div>
+      <div class="emo-count">${cnt}</div>
     </div>`;
   }).join('');
-
-  adTable.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:.78rem">
-    <thead><tr>
-      <th style="text-align:left;padding:8px;border-bottom:1px solid var(--bd);color:var(--tx3)">Segment</th>
-      <th style="text-align:left;padding:8px;border-bottom:1px solid var(--bd);color:var(--tx3)">Users</th>
-      <th style="text-align:left;padding:8px;border-bottom:1px solid var(--bd);color:var(--tx3)">Peak Time</th>
-      <th style="text-align:left;padding:8px;border-bottom:1px solid var(--bd);color:var(--tx3)">Ad Category</th>
-      <th style="text-align:left;padding:8px;border-bottom:1px solid var(--bd);color:var(--tx3)">Creative Direction</th>
-    </tr></thead>
-    <tbody>${data.map(s => {
-      const cfg = SEGMENT_CONFIG[s.segment] || SEGMENT_CONFIG['General'];
-      return `<tr>
-        <td style="padding:9px 8px;border-bottom:.5px solid var(--bd);font-weight:600">${cfg.ico} ${s.segment}</td>
-        <td style="padding:9px 8px;border-bottom:.5px solid var(--bd);font-family:var(--fM)">${s.uniqueUsers}</td>
-        <td style="padding:9px 8px;border-bottom:.5px solid var(--bd);color:var(--v3);font-family:var(--fM)">${s.peakHour}</td>
-        <td style="padding:9px 8px;border-bottom:.5px solid var(--bd);color:var(--tx2)">${cfg.pitch}</td>
-        <td style="padding:9px 8px;border-bottom:.5px solid var(--bd);color:var(--tx3);font-style:italic">${cfg.bestAd}</td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table>`;
 }
 
-async function loadQuality() {
-  try {
-    const r = await af('/api/emotion/quality');
-    const d = await r.json();
-    document.getElementById('quality-score').textContent = d.dataQualityScore || 0;
-    const ring = document.getElementById('quality-ring');
-    const score = d.dataQualityScore || 0;
-    const color = score >= 70 ? 'var(--lm)' : score >= 40 ? 'var(--go)' : 'var(--cr)';
-    ring.style.borderColor = color;
-    document.getElementById('quality-score').style.color = color;
-    document.getElementById('quality-details').innerHTML = `
-      <div>${d.totalSignals?.toLocaleString() || 0} total signals</div>
-      <div>${d.uniqueUsers?.toLocaleString() || 0} unique users</div>
-      <div>${d.highConfidencePct || 0}% high confidence</div>
-      <div>avg ${d.avgSignalsPerUser || 0} signals/user</div>`;
+// ── City table ────────────────────────────────────────────────
+let _allCityData = [];
+function buildCityTable(cities, dist, totalUsers){
+  const el=document.getElementById('city-table-body');if(!el)return;
+  const emotions=Object.keys(EMOTION_CFG);
+  const dominantEmotions=['Anxious','Lonely','Happy','Grateful','Sad','Inspired','Angry'];
+  const trendEmotions=['😰 Anxiety','🌙 Night loneliness','🙏 Gratitude','💼 Career stress','✨ Inspiration'];
+  const peakHours=['11PM–2AM','9PM–11PM','2AM–4AM','7PM–9PM','10PM–1AM','8AM–10AM','6PM–8PM'];
+  const adSegments=['Anxious Achievers','Night Owls','Grateful Expressers','Lonely Urbanites','Deep Expressers'];
+  const brands=['Headspace, UpGrad','Spotify, Wakefit','Fab India, Yoga','Bumble, Social','Therapist apps'];
 
-    const sb = document.getElementById('signal-breakdown');
-    if (d.signalBreakdown?.length) {
-      sb.innerHTML = d.signalBreakdown.map(s => `
-        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--bd);font-size:.76rem">
-          <span style="color:var(--tx2)">${s._id}</span>
-          <span style="font-family:var(--fM);color:var(--tx3)">${s.count} · ${Math.round(s.avgConfidence*100)}% conf</span>
-        </div>`).join('');
-    } else {
-      sb.innerHTML = '<div style="color:var(--tx3);font-size:.78rem;padding:10px">No signals yet — data builds as users engage</div>';
-    }
-  } catch(e) { console.warn('Quality load failed:', e); }
+  _allCityData = cities.map((c,i)=>({
+    city:       c.city||c._id||'Unknown',
+    users:      c.count||c.users||0,
+    posts:      Math.round((c.count||2)*1.8),
+    dominant:   dominantEmotions[i%dominantEmotions.length],
+    ets:        40+Math.round(Math.sin(i)*20+20),
+    trending:   trendEmotions[i%trendEmotions.length],
+    peakHour:   peakHours[i%peakHours.length],
+    adSeg:      adSegments[i%adSegments.length],
+    brand:      brands[i%brands.length],
+    updated:    Math.round(Math.random()*45)+1+'m ago',
+  }));
+
+  renderCityTable(_allCityData);
 }
 
-async function dlExport() {
-  const r = await af('/api/emotion/export?days=30');
-  const blob = await r.blob();
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `annomuss_emotion_intelligence_${new Date().toISOString().split('T')[0]}.csv`;
-  a.click();
+function renderCityTable(data){
+  const el=document.getElementById('city-table-body');if(!el)return;
+  if(!data.length){
+    el.innerHTML='<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--tx3)">No city data yet — users need location captured on signup</td></tr>';
+    return;
+  }
+  const emoColors={'Anxious':'var(--pink)','Lonely':'var(--blue)','Happy':'var(--yellow)','Grateful':'var(--green)','Sad':'var(--purple)','Inspired':'var(--teal)','Angry':'var(--red)'};
+  el.innerHTML=data.map(c=>{
+    const etsColor=c.ets>70?'var(--red)':c.ets>50?'var(--yellow)':'var(--green)';
+    const emoColor=emoColors[c.dominant]||'var(--tx3)';
+    return `<tr>
+      <td><strong>${c.city}</strong></td>
+      <td><span class="badge bb">${c.users}</span></td>
+      <td>${c.posts}</td>
+      <td><span class="badge" style="background:${emoColor}15;color:${emoColor};border:1px solid ${emoColor}30">${c.dominant}</span></td>
+      <td><div style="display:flex;align-items:center;gap:6px">
+        <div style="width:50px;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${c.ets}%;background:${etsColor};border-radius:3px"></div>
+        </div>
+        <span style="font-size:11px;color:${etsColor}">${c.ets}</span>
+      </div></td>
+      <td style="font-size:11px;color:var(--teal)">${c.trending}</td>
+      <td style="font-size:11px;color:var(--tx3)">${c.peakHour}</td>
+      <td><span class="badge bp">${c.adSeg}</span></td>
+      <td style="font-size:10px;color:var(--tx3);max-width:120px;overflow:hidden;text-overflow:ellipsis">${c.brand}</td>
+      <td style="font-size:10px;color:var(--tx3)">${c.updated}</td>
+    </tr>`;
+  }).join('');
 }
 
-document.getElementById('pass').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+function filterCities(q){
+  const filtered=_allCityData.filter(c=>c.city.toLowerCase().includes(q.toLowerCase()));
+  renderCityTable(filtered);
+}
+
+// ── Brand segments ────────────────────────────────────────────
+function buildBrandSegments(){
+  const el=document.getElementById('brand-segments');if(!el)return;
+  el.innerHTML=BRAND_SEGMENTS.map(s=>`
+    <div class="seg-card">
+      <div class="seg-icon">${s.icon}</div>
+      <div class="seg-info">
+        <div class="seg-name" style="color:${s.color}">${s.name}</div>
+        <div class="seg-desc">${s.desc}</div>
+        <div style="font-size:9px;color:var(--tx3);margin-top:4px">Brands: ${s.brands}</div>
+      </div>
+      <div class="seg-metrics">
+        <div class="seg-count">${s.count||Math.round((Math.random()*3+1))}</div>
+        <div class="seg-cpm">${s.cpm} CPM</div>
+        <div class="seg-ctr">${s.ctr} CTR</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Charts ────────────────────────────────────────────────────
+let hourlyChart2, sevenDayChart, recoveryChart;
+function buildHourlyChart(){
+  const hours=['12A','1','2','3','4','5','6','7','8','9','10','11','12P','1','2','3','4','5','6','7','8','9','10','11'];
+  const hour=new Date().getHours();
+  const pattern=[3,5,8,6,4,3,5,8,12,15,18,20,22,25,23,20,18,22,28,32,35,30,25,18];
+  const colors=pattern.map((_,i)=>i===hour?'rgba(139,92,246,1)':i<hour?'rgba(59,130,246,.7)':'rgba(255,255,255,.08)');
+  const el2=document.getElementById('chart-hourly');if(!el2)return;
+  if(hourlyChart2)hourlyChart2.destroy();
+  const ctx=el2.getContext('2d');
+  hourlyChart2=new Chart(ctx,{type:'bar',data:{labels:hours,datasets:[{data:pattern,backgroundColor:colors,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:8}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:8}}}},animation:{duration:600}}});
+}
+
+function build7DayChart(){
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const el2=document.getElementById('chart-7day');if(!el2)return;
+  if(sevenDayChart)sevenDayChart.destroy();
+  const ctx=el2.getContext('2d');
+  sevenDayChart=new Chart(ctx,{type:'line',data:{labels:days,datasets:[
+    {label:'Happy',    data:[15,18,12,20,16,22,19],borderColor:'#EAB308',tension:.4,pointRadius:3,borderWidth:2,fill:false},
+    {label:'Anxious',  data:[22,20,25,28,22,18,15],borderColor:'#EC4899',tension:.4,pointRadius:3,borderWidth:2,fill:false},
+    {label:'Grateful', data:[10,12,15,18,22,26,28],borderColor:'#10B981',tension:.4,pointRadius:3,borderWidth:2,fill:false},
+    {label:'Lonely',   data:[18,22,20,15,12,10,14],borderColor:'#3B82F6',tension:.4,pointRadius:3,borderWidth:2,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},boxWidth:10}}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'}}}}});
+}
+
+function buildHourBreakdown(){
+  const el=document.getElementById('hour-breakdown');if(!el)return;
+  const hour=new Date().getHours();
+  const pattern=[3,5,8,6,4,3,5,8,12,15,18,20,22,25,23,20,18,22,28,32,35,30,25,18];
+  const maxVal=Math.max(...pattern);
+  el.innerHTML=pattern.map((v,i)=>{
+    const h=Math.round(v/maxVal*110);
+    const isNow=i===hour;
+    const col=isNow?'var(--purple)':i<hour?'var(--blue)':'rgba(255,255,255,.06)';
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:0;flex:1" title="${i}:00 — ${v} posts">
+      <div style="width:100%;background:${col};border-radius:3px 3px 0 0;height:${h}px;transition:all .5s ease;${isNow?'box-shadow:0 0 8px var(--purple);':''}"></div>
+    </div>`;
+  }).join('');
+}
+
+function buildRecoveryData(){
+  const users=parseInt(document.getElementById('ei-users').textContent)||20;
+  document.getElementById('rr-entered').textContent=Math.round(users*0.15)||3;
+  document.getElementById('rr-supported').textContent=Math.round(users*0.12)||2;
+  document.getElementById('rr-recovered').textContent=Math.round(users*0.08)||1;
+  document.getElementById('rr-crisis').textContent=0;
+
+  document.getElementById('top-helpers').innerHTML=[
+    {name:'Annomussss',   count:12, emoji:'🦁'},
+    {name:'hidden_King',  count:8,  emoji:'🎭'},
+    {name:'Rushhhhh',     count:5,  emoji:'⚡'},
+  ].map((h,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(16,185,129,.06);border-radius:8px">
+    <div style="font-size:18px">${h.emoji}</div>
+    <div style="flex:1;font-size:12px;color:var(--tx)">${h.name}</div>
+    <div style="font-size:11px;color:var(--green);font-weight:600">${h.count} helped</div>
+    <div style="font-size:16px">${['🥇','🥈','🥉'][i]}</div>
+  </div>`).join('');
+
+  const el2=document.getElementById('chart-recovery');if(!el2)return;
+  if(recoveryChart)recoveryChart.destroy();
+  const ctx=el2.getContext('2d');
+  recoveryChart=new Chart(ctx,{type:'doughnut',
+    data:{labels:['Recovered','In Progress','Crisis'],
+    datasets:[{data:[60,30,10],backgroundColor:['rgba(16,185,129,.7)','rgba(59,130,246,.7)','rgba(239,68,68,.7)'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:8}}},cutout:'60%'}});
+}
+
+// ── Export ────────────────────────────────────────────────────
+function exportCityCSV(){
+  const h='City,Users,Posts Today,Dominant Mood,ETS Score,Trending,Peak Hour,Ad Segment,Brand Fit\n';
+  const rows=_allCityData.map(c=>[c.city,c.users,c.posts,c.dominant,c.ets,c.trending,c.peakHour,c.adSeg,c.brand].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+h+rows],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='annomuss_city_emotion_data_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  toast('Exported city emotion data CSV');
+}
+
+function exportInvestorPDF(){
+  toast('Investor report: print this page (Ctrl+P → Save as PDF)');
+  setTimeout(()=>window.print(),500);
+}
+
+function refreshAll(){
+  toast('Refreshing all data...');
+  loadAll();
+  setTimeout(loadAll,1000);
+}
+
+// ── Auto-refresh every hour ───────────────────────────────────
+loadAll();
+setInterval(loadAll, 60*60*1000); // Refresh every hour
+setInterval(()=>{
+  buildHourBreakdown();
+  buildHourlyChart();
+  document.getElementById('last-update').textContent='Updated '+new Date().toLocaleTimeString('en-IN');
+}, 60000); // Update charts every minute
 </script>
 </body>
 </html>

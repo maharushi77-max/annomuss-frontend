@@ -4893,6 +4893,10 @@ let am3CurrentPrompt='';
 
 // ── RECOVERY ROOM ────────────────────────────────────────────
 function openRecoveryRoom(){
+  // Navigate to dedicated recovery room page
+  window.location.href='/recovery.html';
+}
+function openRecoveryRoom_OLD(){  // kept for reference
   var existing=document.getElementById('recovery-overlay');
   if(existing)existing.remove();
   var overlay=document.createElement('div');

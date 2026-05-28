@@ -234,7 +234,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
   <!-- HEADER -->
   <div class="hdr">
-    <a class="hdr-back" href="/dashboard" id="back-btn">←</a>
+    <a class="hdr-back" href="/dashboard.html" id="back-btn">←</a>
     <div class="hdr-center">
       <div class="hdr-title">🌱 Recovery Room</div>
       <div class="hdr-sub" style="display:flex;align-items:center;justify-content:center;gap:4px">
@@ -855,6 +855,10 @@ async function init(){
 }
 
 init();
+// Handle hash navigation (e.g. /recovery.html#helpers)
+if(location.hash === '#helpers'){
+  switchTab('helpers', document.querySelectorAll('.tab')[2]);
+}
 </script>
 </body>
 </html>

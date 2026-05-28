@@ -4108,8 +4108,8 @@ function initSocket(){
 
   // ── Track online users for status indicators ──────────────
   window._onlineUsers = new Set();
-  socket.on('user-online',  function(uid){ window._onlineUsers.add(uid); updateOnlineUI(uid,'online'); });
-  socket.on('user-offline', function(uid){ window._onlineUsers.delete(uid); updateOnlineUI(uid,'offline'); });
+  socket.on('user-online',  function(uid){ window._onlineUsers.add(uid); if(typeof updateOnlineUI==='function') updateOnlineUI(uid,'online'); });
+  socket.on('user-offline', function(uid){ window._onlineUsers.delete(uid); if(typeof updateOnlineUI==='function') updateOnlineUI(uid,'offline'); });
   socket.on('online-users-list', function(list){
     window._onlineUsers = new Set(list);
     // Update all user cards on the page
@@ -4941,7 +4941,7 @@ function selectRRTag(btn){
 
 async function loadRRHelpers(){
   try{
-    const r=await api('/api/special/recovery-helpers');
+    const r=await api('/api/special/recovery/leaderboard');
     if(r.ok){
       const d=await r.json();
       const el=document.getElementById('rr-helpers');
@@ -4955,17 +4955,14 @@ async function loadRRHelpers(){
 }
 
 function enterRecoveryRoom(){
-  var tags=[...document.querySelectorAll('#rr-tags button')].filter(function(b){return b.style.background.includes('185,129');}).map(function(b){return b.textContent;});
-  var msg=(document.getElementById('rr-message')||{value:''}).value||'';
   document.getElementById('recovery-overlay')?.remove();
-  api('/api/special/recovery/enter',{method:'POST',body:JSON.stringify({tags:tags,message:msg})}).catch(function(){});
-  toast('💚 You are in the Recovery Room. Someone will reach out soon.');
+  window.location.href='/recovery.html';
 }
 
 function iAmAHelper(){
   document.getElementById('recovery-overlay')?.remove();
-  api('/api/special/recovery/helper',{method:'POST',body:'{}'}).catch(function(){});
-  toast('🌟 You are now a Recovery Room helper. Your karma grows with every person you help!');
+  localStorage.setItem('rr_is_helper','true');
+  window.location.href='/recovery.html';
 }
 
 function open3amRoom(){

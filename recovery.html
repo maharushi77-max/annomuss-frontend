@@ -378,35 +378,50 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 </div><!-- /app -->
 
 <script>
-const API  = 'https://api.annomuss.in';
-const SESS = JSON.parse(localStorage.getItem('ann_session_v1') || 'null');
-const USER = SESS?.user || null;
-const TOKEN = SESS?.token || '';
+const API = 'https://api.annomuss.in';
 
-let currentMode = 'anon';
-let selectedTags = [];
-let isHelper = localStorage.getItem('rr_is_helper') === 'true';
-let breathInterval = null, breathPhase = 0, breathCount = 4;
-let socket;
+// ── Session parsing — handle both JWT string and JSON object ──
+var _rawSess = localStorage.getItem('ann_session_v1') || localStorage.getItem('ann_token') || '';
+var _sess = null;
+if(_rawSess){
+  // Try JSON first
+  try{ _sess = JSON.parse(_rawSess); }catch(e){
+    // Raw JWT token — wrap it
+    if(_rawSess.startsWith('eyJ')){ _sess = {token:_rawSess, user:null}; }
+  }
+}
+var USER  = _sess?.user  || null;
+var TOKEN = _sess?.token || '';
+
+// ── ALL GLOBALS declared with var so onclick handlers can access them ──
+var currentMode  = 'anon';
+var selectedTags = [];
+var isHelper     = localStorage.getItem('rr_is_helper') === 'true';
+var socket       = null;
+var breathTimer  = null;
+var breathPhaseIdx = 0;
+var breathCountdown = 4;
+var breathRunning   = false;
+var affIdx = 0;
 
 // ── Particles ─────────────────────────────────────────────────
 (function(){
-  const el = document.getElementById('particles');
+  var el = document.getElementById('particles');
   if(!el) return;
-  for(let i=0;i<15;i++){
-    const p=document.createElement('div');
+  for(var i=0;i<12;i++){
+    var p=document.createElement('div');
     p.className='particle';
-    const size=Math.random()*4+2;
-    p.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;`
-      +`background:rgba(16,185,129,${Math.random()*.15+.03});`
-      +`animation-duration:${Math.random()*20+15}s;`
-      +`animation-delay:${Math.random()*-20}s`;
+    var size=Math.random()*4+2;
+    p.style.cssText='width:'+size+'px;height:'+size+'px;left:'+Math.random()*100+'%;'
+      +'background:rgba(16,185,129,'+(Math.random()*.12+.03)+');'
+      +'animation-duration:'+(Math.random()*20+15)+'s;'
+      +'animation-delay:'+(Math.random()*-20)+'s';
     el.appendChild(p);
   }
 })();
 
 // ── Affirmations ──────────────────────────────────────────────
-const AFFIRMATIONS = [
+var AFFIRMATIONS = [
   "Whatever you're carrying right now — you don't have to carry it alone anymore.",
   "You came here. That alone took courage. That already means something.",
   "Your feelings are valid. Every single one of them. No exceptions.",
@@ -418,405 +433,440 @@ const AFFIRMATIONS = [
   "Hard days do not last forever. This one will pass. You will pass through it.",
   "Expressing how you feel is not weakness. It is the bravest thing a person can do.",
 ];
-let affIdx = 0;
+
 function cycleAffirmation(){
-  const el = document.getElementById('affirmation-text');
+  var el = document.getElementById('affirmation-text');
   if(!el) return;
   el.style.opacity='0';
-  setTimeout(()=>{
+  setTimeout(function(){
     affIdx = (affIdx+1) % AFFIRMATIONS.length;
     el.textContent = AFFIRMATIONS[affIdx];
     el.style.opacity='1';
   }, 400);
 }
-document.getElementById('affirmation-text').style.transition='opacity .4s';
-setInterval(cycleAffirmation, 8000);
+window.addEventListener('load', function(){
+  var el=document.getElementById('affirmation-text');
+  if(el) el.style.transition='opacity .4s';
+  setInterval(cycleAffirmation, 8000);
+});
 
-// ── API helper ─────────────────────────────────────────────────
-async function api(method, path, body){
-  try{
-    const opts={method,headers:{'Content-Type':'application/json'}};
-    if(TOKEN) opts.headers['Authorization']='Bearer '+TOKEN;
-    if(body) opts.body=JSON.stringify(body);
-    const r=await fetch(API+path,opts);
-    const d=await r.json();
-    return {ok:r.ok,status:r.status,data:d};
-  }catch(e){return {ok:false,status:0,data:{}};}
+// ── API ───────────────────────────────────────────────────────
+function apiCall(method, path, body){
+  var opts={method:method,headers:{'Content-Type':'application/json'}};
+  if(TOKEN) opts.headers['Authorization']='Bearer '+TOKEN;
+  if(body)  opts.body=JSON.stringify(body);
+  return fetch(API+path,opts).then(function(r){
+    return r.json().then(function(d){return {ok:r.ok,status:r.status,data:d};});
+  }).catch(function(){return {ok:false,status:0,data:{}};});
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').trim();}
 function timeAgo(d){
-  const s=Math.floor((Date.now()-new Date(d))/1000);
-  if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';
-  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+  var s=Math.floor((Date.now()-new Date(d))/1000);
+  if(s<60)return 'just now';
+  if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
 }
-function toast(msg,dur=3000){
-  const el=document.getElementById('toast');
+
+function toast(msg,dur){
+  dur=dur||3000;
+  var el=document.getElementById('toast');
+  if(!el)return;
   el.textContent=msg;el.classList.add('on');
   clearTimeout(window._toastT);
-  window._toastT=setTimeout(()=>el.classList.remove('on'),dur);
+  window._toastT=setTimeout(function(){el.classList.remove('on');},dur);
+}
+
+// ── Tags ──────────────────────────────────────────────────────
+function toggleTag(el,tag){
+  var on=el.classList.toggle('on');
+  if(on){selectedTags.push(tag);}
+  else{selectedTags=selectedTags.filter(function(t){return t!==tag;});}
+}
+
+// ── Mode ──────────────────────────────────────────────────────
+function setMode(m){
+  currentMode=m;
+  ['anon','gentle','private'].forEach(function(id){
+    var btn=document.getElementById('mode-'+id);
+    if(btn) btn.classList.toggle('on',id===m);
+  });
+}
+
+// ── Tab switch ────────────────────────────────────────────────
+function switchTab(name, tabEl){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  var screen=document.getElementById('screen-'+name);
+  if(screen) screen.classList.add('on');
+  if(tabEl) tabEl.classList.add('on');
+  if(name==='helpers') loadLeaderboard();
+  if(name==='support') renderSupportFeed();
+}
+
+// ── Submit expression ─────────────────────────────────────────
+function submitExpress(){
+  var text=(document.getElementById('express-text')||{value:''}).value.trim();
+  if(!text && !selectedTags.length){
+    toast('Share at least a tag or a few words');
+    return;
+  }
+  var btn=document.getElementById('express-btn');
+  if(btn){btn.disabled=true;btn.innerHTML='<div class="spinner"></div>';}
+
+  apiCall('POST','/api/special/recovery/post',{
+    text:text,
+    tags:selectedTags.slice(0,10),
+    mode:currentMode,
+  }).then(function(r){
+    if(btn){btn.disabled=false;btn.innerHTML='🌱 Share with the room';}
+    if(r.ok||r.status===201){
+      var ta=document.getElementById('express-text');
+      if(ta)ta.value='';
+      var chars=document.getElementById('express-chars');
+      if(chars)chars.textContent='0/800';
+      selectedTags=[];
+      document.querySelectorAll('.feel-tag.on').forEach(function(t){t.classList.remove('on');});
+      toast('You are heard. Someone will respond 💚');
+      // Optimistic local render
+      prependPost({
+        _id:'tmp-'+Date.now(),
+        text:text,
+        tags:selectedTags,
+        mode:currentMode,
+        createdAt:new Date().toISOString(),
+        hugCount:0,replyCount:0,
+        authorName:currentMode==='gentle'?(USER&&USER.anonymousName||'Someone'):'Anonymous',
+        authorEmoji:currentMode==='gentle'?(USER&&USER.avatarEmoji||'🎭'):'🌿',
+      },'express-feed');
+    } else {
+      toast('Something went wrong. Try again');
+    }
+  });
+}
+
+// ── Render post ───────────────────────────────────────────────
+function renderPost(p, feedId){
+  var isSupport=feedId==='support-feed';
+  var tagHTML=(p.tags||[]).map(function(t){
+    return '<span class="post-tag">'+esc(t.replace(/-/g,' '))+'</span>';
+  }).join('');
+  var name=p.mode==='anon'||!p.authorName?'Someone in the room':esc(p.authorName);
+  var emoji=p.mode==='anon'?'🌿':(p.authorEmoji||'🎭');
+  var hugs=p.hugCount||p.hugs||0;
+  var replies=p.replyCount||0;
+
+  var div=document.createElement('div');
+  div.className='post-card';
+  div.id='post-'+p._id;
+  div.innerHTML=
+    '<div class="post-header">'
+      +'<div class="post-avatar">'+esc(emoji)+'</div>'
+      +'<div class="post-meta">'
+        +'<div class="post-name">'+name+'</div>'
+        +'<div class="post-time">'+timeAgo(p.createdAt||Date.now())+'</div>'
+      +'</div>'
+    +'</div>'
+    +(tagHTML?'<div class="post-tags">'+tagHTML+'</div>':'')
+    +(p.text
+      ?'<div class="post-body">'+esc(p.text)+'</div>'
+      :'<div class="post-body" style="font-style:normal;color:var(--tx3);font-size:.78rem">Shared a feeling — no words needed.</div>')
+    +'<div class="post-footer">'
+      +'<button class="post-action" id="hug-btn-'+p._id+'">'
+        +'🫂 <span class="hug-count">'+hugs+'</span> Hugs'
+      +'</button>'
+      +'<button class="post-action">'
+        +'💬 <span id="reply-count-'+p._id+'">'+replies+'</span> Respond'
+      +'</button>'
+      +(isSupport?'<button class="post-action" style="flex:1.5;color:var(--g2)">🌱 Send support</button>':'')
+    +'</div>'
+    +'<div class="replies-area" id="replies-'+p._id+'">'
+      +'<div id="replies-list-'+p._id+'"></div>'
+      +'<div class="reply-input-row">'
+        +'<input class="reply-inp" id="reply-inp-'+p._id+'" placeholder="Send a caring message..." maxlength="300">'
+        +'<button class="reply-send">↑</button>'
+      +'</div>'
+    +'</div>';
+
+  // Wire buttons after creating element
+  var hugBtn=div.querySelector('#hug-btn-'+p._id);
+  if(hugBtn){
+    (function(postId,btn){
+      btn.onclick=function(){sendHug(postId,btn);};
+    })(String(p._id),hugBtn);
+  }
+  var respondBtn=div.querySelectorAll('.post-action')[1];
+  if(respondBtn){
+    (function(postId){
+      respondBtn.onclick=function(){toggleReplies(postId);};
+    })(String(p._id));
+  }
+  var supportBtn=div.querySelector('.post-action:last-child');
+  if(isSupport&&supportBtn){
+    (function(postId){
+      supportBtn.onclick=function(){quickSupport(postId);};
+    })(String(p._id));
+  }
+  var sendBtn=div.querySelector('.reply-send');
+  if(sendBtn){
+    (function(postId){
+      sendBtn.onclick=function(){sendReply(postId);};
+    })(String(p._id));
+  }
+  return div;
+}
+
+function prependPost(p,feedId){
+  var feed=document.getElementById(feedId);
+  if(!feed)return;
+  var loading=feed.querySelector('.loading-screen');
+  if(loading)loading.remove();
+  var empty=feed.querySelector('.empty');
+  if(empty)empty.remove();
+  var div=renderPost(p,feedId);
+  feed.insertBefore(div,feed.firstChild);
+}
+
+// ── Load feed ─────────────────────────────────────────────────
+var _postsCache=[];
+function loadFeed(){
+  apiCall('GET','/api/special/recovery/posts?limit=20').then(function(r){
+    _postsCache=r.data&&(r.data.posts||r.data)||[];
+    ['express-feed','support-feed'].forEach(function(feedId){
+      var feed=document.getElementById(feedId);
+      if(!feed)return;
+      feed.innerHTML='';
+      if(!_postsCache.length){
+        feed.innerHTML='<div class="empty"><div class="empty-icon">🌱</div>'
+          +'<div class="empty-title">The room is quiet right now</div>'
+          +'<div class="empty-desc">Be the first to share. Someone is waiting to feel less alone.</div></div>';
+        return;
+      }
+      _postsCache.forEach(function(p){feed.appendChild(renderPost(p,feedId));});
+    });
+  });
+}
+
+function renderSupportFeed(){
+  var feed=document.getElementById('support-feed');
+  if(!feed||!_postsCache.length)return;
+  feed.innerHTML='';
+  _postsCache.forEach(function(p){feed.appendChild(renderPost(p,'support-feed'));});
+}
+
+// ── Actions ───────────────────────────────────────────────────
+function sendHug(postId,btn){
+  if(btn.classList.contains('hugged'))return;
+  btn.classList.add('hugged');
+  var span=btn.querySelector('.hug-count');
+  if(span)span.textContent=(parseInt(span.textContent)||0)+1;
+  apiCall('POST','/api/special/recovery/hug/'+postId,{});
+  toast('Hug sent 🫂');
+}
+
+function toggleReplies(postId){
+  var area=document.getElementById('replies-'+postId);
+  if(!area)return;
+  area.classList.toggle('on');
+  if(area.classList.contains('on')){
+    loadReplies(postId);
+    var inp=document.getElementById('reply-inp-'+postId);
+    if(inp)setTimeout(function(){inp.focus();},200);
+  }
+}
+
+function loadReplies(postId){
+  var list=document.getElementById('replies-list-'+postId);
+  if(!list||list.children.length)return;
+  list.innerHTML='<div style="font-size:.72rem;color:var(--tx3);padding:4px 0">Loading...</div>';
+  apiCall('GET','/api/special/recovery/replies/'+postId).then(function(r){
+    var replies=r.data&&r.data.replies||[];
+    list.innerHTML='';
+    replies.forEach(function(reply){
+      var area=document.getElementById('replies-'+postId);
+      if(area)appendReply(area,reply);
+    });
+  });
+}
+
+function appendReply(container,d){
+  var list=container.querySelector('[id^="replies-list-"]');
+  if(!list)return;
+  var div=document.createElement('div');
+  div.className='reply-item';
+  div.innerHTML='<div class="reply-avatar">'+esc(d.authorEmoji||'💜')+'</div>'
+    +'<div class="reply-bubble">'
+      +'<div class="reply-name">'+esc(d.authorName||'A helper')+'</div>'
+      +'<div class="reply-text">'+esc(d.text||'')+'</div>'
+    +'</div>';
+  list.appendChild(div);
+}
+
+function sendReply(postId){
+  var inp=document.getElementById('reply-inp-'+postId);
+  if(!inp)return;
+  var text=inp.value.trim();
+  if(!text)return;
+  inp.value='';
+  var senderName=isHelper?(USER&&USER.anonymousName||'A helper'):'A caring soul';
+  var senderEmoji=isHelper?(USER&&USER.avatarEmoji||'💜'):'💜';
+  var area=document.getElementById('replies-'+postId);
+  if(area)appendReply(area,{text:text,authorName:senderName,authorEmoji:senderEmoji});
+  apiCall('POST','/api/special/recovery/reply/'+postId,{text:text,helperName:senderName,helperEmoji:senderEmoji});
+  toast('Support sent 💚');
+  if(isHelper){
+    localStorage.setItem('rr_karma',String((parseInt(localStorage.getItem('rr_karma')||'0'))+5));
+  }
+}
+
+var QUICK_MSGS=[
+  "You are not alone in this room. I am here with you 💙",
+  "Thank you for sharing this. It takes real courage. You are heard.",
+  "I see you. Whatever you are going through — you will get through it.",
+  "Sending you a warm hug right now 🫂",
+  "Your feelings are completely valid. You are safe here.",
+  "I am just a stranger but I genuinely care. Take it one breath at a time.",
+  "You came here — that itself is strength. Keep going 💚",
+];
+function quickSupport(postId){
+  var text=QUICK_MSGS[Math.floor(Math.random()*QUICK_MSGS.length)];
+  var inp=document.getElementById('reply-inp-'+postId);
+  var area=document.getElementById('replies-'+postId);
+  if(!area)area=document.getElementById('replies-'+postId);
+  if(inp){
+    inp.value=text;
+    sendReply(postId);
+  } else {
+    apiCall('POST','/api/special/recovery/reply/'+postId,{text:text,helperName:'A caring soul',helperEmoji:'💚'});
+    toast('Support sent 💚');
+  }
 }
 
 // ── Socket ─────────────────────────────────────────────────────
 function initSocket(){
   try{
     socket=io(API,{transports:['websocket','polling']});
-    socket.on('connect',()=>{
-      if(USER?._id) socket.emit('join-user-room', USER._id);
-      socket.emit('join-recovery-room');
+    socket.on('connect',function(){
+      if(USER&&USER._id) socket.emit('join-user-room',USER._id);
     });
-    socket.on('recovery-new-post', function(post){
-      prependPost(post, 'express-feed');
-      prependPost(post, 'support-feed');
+    socket.on('recovery-new-post',function(post){
+      prependPost(post,'express-feed');
+      _postsCache.unshift(post);
       updateRoomCount(1);
     });
-    socket.on('recovery-new-reply', function(d){
-      const repliesEl=document.getElementById('replies-'+d.postId);
-      if(repliesEl&&repliesEl.classList.contains('on')){
-        appendReply(repliesEl, d);
-      }
+    socket.on('recovery-new-reply',function(d){
+      var repliesEl=document.getElementById('replies-'+d.postId);
+      if(repliesEl&&repliesEl.classList.contains('on'))appendReply(repliesEl,d);
     });
-    socket.on('recovery-hug', function(d){
-      const btn=document.getElementById('hug-btn-'+d.postId);
-      if(btn){
-        const span=btn.querySelector('.hug-count');
-        if(span) span.textContent=d.count;
-      }
+    socket.on('recovery-hug',function(d){
+      var btn=document.getElementById('hug-btn-'+d.postId);
+      if(btn){var span=btn.querySelector('.hug-count');if(span)span.textContent=d.count;}
     });
-    socket.on('recovery-room-count', function(n){
-      document.getElementById('room-count').textContent=n;
+    socket.on('recovery-room-count',function(n){
+      var el=document.getElementById('room-count');
+      if(el)el.textContent=n;
     });
   }catch(e){console.warn('Socket:',e.message);}
 }
 
 function updateRoomCount(delta){
-  const el=document.getElementById('room-count');
-  if(el){
-    const n=(parseInt(el.textContent)||0)+delta;
-    el.textContent=n;
-  }
+  var el=document.getElementById('room-count');
+  if(el)el.textContent=(parseInt(el.textContent)||0)+delta;
 }
 
-// ── Tags ───────────────────────────────────────────────────────
-function toggleTag(el,tag){
-  const on = el.classList.toggle('on');
-  if(on) selectedTags.push(tag);
-  else selectedTags = selectedTags.filter(t=>t!==tag);
-}
-
-// ── Mode ───────────────────────────────────────────────────────
-function setMode(m){
-  currentMode=m;
-  ['anon','gentle','private'].forEach(id=>{
-    document.getElementById('mode-'+id)?.classList.toggle('on',id===m);
-  });
-}
-
-// ── Submit express post ────────────────────────────────────────
-async function submitExpress(){
-  const text = document.getElementById('express-text')?.value?.trim();
-  if(!text && !selectedTags.length){
-    toast('💙 Share at least a tag or a few words');
-    return;
-  }
-  const btn = document.getElementById('express-btn');
-  btn.disabled=true;
-  btn.innerHTML='<div class="spinner"></div>';
-
-  const payload={
-    text: text||'',
-    tags: selectedTags,
-    mode: currentMode,
-    anonymous: true,
-    type: 'recovery',
-    emotion: 'sad',
-  };
-
-  const r = await api('POST', '/api/special/recovery/post', payload);
-
-  btn.disabled=false;
-  btn.innerHTML='🌱 Share with the room';
-
-  if(r.ok){
-    document.getElementById('express-text').value='';
-    document.getElementById('express-chars').textContent='0/800';
-    selectedTags=[];
-    document.querySelectorAll('.feel-tag.on').forEach(t=>t.classList.remove('on'));
-    toast('💚 Your expression is in the room. You are heard.');
-    // Optimistic local render
-    prependPost({
-      _id: r.data?._id || 'tmp-'+Date.now(),
-      text: payload.text,
-      tags: payload.tags,
-      mode: payload.mode,
-      createdAt: new Date().toISOString(),
-      hugs: 0, replies: 0,
-      authorName: currentMode==='gentle'?(USER?.anonymousName||'Someone'):'Anonymous',
-      authorEmoji: currentMode==='gentle'?(USER?.avatarEmoji||'🎭'):'🌿',
-    }, 'express-feed');
-  } else {
-    toast('Something went wrong. Try again 💙');
-  }
-}
-
-// ── Render post ────────────────────────────────────────────────
-function renderPost(p, context){
-  const isSupport = context==='support-feed';
-  const tagHTML = (p.tags||[]).map(t=>`<span class="post-tag">${esc(t.replace(/-/g,' '))}</span>`).join('');
-  const name = p.mode==='anon'||!p.authorName ? 'Someone in the room' : esc(p.authorName);
-  const emoji = p.mode==='anon' ? '🌿' : (p.avatarEmoji||p.authorEmoji||'🎭');
-  const hugs = p.hugs||p.hugCount||0;
-  const replies = p.replyCount||p.replies||0;
-
-  const div = document.createElement('div');
-  div.className='post-card';
-  div.id='post-'+p._id;
-  div.innerHTML=`
-    <div class="post-header">
-      <div class="post-avatar">${esc(emoji)}</div>
-      <div class="post-meta">
-        <div class="post-name">${name}</div>
-        <div class="post-time">${timeAgo(p.createdAt||Date.now())}</div>
-      </div>
-    </div>
-    ${tagHTML?`<div class="post-tags">${tagHTML}</div>`:''}
-    ${p.text?`<div class="post-body">${esc(p.text)}</div>`:'<div class="post-body" style="font-style:normal;color:var(--tx3);font-size:.78rem">Shared a feeling — no words needed.</div>'}
-    <div class="post-footer">
-      <button class="post-action" id="hug-btn-${p._id}" onclick="sendHug('${p._id}',this)">
-        🫂 <span class="hug-count">${hugs}</span> Hugs
-      </button>
-      <button class="post-action" onclick="toggleReplies('${p._id}')">
-        💬 <span id="reply-count-${p._id}">${replies}</span> Respond
-      </button>
-      ${isSupport?`<button class="post-action" onclick="quickSupport('${p._id}')" style="flex:1.5;color:var(--g2)">🌱 Send support</button>`:''}
-    </div>
-    <div class="replies-area" id="replies-${p._id}">
-      <div id="replies-list-${p._id}"></div>
-      <div class="reply-input-row">
-        <input class="reply-inp" id="reply-inp-${p._id}" placeholder="Send a caring message..." maxlength="300">
-        <button class="reply-send" onclick="sendReply('${p._id}')">↑</button>
-      </div>
-    </div>`;
-  return div;
-}
-
-function prependPost(p, feedId){
-  const feed=document.getElementById(feedId);
-  if(!feed) return;
-  const loading=feed.querySelector('.loading-screen');
-  if(loading) loading.remove();
-  const empty=feed.querySelector('.empty');
-  if(empty) empty.remove();
-  const div=renderPost(p, feedId);
-  feed.insertBefore(div, feed.firstChild);
-}
-
-function appendReply(container, d){
-  const list=container.querySelector('[id^="replies-list-"]');
-  if(!list) return;
-  const div=document.createElement('div');
-  div.className='reply-item';
-  div.innerHTML=`
-    <div class="reply-avatar">${esc(d.authorEmoji||'💜')}</div>
-    <div class="reply-bubble">
-      <div class="reply-name">${esc(d.authorName||'A helper')}</div>
-      <div class="reply-text">${esc(d.text||'')}</div>
-    </div>`;
-  list.appendChild(div);
-}
-
-// ── Load feed ──────────────────────────────────────────────────
-async function loadFeed(){
-  const r = await api('GET', '/api/special/recovery/posts?limit=20');
-  const posts = r.data?.posts || r.data || [];
-
-  ['express-feed','support-feed'].forEach(feedId=>{
-    const feed=document.getElementById(feedId);
-    if(!feed) return;
-    feed.innerHTML='';
-    if(!posts.length){
-      feed.innerHTML=`<div class="empty">
-        <div class="empty-icon">🌱</div>
-        <div class="empty-title">The room is quiet right now</div>
-        <div class="empty-desc">Be the first to share. Someone out there is waiting to feel less alone.</div>
-      </div>`;
-      return;
-    }
-    posts.forEach(p=>feed.appendChild(renderPost(p,feedId)));
-  });
-}
-
-// ── Actions ────────────────────────────────────────────────────
-async function sendHug(postId, btn){
-  if(btn.classList.contains('hugged')) return;
-  btn.classList.add('hugged');
-  const span=btn.querySelector('.hug-count');
-  if(span) span.textContent=(parseInt(span.textContent)||0)+1;
-  await api('POST', '/api/special/recovery/hug/'+postId, {});
-  toast('🫂 Hug sent — they will feel it.');
-}
-
-function toggleReplies(postId){
-  const area=document.getElementById('replies-'+postId);
-  if(!area) return;
-  area.classList.toggle('on');
-  if(area.classList.contains('on')){
-    loadReplies(postId);
-    document.getElementById('reply-inp-'+postId)?.focus();
-  }
-}
-
-async function loadReplies(postId){
-  const list=document.getElementById('replies-list-'+postId);
-  if(!list||list.children.length) return;
-  list.innerHTML='<div style="font-size:.72rem;color:var(--tx3);padding:4px 0">Loading responses...</div>';
-  const r = await api('GET', '/api/special/recovery/replies/'+postId);
-  const replies = r.data?.replies || [];
-  list.innerHTML='';
-  replies.forEach(reply=>{
-    const area=document.getElementById('replies-'+postId);
-    if(area) appendReply(area, reply);
-  });
-}
-
-async function sendReply(postId){
-  const inp=document.getElementById('reply-inp-'+postId);
-  if(!inp) return;
-  const text=inp.value.trim();
-  if(!text) return;
-  inp.value='';
-
-  const senderName = isHelper ? (USER?.anonymousName||'A helper') : 'A caring soul';
-  const senderEmoji = isHelper ? (USER?.avatarEmoji||'💜') : '💜';
-
-  // Optimistic render
-  const area=document.getElementById('replies-'+postId);
-  if(area) appendReply(area,{text,authorName:senderName,authorEmoji:senderEmoji});
-
-  const r=await api('POST','/api/special/recovery/reply/'+postId,{text,helperName:senderName,helperEmoji:senderEmoji});
-  if(r.ok){
-    toast('💚 Your support was sent. It means more than you know.');
-    if(isHelper){
-      // Award karma points
-      const karma = parseInt(localStorage.getItem('rr_karma')||'0') + 5;
-      localStorage.setItem('rr_karma', karma);
-    }
-  }
-}
-
-async function quickSupport(postId){
-  const MESSAGES=[
-    "You are not alone in this room. I'm here with you 💙",
-    "Thank you for sharing this. It takes real courage. You're heard.",
-    "I see you. Whatever you're going through — you will get through it.",
-    "Sending you a hug and steady presence right now 🫂",
-    "Your feelings are completely valid. You're safe here.",
-    "I'm just a stranger but I genuinely care about how you are. Take it one breath at a time.",
-    "You came here — that itself is strength. Keep going 💚",
-  ];
-  const text = MESSAGES[Math.floor(Math.random()*MESSAGES.length)];
-  const inp = document.getElementById('reply-inp-'+postId);
-  if(inp){inp.value=text; sendReply(postId);}
-  else {
-    await api('POST','/api/special/recovery/reply/'+postId,{text,helperName:'A caring soul',helperEmoji:'💚'});
-    toast('💚 Support sent!');
-  }
-}
-
-// ── Helper toggle ──────────────────────────────────────────────
-async function toggleHelper(){
+// ── Helper toggle ─────────────────────────────────────────────
+function toggleHelper(){
   isHelper=!isHelper;
-  localStorage.setItem('rr_is_helper', isHelper);
-  const btn=document.getElementById('helper-toggle-btn');
+  localStorage.setItem('rr_is_helper',String(isHelper));
+  var btn=document.getElementById('helper-toggle-btn');
   if(isHelper){
-    btn.className='helper-toggle on';
-    btn.textContent='✅ You are a helper — thank you';
-    await api('POST','/api/special/recovery/helper',{active:true});
-    toast('🌟 You are now a Recovery Room helper. Your karma points will grow.');
+    if(btn){btn.className='helper-toggle on';btn.textContent='You are a helper — thank you';}
+    apiCall('POST','/api/special/recovery/helper',{active:true});
+    toast('You are now a Recovery Room helper 🌟');
   } else {
-    btn.className='helper-toggle off';
-    btn.textContent='🤝 I want to be a helper';
-    await api('POST','/api/special/recovery/helper',{active:false});
+    if(btn){btn.className='helper-toggle off';btn.textContent='I want to be a helper';}
+    apiCall('POST','/api/special/recovery/helper',{active:false});
   }
 }
 
-// ── Leaderboard ────────────────────────────────────────────────
-async function loadLeaderboard(){
-  const el=document.getElementById('helpers-leaderboard');
-  if(!el) return;
-  const r=await api('GET','/api/special/recovery/leaderboard');
-  const helpers=r.data?.helpers||[];
-  const medals=['🥇','🥈','🥉','④','⑤','⑥','⑦','⑧'];
-  const localKarma=parseInt(localStorage.getItem('rr_karma')||'0');
+// ── Leaderboard ───────────────────────────────────────────────
+function loadLeaderboard(){
+  var el=document.getElementById('helpers-leaderboard');
+  if(!el)return;
+  var medals=['🥇','🥈','🥉','④','⑤','⑥','⑦','⑧'];
+  var BADGES=[['🌟 Guardian Angel',60],['💙 Heart Holder',40],['🌱 Kind Soul',20],['🫂 Soft Presence',10],['🤍 New Helper',0]];
 
-  // Add current user if they are a helper
-  if(isHelper&&USER&&localKarma>0&&!helpers.find(h=>h._id===USER._id)){
-    helpers.push({anonymousName:USER.anonymousName||'You',avatarEmoji:USER.avatarEmoji||'💜',helpCount:0,karma:localKarma,_id:USER._id});
-    helpers.sort((a,b)=>(b.karma||0)-(a.karma||0));
-  }
+  // Show fallback while loading
+  el.innerHTML='<div style="padding:0 16px 8px">'
+    +'<div class="karma-card"><div class="karma-rank">🥇</div><div class="karma-avatar">🦁</div>'
+      +'<div class="karma-info"><div class="karma-name">Annomussss</div>'
+      +'<div class="karma-helped">Helped 12 people this month</div>'
+      +'<div class="karma-badge">🌟 Guardian Angel</div></div>'
+      +'<div class="karma-points"><div class="karma-num">60</div><div class="karma-label">karma pts</div></div></div>'
+    +'<div style="padding:14px;text-align:center;color:var(--tx3);font-size:.78rem">Be the first real helper. Every person you support earns 5 karma points.</div>'
+  +'</div>';
 
-  if(!helpers.length){
-    // Show sample leaderboard to inspire
-    el.innerHTML=`
-      <div style="padding:0 16px 8px">
-        <div class="karma-card"><div class="karma-rank">🥇</div><div class="karma-avatar">🦁</div><div class="karma-info"><div class="karma-name">Annomussss</div><div class="karma-helped">Helped 12 people this month</div><div class="karma-badge">🌟 Guardian Angel</div></div><div class="karma-points"><div class="karma-num">60</div><div class="karma-label">karma pts</div></div></div>
-        <div class="karma-card"><div class="karma-rank">🥈</div><div class="karma-avatar">🎭</div><div class="karma-info"><div class="karma-name">hidden_King</div><div class="karma-helped">Helped 8 people this month</div><div class="karma-badge">💙 Heart Holder</div></div><div class="karma-points"><div class="karma-num">40</div><div class="karma-label">karma pts</div></div></div>
-        <div class="karma-card"><div class="karma-rank">🥉</div><div class="karma-avatar">⚡</div><div class="karma-info"><div class="karma-name">Rushhhhh</div><div class="karma-helped">Helped 5 people this month</div><div class="karma-badge">🌱 Kind Soul</div></div><div class="karma-points"><div class="karma-num">25</div><div class="karma-label">karma pts</div></div></div>
-        <div style="padding:16px;text-align:center;color:var(--tx3);font-size:.78rem">Your name could be here. Every person you support earns 5 karma points.</div>
-      </div>`;
-    return;
-  }
-
-  const BADGES=[['🌟 Guardian Angel',60],['💙 Heart Holder',40],['🌱 Kind Soul',20],['🫂 Soft Presence',10],['🤍 New Helper',0]];
-  el.innerHTML='<div style="padding:0 16px 8px">'+helpers.slice(0,10).map((h,i)=>{
-    const badge=BADGES.find(b=>((h.karma||0))>=b[1])||BADGES[BADGES.length-1];
-    return `<div class="karma-card">
-      <div class="karma-rank">${medals[i]||'·'}</div>
-      <div class="karma-avatar">${esc(h.avatarEmoji||'💜')}</div>
-      <div class="karma-info">
-        <div class="karma-name">${esc(h.anonymousName||'Anonymous')}</div>
-        <div class="karma-helped">Helped ${h.helpCount||0} people this month</div>
-        <div class="karma-badge">${badge[0]}</div>
-      </div>
-      <div class="karma-points">
-        <div class="karma-num">${h.karma||((h.helpCount||0)*5)}</div>
-        <div class="karma-label">karma pts</div>
-      </div>
-    </div>`;
-  }).join('')+'</div>';
+  apiCall('GET','/api/special/recovery/leaderboard').then(function(r){
+    var helpers=r.data&&r.data.helpers||[];
+    var localKarma=parseInt(localStorage.getItem('rr_karma')||'0');
+    if(isHelper&&USER&&localKarma>0){
+      var already=helpers.some(function(h){return h._id===USER._id||h.userId===USER._id;});
+      if(!already) helpers.push({anonymousName:USER.anonymousName||'You',avatarEmoji:USER.avatarEmoji||'💜',helpCount:0,karma:localKarma});
+      helpers.sort(function(a,b){return (b.karma||0)-(a.karma||0);});
+    }
+    if(!helpers.length) return;
+    el.innerHTML='<div style="padding:0 16px 8px">'+helpers.slice(0,10).map(function(h,i){
+      var pts=h.karma||(h.helpCount||0)*5;
+      var badge=BADGES.filter(function(b){return pts>=b[1];})[0]||BADGES[BADGES.length-1];
+      return '<div class="karma-card">'
+        +'<div class="karma-rank">'+(medals[i]||'·')+'</div>'
+        +'<div class="karma-avatar">'+esc(h.avatarEmoji||'💜')+'</div>'
+        +'<div class="karma-info">'
+          +'<div class="karma-name">'+esc(h.anonymousName||'Anonymous')+'</div>'
+          +'<div class="karma-helped">Helped '+(h.helpCount||0)+' people this month</div>'
+          +'<div class="karma-badge">'+badge[0]+'</div>'
+        +'</div>'
+        +'<div class="karma-points"><div class="karma-num">'+pts+'</div><div class="karma-label">karma pts</div></div>'
+      +'</div>';
+    }).join('')+'</div>';
+  });
 }
 
-// ── Breathing exercise ─────────────────────────────────────────
-const BREATH_PHASES=[
-  {text:'Breathe in slowly...',emoji:'🌿',duration:4,color:'rgba(16,185,129,.8)'},
-  {text:'Hold gently...',emoji:'💙',duration:4,color:'rgba(59,130,246,.8)'},
-  {text:'Breathe out fully...',emoji:'🌊',duration:6,color:'rgba(6,182,212,.8)'},
-  {text:'Rest...',emoji:'⭐',duration:2,color:'rgba(124,58,237,.8)'},
+// ── Breathing ─────────────────────────────────────────────────
+var BREATH_PHASES=[
+  {text:'Breathe in slowly...',emoji:'🌿',duration:4},
+  {text:'Hold gently...',emoji:'💙',duration:4},
+  {text:'Breathe out fully...',emoji:'🌊',duration:6},
+  {text:'Rest...',emoji:'⭐',duration:2},
 ];
-let breathRunning=false, breathTimer=null, breathPhaseIdx=0, breathCountdown=4;
 
 function startBreath(){
-  document.getElementById('breath-modal').classList.add('on');
+  var modal=document.getElementById('breath-modal');
+  if(modal)modal.classList.add('on');
   breathRunning=true;
   breathPhaseIdx=0;
   runBreathPhase();
 }
 
 function runBreathPhase(){
-  if(!breathRunning) return;
-  const phase=BREATH_PHASES[breathPhaseIdx%BREATH_PHASES.length];
+  if(!breathRunning)return;
+  var phase=BREATH_PHASES[breathPhaseIdx%BREATH_PHASES.length];
   breathCountdown=phase.duration;
-  document.getElementById('breath-text').textContent=phase.text;
-  document.getElementById('breath-emoji').textContent=phase.emoji;
-  document.getElementById('breath-count').textContent=breathCountdown;
+  var textEl=document.getElementById('breath-text');
+  var emoEl=document.getElementById('breath-emoji');
+  var cntEl=document.getElementById('breath-count');
+  if(textEl)textEl.textContent=phase.text;
+  if(emoEl)emoEl.textContent=phase.emoji;
+  if(cntEl)cntEl.textContent=breathCountdown;
   clearInterval(breathTimer);
-  breathTimer=setInterval(()=>{
+  breathTimer=setInterval(function(){
     breathCountdown--;
-    document.getElementById('breath-count').textContent=breathCountdown;
+    if(cntEl)cntEl.textContent=breathCountdown;
     if(breathCountdown<=0){
       clearInterval(breathTimer);
       breathPhaseIdx++;
-      setTimeout(runBreathPhase, 200);
+      setTimeout(runBreathPhase,200);
     }
   },1000);
 }
@@ -824,41 +874,36 @@ function runBreathPhase(){
 function stopBreath(){
   breathRunning=false;
   clearInterval(breathTimer);
-  document.getElementById('breath-modal').classList.remove('on');
-  toast('💚 How do you feel? Take your time.');
+  var modal=document.getElementById('breath-modal');
+  if(modal)modal.classList.remove('on');
+  toast('How do you feel now? Take your time 💚');
 }
 
-// ── Tab switch ─────────────────────────────────────────────────
-function switchTab(name, tabEl){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  document.getElementById('screen-'+name)?.classList.add('on');
-  tabEl.classList.add('on');
-  if(name==='helpers') loadLeaderboard();
-}
-
-// ── Init ───────────────────────────────────────────────────────
-async function init(){
+// ── Init ──────────────────────────────────────────────────────
+function init(){
   initSocket();
   loadFeed();
-  // Update helper toggle state
-  if(isHelper){
-    const btn=document.getElementById('helper-toggle-btn');
-    if(btn){btn.className='helper-toggle on';btn.textContent='✅ You are a helper — thank you';}
+
+  // Set helper toggle state
+  var btn=document.getElementById('helper-toggle-btn');
+  if(isHelper&&btn){
+    btn.className='helper-toggle on';
+    btn.textContent='You are a helper — thank you';
   }
-  // Room count from server
-  try{
-    const r=await api('GET','/api/special/recovery/status');
-    if(r.ok&&r.data?.online) document.getElementById('room-count').textContent=r.data.online;
-    else document.getElementById('room-count').textContent='a few';
-  }catch(_){}
+
+  // Room count
+  apiCall('GET','/api/special/recovery/status').then(function(r){
+    var el=document.getElementById('room-count');
+    if(el) el.textContent=r.ok&&r.data&&r.data.online?r.data.online:'a few';
+  });
+
+  // Handle hash navigation
+  if(location.hash==='#helpers'){
+    switchTab('helpers',document.querySelectorAll('.tab')[2]);
+  }
 }
 
-init();
-// Handle hash navigation (e.g. /recovery.html#helpers)
-if(location.hash === '#helpers'){
-  switchTab('helpers', document.querySelectorAll('.tab')[2]);
-}
+window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>

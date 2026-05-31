@@ -56,6 +56,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:cent
 .btn-ghost{font-size:15px;font-weight:500;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line);padding:15px 28px;border-radius:100px;text-decoration:none;cursor:pointer;transition:all .2s;font-family:inherit}
 .btn-ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(167,139,250,.3)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+#lock-msg.show{opacity:1!important}
+@keyframes lockPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 
 /* countdown timer */
 .timer{display:flex;gap:14px;margin-top:48px;animation:fadeUp .8s ease .4s both}
@@ -144,7 +146,7 @@ footer{position:relative;z-index:2;border-top:1px solid var(--line);padding:40px
 <!-- NAV -->
 <nav>
   <div class="brand"><span class="moon">🌙</span> annomuss</div>
-  <a href="/dashboard.html" class="nav-cta">Enter</a>
+  <a href="/dashboard.html" class="nav-cta" id="nav-enter-btn" onclick="return checkLaunch(event)">Enter</a>
 </nav>
 
 <!-- HERO -->
@@ -153,9 +155,10 @@ footer{position:relative;z-index:2;border-top:1px solid var(--line);padding:40px
   <h1>Say the things you <em>can't</em><br>say <span class="gradient">out loud</span>.</h1>
   <p>An anonymous space built for how you actually feel. No followers. No performing. Just truth — and people who understand.</p>
   <div class="hero-cta">
-    <a href="/dashboard.html" class="btn-primary">Enter the space →</a>
+    <a href="/dashboard.html" class="btn-primary" id="enter-btn" onclick="return checkLaunch(event)">Enter the space →</a>
     <a href="#recovery" class="btn-ghost">See the Recovery Room</a>
   </div>
+  <div id="lock-msg" style="margin-top:20px;font-size:14px;color:var(--amber);opacity:0;transition:opacity .3s;font-weight:500">🔒 The doors open June 6 at 6 PM. The countdown is below.</div>
   <div class="timer" id="timer">
     <div class="timer-unit"><div class="timer-num" id="t-days">--</div><div class="timer-lbl">Days</div></div>
     <div class="timer-sep">:</div>
@@ -252,10 +255,43 @@ footer{position:relative;z-index:2;border-top:1px solid var(--line);padding:40px
 
 // Countdown to June 6, 2026 6 PM IST (12:30 UTC)
 var LAUNCH = new Date('2026-06-06T18:00:00+05:30').getTime();
+
+// ── Time-gate: Enter only works at/after launch ──
+function isLaunched(){ return Date.now() >= LAUNCH; }
+
+function checkLaunch(e){
+  if(isLaunched()) return true;  // allow navigation
+  e.preventDefault();
+  // Show locked message
+  var msg = document.getElementById('lock-msg');
+  if(msg){
+    msg.classList.add('show');
+    clearTimeout(window._lockT);
+    window._lockT = setTimeout(function(){ msg.classList.remove('show'); }, 3500);
+  }
+  // Pulse the countdown
+  var timer = document.getElementById('timer');
+  if(timer){ timer.style.animation='none'; void timer.offsetWidth; timer.style.animation='lockPulse .6s ease'; }
+  return false;
+}
+
+function updateEnterButtons(){
+  var launched = isLaunched();
+  var enterBtn = document.getElementById('enter-btn');
+  var navBtn = document.getElementById('nav-enter-btn');
+  if(launched){
+    if(enterBtn) enterBtn.textContent='Enter the space →';
+    if(navBtn) navBtn.textContent='Enter';
+  } else {
+    if(enterBtn){ enterBtn.innerHTML='🔒 Opens June 6, 6 PM'; enterBtn.style.opacity='.75'; }
+    if(navBtn){ navBtn.textContent='🔒 Soon'; }
+  }
+}
 function tick(){
   var now=Date.now(), diff=LAUNCH-now;
   if(diff<0){
     document.getElementById('timer').innerHTML='<div style="font-family:Fraunces,serif;font-size:24px;color:var(--teal)">✨ We are LIVE — enter now</div>';
+    updateEnterButtons();
     return;
   }
   var d=Math.floor(diff/86400000);
@@ -267,7 +303,7 @@ function tick(){
   document.getElementById('t-mins').textContent=String(m).padStart(2,'0');
   document.getElementById('t-secs').textContent=String(s).padStart(2,'0');
 }
-tick(); setInterval(tick,1000);
+tick(); updateEnterButtons(); setInterval(tick,1000);
 
 // Email capture
 function notifyMe(){

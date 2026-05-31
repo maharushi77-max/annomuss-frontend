@@ -156,7 +156,7 @@ footer{position:relative;z-index:2;border-top:1px solid var(--line);padding:40px
   <p>An anonymous space built for how you actually feel. No followers. No performing. Just truth — and people who understand.</p>
   <div class="hero-cta">
     <a href="/dashboard.html" class="btn-primary" id="enter-btn" onclick="return checkLaunch(event)">Enter the space →</a>
-    <a href="#recovery" class="btn-ghost">See the Recovery Room</a>
+    <a href="javascript:void(0)" class="btn-ghost" onclick="scrollToRecovery()">See the Recovery Room</a>
   </div>
   <div id="lock-msg" style="margin-top:20px;font-size:14px;color:var(--amber);opacity:0;transition:opacity .3s;font-weight:500">🔒 The doors open June 6 at 6 PM. The countdown is below.</div>
   <div class="timer" id="timer">
@@ -233,7 +233,7 @@ footer{position:relative;z-index:2;border-top:1px solid var(--line);padding:40px
 <footer>
   <div class="foot-links">
     <a href="/dashboard.html">Enter</a>
-    <a href="#recovery">Recovery Room</a>
+    <a href="javascript:void(0)" onclick="scrollToRecovery()">Recovery Room</a>
     <a href="/terms.html">Terms</a>
     <a href="mailto:hello@annomuss.in">Contact</a>
   </div>
@@ -241,6 +241,17 @@ footer{position:relative;z-index:2;border-top:1px solid var(--line);padding:40px
 </footer>
 
 <script>
+// Scroll to recovery section WITHOUT adding #recovery to URL (surprise intact)
+function scrollToRecovery(){
+  var el=document.getElementById('recovery');
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// Strip any hash from URL on load (in case someone shares /landing#recovery)
+if(location.hash){
+  history.replaceState(null,'',location.pathname+location.search);
+}
+
 // Stars
 (function(){
   var el=document.getElementById('stars');

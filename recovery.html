@@ -258,12 +258,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <!-- ══ EXPRESS TAB ══ -->
     <div class="screen on" id="screen-express">
 
-      <!-- CRISIS BAR -->
-      <div class="crisis-bar">
-        <div class="crisis-txt">If you are in immediate danger or having thoughts of self-harm, please reach out right now.</div>
-        <a class="crisis-call" href="tel:9152987821">📞 iCall</a>
-      </div>
-
       <!-- AFFIRMATION -->
       <div class="affirmation-strip" id="affirmation-text">
         Whatever you're carrying right now — you don't have to carry it alone anymore. This room is yours.
@@ -529,9 +523,13 @@ function submitExpress(){
       selectedTags=[];
       document.querySelectorAll('.feel-tag.on').forEach(function(t){t.classList.remove('on');});
       toast('You are heard. Someone will respond 💚');
-      // Optimistic local render
+      // Track this post so the socket echo doesn't double-render it
+      window._myRecentPosts = window._myRecentPosts || [];
+      window._myRecentPosts.push({ text: text, at: Date.now() });
+      // Render once, locally
+      var serverId = r.data && (r.data._id || (r.data.post && r.data.post._id));
       prependPost({
-        _id:'tmp-'+Date.now(),
+        _id: serverId || ('tmp-'+Date.now()),
         text:text,
         tags:selectedTags,
         mode:currentMode,
@@ -713,6 +711,9 @@ function sendReply(postId){
   var senderEmoji=isHelper?(USER&&USER.avatarEmoji||'💜'):'💜';
   var area=document.getElementById('replies-'+postId);
   if(area)appendReply(area,{text:text,authorName:senderName,authorEmoji:senderEmoji});
+  // Track own reply so socket echo doesn't duplicate it
+  window._myRecentReplies = window._myRecentReplies || [];
+  window._myRecentReplies.push({ text: text, postId: postId, at: Date.now() });
   apiCall('POST','/api/special/recovery/reply/'+postId,{text:text,helperName:senderName,helperEmoji:senderEmoji});
   toast('Support sent 💚');
   if(isHelper){
@@ -751,11 +752,24 @@ function initSocket(){
       if(USER&&USER._id) socket.emit('join-user-room',USER._id);
     });
     socket.on('recovery-new-post',function(post){
+      // Skip if this is a post WE just made (avoid double render)
+      var mine = window._myRecentPosts || [];
+      var isMine = mine.some(function(m){
+        return m.text === (post.text||'') && (Date.now() - m.at) < 10000;
+      });
+      if(isMine) return;
+      // Skip if already on screen (dedup by id)
+      if(post._id && document.getElementById('post-'+post._id)) return;
       prependPost(post,'express-feed');
       _postsCache.unshift(post);
       updateRoomCount(1);
     });
     socket.on('recovery-new-reply',function(d){
+      var mine = window._myRecentReplies || [];
+      var isMine = mine.some(function(m){
+        return m.text === (d.text||'') && m.postId === d.postId && (Date.now() - m.at) < 10000;
+      });
+      if(isMine) return;
       var repliesEl=document.getElementById('replies-'+d.postId);
       if(repliesEl&&repliesEl.classList.contains('on'))appendReply(repliesEl,d);
     });

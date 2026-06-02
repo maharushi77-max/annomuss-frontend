@@ -2073,7 +2073,11 @@ async function loadFeed(reset=true){
   if(reset)showSkeletons(3);
   try{
     let url;
-    if(feedTab==='trending'){
+    const emoParam = feedEmo ? `&emotion=${encodeURIComponent(feedEmo)}` : '';
+    if(feedEmo){
+      // When an emotion filter is active, use the emotion-filtered feed
+      url=`/api/posts?page=${feedPage}&limit=20&emotion=${encodeURIComponent(feedEmo)}`;
+    } else if(feedTab==='trending'){
       url=`/api/posts/trending?limit=20`;
     } else {
       // Use algorithm feed for personalised Latest tab

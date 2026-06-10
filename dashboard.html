@@ -972,6 +972,18 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <div class="eb" onclick="selEmo('angry',this)">😤 Angry</div>
       <div class="eb" onclick="selEmo('inspired',this)">✨ Inspired</div>
     </div>
+    <!-- LOCATION PICKER (opt-in) -->
+    <div style="margin-top:14px">
+      <div id="loc-add-btn" onclick="openLocationPicker()" style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:100px;cursor:pointer;font-size:.78rem;color:#60A5FA;transition:all .2s">
+        📍 <span id="loc-btn-label">Add location</span>
+      </div>
+      <div id="loc-selected" style="display:none;align-items:center;gap:8px;margin-top:8px;padding:8px 12px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:10px">
+        <span style="font-size:.85rem">📍</span>
+        <span id="loc-selected-name" style="flex:1;font-size:.82rem;color:#93C5FD;font-weight:600"></span>
+        <span onclick="clearLocation()" style="cursor:pointer;color:var(--tx3);font-size:.9rem">✕</span>
+      </div>
+    </div>
+
     <div style="font-size:.68rem;font-weight:700;color:rgba(196,168,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;font-family:var(--fD)" id="cap-lbl">Your unheard story</div>
     
     <textarea class="fld" id="ctxt" rows="5" maxlength="1000" placeholder="Say something real..." oninput="onCompose(this)"></textarea>
@@ -2174,6 +2186,12 @@ function renderPost(p){
     ?'<span style="font-size:.6rem;padding:2px 7px;border-radius:100px;background:rgba(0,201,167,.12);color:#00C9A7;font-family:var(--fD);font-weight:700;border:1px solid rgba(0,201,167,.2)">'+esc(p.city)+'</span>'
     :'';
 
+  // User-tagged location (Instagram-style) — shows when user added a location
+  const locName = p.location && (p.location.city || p.location.name);
+  const locationPin = locName
+    ? '<span style="font-size:.62rem;padding:2px 8px;border-radius:100px;background:rgba(59,130,246,.1);color:#60A5FA;font-weight:600;border:1px solid rgba(59,130,246,.2);display:inline-flex;align-items:center;gap:3px">📍 '+esc(locName)+(p.location.state?', '+esc(p.location.state):'')+'</span>'
+    : '';
+
 
   const isSaved=(p.saves||[]).some(id=>id===user?._id?.toString()||id===user?.anonymousName)||p.isSaved;
 
@@ -2228,7 +2246,7 @@ function renderPost(p){
         <div style="display:flex;align-items:center;gap:4px;margin-top:2px;flex-wrap:wrap">
           <span class="pt">${timeAgo(p.createdAt)}</span>
           ${epill}${stbdg}${mnbdg}${ubdg}${pbdg}${vbdg}
-          ${relLabel}${cityBadge}
+          ${relLabel}${cityBadge}${locationPin}
         </div>
       </div>
       <button style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:.9rem" onclick="ctxMenu(event,'${p._id}',${isOwn},'${esc(author)}','${esc(av)}','${p.authorId||p._authorId||''}')">⋯</button>
@@ -3573,14 +3591,14 @@ async function submitPost(){
       emotion:    compEmo||undefined,
       mediaUrl:   finalMediaUrl||undefined,
       mediaType:  finalMediaType||undefined,
-
       poll:       pollData||undefined,
+      location:   selectedLocation||undefined,
     };
     if(compType==='story')body.expiresAt=new Date(Date.now()+24*60*60*1000).toISOString();
 
     // ── DIARY: private, never sent to server ──
     if(compType==='diary'){
-      closeCompose();clearDraft();
+      closeCompose();clearDraft();if(typeof clearLocation==='function')clearLocation();
       const diaries=JSON.parse(localStorage.getItem('ann_diary')||'[]');
       diaries.unshift({text:cap,emotion:compEmo||'neutral',ts:Date.now(),id:'d'+Date.now()});
       localStorage.setItem('ann_diary',JSON.stringify(diaries.slice(0,200)));
@@ -7566,6 +7584,152 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 console.log('✅ Annomuss micro-interactions loaded');
 
+
+// ════════════════════════════════════════════════════════════
+//  LOCATION SHARING — opt-in, Indian cities
+// ════════════════════════════════════════════════════════════
+var selectedLocation = null;  // { city, state, lat, lng }
+
+// Major Indian cities with states (covers all major + tier-2)
+var INDIAN_CITIES = [
+  ["Mumbai","Maharashtra"],["Delhi","Delhi"],["Bengaluru","Karnataka"],["Hyderabad","Telangana"],
+  ["Chennai","Tamil Nadu"],["Kolkata","West Bengal"],["Pune","Maharashtra"],["Ahmedabad","Gujarat"],
+  ["Jaipur","Rajasthan"],["Surat","Gujarat"],["Lucknow","Uttar Pradesh"],["Kanpur","Uttar Pradesh"],
+  ["Nagpur","Maharashtra"],["Indore","Madhya Pradesh"],["Thane","Maharashtra"],["Bhopal","Madhya Pradesh"],
+  ["Visakhapatnam","Andhra Pradesh"],["Patna","Bihar"],["Vadodara","Gujarat"],["Ghaziabad","Uttar Pradesh"],
+  ["Ludhiana","Punjab"],["Agra","Uttar Pradesh"],["Nashik","Maharashtra"],["Faridabad","Haryana"],
+  ["Meerut","Uttar Pradesh"],["Rajkot","Gujarat"],["Varanasi","Uttar Pradesh"],["Srinagar","J&K"],
+  ["Aurangabad","Maharashtra"],["Dhanbad","Jharkhand"],["Amritsar","Punjab"],["Allahabad","Uttar Pradesh"],
+  ["Ranchi","Jharkhand"],["Coimbatore","Tamil Nadu"],["Jabalpur","Madhya Pradesh"],["Gwalior","Madhya Pradesh"],
+  ["Vijayawada","Andhra Pradesh"],["Jodhpur","Rajasthan"],["Madurai","Tamil Nadu"],["Raipur","Chhattisgarh"],
+  ["Kota","Rajasthan"],["Guwahati","Assam"],["Chandigarh","Chandigarh"],["Thiruvananthapuram","Kerala"],
+  ["Solapur","Maharashtra"],["Hubli","Karnataka"],["Tiruchirappalli","Tamil Nadu"],["Bareilly","Uttar Pradesh"],
+  ["Mysuru","Karnataka"],["Tiruppur","Tamil Nadu"],["Gurugram","Haryana"],["Noida","Uttar Pradesh"],
+  ["Aligarh","Uttar Pradesh"],["Jalandhar","Punjab"],["Bhubaneswar","Odisha"],["Salem","Tamil Nadu"],
+  ["Warangal","Telangana"],["Guntur","Andhra Pradesh"],["Bhiwandi","Maharashtra"],["Saharanpur","Uttar Pradesh"],
+  ["Gorakhpur","Uttar Pradesh"],["Bikaner","Rajasthan"],["Amravati","Maharashtra"],["Noida","Uttar Pradesh"],
+  ["Jamshedpur","Jharkhand"],["Bhilai","Chhattisgarh"],["Cuttack","Odisha"],["Kochi","Kerala"],
+  ["Nellore","Andhra Pradesh"],["Bhavnagar","Gujarat"],["Dehradun","Uttarakhand"],["Durgapur","West Bengal"],
+  ["Asansol","West Bengal"],["Rourkela","Odisha"],["Nanded","Maharashtra"],["Kolhapur","Maharashtra"],
+  ["Ajmer","Rajasthan"],["Akola","Maharashtra"],["Gulbarga","Karnataka"],["Jamnagar","Gujarat"],
+  ["Ujjain","Madhya Pradesh"],["Loni","Uttar Pradesh"],["Siliguri","West Bengal"],["Jhansi","Uttar Pradesh"],
+  ["Mangaluru","Karnataka"],["Erode","Tamil Nadu"],["Belgaum","Karnataka"],["Pondicherry","Puducherry"],
+  ["Tirunelveli","Tamil Nadu"],["Malegaon","Maharashtra"],["Gaya","Bihar"],["Udaipur","Rajasthan"],
+  ["Kakinada","Andhra Pradesh"],["Davanagere","Karnataka"],["Kozhikode","Kerala"],["Pallavaram","Tamil Nadu"],
+  ["Tambaram","Tamil Nadu"],["Vellore","Tamil Nadu"],["Panaji","Goa"],["Shimla","Himachal Pradesh"],
+  ["Imphal","Manipur"],["Shillong","Meghalaya"],["Agartala","Tripura"],["Aizawl","Mizoram"],
+  ["Gangtok","Sikkim"],["Itanagar","Arunachal Pradesh"],["Kohima","Nagaland"],["Dispur","Assam"]
+];
+
+function openLocationPicker(){
+  document.getElementById('location-overlay').style.display='flex';
+  renderCityList(INDIAN_CITIES);
+  setTimeout(function(){var s=document.getElementById('loc-search');if(s)s.focus();},200);
+}
+
+function closeLocationPicker(){
+  document.getElementById('location-overlay').style.display='none';
+}
+
+function renderCityList(cities){
+  var el=document.getElementById('city-list');
+  if(!el)return;
+  el.innerHTML=cities.slice(0,60).map(function(c){
+    return '<div class="loc-city-item" onclick="selectLocation(\''+c[0].replace(/'/g,"")+'\',\''+c[1].replace(/'/g,"")+'\')">'
+      +'<span style="font-size:1rem">📍</span>'
+      +'<span style="font-weight:600;color:var(--tx)">'+c[0]+'</span>'
+      +'<span class="loc-city-sub">'+c[1]+'</span>'
+    +'</div>';
+  }).join('');
+  if(!cities.length){
+    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:.82rem">No city found. Try another spelling.</div>';
+  }
+}
+
+function filterCities(q){
+  q=(q||'').toLowerCase().trim();
+  if(!q){renderCityList(INDIAN_CITIES);return;}
+  var filtered=INDIAN_CITIES.filter(function(c){
+    return c[0].toLowerCase().includes(q)||c[1].toLowerCase().includes(q);
+  });
+  renderCityList(filtered);
+}
+
+function selectLocation(city, state){
+  selectedLocation={city:city,state:state};
+  document.getElementById('loc-selected-name').textContent=city+', '+state;
+  document.getElementById('loc-selected').style.display='flex';
+  document.getElementById('loc-add-btn').style.display='none';
+  closeLocationPicker();
+  if(typeof toast==='function')toast('📍 Location added');
+}
+
+function clearLocation(){
+  selectedLocation=null;
+  document.getElementById('loc-selected').style.display='none';
+  document.getElementById('loc-add-btn').style.display='inline-flex';
+}
+
+function useCurrentLocation(){
+  if(!navigator.geolocation){
+    if(typeof toast==='function')toast('Location not supported on this device');
+    return;
+  }
+  if(typeof toast==='function')toast('📍 Getting your location...');
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude, lng=pos.coords.longitude;
+    // Reverse-geocode via free API
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lng+'&zoom=10')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var city=d.address&&(d.address.city||d.address.town||d.address.village||d.address.state_district||d.address.county)||'My location';
+        var state=d.address&&d.address.state||'';
+        selectedLocation={city:city,state:state,lat:lat,lng:lng};
+        document.getElementById('loc-selected-name').textContent=city+(state?', '+state:'');
+        document.getElementById('loc-selected').style.display='flex';
+        document.getElementById('loc-add-btn').style.display='none';
+        closeLocationPicker();
+        if(typeof toast==='function')toast('📍 '+city+' added');
+      })
+      .catch(function(){
+        selectedLocation={city:'My location',lat:lat,lng:lng};
+        document.getElementById('loc-selected-name').textContent='My current location';
+        document.getElementById('loc-selected').style.display='flex';
+        document.getElementById('loc-add-btn').style.display='none';
+        closeLocationPicker();
+      });
+  },function(err){
+    if(typeof toast==='function')toast('Could not get location. Pick a city instead.');
+  },{timeout:10000});
+}
+
 </script>
+
+<!-- LOCATION PICKER OVERLAY -->
+<div id="location-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(5,5,12,.85);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center">
+  <div style="width:100%;max-width:480px;background:#0F0A1E;border:1px solid rgba(196,168,255,.15);border-radius:24px 24px 0 0;max-height:80vh;display:flex;flex-direction:column;animation:slideUpLoc .3s ease">
+    <div style="padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:12px">
+      <div style="flex:1">
+        <div style="font-family:var(--fD);font-weight:700;font-size:1rem;color:var(--vl)">📍 Share your location</div>
+        <div style="font-size:.7rem;color:var(--tx3);margin-top:2px">Let others know where you are. Totally optional.</div>
+      </div>
+      <div onclick="closeLocationPicker()" style="cursor:pointer;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:var(--tx2)">✕</div>
+    </div>
+    <div style="padding:14px 20px 8px">
+      <input id="loc-search" placeholder="🔍 Search your city..." oninput="filterCities(this.value)" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(196,168,255,.15);border-radius:12px;padding:11px 14px;font-size:.85rem;color:var(--tx);outline:none;font-family:inherit">
+      <div onclick="useCurrentLocation()" style="margin-top:10px;display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;cursor:pointer;font-size:.8rem;color:#34D399">
+        🎯 <span>Use my current location</span>
+      </div>
+    </div>
+    <div id="city-list" style="flex:1;overflow-y:auto;padding:8px 12px 20px"></div>
+  </div>
+</div>
+<style>
+@keyframes slideUpLoc{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.loc-city-item{padding:11px 14px;border-radius:10px;cursor:pointer;font-size:.85rem;color:var(--tx2);display:flex;align-items:center;gap:10px;transition:background .15s}
+.loc-city-item:hover{background:rgba(196,168,255,.08);color:var(--tx)}
+.loc-city-sub{font-size:.7rem;color:var(--tx3);margin-left:auto}
+</style>
+
 </body>
 </html>

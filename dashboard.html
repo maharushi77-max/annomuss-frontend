@@ -1282,7 +1282,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
     <div id="rc-idle">
       <div class="orb-wrap">
         <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
-        <div class="orb" id="main-orb" style="position:relative;overflow:visible"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><circle cx="14" cy="22" r="10" fill="rgba(83,74,183,.9)" stroke="rgba(175,169,236,.8)" stroke-width="1.5"/><ellipse cx="11" cy="20" rx="3" ry="4" fill="rgba(38,33,92,.9)"/><ellipse cx="17" cy="20" rx="3" ry="4" fill="rgba(38,33,92,.9)"/><circle cx="12" cy="19" r="1" fill="rgba(238,237,254,.9)"/><circle cx="18" cy="19" r="1" fill="rgba(238,237,254,.9)"/><path d="M10 25 Q14 28 18 25" fill="none" stroke="rgba(175,169,236,.9)" stroke-width="1.2" stroke-linecap="round"/><circle cx="30" cy="22" r="10" fill="rgba(15,110,86,.9)" stroke="rgba(93,202,165,.8)" stroke-width="1.5"/><ellipse cx="27" cy="20" rx="3" ry="4" fill="rgba(4,52,44,.9)"/><ellipse cx="33" cy="20" rx="3" ry="4" fill="rgba(4,52,44,.9)"/><circle cx="28" cy="19" r="1" fill="rgba(225,245,238,.9)"/><circle cx="34" cy="19" r="1" fill="rgba(225,245,238,.9)"/><path d="M26 25 Q30 29 34 25" fill="none" stroke="rgba(93,202,165,.9)" stroke-width="1.2" stroke-linecap="round"/><path d="M22 18 L24 22 L22 26" fill="none" stroke="rgba(250,199,117,.95)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="orb" id="main-orb">⚡</div>
       </div>
       <div class="orb-label">Random Chat</div>
       <div class="orb-sub">Matched by emotion + location. Genuinely private. 5 minutes of real connection.</div>
@@ -2095,6 +2095,8 @@ async function loadFeed(reset=true){
       return;
     }
     posts.forEach((p,i)=>{
+      // Skip if this post is already rendered on screen (prevents duplicates + inflated counts)
+      if(document.getElementById('post-'+p._id)) return;
       const d=document.createElement('div');d.innerHTML=renderPost(p);
       const c=d.firstElementChild;
       if(c){c.style.animationDelay=`${i*.04}s`;el.appendChild(c);}
@@ -2124,8 +2126,8 @@ function loadMore(){if(!feedDone)loadFeed(false);}
 function filterEmo(emo,el){feedEmo=emo;document.querySelectorAll('.ec').forEach(c=>c.classList.remove('on'));if(el)el.classList.add('on');loadFeed();}
 
 function renderPost(p){
-  // Guard: never render the same post twice
-  if(document.getElementById('post-'+p._id)) return document.getElementById('post-'+p._id).outerHTML;
+  // Guard: never render the same post twice — return empty so it's not re-appended
+  if(document.getElementById('post-'+p._id)) return '';
   const me    = user?.anonymousName || '';
   const myId  = String(user?._id || user?.id || '');
   // Use server-provided isOwn if available (most reliable)
@@ -4195,6 +4197,39 @@ function initSocket(){
         '</div>';
       msgs.appendChild(exitDiv);
       msgs.scrollTop=msgs.scrollHeight;
+    }
+  });
+
+  // ── Timer expired — IMMEDIATELY stop the chat ──
+  socket.on('rchat-ended',(d)=>{
+    const reason=d?.reason==='time'?'⏱️ Time\'s up! 5 minutes complete.':'This conversation has ended.';
+    rcAddMsg(reason,'sys');
+    if(q('rc-typing'))q('rc-typing').classList.remove('on');
+    stopCRing();stopDeepTalk();
+    if(typeof rcStopTimer==='function')rcStopTimer();
+    rcRoom=null;rcState='ended';
+    // Disable input immediately
+    const inp=q('rc-input');if(inp){inp.disabled=true;inp.placeholder='Chat ended';}
+    const sendBtn=q('rc-send');if(sendBtn)sendBtn.disabled=true;
+    // Show the "find another" state after a brief moment
+    setTimeout(()=>{ if(typeof rcSetState==='function')rcSetState('idle'); },2500);
+  });
+
+  // ── Countdown tick — update timer display ──
+  socket.on('rchat-tick',(d)=>{
+    const secs=d?.secsLeft;
+    if(secs===undefined)return;
+    const el=q('rc-timer');
+    if(el){
+      const m=Math.floor(secs/60),s=secs%60;
+      el.textContent=m+':'+String(s).padStart(2,'0');
+      // Warning color in last 30s
+      if(secs<=30)el.style.color='var(--cr)';
+    }
+    // Auto-stop safety: if server says 0, force end
+    if(secs<=0){
+      rcRoom=null;rcState='ended';
+      const inp=q('rc-input');if(inp)inp.disabled=true;
     }
   });
 

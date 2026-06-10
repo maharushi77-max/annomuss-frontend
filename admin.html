@@ -140,6 +140,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="nav-item" id="nav-reports" onclick="showTab('reports',this)"><span class="nav-ico">⚠️</span>Reports <span class="nav-badge" id="reports-badge" style="display:none">!</span></div>
     <div class="nav-item" id="nav-crisis" onclick="showTab('crisis',this)"><span class="nav-ico">🆘</span>Crisis</div>
     <div class="nav-item" id="nav-recovery" onclick="showTab('recovery',this)"><span class="nav-ico">🌱</span>Recovery Room<span id="recovery-nav-badge" style="display:none;background:#EF4444;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:100px;margin-left:6px"></span></div>
+    <div class="nav-item" id="nav-chatsec" onclick="showTab('chatsec',this)"><span class="nav-ico">🔐</span>Chat Security</div>
     <div class="nav-section">Special Features</div>
     <div class="nav-item" id="nav-whisper" onclick="showTab('whisper',this)"><span class="nav-ico">🌀</span>Whisper Chains</div>
     <div class="nav-item" id="nav-gratitude" onclick="showTab('gratitude',this)"><span class="nav-ico">💛</span>Gratitude Bombs</div>
@@ -265,6 +266,35 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div id="tab-reports" class="tab-content" style="display:none">
         <div class="page-head"><div class="page-title">Open Reports</div><div class="page-sub">User-submitted reports awaiting action</div></div>
         <div style="overflow-x:auto"><div id="reports-table"><div class="spin"></div></div></div>
+      </div>
+
+      <!-- CHAT SECURITY -->
+      <div id="tab-chatsec" class="tab-content" style="display:none">
+        <div class="page-head">
+          <div class="page-title" style="color:#60A5FA">🔐 Chat Security & Records Access</div>
+          <button class="btn btn-ghost" onclick="loadChatSecurity()">↻ Refresh</button>
+        </div>
+
+        <div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#93C5FD">
+          🔒 <strong>Legal/Safety access only.</strong> All chat records are retained for security under IT Rules 2021. Every access here is logged for audit. Use only to investigate reported illegal activity.
+        </div>
+
+        <!-- Search bar -->
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <input id="chatsec-search" placeholder="🔍 Search all messages for a keyword (e.g. threat, illegal term)..." style="flex:1;background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--tx);outline:none;font-family:inherit" onkeydown="if(event.key==='Enter')searchChats()">
+          <button class="btn btn-primary" onclick="searchChats()">Search</button>
+        </div>
+
+        <!-- Tab toggle: DMs vs Random Chat -->
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button class="btn" id="cs-tab-dms" onclick="csSwitch('dms')" style="background:rgba(59,130,246,.15);color:#60A5FA;border:1px solid rgba(59,130,246,.3)">💬 Direct Messages</button>
+          <button class="btn btn-ghost" id="cs-tab-random" onclick="csSwitch('random')">⚡ Random Chats</button>
+          <button class="btn btn-ghost" id="cs-tab-results" onclick="csSwitch('results')" style="display:none">🔍 Search Results</button>
+        </div>
+
+        <div id="chatsec-content">
+          <div style="text-align:center;padding:40px;color:#64748B"><div class="spinner" style="display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,.1);border-top-color:#60A5FA;border-radius:50%;animation:spin .7s linear infinite"></div></div>
+        </div>
       </div>
 
       <!-- RECOVERY ROOM -->
@@ -564,6 +594,7 @@ function showTab(tab, navEl){
   if(tab==='emotion')  switchEmotionView('pulse',q('ebtn-pulse'));
   if(tab==='overview') loadOverview();
   if(tab==='recovery') loadRecoveryAdmin();
+  if(tab==='chatsec') loadChatSecurity();
 }
 
 function refreshCurrent(){showTab(currentTab,null);}
@@ -1357,6 +1388,153 @@ async function flagRecovery(id){
     if(typeof toast==='function')toast('Marked as handled');
     loadRecoveryAdmin();
   }catch(e){}
+}
+
+
+// ════════════════════════════════════════════════════════════
+//  CHAT SECURITY — DM + Random Chat access for safety/legal
+// ════════════════════════════════════════════════════════════
+var csView = 'dms';
+var csDMs = [], csRandom = [], csResults = [];
+
+function csEsc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function csTime(d){return new Date(d).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
+
+async function loadChatSecurity(){
+  csSwitch(csView);
+}
+
+function csSwitch(view){
+  csView=view;
+  ['dms','random','results'].forEach(function(v){
+    var btn=document.getElementById('cs-tab-'+v);
+    if(btn){
+      if(v===view){btn.style.background='rgba(59,130,246,.15)';btn.style.color='#60A5FA';btn.style.border='1px solid rgba(59,130,246,.3)';btn.className='btn';}
+      else{btn.className='btn btn-ghost';btn.style.background='';btn.style.color='';btn.style.border='';}
+    }
+  });
+  if(view==='dms') loadDMs();
+  else if(view==='random') loadRandomChats();
+  else if(view==='results') renderSearchResults();
+}
+
+async function loadDMs(){
+  var el=document.getElementById('chatsec-content');
+  el.innerHTML='<div style="text-align:center;padding:30px;color:#64748B"><div class="spinner" style="display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.1);border-top-color:#60A5FA;border-radius:50%;animation:spin .7s linear infinite"></div></div>';
+  try{
+    var r=await af('/api/admin/chats/dms?limit=50');
+    if(!r.ok){el.innerHTML='<div style="padding:30px;text-align:center;color:#64748B">Could not load.</div>';return;}
+    var d=await r.json();
+    csDMs=d.conversations||[];
+    if(!csDMs.length){el.innerHTML='<div style="padding:40px;text-align:center;color:#64748B">💬 No direct messages yet.</div>';return;}
+    el.innerHTML=csDMs.map(function(c,i){
+      return '<div style="background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="viewConversation(\''+c.userA+'\',\''+c.userB+'\',\''+csEsc(c.userAName)+'\',\''+csEsc(c.userBName)+'\')">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+          +'<span style="font-weight:600;font-size:13px;color:#F1F5F9">'+csEsc(c.userAName)+'</span>'
+          +'<span style="color:#64748B">↔</span>'
+          +'<span style="font-weight:600;font-size:13px;color:#F1F5F9">'+csEsc(c.userBName)+'</span>'
+          +'<span style="margin-left:auto;font-size:10px;color:#64748B">'+(c.messages?c.messages.length:0)+' msgs · '+csTime(c.lastAt)+'</span>'
+        +'</div>'
+        +'<div style="font-size:11px;color:#94A3B8">'+csEsc(c.userAEmail||'')+' · '+csEsc(c.userBEmail||'')+'</div>'
+        +'<div style="font-size:12px;color:#CBD5E1;margin-top:6px;font-style:italic">"'+csEsc((c.messages&&c.messages[0]&&c.messages[0].text||'').slice(0,80))+'..."</div>'
+        +'<div style="font-size:10px;color:#60A5FA;margin-top:6px">Click to view full conversation →</div>'
+      +'</div>';
+    }).join('');
+  }catch(e){el.innerHTML='<div style="padding:30px;text-align:center;color:#64748B">Error loading DMs.</div>';}
+}
+
+async function viewConversation(userA, userB, nameA, nameB){
+  var el=document.getElementById('chatsec-content');
+  el.innerHTML='<div style="text-align:center;padding:20px"><div class="spinner" style="display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.1);border-top-color:#60A5FA;border-radius:50%;animation:spin .7s linear infinite"></div></div>';
+  try{
+    var r=await af('/api/admin/chats/conversation?userA='+userA+'&userB='+userB);
+    var d=await r.json();
+    var msgs=d.messages||[];
+    var html='<button class="btn btn-ghost" onclick="loadDMs()" style="margin-bottom:12px">← Back to all chats</button>'
+      +'<div style="background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:10px">'
+      +'<div style="font-weight:600;color:#F1F5F9;margin-bottom:12px">'+csEsc(nameA)+' ↔ '+csEsc(nameB)+' ('+msgs.length+' messages)</div>';
+    msgs.forEach(function(m){
+      var fromA=String(m.senderId)===userA;
+      html+='<div style="display:flex;justify-content:'+(fromA?'flex-start':'flex-end')+';margin-bottom:8px">'
+        +'<div style="max-width:70%;background:'+(fromA?'rgba(59,130,246,.1)':'rgba(16,185,129,.1)')+';border:1px solid '+(fromA?'rgba(59,130,246,.2)':'rgba(16,185,129,.2)')+';border-radius:12px;padding:8px 12px">'
+          +'<div style="font-size:10px;color:#64748B;margin-bottom:3px">'+csEsc(fromA?nameA:nameB)+' · '+csTime(m.createdAt)+'</div>'
+          +'<div style="font-size:13px;color:#E2E8F0">'+csEsc(m.text)+'</div>'
+        +'</div></div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div style="padding:30px;text-align:center;color:#64748B">Error loading conversation.</div>';}
+}
+
+async function loadRandomChats(){
+  var el=document.getElementById('chatsec-content');
+  el.innerHTML='<div style="text-align:center;padding:30px;color:#64748B"><div class="spinner" style="display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.1);border-top-color:#60A5FA;border-radius:50%;animation:spin .7s linear infinite"></div></div>';
+  try{
+    var r=await af('/api/admin/chats/random-sessions');
+    var d=await r.json();
+    csRandom=d.sessions||[];
+    if(!csRandom.length){el.innerHTML='<div style="padding:40px;text-align:center;color:#64748B">⚡ No random chat sessions recorded yet.</div>';return;}
+    el.innerHTML=csRandom.map(function(sess){
+      return '<div style="background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="viewRandomTranscript(\''+(sess.sessionId||sess._id)+'\')">'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+          +'<span style="font-size:16px">⚡</span>'
+          +'<span style="font-weight:600;font-size:13px;color:#F1F5F9">Session '+csEsc(String(sess.sessionId||sess._id).slice(0,12))+'</span>'
+          +'<span style="margin-left:auto;font-size:10px;color:#64748B">'+csTime(sess.startedAt)+'</span>'
+        +'</div>'
+        +'<div style="font-size:11px;color:#94A3B8;margin-top:4px">'+(sess.messageCount||sess.totalMessages||'?')+' messages</div>'
+        +'<div style="font-size:10px;color:#60A5FA;margin-top:6px">Click to decrypt & view transcript →</div>'
+      +'</div>';
+    }).join('');
+  }catch(e){el.innerHTML='<div style="padding:30px;text-align:center;color:#64748B">Error loading random chats.</div>';}
+}
+
+async function viewRandomTranscript(sessionId){
+  var el=document.getElementById('chatsec-content');
+  el.innerHTML='<div style="text-align:center;padding:20px"><div class="spinner" style="display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.1);border-top-color:#60A5FA;border-radius:50%;animation:spin .7s linear infinite"></div></div>';
+  try{
+    var r=await af('/api/admin/chats/random-transcript/'+sessionId);
+    var d=await r.json();
+    var t=d.transcript||[];
+    var html='<button class="btn btn-ghost" onclick="loadRandomChats()" style="margin-bottom:12px">← Back to sessions</button>'
+      +'<div style="background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:12px;padding:14px">'
+      +'<div style="font-weight:600;color:#F1F5F9;margin-bottom:12px">⚡ Random Chat Transcript ('+t.length+' messages)</div>';
+    if(!t.length) html+='<div style="color:#64748B;font-size:12px">No messages in this session.</div>';
+    t.forEach(function(m){
+      html+='<div style="margin-bottom:8px;padding:8px 12px;background:rgba(255,255,255,.03);border-radius:10px">'
+        +'<div style="font-size:10px;color:#64748B;margin-bottom:2px">'+csEsc(m.from||'user')+' · '+csTime(m.ts||m.at||Date.now())+'</div>'
+        +'<div style="font-size:13px;color:#E2E8F0">'+csEsc(m.text||'')+'</div>'
+      +'</div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div style="padding:30px;text-align:center;color:#64748B">Could not decrypt transcript.</div>';}
+}
+
+async function searchChats(){
+  var q=document.getElementById('chatsec-search').value.trim();
+  if(!q)return;
+  document.getElementById('cs-tab-results').style.display='inline-flex';
+  csSwitch('results');
+  var el=document.getElementById('chatsec-content');
+  el.innerHTML='<div style="text-align:center;padding:20px"><div class="spinner" style="display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.1);border-top-color:#60A5FA;border-radius:50%;animation:spin .7s linear infinite"></div></div>';
+  try{
+    var r=await af('/api/admin/chats/search?q='+encodeURIComponent(q));
+    var d=await r.json();
+    csResults=d.results||[];
+    renderSearchResults(q);
+  }catch(e){el.innerHTML='<div style="padding:30px;text-align:center;color:#64748B">Search failed.</div>';}
+}
+
+function renderSearchResults(q){
+  var el=document.getElementById('chatsec-content');
+  if(!csResults.length){el.innerHTML='<div style="padding:40px;text-align:center;color:#64748B">No messages found'+(q?' for "'+csEsc(q)+'"':'')+'.</div>';return;}
+  el.innerHTML='<div style="font-size:12px;color:#94A3B8;margin-bottom:10px">Found '+csResults.length+' messages'+(q?' containing "'+csEsc(q)+'"':'')+':</div>'
+    +csResults.map(function(m){
+      return '<div style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:10px;padding:12px;margin-bottom:8px">'
+        +'<div style="font-size:10px;color:#64748B;margin-bottom:4px">'+csTime(m.createdAt)+' · sender: '+csEsc(String(m.senderId).slice(0,10))+'</div>'
+        +'<div style="font-size:13px;color:#E2E8F0">'+csEsc(m.text)+'</div>'
+      +'</div>';
+    }).join('');
 }
 
 </script>

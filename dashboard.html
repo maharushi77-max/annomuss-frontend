@@ -16,6 +16,7 @@
 <title>Annomuss 🎭</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>"/>
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet"/>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <style>
 :root{
@@ -1181,6 +1182,16 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 
   <!-- STORIES STRIP -->
   <div class="stories" id="stories-strip"><div class="s-add" onclick="openCompose('story')">➕</div></div>
+
+  <!-- WRITING SANCTUARY ENTRY -->
+  <div onclick="openSanctuary()" style="margin:12px 14px 4px;padding:16px 18px;border-radius:18px;background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(236,72,153,.08));border:1px solid rgba(139,92,246,.2);cursor:pointer;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;transition:transform .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+    <div style="font-size:1.8rem;flex-shrink:0">🕯️</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-family:var(--fD);font-weight:700;font-size:.92rem;color:#C4B5FD">Enter the Writing Sanctuary</div>
+      <div style="font-size:.72rem;color:#8B7FA8;margin-top:2px;line-height:1.5">A quiet space to open your heart. No pressure. Just you and your words.</div>
+    </div>
+    <div style="font-size:1.1rem;color:rgba(196,181,253,.6);flex-shrink:0">→</div>
+  </div>
 
   <!-- DAILY PROMPT -->
   <div class="daily-prompt" id="daily-prompt" onclick="openCompose('post');setTimeout(()=>{const t=q('ctxt');if(t){t.placeholder=currentPrompt;t.focus();}},300)" style="display:none">
@@ -4129,6 +4140,13 @@ function initSocket(){
   socket.emit('register');
   // Join personal user room for private notifications (compliments, DMs)
   if(user&&user._id) socket.emit('join-user-room', user._id);
+  // Load stored activity + show badge count on startup
+  try{
+    const saved=JSON.parse(localStorage.getItem('ann_notifs')||'[]');
+    saved.forEach(function(n){if(!notifStore.find(function(x){return x.time===n.time;}))notifStore.push(n);});
+    notifStore.sort(function(a,b){return b.time-a.time;});
+    if(typeof bumpNotifBadge==='function')bumpNotifBadge();
+  }catch(_){}
 
   // ── Track online users for status indicators ──────────────
   window._onlineUsers = new Set();
@@ -4327,6 +4345,10 @@ function initSocket(){
         helped:'✨ Your post helped someone'})[d.type]||'❤️ Someone reacted to your post',
       d.postId);
     const badge=q('notif-badge');if(badge)badge.style.display='block';
+  
+    if(typeof bumpNotifBadge==='function')bumpNotifBadge();
+    const tab=document.getElementById('tab-notifs');
+    if(tab&&tab.style.display!=='none'&&typeof renderNotifsInstant==='function')renderNotifsInstant();
   });
 
   // Real-time DM — if DM overlay is open and matches sender, append message
@@ -6082,6 +6104,80 @@ function addNotification(type,msg,postId){
   notifStore.unshift(n);if(notifStore.length>50)notifStore=notifStore.slice(0,50);
   try{localStorage.setItem('ann_notifs',JSON.stringify(notifStore.slice(0,20)));}catch(_){}
 }
+
+// ── Activity center: live event handler (called by socket events) ──
+function addActivity(act){
+  if(!act)return;
+  const n={
+    type: act.type||'reaction',
+    msg:  act.msg||'New activity',
+    postId: act.postId||null,
+    time: act.time||Date.now(),
+    read: false,
+  };
+  notifStore.unshift(n);
+  if(notifStore.length>50)notifStore=notifStore.slice(0,50);
+  try{localStorage.setItem('ann_notifs',JSON.stringify(notifStore.slice(0,30)));}catch(_){}
+  // If the activity center is currently open, re-render it live
+  const tab=document.getElementById('tab-notifs');
+  const isOpen = tab && tab.style.display!=='none';
+  if(isOpen && typeof loadNotifications==='function'){
+    renderNotifsInstant();
+  }
+  bumpNotifBadge();
+}
+
+// Instant render without re-fetching (for live updates)
+function renderNotifsInstant(){
+  const el=q('notifs-list');if(!el)return;
+  if(!notifStore.length)return;
+  var icons={reaction:'✨',like:'💜',comment:'💬',reply:'↩️',gift:'🎁',friend:'👋',follow:'💜',dm:'💬',challenge:'🎯',hug:'🫂'};
+  el.innerHTML='';
+  notifStore.slice(0,30).forEach(function(n){
+    var item=document.createElement('div');
+    item.className='notif-item'+(n.read?'':' unread');
+    item.setAttribute('style','display:flex;align-items:flex-start;gap:12px;padding:13px 18px;border-bottom:1px solid var(--bd2);'+(n.postId?'cursor:pointer':''));
+    if(n.postId)item.onclick=function(){openPModal(n.postId);};
+    var ico=document.createElement('div');
+    ico.setAttribute('style','font-size:1.2rem;flex-shrink:0;margin-top:2px;width:28px;text-align:center');
+    ico.textContent=icons[n.type]||'🔔';
+    var body=document.createElement('div');body.style.cssText='flex:1;min-width:0';
+    var msg=document.createElement('div');
+    msg.setAttribute('style','font-size:.875rem;color:var(--tx);line-height:1.5');
+    msg.textContent=n.msg||'';
+    var tm=document.createElement('div');
+    tm.setAttribute('style','font-size:.7rem;color:var(--tx3);margin-top:3px');
+    tm.textContent=timeAgo(n.time);
+    body.appendChild(msg);body.appendChild(tm);
+    item.appendChild(ico);item.appendChild(body);
+    if(!n.read){
+      var dot=document.createElement('div');
+      dot.setAttribute('style','width:7px;height:7px;border-radius:50%;background:var(--v);flex-shrink:0;margin-top:7px');
+      item.appendChild(dot);
+    }
+    el.appendChild(item);
+  });
+}
+
+// ── Notification badge — the red dot/count on the bell ──
+function bumpNotifBadge(){
+  const unread=notifStore.filter(function(n){return !n.read;}).length;
+  // Try multiple badge element ids for resilience
+  ['notif-badge','notifs-badge','activity-badge'].forEach(function(id){
+    const b=document.getElementById(id);
+    if(b){
+      if(unread>0){
+        b.style.display='flex';
+        b.textContent=unread>9?'9+':String(unread);
+      } else {
+        b.style.display='none';
+      }
+    }
+  });
+  // Also bump the bottom-nav bell dot if present
+  const navDot=document.getElementById('nav-notif-dot');
+  if(navDot)navDot.style.display=unread>0?'block':'none';
+}
 async function loadNotifications(){
   // Merge localStorage with in-memory
   try{
@@ -7703,6 +7799,357 @@ function useCurrentLocation(){
   },{timeout:10000});
 }
 
+
+// ════════════════════════════════════════════════════════════
+//  THE WRITING SANCTUARY — expression engine
+//  Psychology: remove blank-page fear, hold space, honor courage
+// ════════════════════════════════════════════════════════════
+var sancIntent = null;
+var sancAfterMood = null;
+var sancPromptIdx = 0;
+var sancAmbient = false;
+var sancAmbientAudio = null;
+var sancEncourageShown = {};
+
+// ── Prompt libraries by intent (each removes the blank-page fear) ──
+var SANC_PROMPTS = {
+  vent: [
+    "What's sitting heavy on your chest right now?",
+    "What do you wish you could scream out loud?",
+    "Who or what made today hard?",
+    "What are you so tired of carrying?",
+    "If no one could judge you — what would you say?",
+    "What's the thing you keep swallowing down?",
+    "What's making you feel like this?",
+  ],
+  understand: [
+    "What are you actually feeling underneath it all?",
+    "When did you first start feeling this way?",
+    "What's the story you keep telling yourself?",
+    "What would you say to a friend feeling exactly this?",
+    "What do you need that you're not getting?",
+    "What's the real fear hiding behind this?",
+    "What would 'okay' even look like right now?",
+  ],
+  letgo: [
+    "What are you finally ready to release?",
+    "What have you been holding onto for too long?",
+    "What would you let go of if you knew you'd be okay?",
+    "Write the thing you need to stop carrying.",
+    "What weight do you want to set down tonight?",
+    "What are you forgiving — yourself or someone else?",
+  ],
+  letter: [
+    "Who do you need to say something to?",
+    "Start with: 'There's something I never told you...'",
+    "What would you say if they were sitting right here?",
+    "Write the words you never got to say.",
+    "Dear ___, here's what I wish you knew...",
+    "What do you wish they understood about you?",
+  ],
+  remember: [
+    "What does this exact moment feel like?",
+    "What do you want to remember about who you are right now?",
+    "What's something true about today?",
+    "Capture this feeling before it fades.",
+    "What do you hope future-you remembers?",
+    "What small thing mattered today?",
+  ],
+};
+
+var SANC_INTENT_CONFIG = {
+  vent:       { title:"Let it out", icon:"🌊", placeholder:"Let it all pour out. No filter. No order. Just release...", releaseIcon:"🌊", releaseTitle:"You let it out." },
+  understand: { title:"Understand yourself", icon:"🌙", placeholder:"Write your way to clarity. One honest thought at a time...", releaseIcon:"🌙", releaseTitle:"You looked inward." },
+  letgo:      { title:"Let it go", icon:"🕊️", placeholder:"Write what you're releasing. Then we'll set it free...", releaseIcon:"🕊️", releaseTitle:"You're ready to release it." },
+  letter:     { title:"Your letter", icon:"💌", placeholder:"Write to them. Say everything. They'll never see it — but you'll feel it...", releaseIcon:"💌", releaseTitle:"You said what needed saying." },
+  remember:   { title:"Remember this", icon:"✨", placeholder:"Capture this moment exactly as it feels...", releaseIcon:"✨", releaseTitle:"This moment is yours now." },
+};
+
+// ── Encouragement messages by word count (emotional pacing) ──
+var SANC_ENCOURAGEMENTS = [
+  { at:15,  msg:"Yes. Keep going." },
+  { at:40,  msg:"You're doing something brave." },
+  { at:80,  msg:"Let it keep coming. Don't stop." },
+  { at:140, msg:"This is what honesty feels like." },
+  { at:220, msg:"You're really letting yourself be heard." },
+  { at:320, msg:"Take all the space you need." },
+];
+
+function openSanctuary(){
+  var s=document.getElementById('sanctuary');
+  if(!s)return;
+  s.style.display='block';
+  document.body.style.overflow='hidden';
+  // Reset
+  sancIntent=null;sancAfterMood=null;sancEncourageShown={};
+  showSancStage('intent');
+  // Personalized greeting by time
+  var h=new Date().getHours();
+  var greet=document.getElementById('sanc-greeting');
+  if(greet){
+    if(h>=22||h<5) greet.innerHTML="It's late, and you're still<br>carrying something.";
+    else if(h<12) greet.innerHTML="What do you need<br>this morning?";
+    else if(h<17) greet.innerHTML="What do you need<br>right now?";
+    else greet.innerHTML="As the day winds down,<br>what's on your heart?";
+  }
+  // Stars
+  sancMakeStars();
+}
+
+function closeSanctuary(){
+  var s=document.getElementById('sanctuary');
+  if(s)s.style.display='none';
+  document.body.style.overflow='';
+  sancStopAmbient();
+}
+
+function showSancStage(stage){
+  ['intent','write','release'].forEach(function(st){
+    var el=document.getElementById('sanc-'+st);
+    if(el)el.style.display = (st===stage) ? 'flex' : 'none';
+  });
+}
+
+function sancMakeStars(){
+  var el=document.getElementById('sanc-stars');
+  if(!el||el.children.length)return;
+  for(var i=0;i<30;i++){
+    var st=document.createElement('div');
+    st.className='sanc-star';
+    var sz=Math.random()*2+1;
+    st.style.cssText='width:'+sz+'px;height:'+sz+'px;top:'+Math.random()*100+'%;left:'+Math.random()*100+'%;animation-delay:'+(Math.random()*-4)+'s';
+    el.appendChild(st);
+  }
+}
+
+function sancChooseIntent(intent){
+  sancIntent=intent;
+  var cfg=SANC_INTENT_CONFIG[intent];
+  showSancStage('write');
+  // Set placeholder
+  var ta=document.getElementById('sanc-text');
+  if(ta){ta.value='';ta.placeholder=cfg.placeholder;setTimeout(function(){ta.focus();},300);}
+  // Reset state
+  sancEncourageShown={};
+  document.getElementById('sanc-wordcount').textContent='0 words';
+  var btn=document.getElementById('sanc-done-btn');
+  btn.disabled=true;btn.style.opacity='.5';btn.textContent='Keep writing...';
+  // First prompt
+  sancPromptIdx=Math.floor(Math.random()*SANC_PROMPTS[intent].length);
+  sancShowPrompt();
+}
+
+function sancShowPrompt(){
+  var prompts=SANC_PROMPTS[sancIntent]||[];
+  var el=document.getElementById('sanc-prompt-text');
+  if(el&&prompts.length){
+    el.style.opacity='0';
+    setTimeout(function(){
+      el.textContent='“'+prompts[sancPromptIdx % prompts.length]+'”';
+      el.style.opacity='1';
+    },200);
+  }
+}
+
+function sancNewPrompt(){
+  sancPromptIdx++;
+  sancShowPrompt();
+}
+
+function sancUsePrompt(){
+  // Tapping the prompt drops it into the text as a starting point
+  var ta=document.getElementById('sanc-text');
+  var prompts=SANC_PROMPTS[sancIntent]||[];
+  if(ta&&!ta.value.trim()&&prompts.length){
+    ta.focus();
+  }
+}
+
+function sancOnInput(ta){
+  var text=ta.value;
+  var words=text.trim()?text.trim().split(/\s+/).length:0;
+  document.getElementById('sanc-wordcount').textContent=words+(words===1?' word':' words');
+
+  // Enable done button after they've written something real
+  var btn=document.getElementById('sanc-done-btn');
+  if(words>=5){
+    btn.disabled=false;btn.style.opacity='1';
+    btn.textContent='I\'m ready';
+  } else {
+    btn.disabled=true;btn.style.opacity='.5';btn.textContent='Keep writing...';
+  }
+
+  // Emotional pacing — show encouragement at milestones
+  SANC_ENCOURAGEMENTS.forEach(function(e){
+    if(words>=e.at && !sancEncourageShown[e.at]){
+      sancEncourageShown[e.at]=true;
+      sancShowEncourage(e.msg);
+    }
+  });
+
+  // Hide the prompt once they're flowing (don't distract)
+  if(words>=8){
+    var prompt=document.getElementById('sanc-prompt');
+    if(prompt)prompt.style.opacity='0.25';
+  }
+}
+
+function sancShowEncourage(msg){
+  var el=document.getElementById('sanc-encourage');
+  if(!el)return;
+  el.textContent=msg;
+  el.style.opacity='1';
+  setTimeout(function(){el.style.opacity='0';},3500);
+}
+
+function sancToggleAmbient(){
+  sancAmbient=!sancAmbient;
+  var label=document.getElementById('sanc-ambient-label');
+  var s=document.getElementById('sanctuary');
+  if(sancAmbient){
+    if(label)label.textContent='🌧️ Ambient on';
+    if(s)s.classList.add('ambient-on');
+    sancStartAmbient();
+  } else {
+    if(label)label.textContent='🔇 Silence';
+    if(s)s.classList.remove('ambient-on');
+    sancStopAmbient();
+  }
+}
+
+function sancStartAmbient(){
+  // Gentle rain/ambient using Web Audio API (soft brown noise)
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return;
+    sancAmbientAudio=new AC();
+    var bufferSize=4096;
+    var node=sancAmbientAudio.createScriptProcessor(bufferSize,1,1);
+    var lastOut=0;
+    node.onaudioprocess=function(e){
+      var output=e.outputBuffer.getChannelData(0);
+      for(var i=0;i<bufferSize;i++){
+        var white=Math.random()*2-1;
+        output[i]=(lastOut+(0.02*white))/1.02;
+        lastOut=output[i];
+        output[i]*=0.12; // soft volume
+      }
+    };
+    var gain=sancAmbientAudio.createGain();
+    gain.gain.value=0.4;
+    node.connect(gain);
+    gain.connect(sancAmbientAudio.destination);
+    sancAmbientAudio._node=node;
+  }catch(e){}
+}
+
+function sancStopAmbient(){
+  try{
+    if(sancAmbientAudio){
+      if(sancAmbientAudio._node)sancAmbientAudio._node.disconnect();
+      sancAmbientAudio.close();
+      sancAmbientAudio=null;
+    }
+  }catch(e){}
+}
+
+function sancBack(){
+  sancStopAmbient();
+  sancAmbient=false;
+  var s=document.getElementById('sanctuary');
+  if(s)s.classList.remove('ambient-on');
+  showSancStage('intent');
+}
+
+function sancFinish(){
+  var ta=document.getElementById('sanc-text');
+  if(!ta||ta.value.trim().split(/\s+/).length<5)return;
+  sancStopAmbient();
+  // Configure release screen by intent
+  var cfg=SANC_INTENT_CONFIG[sancIntent];
+  document.getElementById('sanc-release-icon').textContent=cfg.releaseIcon;
+  document.getElementById('sanc-release-title').textContent=cfg.releaseTitle;
+  // letgo intent emphasizes dissolve
+  var sub=document.getElementById('sanc-release-sub');
+  if(sancIntent==='letgo'){
+    sub.textContent="Now you can choose to release it completely. Let it dissolve, and let the weight go with it.";
+  } else if(sancIntent==='letter'){
+    sub.textContent="You said the words. Even unsent, they're real now. You can carry them lighter.";
+  } else {
+    sub.textContent="You let yourself be honest. That takes more strength than most people ever find.";
+  }
+  showSancStage('release');
+}
+
+function sancSetAfter(mood, el){
+  sancAfterMood=mood;
+  document.querySelectorAll('.sanc-mood-chip').forEach(function(c){c.classList.remove('on');});
+  if(el)el.classList.add('on');
+}
+
+function sancRelease(action){
+  var ta=document.getElementById('sanc-text');
+  var text=ta?ta.value.trim():'';
+  if(!text){closeSanctuary();return;}
+
+  // Map intent to emotion for the post
+  var intentEmotion={vent:'sad',understand:'neutral',letgo:'hopeful',letter:'sad',remember:'grateful'};
+  var emotion=intentEmotion[sancIntent]||'neutral';
+
+  if(action==='share'){
+    // Open into the normal compose flow, pre-filled
+    closeSanctuary();
+    if(typeof openCompose==='function'){
+      openCompose('post');
+      setTimeout(function(){
+        var ctxt=document.getElementById('ctxt');
+        if(ctxt){ctxt.value=text;if(typeof onCompose==='function')onCompose(ctxt);}
+        // Pre-select emotion
+        if(typeof selEmo==='function'){
+          window.compEmo=emotion;
+          var ebs=document.querySelectorAll('.eb');
+          ebs.forEach(function(b){if(b.textContent.toLowerCase().includes(emotion))b.click();});
+        }
+        if(typeof toast==='function')toast('💜 Your words are ready to share');
+      },400);
+    }
+  } else if(action==='private'){
+    // Save to private diary in localStorage
+    try{
+      var diaries=JSON.parse(localStorage.getItem('ann_diary_v1')||'[]');
+      diaries.unshift({text:text,intent:sancIntent,emotion:emotion,afterMood:sancAfterMood,at:Date.now()});
+      localStorage.setItem('ann_diary_v1',JSON.stringify(diaries.slice(0,200)));
+    }catch(e){}
+    sancShowFarewell('🔒','Saved just for you','Your words are safe in your private space. Only you can see them.');
+  } else if(action==='dissolve'){
+    // Beautiful dissolve animation, then gone
+    sancDissolveAnimation();
+  }
+}
+
+function sancDissolveAnimation(){
+  var ta=document.getElementById('sanc-text');
+  showSancStage('release');
+  var stage=document.getElementById('sanc-release');
+  // Fade the whole thing into particles
+  if(stage){
+    stage.innerHTML='<div style="text-align:center"><div style="font-size:3rem;margin-bottom:18px;animation:sancFloat 3s ease-in-out infinite">🌬️</div>'
+      +'<div style="font-family:Fraunces,Georgia,serif;font-size:1.4rem;color:#F3EEFB;margin-bottom:10px">Let it go.</div>'
+      +'<div style="font-size:.9rem;color:#8B7FA8;max-width:300px;margin:0 auto;line-height:1.7">You wrote it. You felt it. You released it. Sometimes that\'s all you need.</div></div>';
+  }
+  setTimeout(function(){closeSanctuary();},3000);
+}
+
+function sancShowFarewell(icon,title,sub){
+  var stage=document.getElementById('sanc-release');
+  if(stage){
+    stage.innerHTML='<div style="text-align:center"><div style="font-size:3rem;margin-bottom:18px;animation:sancFloat 3s ease-in-out infinite">'+icon+'</div>'
+      +'<div style="font-family:Fraunces,Georgia,serif;font-size:1.4rem;color:#F3EEFB;margin-bottom:10px">'+title+'</div>'
+      +'<div style="font-size:.9rem;color:#8B7FA8;max-width:300px;margin:0 auto;line-height:1.7">'+sub+'</div></div>';
+  }
+  setTimeout(function(){closeSanctuary();},2800);
+}
+
 </script>
 
 <!-- LOCATION PICKER OVERLAY -->
@@ -7729,6 +8176,135 @@ function useCurrentLocation(){
 .loc-city-item{padding:11px 14px;border-radius:10px;cursor:pointer;font-size:.85rem;color:var(--tx2);display:flex;align-items:center;gap:10px;transition:background .15s}
 .loc-city-item:hover{background:rgba(196,168,255,.08);color:var(--tx)}
 .loc-city-sub{font-size:.7rem;color:var(--tx3);margin-left:auto}
+</style>
+
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- THE WRITING SANCTUARY — immersive expression experience       -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div id="sanctuary" style="display:none;position:fixed;inset:0;z-index:20000;background:#070510;overflow:hidden">
+
+  <!-- Ambient animated background -->
+  <div id="sanc-bg" style="position:absolute;inset:0;pointer-events:none;overflow:hidden">
+    <div class="sanc-orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(139,92,246,.15),transparent 70%);top:-150px;left:-100px"></div>
+    <div class="sanc-orb" style="width:400px;height:400px;background:radial-gradient(circle,rgba(236,72,153,.1),transparent 70%);bottom:-100px;right:-80px;animation-delay:-6s"></div>
+    <div class="sanc-orb" style="width:350px;height:350px;background:radial-gradient(circle,rgba(6,182,212,.08),transparent 70%);top:40%;left:55%;animation-delay:-12s"></div>
+    <div id="sanc-stars"></div>
+  </div>
+
+  <!-- STAGE 1: What do you need? -->
+  <div id="sanc-intent" class="sanc-stage" style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center">
+    <button onclick="closeSanctuary()" style="position:absolute;top:24px;right:24px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);cursor:pointer;font-size:16px">✕</button>
+    <div style="font-family:'Fraunces',Georgia,serif;font-size:1.8rem;font-weight:400;color:#F3EEFB;margin-bottom:10px;line-height:1.3" id="sanc-greeting">What do you need<br>right now?</div>
+    <div style="font-size:.9rem;color:#8B7FA8;margin-bottom:38px;max-width:300px;line-height:1.7">There's no wrong answer. Just begin where you are.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px">
+      <div class="sanc-intent-btn" onclick="sancChooseIntent('vent')">
+        <span style="font-size:1.4rem">🌊</span>
+        <div style="text-align:left;flex:1"><div class="sib-title">To let it out</div><div class="sib-sub">Vent. Release. Get it off your chest.</div></div>
+      </div>
+      <div class="sanc-intent-btn" onclick="sancChooseIntent('understand')">
+        <span style="font-size:1.4rem">🌙</span>
+        <div style="text-align:left;flex:1"><div class="sib-title">To understand myself</div><div class="sib-sub">Untangle what I'm feeling.</div></div>
+      </div>
+      <div class="sanc-intent-btn" onclick="sancChooseIntent('letgo')">
+        <span style="font-size:1.4rem">🕊️</span>
+        <div style="text-align:left;flex:1"><div class="sib-title">To let something go</div><div class="sib-sub">Write it, then release it forever.</div></div>
+      </div>
+      <div class="sanc-intent-btn" onclick="sancChooseIntent('letter')">
+        <span style="font-size:1.4rem">💌</span>
+        <div style="text-align:left;flex:1"><div class="sib-title">To say something to someone</div><div class="sib-sub">A letter you'll never send.</div></div>
+      </div>
+      <div class="sanc-intent-btn" onclick="sancChooseIntent('remember')">
+        <span style="font-size:1.4rem">✨</span>
+        <div style="text-align:left;flex:1"><div class="sib-title">To remember this moment</div><div class="sib-sub">Capture how you feel right now.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAGE 2: The writing space -->
+  <div id="sanc-write" class="sanc-stage" style="display:none;position:relative;z-index:2;height:100%;flex-direction:column">
+    <!-- Top bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;flex-shrink:0">
+      <button onclick="sancBack()" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:.85rem;font-family:inherit;display:flex;align-items:center;gap:6px">← Back</button>
+      <div id="sanc-ambient-toggle" onclick="sancToggleAmbient()" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <span style="font-size:.72rem;color:rgba(255,255,255,.4)" id="sanc-ambient-label">🔇 Silence</span>
+      </div>
+      <div id="sanc-wordcount" style="font-size:.72rem;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">0 words</div>
+    </div>
+
+    <!-- The prompt -->
+    <div id="sanc-prompt" style="padding:8px 28px 0;text-align:center;flex-shrink:0">
+      <div id="sanc-prompt-text" style="font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:1.05rem;color:#A78BFA;line-height:1.6;cursor:pointer" onclick="sancUsePrompt()"></div>
+      <div onclick="sancNewPrompt()" style="font-size:.68rem;color:rgba(255,255,255,.3);margin-top:8px;cursor:pointer">↻ another prompt</div>
+    </div>
+
+    <!-- The writing area -->
+    <div style="flex:1;display:flex;flex-direction:column;padding:20px 28px;overflow-y:auto">
+      <textarea id="sanc-text" placeholder="Begin here. Whatever wants to come out..."
+        oninput="sancOnInput(this)"
+        style="flex:1;width:100%;background:transparent;border:none;outline:none;resize:none;color:#F3EEFB;font-family:'Fraunces',Georgia,serif;font-size:1.25rem;line-height:2;letter-spacing:.2px;min-height:200px"></textarea>
+    </div>
+
+    <!-- Encouragement that appears as they write -->
+    <div id="sanc-encourage" style="text-align:center;padding:0 28px;height:24px;font-size:.8rem;color:#6EE7B7;opacity:0;transition:opacity .6s;font-style:italic;flex-shrink:0"></div>
+
+    <!-- Bottom action -->
+    <div style="padding:18px 24px 28px;flex-shrink:0">
+      <button id="sanc-done-btn" onclick="sancFinish()" style="width:100%;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,rgba(139,92,246,.9),rgba(236,72,153,.8));color:#fff;font-family:var(--fD);font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;opacity:.5" disabled>Keep writing...</button>
+    </div>
+  </div>
+
+  <!-- STAGE 3: The release -->
+  <div id="sanc-release" class="sanc-stage" style="display:none;position:relative;z-index:2;height:100%;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center">
+    <div id="sanc-release-icon" style="font-size:3rem;margin-bottom:18px;animation:sancFloat 3s ease-in-out infinite">🌱</div>
+    <div style="font-family:'Fraunces',Georgia,serif;font-size:1.5rem;color:#F3EEFB;margin-bottom:10px;line-height:1.4" id="sanc-release-title">You did something brave.</div>
+    <div style="font-size:.9rem;color:#8B7FA8;margin-bottom:32px;max-width:320px;line-height:1.7" id="sanc-release-sub">You let yourself be honest. That takes more strength than most people ever find.</div>
+
+    <!-- How do you feel now? -->
+    <div style="margin-bottom:28px;width:100%;max-width:340px">
+      <div style="font-size:.78rem;color:rgba(255,255,255,.5);margin-bottom:12px">How do you feel now?</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap" id="sanc-after-mood">
+        <button class="sanc-mood-chip" onclick="sancSetAfter('lighter',this)">🌤️ Lighter</button>
+        <button class="sanc-mood-chip" onclick="sancSetAfter('calmer',this)">🍃 Calmer</button>
+        <button class="sanc-mood-chip" onclick="sancSetAfter('clearer',this)">💧 Clearer</button>
+        <button class="sanc-mood-chip" onclick="sancSetAfter('still-heavy',this)">🌧️ Still heavy</button>
+        <button class="sanc-mood-chip" onclick="sancSetAfter('relieved',this)">🕊️ Relieved</button>
+      </div>
+    </div>
+
+    <!-- What to do with it -->
+    <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px">
+      <button class="sanc-release-action" onclick="sancRelease('share')" style="background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(236,72,153,.12));border:1px solid rgba(139,92,246,.3);color:#C4B5FD">
+        🌍 Share it — someone needs to read this
+      </button>
+      <button class="sanc-release-action" onclick="sancRelease('private')" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#B9AED4">
+        🔒 Keep it private — just for me
+      </button>
+      <button class="sanc-release-action" onclick="sancRelease('dissolve')" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5)">
+        🌬️ Let it dissolve — I just needed to write it
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.sanc-orb{position:absolute;border-radius:50%;filter:blur(70px);animation:sancDrift 16s ease-in-out infinite}
+@keyframes sancDrift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.08)}66%{transform:translate(-30px,40px) scale(.94)}}
+@keyframes sancFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.sanc-star{position:absolute;border-radius:50%;background:#fff;animation:sancTwinkle 4s ease-in-out infinite}
+@keyframes sancTwinkle{0%,100%{opacity:.1}50%{opacity:.6}}
+.sanc-intent-btn{display:flex;align-items:center;gap:14px;padding:16px 18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;cursor:pointer;transition:all .25s}
+.sanc-intent-btn:hover{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);transform:translateY(-2px)}
+.sib-title{font-family:var(--fD);font-weight:600;font-size:.9rem;color:#F3EEFB}
+.sib-sub{font-size:.72rem;color:#8B7FA8;margin-top:2px}
+.sanc-mood-chip{padding:8px 14px;border-radius:100px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#B9AED4;font-size:.78rem;cursor:pointer;font-family:inherit;transition:all .2s}
+.sanc-mood-chip.on{background:rgba(110,231,183,.15);border-color:rgba(110,231,183,.4);color:#6EE7B7}
+.sanc-release-action{padding:14px;border-radius:14px;cursor:pointer;font-family:var(--fD);font-size:.88rem;font-weight:500;transition:all .2s}
+.sanc-release-action:hover{transform:translateY(-2px);filter:brightness(1.15)}
+.sanc-stage{animation:sancFadeIn .5s ease}
+@keyframes sancFadeIn{from{opacity:0}to{opacity:1}}
+#sanctuary.ambient-on #sanc-prompt,#sanctuary.ambient-on #sanc-wordcount{opacity:.3;transition:opacity .5s}
 </style>
 
 </body>

@@ -15,8 +15,10 @@
 <link rel="apple-touch-icon" href="/icon.svg"/>
 <title>Annomuss 🎭</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet"/>
+
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <style>
 :root{
@@ -824,6 +826,13 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 @keyframes ann-xp-flash{0%{background:rgba(0,201,167,.3)}100%{background:transparent}}
 .ann-xp-flash{animation:ann-xp-flash 0.8s ease}
 </style>
+  <link rel="preconnect" href="https://api.annomuss.in">
+  <link rel="dns-prefetch" href="https://res.cloudinary.com">
+  <link rel="dns-prefetch" href="https://cdn.socket.io">
+  <meta name="theme-color" content="#0A0612">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 
 <!-- OFFLINE BANNER -->
@@ -1019,7 +1028,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
       <input type="file" id="file-in" accept="image/*,video/*" onchange="handleUpload(this)" style="display:none"/>
     </div>
     <div class="media-preview" id="mprev">
-      <img id="mprev-img" src="" alt=""/>
+      <img id="mprev-img" src="" alt="" loading="lazy"/>
       <video id="mprev-vid" controls></video>
       <button class="media-rm" onclick="removeMedia()">✕</button>
     </div>
@@ -1084,7 +1093,7 @@ body.midnight .tb{background:rgba(1,1,10,.92)}
 <!-- IMAGE LIGHTBOX -->
 <div id="lightbox" onclick="closeLightbox()">
   <div id="lightbox-close" onclick="closeLightbox()">✕</div>
-  <img id="lightbox-img" src="" alt=""/>
+  <img id="lightbox-img" src="" alt="" loading="lazy"/>
 </div>
 
 <!-- SHARE SHEET -->
@@ -3021,7 +3030,7 @@ function showSVItem(){
   const prog=q('sv-progress');prog.innerHTML='';
   g.items.forEach((_,i)=>{const bar=document.createElement('div');bar.style.cssText=`flex:1;height:2.5px;background:${i<svItemIdx?'#fff':'rgba(255,255,255,.25)'};border-radius:2px;overflow:hidden`;if(i===svItemIdx){const fill=document.createElement('div');fill.style.cssText='height:100%;background:#fff;width:0;transition:width linear';bar.appendChild(fill);}prog.appendChild(bar);});
   const cont=q('sv-content');
-  const inner=it.mediaUrl&&it.mediaType!=='video'?`<img src="${esc(it.mediaUrl)}" style="max-width:100%;max-height:100%;object-fit:contain"/>`
+  const inner=it.mediaUrl&&it.mediaType!=='video'?`<img src="${esc(it.mediaUrl)}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:contain"/>`
     :it.mediaUrl?`<video src="${esc(it.mediaUrl)}" autoplay muted playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`
     :`<div style="padding:32px;font-style:italic;font-size:1.1rem;color:#fff;text-align:center;line-height:1.7">"${esc(it.caption||'')}"</div>`;
   cont.innerHTML=inner+`<div onclick="svPrev()" style="position:absolute;left:0;top:0;width:33%;height:100%;cursor:pointer;z-index:5"></div><div onclick="svNext()" style="position:absolute;right:0;top:0;width:67%;height:100%;cursor:pointer;z-index:5"></div>`;
@@ -4132,13 +4141,15 @@ function initSocket(){
   socket.emit('register');
   // Join personal user room for private notifications (compliments, DMs)
   if(user&&user._id) socket.emit('join-user-room', user._id);
-  // Load stored activity + show badge count on startup
-  try{
-    const saved=JSON.parse(localStorage.getItem('ann_notifs')||'[]');
-    saved.forEach(function(n){if(!notifStore.find(function(x){return x.time===n.time;}))notifStore.push(n);});
-    notifStore.sort(function(a,b){return b.time-a.time;});
-    if(typeof bumpNotifBadge==='function')bumpNotifBadge();
-  }catch(_){}
+  // Load stored activity lazily after connect
+  setTimeout(function(){
+    try{
+      const saved=JSON.parse(localStorage.getItem('ann_notifs')||'[]');
+      saved.forEach(function(n){if(!notifStore.find(function(x){return x.time===n.time;}))notifStore.push(n);});
+      notifStore.sort(function(a,b){return b.time-a.time;});
+      if(typeof bumpNotifBadge==='function')bumpNotifBadge();
+    }catch(_){}
+  }, 500);
 
   // ── Track online users for status indicators ──────────────
   window._onlineUsers = new Set();
@@ -4966,42 +4977,6 @@ let am3CurrentPrompt='';
 function openRecoveryRoom(){
   // Navigate to dedicated recovery room page
   window.location.href='/recovery.html';
-}
-function openRecoveryRoom_OLD(){  // kept for reference
-  var existing=document.getElementById('recovery-overlay');
-  if(existing)existing.remove();
-  var overlay=document.createElement('div');
-  overlay.id='recovery-overlay';
-  overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(3,8,15,.94);display:flex;align-items:center;justify-content:center';
-  var tags=["Feeling low","Anxiety","Heartbreak","Burnout","Depression","Anger","Insomnia","Feeling numb","Work stress","Family issues","Need to talk"];
-  var tagHTML=tags.map(function(t){return '<button onclick="selectRRTag(this)" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:5px 12px;font-size:.74rem;color:var(--tx2);cursor:pointer;transition:all .18s;margin:3px">'+t+'</button>';}).join('');
-  overlay.innerHTML='<div style="width:min(94vw,460px);background:#070F1C;border:1px solid rgba(16,185,129,.25);border-radius:24px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column">'
-    +'<div style="padding:18px 20px 14px;border-bottom:1px solid rgba(16,185,129,.12);display:flex;align-items:center;gap:10px">'
-      +'<div style="width:40px;height:40px;border-radius:50%;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🌱</div>'
-      +'<div style="flex:1"><div style="font-family:var(--fD);font-weight:700;font-size:.95rem;color:#10B981">Recovery Room</div><div style="font-size:.7rem;color:var(--tx3)">Anonymous. No judgment. Humans helping humans.</div></div>'
-      +'<button onclick="document.getElementById(\'recovery-overlay\').remove()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:14px;color:var(--tx2)">✕</button>'
-    +'</div>'
-    +'<div style="padding:16px 20px;overflow-y:auto;flex:1">'
-      +'<div style="font-size:.75rem;font-weight:600;color:var(--tx);margin-bottom:8px">💙 What are you going through?</div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:0" id="rr-tags">'+tagHTML+'</div>'
-      +'<textarea id="rr-message" placeholder="Share more if you want... or just show up. 💚" style="width:100%;margin-top:12px;background:rgba(255,255,255,.04);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:10px 12px;font-size:.8rem;color:var(--tx);font-family:var(--fB);resize:none;height:72px;outline:none;line-height:1.6"></textarea>'
-      +'<div style="background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.12);border-radius:12px;padding:12px;margin:10px 0">'
-        +'<div style="font-size:.72rem;color:var(--green);font-weight:600;margin-bottom:6px">🌟 Current helpers in the room</div>'
-        +'<div id="rr-helpers" style="font-size:.75rem;color:var(--tx3)">Loading helpers...</div>'
-      +'</div>'
-      +'<div style="display:flex;gap:8px">'
-        +'<div style="flex:1;background:rgba(16,185,129,.06);border-radius:9px;padding:9px;text-align:center"><div style="font-size:1rem;font-weight:600;color:#10B981">847</div><div style="font-size:.64rem;color:var(--tx3)">helped</div></div>'
-        +'<div style="flex:1;background:rgba(6,182,212,.06);border-radius:9px;padding:9px;text-align:center"><div style="font-size:1rem;font-weight:600;color:#06B6D4">94%</div><div style="font-size:.64rem;color:var(--tx3)">felt better</div></div>'
-        +'<div style="flex:1;background:rgba(139,92,246,.06);border-radius:9px;padding:9px;text-align:center"><div style="font-size:1rem;font-weight:600;color:#8B5CF6">3m</div><div style="font-size:.64rem;color:var(--tx3)">response</div></div>'
-      +'</div>'
-    +'</div>'
-    +'<div style="padding:12px 20px;border-top:1px solid rgba(16,185,129,.12);display:flex;gap:8px">'
-      +'<button onclick="enterRecoveryRoom()" style="flex:1;background:linear-gradient(135deg,rgba(16,185,129,.9),rgba(6,182,212,.7));border:none;border-radius:11px;padding:11px;font-size:.85rem;font-weight:700;color:#fff;cursor:pointer;font-family:var(--fD)">🌱 Enter Recovery Room</button>'
-      +'<button onclick="iAmAHelper()" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:11px;padding:11px 14px;font-size:.76rem;color:#10B981;cursor:pointer;font-family:var(--fB);white-space:nowrap">🤝 Help others</button>'
-    +'</div>'
-  +'</div>';
-  document.body.appendChild(overlay);
-  loadRRHelpers();
 }
 
 function selectRRTag(btn){
@@ -7329,12 +7304,15 @@ async function main(){
     getLocation(),
   ]).catch(()=>{});
 
-  initSocket();
-  showDailyPrompt();
-  checkReferral();
+  // Non-critical: defer after first paint
+  requestIdleCallback(function(){
+    initSocket();
+    checkReferral();
+    setTimeout(patchSpecialSocketEvents, 1500);
+  }, {timeout: 2000});
 
-  // ── Wire special socket events ──
-  setTimeout(patchSpecialSocketEvents, 1000);
+  // Daily prompt — lightweight, show after 300ms
+  setTimeout(showDailyPrompt, 300);
 
   // ── NEW EXTRAORDINARY FEATURES ──
   // Permission to Feel — show after 1s so feed loads first

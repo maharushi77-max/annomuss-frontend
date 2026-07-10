@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A0612">
+<title>annomuss — say the things you can't say out loud</title>
+<meta name="description" content="An anonymous space for how you really feel. Live now.">
+<meta property="og:title" content="annomuss — live now">
+<meta property="og:description" content="Say the things you can't say out loud. An anonymous space for how you really feel.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A0612; --dusk:#150C24; --violet:#8B5CF6; --bloom:#F472B6;
+    --moonlight:#F3EEFB; --whisper:#6B5F86; --line:rgba(139,92,246,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:var(--void);
+    color:var(--moonlight);
+    font-family:'Inter',system-ui,sans-serif;
+    overflow-x:hidden;
+    min-height:100vh;
+    display:flex; flex-direction:column;
+    position:relative;
+  }
+
+  /* ── ambient night glow ── */
+  .glow{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .g1,.g2,.g3{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55}
+  .g1{width:60vw;height:60vw;background:radial-gradient(circle,rgba(139,92,246,.35),transparent 70%);top:-20vw;left:-15vw}
+  .g2{width:50vw;height:50vw;background:radial-gradient(circle,rgba(244,114,182,.2),transparent 70%);bottom:-15vw;right:-15vw}
+  .g3{width:35vw;height:35vw;background:radial-gradient(circle,rgba(139,92,246,.18),transparent 70%);top:38%;left:60%}
+  .stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .star{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;animation:tw 4s ease-in-out infinite}
+  @keyframes tw{0%,100%{opacity:.15}50%{opacity:.75}}
+
+  main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;
+    padding:28px 24px 32px;max-width:460px;margin:0 auto;width:100%;text-align:center}
+
+  /* ── live badge ── */
+  .badge{display:inline-flex;align-items:center;gap:7px;padding:7px 15px;border-radius:100px;
+    background:rgba(139,92,246,.1);border:1px solid var(--line);font-size:12px;font-weight:600;
+    letter-spacing:.04em;color:#C4B5FD;margin-top:8px;animation:fadeUp .7s ease both}
+  .dot{width:6px;height:6px;border-radius:50%;background:#34D399;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,.5)}50%{box-shadow:0 0 0 6px transparent}}
+
+  /* ── headline ── */
+  h1{
+    font-family:'Fraunces',serif; font-style:italic; font-weight:400;
+    font-size:clamp(32px,9vw,46px); line-height:1.18; letter-spacing:-.5px;
+    margin:26px 0 0; animation:fadeUp .8s ease .1s both;
+  }
+  h1 em{font-style:italic;background:linear-gradient(120deg,var(--violet),var(--bloom));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+  /* ── signature element: drifting whisper fragments ── */
+  .whispers{position:relative;width:100%;height:180px;margin-top:18px;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+  .whisper{
+    position:absolute; font-family:'Fraunces',serif; font-style:italic; font-size:14px;
+    color:var(--whisper); opacity:0; white-space:nowrap;
+    animation:drift 9s ease-in infinite;
+  }
+  .whisper::before{content:'"'} .whisper::after{content:'"'}
+  .w1{animation-delay:0s;    left:2%;  top:70%}
+  .w2{animation-delay:2.2s;  left:18%; top:75%}
+  .w3{animation-delay:4.4s;  left:6%;  top:72%}
+  .w4{animation-delay:6.6s;  left:22%; top:78%}
+  @keyframes drift{
+    0%{opacity:0; transform:translateY(0)}
+    12%{opacity:.85}
+    75%{opacity:.5}
+    100%{opacity:0; transform:translateY(-170px)}
+  }
+
+  /* ── supporting line ── */
+  .sub{font-size:15.5px;line-height:1.65;color:#B9AED4;max-width:320px;
+    margin-top:6px;animation:fadeUp .8s ease .2s both}
+
+  /* ── CTA ── */
+  .cta{
+    display:inline-flex;align-items:center;gap:9px;margin-top:30px;
+    padding:16px 34px;border-radius:100px;text-decoration:none;
+    background:linear-gradient(120deg,var(--violet),var(--bloom));
+    color:#0A0612;font-weight:700;font-size:16px;letter-spacing:-.1px;
+    box-shadow:0 12px 34px rgba(139,92,246,.32);
+    animation:fadeUp .8s ease .3s both, breathe 3.4s ease-in-out 1.5s infinite;
+    transition:transform .15s ease;
+  }
+  .cta:active{transform:scale(.97)}
+  @keyframes breathe{0%,100%{box-shadow:0 12px 34px rgba(139,92,246,.32)}
+    50%{box-shadow:0 14px 42px rgba(244,114,182,.4)}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+  footer{position:relative;z-index:1;text-align:center;padding:0 24px 30px;
+    font-size:12.5px;color:var(--whisper);letter-spacing:.02em}
+  footer span{margin:0 7px}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms!important;animation-iteration-count:1!important}
+  }
+  @media (max-height:680px){ .whispers{height:130px} }
+</style>
+</head>
+<body>
+
+<div class="glow"><div class="g1"></div><div class="g2"></div><div class="g3"></div></div>
+<div class="stars" id="stars"></div>
+
+<main>
+  <div class="badge"><span class="dot"></span> annomuss is live now</div>
+
+  <h1>Say the things you<br><em>can't say out loud.</em></h1>
+
+  <div class="whispers">
+    <div class="whisper w1">i'm tired of pretending i'm okay</div>
+    <div class="whisper w2">nobody knows this but—</div>
+    <div class="whisper w3">i just need someone to listen</div>
+    <div class="whisper w4">i've never told anyone this</div>
+  </div>
+
+  <p class="sub">An anonymous space for how you really feel. No followers. No performing. Just truth — and people who understand.</p>
+
+  <a class="cta" href="https://annomuss.in" target="_blank" rel="noopener">
+    Enter annomuss <span aria-hidden="true">→</span>
+  </a>
+</main>
+
+<footer>anonymous <span>·</span> free <span>·</span> made for you 🌙</footer>
+
+<script>
+(function(){
+  var el = document.getElementById('stars');
+  if(!el) return;
+  var n = 34;
+  for(var i=0;i<n;i++){
+    var s = document.createElement('div');
+    s.className = 'star';
+    var sz = Math.random()*1.6+1;
+    s.style.cssText = 'width:'+sz+'px;height:'+sz+'px;top:'+(Math.random()*100)+'%;left:'+(Math.random()*100)+'%;animation-delay:'+(Math.random()*-4)+'s';
+    el.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>

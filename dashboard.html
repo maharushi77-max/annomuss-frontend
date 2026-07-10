@@ -7304,12 +7304,40 @@ async function main(){
     getLocation(),
   ]).catch(()=>{});
 
-  // Non-critical: defer after first paint
+  // Socket connects IMMEDIATELY — real-time features (online count,
+  // activity, chat) depend on this. Delaying it broke mobile UX.
+  initSocket();
+  patchSpecialSocketEvents();
+
+  // Safety net: if socket hasn't delivered online-count within 2.5s
+  // (slow mobile network, connection drop), fetch it directly via REST
+  // so the count is never stuck on "..." — critical for mobile UX.
+  function fetchOnlineCountFallback(){
+    api('/api/status/online').then(function(r){
+      return r.ok ? r.json() : null;
+    }).then(function(d){
+      var el = q('online-num');
+      if (el && d && typeof d.count === 'number') {
+        el.textContent = d.count;
+      }
+    }).catch(function(){});
+  }
+  setTimeout(function(){
+    var el = q('online-num');
+    if (el && (el.textContent === '...' || !el.textContent)) {
+      fetchOnlineCountFallback();
+    }
+  }, 2500);
+
+  // Keep retrying every 15s ONLY if socket is disconnected (extra safety)
+  setInterval(function(){
+    if (!socket || !socket.connected) fetchOnlineCountFallback();
+  }, 15000);
+
+  // Only genuinely non-critical things wait for idle time
   requestIdleCallback(function(){
-    initSocket();
     checkReferral();
-    setTimeout(patchSpecialSocketEvents, 1500);
-  }, {timeout: 2000});
+  }, {timeout: 1500});
 
   // Daily prompt — lightweight, show after 300ms
   setTimeout(showDailyPrompt, 300);

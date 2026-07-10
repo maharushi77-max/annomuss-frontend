@@ -4162,13 +4162,23 @@ function initSocket(){
     // transparently upgrades to WebSocket in the background if the
     // network supports it. This was why random chat + online count
     // worked for some users/networks and completely failed for others.
-    transports:['polling','websocket'],
+    // CRITICAL: polling ONLY, no WebSocket upgrade attempt at all.
+    // Indian mobile carriers (Jio/Airtel/Vi) commonly run transparent
+    // proxies on cellular data that silently kill WebSocket connections
+    // — including ones that started as polling and tried to upgrade.
+    // This is invisible on WiFi/broadband/laptop, which is exactly why
+    // it worked everywhere except real mobile data. Plain HTTPS polling
+    // is the most universally compatible transport there is — no carrier
+    // proxy blocks ordinary HTTPS requests. Slightly higher latency per
+    // message (still sub-second) in exchange for actually working.
+    transports:['polling'],
+    upgrade:false,
     reconnection:true,
     reconnectionDelay:1000,
-    reconnectionDelayMax:10000, // backs off up to 10s between attempts
-    randomizationFactor:0.5,    // jitter — prevents every client retrying in lockstep
-    reconnectionAttempts:10,
-    timeout:8000, // give polling handshake a firm deadline too
+    reconnectionDelayMax:10000,
+    randomizationFactor:0.5,
+    reconnectionAttempts:15,
+    timeout:10000,
   });
 
   socket.on('connect',()=>{

@@ -1947,19 +1947,32 @@ const EMO_WDS={happy:['happy','joy','great','amazing','wonderful','love','smile'
 function detectEmo(txt){if(!txt||txt.length<5)return null;const l=txt.toLowerCase();const sc={};for(const[e,ws]of Object.entries(EMO_WDS)){sc[e]=ws.filter(w=>l.includes(w)).length;}const best=Object.entries(sc).sort((a,b)=>b[1]-a[1])[0];return best&&best[1]>0?best[0]:null;}
 
 /* session */
-async function initSession(){
+// SYNCHRONOUS, instant — no network calls. Reads token, paints cached
+// user immediately, loads saved location. This is all main() needs to
+// proceed — nothing here can be slow.
+function initSessionSync(){
   token=getToken();
-  if(!token){location.href='/index.html';return;}
+  if(!token){location.href='/index.html';return false;}
 
-  // ── Instant: paint UI from cache immediately ──
   const cached=localStorage.getItem('user');
   if(cached){try{user=JSON.parse(cached);applyUser();}catch(_){}}
 
-  // ── Background: verify token + refresh user data ──
+  const sl=localStorage.getItem('ann_loc');
+  if(sl){try{userLoc={...userLoc,...JSON.parse(sl)};}catch(_){}}
+
+  return true;
+}
+
+// BACKGROUND verification — runs in PARALLEL with feed/stories/socket,
+// never blocks them. This was the real bottleneck: previously `main()`
+// awaited this entire network round-trip before starting anything else
+// — including the socket connection that powers online count and
+// random chat. Now everything starts immediately; this just quietly
+// refreshes user data and self-corrects auth issues whenever it resolves.
+async function verifySessionBackground(){
   try{
     const r=await fetch(`${API}/api/users/me`,{headers:{Authorization:`Bearer ${token}`}});
     if(r.status===401){
-      // Only log out if token is genuinely invalid — not on server errors
       const body=await r.json().catch(()=>({}));
       const msg=(body.message||'').toLowerCase();
       if(msg.includes('invalid')||msg.includes('expired')||msg.includes('malformed')){
@@ -1968,7 +1981,6 @@ async function initSession(){
         location.href='/index.html';
         return;
       }
-      // 401 for other reason — stay logged in with cached data
     }
     if(r.ok){
       const fresh=await r.json();
@@ -1976,19 +1988,12 @@ async function initSession(){
       localStorage.setItem('user',JSON.stringify(user));
       applyUser();
     }
-    // Non-200 but not 401 (500, 503 etc) — stay logged in with cache
   }catch(e){
-    // Network error (offline, Render cold start) — NEVER log out
-    // User stays logged in with cached data
+    // Network error — never log out, cached data already painted
     if(!user){
-      // No cache either — can't show anything, redirect
       location.href='/index.html';
     }
   }
-
-  // Get saved location
-  const sl=localStorage.getItem('ann_loc');
-  if(sl){try{userLoc={...userLoc,...JSON.parse(sl)};}catch(_){}}
 }
 function applyUser(){
   if(!user)return;
@@ -7304,7 +7309,10 @@ async function toggleFollow(btn, userId){
 }
 
 async function main(){
-  await initSession();
+  // Instant, synchronous — no network wait. Everything else can now
+  // start immediately in true parallel, including the socket connection.
+  if(!initSessionSync()) return; // redirected to login, stop here
+  verifySessionBackground(); // fires in background, never blocks anything below
   checkMidnightMode();
 
   // ── Offline banner ────────────────────────────────────────

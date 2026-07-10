@@ -3962,10 +3962,23 @@ function rcSetState(s){
 
 function rcStart(){
   if(!socket||!socket.connected){
-    // Only try once — don't recurse if already reconnecting
     if(!socket){initSocket();}
     else{socket.connect();}
-    toast('⚡ Connecting... try again in a moment');
+    toast('⚡ Connecting to server...');
+    // Actively retry starting the chat once connected, instead of
+    // making the user tap again — critical on slower networks where
+    // the polling handshake can take a couple seconds.
+    var attempts=0;
+    var retryIv=setInterval(function(){
+      attempts++;
+      if(socket&&socket.connected){
+        clearInterval(retryIv);
+        rcStart();
+      } else if(attempts>=8){ // ~8 seconds max wait
+        clearInterval(retryIv);
+        toast('⚠️ Connection is slow. Please check your network and try again.');
+      }
+    },1000);
     return;
   }
   rcSetState('searching');rcSearchSecs=0;clearInterval(rcSearchIv);
@@ -4135,7 +4148,23 @@ function initSocket(){
   // If socket exists but disconnected, reconnect it (don't create new one)
   if(socket&&!socket.connected){socket.connect();return;}
   // Create new socket
-  socket=io(API,{auth:{token:getToken()},transports:['websocket','polling'],reconnection:true,reconnectionDelay:1000,reconnectionAttempts:10});
+  socket=io(API,{
+    auth:{token:getToken()},
+    // CRITICAL: polling FIRST. Many mobile carriers/restrictive networks
+    // silently block or hang on the WebSocket upgrade handshake while
+    // allowing normal HTTPS requests through fine. Starting with polling
+    // gets a working connection almost immediately on ANY network, then
+    // transparently upgrades to WebSocket in the background if the
+    // network supports it. This was why random chat + online count
+    // worked for some users/networks and completely failed for others.
+    transports:['polling','websocket'],
+    reconnection:true,
+    reconnectionDelay:1000,
+    reconnectionDelayMax:10000, // backs off up to 10s between attempts
+    randomizationFactor:0.5,    // jitter — prevents every client retrying in lockstep
+    reconnectionAttempts:10,
+    timeout:8000, // give polling handshake a firm deadline too
+  });
 
   socket.on('connect',()=>{
   socket.emit('register');
@@ -7329,10 +7358,27 @@ async function main(){
     }
   }, 2500);
 
-  // Keep retrying every 15s ONLY if socket is disconnected (extra safety)
-  setInterval(function(){
-    if (!socket || !socket.connected) fetchOnlineCountFallback();
-  }, 15000);
+  // Retry with EXPONENTIAL BACKOFF + JITTER — critical under server load.
+  // A fixed interval means every struggling client retries in near-lockstep,
+  // which piles more load onto an already-strained server ("thundering
+  // herd"). Backoff spreads retries out and self-throttles automatically
+  // as conditions get worse, instead of making them worse.
+  var _onlineBackoffMs = 15000;
+  var _onlineBackoffMax = 60000;
+  function scheduleOnlineRetry(){
+    var jitter = Math.random() * 0.4 * _onlineBackoffMs; // up to +40% jitter
+    var delay = _onlineBackoffMs + jitter;
+    setTimeout(function(){
+      if (!socket || !socket.connected) {
+        fetchOnlineCountFallback();
+        _onlineBackoffMs = Math.min(_onlineBackoffMs * 1.5, _onlineBackoffMax);
+        scheduleOnlineRetry();
+      } else {
+        _onlineBackoffMs = 15000; // reset once healthy again
+      }
+    }, delay);
+  }
+  scheduleOnlineRetry();
 
   // Only genuinely non-critical things wait for idle time
   requestIdleCallback(function(){

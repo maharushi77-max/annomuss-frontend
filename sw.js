@@ -3,7 +3,7 @@
    Force-refresh cache after major updates
 ═══════════════════════════════════════════ */
 
-const CACHE_NAME  = "annomuss-v6";
+const CACHE_NAME  = "annomuss-v7";  // bumped — forces old caches to clear on this update
 const OFFLINE_URL = "/offline.html";
 
 const PRECACHE = [
@@ -86,24 +86,38 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // ── HTML pages → Network first ──
+  // ── HTML pages → Network first, WITH TIMEOUT ──
+  // CRITICAL FIX: the original had no timeout on the network attempt.
+  // On mobile data — higher latency, more prone to stalls than WiFi —
+  // a slow/stalled request would hang the ENTIRE page load indefinitely
+  // instead of falling back to the cached version. This was the single
+  // most impactful bug for mobile users: it sat in front of every page
+  // load in the whole app, not just one page.
   if (
     request.destination === "document" ||
     request.headers.get("accept")?.includes("text/html")
   ) {
     event.respondWith(
-      fetch(request)
-        .then(resp => {
+      (async () => {
+        const ctrl = new AbortController();
+        const timeoutId = setTimeout(() => ctrl.abort(), 6000); // 6s max wait
+        try {
+          const resp = await fetch(request, { signal: ctrl.signal });
+          clearTimeout(timeoutId);
           if (resp && resp.ok && resp.status === 200) {
-            const clone = resp.clone(); // clone BEFORE returning
+            const clone = resp.clone();
             caches.open(CACHE_NAME).then(c => c.put(request, clone));
           }
           return resp;
-        })
-        .catch(() =>
-          caches.match(request)
-            .then(cached => cached || caches.match(OFFLINE_URL))
-        )
+        } catch (e) {
+          clearTimeout(timeoutId);
+          // Network too slow/failed — serve last good cached version
+          // instantly instead of leaving the user staring at a blank
+          // hang. Falls back to offline page only if nothing cached.
+          const cached = await caches.match(request);
+          return cached || caches.match(OFFLINE_URL);
+        }
+      })()
     );
     return;
   }

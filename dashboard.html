@@ -5927,11 +5927,13 @@ function playAudio(url,btn){
 
 function clearRecording(){
   audioBlob=null;recSecs=0;
-  q('voice-preview').style.display='none';
-  q('rec-timer').style.display='none';
-  q('rec-timer').textContent='0:00';
-  q('voice-rec-icon').textContent='🎙️';
-  q('voice-rec-label').textContent='Tap to record';
+  if(q('voice-preview'))   q('voice-preview').style.display='none';
+  if(q('rec-timer')){
+    q('rec-timer').style.display='none';
+    q('rec-timer').textContent='0:00';
+  }
+  if(q('voice-rec-icon'))  q('voice-rec-icon').textContent='🎙️';
+  if(q('voice-rec-label')) q('voice-rec-label').textContent='Tap to record';
 }
 
 /* Poll compose helpers */

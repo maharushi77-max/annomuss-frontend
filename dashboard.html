@@ -2143,7 +2143,13 @@ async function loadFeed(reset=true){
         const d=await r.json();
         const posts=Array.isArray(d)?d:(d.posts||[]);
         el.innerHTML='';
-        posts.forEach((p,i)=>{const dv=document.createElement('div');dv.innerHTML=renderPost(p);const c=dv.firstElementChild;if(c){c.style.animationDelay=`${i*.04}s`;el.appendChild(c);}});
+        // Batch all DOM writes into one insertion instead of N separate
+        // ones — each individual appendChild to a live element forces a
+        // layout recalc. On budget Android CPUs, 20 separate recalcs in
+        // a row is visible stutter; one batched insert is a single reflow.
+        const frag=document.createDocumentFragment();
+        posts.forEach((p,i)=>{const dv=document.createElement('div');dv.innerHTML=renderPost(p);const c=dv.firstElementChild;if(c){c.style.animationDelay=`${i*.04}s`;frag.appendChild(c);}});
+        el.appendChild(frag);
         feedDone=posts.length<15;feedPage=2;
       }catch(_){
         el.innerHTML=`<div class="empty"><div style="font-size:3rem">⚡</div><div style="font-family:var(--fD);font-weight:700;font-size:.95rem">Couldn't load feed</div><button class="btn btn-g btn-sm" style="margin-top:12px" onclick="loadFeed()">Retry</button></div>`;
